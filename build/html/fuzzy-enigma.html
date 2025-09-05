@@ -1,0 +1,1034 @@
+<table>
+<thead>
+<tr>
+<th>课程名称</th>
+<th>程序设计</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>项目名称</td>
+<td>FuzzyEnigma——一个简单的任务管理系统</td>
+</tr>
+<tr>
+<td>项目代码量</td>
+<td>7900 行代码左右</td>
+</tr>
+<tr>
+<td>完成时间</td>
+<td>2025 年 5 月 24 日</td>
+</tr>
+<tr>
+<td>Github开源地址</td>
+<td><a href="https://github.com/caiwen666/FuzzyEnigma">https://github.com/caiwen666/FuzzyEnigma</a></td>
+</tr>
+<tr>
+<td>演示地址</td>
+<td><a href="http://fe.caiwen.work">http://fe.caiwen.work</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="yi-shi-yan-mu-de" tabindex="-1">一. 实验目的</h2>
+<ol>
+<li>掌握面向对象的管理信息系统开发</li>
+<li>体验类的封装与继承</li>
+<li>尝试SSR（服务端渲染）的前后端开发架构</li>
+<li>尝试Rust的后端开发</li>
+</ol>
+<h2 id="er-zhu-yao-gong-zuo" tabindex="-1">二. 主要工作</h2>
+<h3 id="2-1-ji-shu-xuan-xing" tabindex="-1">2.1 技术选型</h3>
+<p>技术选型是一个项目开始时的主要问题之一，选择好的技术栈可以做到事半功倍的作用。
+首先是编程语言，我考虑了自己比较熟悉的一些编程语言进行对比：</p>
+<ul>
+<li>C++：C++ 是本门课程的主讲语言，理论上应该选用 C++。但我考虑这个项目应该做成一个前后端分离的一个项目，而 C++ 的强项在系统级编程领域，在互联网领域并非 C++ 强项。虽然 C++ 的生态很丰富，但是 C++ 中使用第三方工具库相当麻烦。可以预见地，使用 C++ 进行开发会严重拖慢效率，并且没有 ”站在巨人的肩膀上“ 的优点。</li>
+<li>Java：Java 和 C++ 有很多相通之处，且 Java 的面向对象思想非常浓厚。但 Java 的内存占用很高，且我个人认为 Java 中很多地方所谓的 ”面向对象“ 有滥用之势，且根据我之前的经验，Java 的开发有点老旧，用来开发项目很难受，因此放弃了 Java。</li>
+<li>Python：Python 作为弱类型的语言，用于开发项目是个灾难，而且 Python 的面向对象也是非常简陋，严格意义上并非面向对象的语言。且 Python 作为解释性语言运行较慢，GIL 锁限制了项目以后的潜力，因此放弃了 Python。</li>
+<li>Rust：Rust 作为一门新兴的语言，有很多现代的地方。且 Rust 作为对标 C++ 的语言，将 Rust 和 C++ 进行对比学习，反而能更深刻的了解这两门语言。Rust 没有 GC，效率更高，有强大的类型系统和编译检查，使得程序不会出现暗病。综合考虑，我选用了 Rust 作为本次项目的开发语言。
+对于前端部分，目前主流的方向有两个。一个是 SPA，即单页应用，可以理解为网页首次加载时就把所有的页面都加载，后续页面跳转只不过是挂载不同的组件。一个是 SSR，即服务端渲染，可以理解为我们在 SPA 的基础上，让一些初始数据可以在服务端渲染。
+SPA 是完全的前后端分离，但是根据先前开发经验会存在路由管理等问题，因此我们选用了 SSR。
+于是前端部分的技术栈为：</li>
+<li>响应式框架：React</li>
+<li>SSR：Next.js</li>
+<li>UI
+<ul>
+<li>Material UI：MUI 是我经常用的前端组件框架，且我个人非常喜欢谷歌的 Material Design 设计风格</li>
+<li>TailwindCSS：TailwindCSS 将 CSS 的属性用原子化的类名表示，并提供响应式的支持。虽说使用 TailwindCSS 和直接写内联样式本质相同，但实践证明 TailwindCSS 的开发效率和心里感受都好很多</li>
+<li>Notistack：MUI 推荐的一个消息提示框组件。本项目在操作成功/失败时左下角的提示就是使用这个库做到的</li>
+</ul>
+</li>
+<li>代码质量
+<ul>
+<li>Typescript：Javascript 作为弱类型语言，用于工程开发会产生很多问题。Typescript 是 Javascript 的超集，为 Javascript 提供了类型支持，减少类型问题并增强开发时的代码补全</li>
+<li>Eslint：一个增强 IDE 代码检查的工具</li>
+<li>Prettier：一个代码格式化工具，可以使得项目的代码变得整洁且风格统一</li>
+</ul>
+</li>
+<li>状态管理：Zustand</li>
+<li>表单验证：ReactHookForm，Zod：这两个工具配合使得项目前端有表单的地方开发起来效率更高</li>
+<li>网络请求：Axios</li>
+<li>其他：
+<ul>
+<li>classnames：React 中一个管理类名的工具</li>
+<li>dayjs：日期处理工具</li>
+<li>markdown-it：markdown 渲染工具
+后端部分的技术栈为</li>
+</ul>
+</li>
+<li>Salvo：HTTP 框架</li>
+<li>anyhow、thiserror：提供更优雅的错误处理</li>
+<li>lettre：邮件发送工具</li>
+<li>moka：缓存工具。为了保持项目的简单性，且本项目并没有分布式架构，所以我们并没有选用 redis</li>
+<li>sqlx：数据库操作的工具</li>
+<li>validator：请求参数校验工具
+以及 MySQL，提供数据的持久化存储</li>
+</ul>
+<h3 id="2-2-xiang-mu-jia-gou" tabindex="-1">2.2 项目架构</h3>
+<p>经过一段时间的摸索，本项目形成了这样的一个架构
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/05/28/6836f84bb1aec.png" style="transform: scale(1)" width=1609 height=869><div class="img-title">image-20250523171912663</div></div></p>
+<h4 id="2-2-1-qian-duan" tabindex="-1">2.2.1 前端</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/05/28/6836f86a26c9a.png" style="transform: scale(1)" width=1602 height=509><div class="img-title">image-20250523171544811</div></div>
+前端中，每个页面的初始数据都由 <code>page.tsx</code> 在服务端中获取，并将初始数据通过 Props 注入到客户端组件中。服务端和客户端组件使用的 Request 实例（在本项目中为 Axios 实例）不同，但都经过统一的 api 函数来请求后端。</p>
+<h4 id="2-2-2-hou-duan" tabindex="-1">2.2.2 后端</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/05/28/6836f87f460dd.png" style="transform: scale(1)" width=1213 height=817><div class="img-title">image-20250523172425262</div></div>
+Router 层负责校验请求参数是否合法，是否符合权限。校验完毕之后，请求交给 Service 层处理。Service 层注重业务逻辑。Service 如果需要与持久化数据进行交互的话，则调用 Repository 层或者文件存储层。Repository 注重数据库操作。原本计划的文件存储层是打算接入 OSS （对象存储）服务的，但由于时间原因，本项目的资源选择在本地存储。Moka 作为缓存，放在 Repository 层比较好，但本项目为了简单期间并没有在后端和 MySQL 之间建立一个缓存层，Moka 在本项目中的用处是存储登录令牌，邮件验证码验证等会定时过期的数据，因此放在了 Service 层</p>
+<h3 id="2-3-yong-hu-guan-li" tabindex="-1">2.3 用户管理</h3>
+<h4 id="2-3-1-yong-hu-jian-quan" tabindex="-1">2.3.1 用户鉴权</h4>
+<p>一般而言用户鉴权有两种：</p>
+<ul>
+<li>Stateful，用户的登录状态在服务端中也存储，一般而言是登录成功之后下发一个令牌，客户端得到令牌之后在每次请求都携带这个令牌，由服务端查询存储来校验令牌是否有效</li>
+<li>Stateless，服务端不存储用户的令牌。登陆后下发给用户的令牌是加密的，并有不对称加密的特点：只有服务端能加密，但所有人都能解密。基于这个特点，服务端只需要尝试解密用户提供的令牌即可完成鉴权
+对于后者，难以控制用户的登录状态，所以本项目选择了第一种
+登录时，后端从数据库中获取密码进行比对，比对成功后服务端生成一个 token，把 token 存储在缓存中，并下发给客户端</li>
+</ul>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc2VydmljZSUyRnVzZXIucnMlMEElMkYlMkYlMkYlMjAlRTclOTQlOUYlRTYlODglOTAlRTclOTQlQTglRTYlODglQjclRTclOTklQkIlRTUlQkQlOTUlRTclOEElQjYlRTYlODAlODElRTclOUElODQlRTQlQkMlOUElRTglQUYlOUQlMjB0b2tlbiUwQXB1YiUyMGFzeW5jJTIwZm4lMjBnZW5lcmF0ZV91c2VyX3Nlc3Npb24odWlkJTNBJTIwdTMyKSUyMC0lM0UlMjBSZXN1bHQlM0NTdHJpbmclM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjB0b2tlbiUyMCUzRCUyMGNvbXB1dGVfc3RyX21kNShmb3JtYXQhKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMnVzZXJfc2Vzc2lvbl8lN0IlN0RfJTdCJTdEJTIyJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwdWlkJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwVXRjJTNBJTNBbm93KCkudGltZXN0YW1wX21pbGxpcygpJTBBJTIwJTIwJTIwJTIwKSklM0IlMEElMjAlMjAlMjAlMjBDQUNIRSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5pbnNlcnQoQ2FjaGVUeXBlJTNBJTNBVXNlclNlc3Npb24odG9rZW4uY2xvbmUoKSklMkMlMjB1aWQudG9fc3RyaW5nKCkpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLmF3YWl0JTNCJTBBJTIwJTIwJTIwJTIwT2sodG9rZW4pJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div></div><div class="code"><span class="hljs-comment">/// server/service/user.rs</span>
+<span class="hljs-comment">/// 生成用户登录状态的会话 token</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">generate_user_session</span>(uid: <span class="hljs-type">u32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">String</span>&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">token</span> = <span class="hljs-title function_ invoke__">compute_str_md5</span>(<span class="hljs-built_in">format!</span>(
+        <span class="hljs-string">&quot;user_session_{}_{}&quot;</span>,
+        uid,
+        Utc::<span class="hljs-title function_ invoke__">now</span>().<span class="hljs-title function_ invoke__">timestamp_millis</span>()
+    ));
+    CACHE
+        .<span class="hljs-title function_ invoke__">insert</span>(CacheType::<span class="hljs-title function_ invoke__">UserSession</span>(token.<span class="hljs-title function_ invoke__">clone</span>()), uid.<span class="hljs-title function_ invoke__">to_string</span>())
+        .<span class="hljs-keyword">await</span>;
+    <span class="hljs-title function_ invoke__">Ok</span>(token)
+}
+</div></code></pre>
+<p>客户端收到 token 后将其存储在 cookie 中</p>
+<pre><div class="head"><div class="language">tsx</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGYXBwJTJGdXNlciUyRmxvZ2luJTJGTG9naW5Gb3JtLnRzeCUwQXRyeSUyMCU3QiUwQSUwOWNvbnN0JTIwdG9rZW4lMjAlM0QlMjBhd2FpdCUyMGxvZ2luKHJlcXVlc3QlMkMlMjBlbWFpbCUyQyUyMHBhc3N3b3JkKSUzQiUwQSUwOXNldENvb2tpZSglMjJzZXNzaW9uJTIyJTJDJTIwdG9rZW4lMkMlMjAlN0IlMjBtYXhBZ2UlM0ElMjA2MCUyMColMjA2MCUyMColMjAxMiUyMCU3RCklM0IlMEElMDlpZiUyMChjYWxsYmFjayklMjAlN0IlMEElMDklMDl3aW5kb3cubG9jYXRpb24ucmVwbGFjZShjYWxsYmFjayklM0IlMEElMDklN0QlMjBlbHNlJTIwJTdCJTBBJTA5JTA5d2luZG93LmxvY2F0aW9uLnJlcGxhY2UoJTIyJTJGJTIyKSUzQiUwQSUwOSU3RCUwQSU3RCUyMGNhdGNoJTIwJTdCJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-comment">/// web/src/app/user/login/LoginForm.tsx</span>
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-keyword">const</span> token = <span class="hljs-keyword">await</span> <span class="hljs-title function_">login</span>(request, email, password);
+	<span class="hljs-title function_">setCookie</span>(<span class="hljs-string">&quot;session&quot;</span>, token, { <span class="hljs-attr">maxAge</span>: <span class="hljs-number">60</span> * <span class="hljs-number">60</span> * <span class="hljs-number">12</span> });
+	<span class="hljs-keyword">if</span> (callback) {
+		<span class="hljs-variable language_">window</span>.<span class="hljs-property">location</span>.<span class="hljs-title function_">replace</span>(callback);
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-variable language_">window</span>.<span class="hljs-property">location</span>.<span class="hljs-title function_">replace</span>(<span class="hljs-string">&quot;/&quot;</span>);
+	}
+} <span class="hljs-keyword">catch</span> {}
+</div></code></pre>
+<p>不选择存储在 LocalStorage 的原因，一个是 LocalStorage 无法设置过期时间，另一个是，有一部分的后端请求是 Next.js 在服务端渲染的时候产生的，服务端组件的请求也需要 token，而 Next.js 的服务端组件不可能获取到 LocalStorage 的数据来得到 token，只能通过浏览器的请求来获得token，同时浏览器请求时无法自动携带 LocalStorage 的数据，但是可以自动携带 Cookie ，所以我们选择存放在 Cookie 中
+而后端的接口鉴权的时候是通过 HTTP 请求头的 Authorization 字段获取 token 并进行检查，所以，对于客户端组件，请求前的准备如下：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGdXRpbHMlMkZyZXF1ZXN0JTJGY2xpZW50LnRzJTBBaW5zdGFuY2UuaW50ZXJjZXB0b3JzLnJlcXVlc3QudXNlKCUwQSUwOShjb25maWcpJTIwJTNEJTNFJTIwJTdCJTBBJTA5JTA5Y29uZmlnLmhlYWRlcnMlNUIlMjJBdXRob3JpemF0aW9uJTIyJTVEJTIwJTNEJTIwZ2V0Q29va2llKCUyMnNlc3Npb24lMjIpJTNCJTBBJTA5JTA5cmV0dXJuJTIwY29uZmlnJTNCJTBBJTA5JTdEJTJDJTBBJTA5Li4uJTBBKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-comment">/// web/src/utils/request/client.ts</span>
+instance.<span class="hljs-property">interceptors</span>.<span class="hljs-property">request</span>.<span class="hljs-title function_">use</span>(
+	<span class="hljs-function">(<span class="hljs-params">config</span>) =&gt;</span> {
+		config.<span class="hljs-property">headers</span>[<span class="hljs-string">&quot;Authorization&quot;</span>] = <span class="hljs-title function_">getCookie</span>(<span class="hljs-string">&quot;session&quot;</span>);
+		<span class="hljs-keyword">return</span> config;
+	},
+	...
+);
+</div></code></pre>
+<p>客户端组件请求接口的一般做法是：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW1wb3J0JTIwcmVxdWVzdCUyMGZyb20lMjAlMjIlNDAlMkZ1dGlscyUyRnJlcXVlc3QlMkZjbGllbnQlMjIlM0IlMEElMkYlMkYlMjAlRTglQkYlOTklRTklODclOEMlRTYlOEIlQkYlRTclOTklQkIlRTUlQkQlOTUlRTYlOEUlQTUlRTUlOEYlQTMlRTQlQjglQkUlRTQlQkUlOEIlMEFjb25zdCUyMHRva2VuJTIwJTNEJTIwYXdhaXQlMjBsb2dpbihyZXF1ZXN0JTJDJTIwZW1haWwlMkMlMjBwYXNzd29yZCklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">import</span> request <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@/utils/request/client&quot;</span>;
+<span class="hljs-comment">// 这里拿登录接口举例</span>
+<span class="hljs-keyword">const</span> token = <span class="hljs-keyword">await</span> <span class="hljs-title function_">login</span>(request, email, password);
+</div></code></pre>
+<p>对于服务端组件，在中间件中获取到 token</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGbWlkZGxld2FyZS50cyUwQWlmJTIwKHJlcXVlc3QuY29va2llcy5oYXMoJTIyc2Vzc2lvbiUyMikpJTIwJTdCJTBBJTA5JTJGJTJGJTIwJUU0JUJCJThFJTIwY29va2llJTIwJUU0JUI4JUFEJUU4JThFJUI3JUU1JThGJTk2JTIwdG9rZW4lMEElMDljb25zdCUyMHNlc3Npb24lMjAlM0QlMjByZXF1ZXN0LmNvb2tpZXMuZ2V0KCUyMnNlc3Npb24lMjIpJTNGLnZhbHVlJTNCJTBBJTA5aWYlMjAoIXNlc3Npb24pJTIwJTdCJTBBJTA5JTA5cmV0dXJuJTIwTmV4dFJlc3BvbnNlLnJlZGlyZWN0KGp1bXApJTNCJTBBJTA5JTdEJTBBJTA5Y29uc3QlMjByJTIwJTNEJTIwYXdhaXQlMjBnZXRTZXJ2ZXJSZXF1ZXN0KHNlc3Npb24pJTNCJTBBJTA5dHJ5JTIwJTdCJTBBJTA5JTA5Y29uc3QlMjBpbmZvJTIwJTNEJTIwYXdhaXQlMjBnZXRVc2VySW5mbyhyKSUzQiUwQSUwOSUwOXJlcXVlc3QuaGVhZGVycy5zZXQoJTIydWlkJTIyJTJDJTIwaW5mby5iYXNpY19pbmZvLnVpZC50b1N0cmluZygpKSUzQiUwQSUwOSUwOXJlcXVlc3QuaGVhZGVycy5zZXQoJTIydXNlcm5hbWUlMjIlMkMlMjBpbmZvLmJhc2ljX2luZm8udXNlcm5hbWUpJTNCJTBBJTA5JTA5cmVxdWVzdC5oZWFkZXJzLnNldCglMjJlbWFpbCUyMiUyQyUyMGluZm8uYmFzaWNfaW5mby5lbWFpbCklM0IlMEElMDklMDlyZXF1ZXN0LmhlYWRlcnMuc2V0KCUyMnBlcm1pc3Npb24lMjIlMkMlMjBKU09OLnN0cmluZ2lmeShpbmZvLnBlcm1pc3Npb24pKSUzQiUwQSUwOSUwOSUyRiUyRiUyMCVFNiVCMyVBOCVFNSU4NSVBNSVFNSU4OCVCMCUyMGhlYWRlciUyMCVFNCVCOCVBRCVFRiVCQyU4QyVFNSU5QiVBMCVFNCVCOCVCQSVFNSU5QyVBOCUyME5leHQuanMlMjAlRTQlQjglQUQlRUYlQkMlOEMlRTUlOTAlOEUlRTclQkIlQUQlRTclOUElODQlRTclQkIlODQlRTQlQkIlQjYlRTYlOTclQTAlRTYlQjMlOTUlRTglOEUlQjclRTUlOEYlOTYlMjBjb29raWUlMjAlRTQlQkElODYlRUYlQkMlOEMlRTUlOEYlQUElRTglODMlQkQlRTglOEUlQjclRTUlOEYlOTYlMjBoZWFkZXIlMEElMDklMDlyZXF1ZXN0LmhlYWRlcnMuc2V0KCUyMnNlc3Npb24lMjIlMkMlMjBzZXNzaW9uKSUzQiUwQSUwOSU3RCUyMGNhdGNoJTIwJTdCJTBBJTA5JTA5cmV0dXJuJTIwTmV4dFJlc3BvbnNlLnJlZGlyZWN0KGp1bXApJTNCJTBBJTA5JTdEJTBBJTdEJTIwZWxzZSUyMCU3QiUwQSUwOXJldHVybiUyME5leHRSZXNwb25zZS5yZWRpcmVjdChqdW1wKSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div></div><div class="code"><span class="hljs-comment">/// web/src/middleware.ts</span>
+<span class="hljs-keyword">if</span> (request.<span class="hljs-property">cookies</span>.<span class="hljs-title function_">has</span>(<span class="hljs-string">&quot;session&quot;</span>)) {
+	<span class="hljs-comment">// 从 cookie 中获取 token</span>
+	<span class="hljs-keyword">const</span> session = request.<span class="hljs-property">cookies</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;session&quot;</span>)?.<span class="hljs-property">value</span>;
+	<span class="hljs-keyword">if</span> (!session) {
+		<span class="hljs-keyword">return</span> <span class="hljs-title class_">NextResponse</span>.<span class="hljs-title function_">redirect</span>(jump);
+	}
+	<span class="hljs-keyword">const</span> r = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getServerRequest</span>(session);
+	<span class="hljs-keyword">try</span> {
+		<span class="hljs-keyword">const</span> info = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getUserInfo</span>(r);
+		request.<span class="hljs-property">headers</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&quot;uid&quot;</span>, info.<span class="hljs-property">basic_info</span>.<span class="hljs-property">uid</span>.<span class="hljs-title function_">toString</span>());
+		request.<span class="hljs-property">headers</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&quot;username&quot;</span>, info.<span class="hljs-property">basic_info</span>.<span class="hljs-property">username</span>);
+		request.<span class="hljs-property">headers</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&quot;email&quot;</span>, info.<span class="hljs-property">basic_info</span>.<span class="hljs-property">email</span>);
+		request.<span class="hljs-property">headers</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&quot;permission&quot;</span>, <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(info.<span class="hljs-property">permission</span>));
+		<span class="hljs-comment">// 注入到 header 中，因为在 Next.js 中，后续的组件无法获取 cookie 了，只能获取 header</span>
+		request.<span class="hljs-property">headers</span>.<span class="hljs-title function_">set</span>(<span class="hljs-string">&quot;session&quot;</span>, session);
+	} <span class="hljs-keyword">catch</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-title class_">NextResponse</span>.<span class="hljs-title function_">redirect</span>(jump);
+	}
+} <span class="hljs-keyword">else</span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-title class_">NextResponse</span>.<span class="hljs-title function_">redirect</span>(jump);
+}
+</div></code></pre>
+<p>服务端组件请求接口的一般做法是：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGYXBwJTJGdGFzayUyRmRldGFpbCUyRnBhZ2UudHN4JTBBY29uc3QlMjBoZWFkZXIlMjAlM0QlMjBhd2FpdCUyMGhlYWRlcnMoKSUzQiUwQWNvbnN0JTIwc2Vzc2lvbiUyMCUzRCUyMGhlYWRlci5nZXQoJTIyc2Vzc2lvbiUyMiklMjBhcyUyMHN0cmluZyUzQiUwQWNvbnN0JTIwciUyMCUzRCUyMGF3YWl0JTIwZ2V0U2VydmVyUmVxdWVzdChzZXNzaW9uKSUzQiUwQSUyRiUyRiUyMCVFNCVCQiVBNSVFOCU4RSVCNyVFNSU4RiU5NiVFNCVCQiVCQiVFNSU4QSVBMSVFOCVBRiVBNiVFNiU4MyU4NSVFNCVCRiVBMSVFNiU4MSVBRiVFNiU4RSVBNSVFNSU4RiVBMyVFNCVCOCVCRSVFNCVCRSU4QiUwQWNvbnN0JTIwdGFzayUyMCUzRCUyMGF3YWl0JTIwZ2V0VGFza0RldGFpbChyJTJDJTIwTnVtYmVyKGlkKSklM0IlMEElMkYlMkYlMkYlMjB3ZWIlMkZzcmMlMkZ1dGlscyUyRnJlcXVlc3QlMkZzZXJ2ZXIudHMlMEFleHBvcnQlMjBjb25zdCUyMGdldFNlcnZlclJlcXVlc3QlMjAlM0QlMjBhc3luYyUyMCh0b2tlbiUzQSUyMHN0cmluZyklMjAlM0QlM0UlMjAlN0IlMEElMDljb25zdCUyMGluc3RhbmNlJTIwJTNEJTIwYXhpb3MuY3JlYXRlKCU3QiUwQSUwOSUwOWJhc2VVUkwlM0ElMjBBUElfVVJMX0xPQ0FMJTJDJTBBJTA5JTA5dGltZW91dCUzQSUyMDEwMDAwJTJDJTBBJTA5JTA5d2l0aENyZWRlbnRpYWxzJTNBJTIwdHJ1ZSUyQyUwQSUwOSU3RCklM0IlMEElMDlpbnN0YW5jZS5pbnRlcmNlcHRvcnMucmVxdWVzdC51c2UoKGNvbmZpZyklMjAlM0QlM0UlMjAlN0IlMEElMDklMDljb25maWcuaGVhZGVycyU1QiUyMkF1dGhvcml6YXRpb24lMjIlNUQlMjAlM0QlMjB0b2tlbiUzQiUwQSUwOSUwOXJldHVybiUyMGNvbmZpZyUzQiUwQSUwOSU3RCklM0IlMEElMDlpbnN0YW5jZS5pbnRlcmNlcHRvcnMucmVzcG9uc2UudXNlKChyZXN1bHQpJTIwJTNEJTNFJTIwJTdCJTBBJTA5JTA5Y29uc3QlMjAlN0IlMjBjb2RlJTJDJTIwbXNnJTJDJTIwZGF0YSUyMCU3RCUyMCUzRCUyMHJlc3VsdC5kYXRhJTNCJTBBJTA5JTA5aWYlMjAoY29kZSUyMCUzRCUzRCUzRCUyMDIwMCklMjByZXR1cm4lMjBkYXRhJTNCJTBBJTA5JTA5cmV0dXJuJTIwUHJvbWlzZS5yZWplY3QobXNnKSUzQiUwQSUwOSU3RCklM0IlMEElMDlyZXR1cm4lMjBpbnN0YW5jZSUzQiUwQSU3RCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div></div><div class="code"><span class="hljs-comment">/// web/src/app/task/detail/page.tsx</span>
+<span class="hljs-keyword">const</span> header = <span class="hljs-keyword">await</span> <span class="hljs-title function_">headers</span>();
+<span class="hljs-keyword">const</span> session = header.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;session&quot;</span>) <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>;
+<span class="hljs-keyword">const</span> r = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getServerRequest</span>(session);
+<span class="hljs-comment">// 以获取任务详情信息接口举例</span>
+<span class="hljs-keyword">const</span> task = <span class="hljs-keyword">await</span> <span class="hljs-title function_">getTaskDetail</span>(r, <span class="hljs-title class_">Number</span>(id));
+<span class="hljs-comment">/// web/src/utils/request/server.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">getServerRequest</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"><span class="hljs-attr">token</span>: <span class="hljs-built_in">string</span></span>) =&gt; {
+	<span class="hljs-keyword">const</span> instance = axios.<span class="hljs-title function_">create</span>({
+		<span class="hljs-attr">baseURL</span>: <span class="hljs-variable constant_">API_URL_LOCAL</span>,
+		<span class="hljs-attr">timeout</span>: <span class="hljs-number">10000</span>,
+		<span class="hljs-attr">withCredentials</span>: <span class="hljs-literal">true</span>,
+	});
+	instance.<span class="hljs-property">interceptors</span>.<span class="hljs-property">request</span>.<span class="hljs-title function_">use</span>(<span class="hljs-function">(<span class="hljs-params">config</span>) =&gt;</span> {
+		config.<span class="hljs-property">headers</span>[<span class="hljs-string">&quot;Authorization&quot;</span>] = token;
+		<span class="hljs-keyword">return</span> config;
+	});
+	instance.<span class="hljs-property">interceptors</span>.<span class="hljs-property">response</span>.<span class="hljs-title function_">use</span>(<span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+		<span class="hljs-keyword">const</span> { code, msg, data } = result.<span class="hljs-property">data</span>;
+		<span class="hljs-keyword">if</span> (code === <span class="hljs-number">200</span>) <span class="hljs-keyword">return</span> data;
+		<span class="hljs-keyword">return</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">reject</span>(msg);
+	});
+	<span class="hljs-keyword">return</span> instance;
+};
+</div></code></pre>
+<p>总体上说，我们希望仍保持前后端分离总体的思想，但是把部分本应客户端组件发送的请求转移到服务端组件中
+同时，我们在前端设置 Cookie 中设置了过期时间，同时后端存储 token 时也设置了过期时间（见 <code>server/src/cache.rs</code>，这使得经过一段时间，用户的登录状态会过期）</p>
+<h4 id="2-3-2-quan-xian-guan-li" tabindex="-1">2.3.2 权限管理</h4>
+<p>每个用户的权限是一个 string 数组，权限信息存储在 tb_user_permissions 表中，其定义为</p>
+<pre><div class="head"><div class="language">sql</div><div class="copy" data="Y3JlYXRlJTIwdGFibGUlMjB0Yl91c2VyX3Blcm1pc3Npb25zJTBBKCUwQSUyMCUyMCUyMCUyMHVpZCUyMCUyMCUyMGludCUyMHVuc2lnbmVkJTIwbm90JTIwbnVsbCUyQyUwQSUyMCUyMCUyMCUyMHZhbHVlJTIwdmFyY2hhcigyNTUpJTIwbm90JTIwbnVsbCUyQyUwQSUyMCUyMCUyMCUyMHByaW1hcnklMjBrZXklMjAodWlkJTJDJTIwdmFsdWUpJTJDJTBBJTIwJTIwJTIwJTIwY29uc3RyYWludCUyMHRiX3VzZXJfcGVybWlzc2lvbnNfaWJma18xJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZm9yZWlnbiUyMGtleSUyMCh1aWQpJTIwcmVmZXJlbmNlcyUyMHRiX3VzZXIlMjAodWlkKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMG9uJTIwZGVsZXRlJTIwY2FzY2FkZSUwQSklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">create table</span> tb_user_permissions
+(
+    uid   <span class="hljs-type">int</span> unsigned <span class="hljs-keyword">not null</span>,
+    <span class="hljs-keyword">value</span> <span class="hljs-type">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">not null</span>,
+    <span class="hljs-keyword">primary key</span> (uid, <span class="hljs-keyword">value</span>),
+    <span class="hljs-keyword">constraint</span> tb_user_permissions_ibfk_1
+        <span class="hljs-keyword">foreign key</span> (uid) <span class="hljs-keyword">references</span> tb_user (uid)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade
+);
+</div></code></pre>
+<p>权限的定义和解释如下</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGY29uZmlnJTJGaW5kZXgudHMlMEFleHBvcnQlMjBjb25zdCUyMFBFUk1JU1NJT05TJTIwJTNEJTIwJTVCJTBBJTA5JTdCJTBBJTA5JTA5dmFsdWUlM0ElMjAlMjJtYW5hZ2VfYWxsX3Rhc2slMjIlMkMlMEElMDklMDlsYWJlbCUzQSUyMCUyMiVFNSU4RiVBRiVFNCVCQiVBNSVFNyVBRSVBMSVFNyU5MCU4NiVFNiU4OSU4MCVFNiU5QyU4OSVFNCVCQiVCQiVFNSU4QSVBMSUyMiUyQyUwQSUwOSU3RCUyQyUwQSUwOSU3QiUwQSUwOSUwOXZhbHVlJTNBJTIwJTIybWFuYWdlX3VzZXIlMjIlMkMlMEElMDklMDlsYWJlbCUzQSUyMCUyMiVFNSU4RiVBRiVFNCVCQiVBNSVFOCVCRiU5QiVFOCVBMSU4QyVFNyU5NCVBOCVFNiU4OCVCNyVFNyVBRSVBMSVFNyU5MCU4NiUyMiUyQyUwQSUwOSU3RCUyQyUwQSUwOSU3QiUwQSUwOSUwOXZhbHVlJTNBJTIwJTIycm9vdCUyMiUyQyUwQSUwOSUwOWxhYmVsJTNBJTIwJTIyJUU1JThGJUFGJUU0JUJCJUE1JUU2JTlCJUI0JUU2JTk0JUI5JUU3JTk0JUE4JUU2JTg4JUI3JUU2JTlEJTgzJUU5JTk5JTkwJUVGJUJDJThDJUU2JTlCJUI0JUU2JTk0JUI5JUU3JTk0JUE4JUU2JTg4JUI3JUU4JUE3JTkyJUU4JTg5JUIyJUVGJUJDJThDJUU1JTkwJThDJUU2JTk3JUI2JUU0JUI4JThEJUU4JTgzJUJEJUU4JUEyJUFCJUU1JTg4JUEwJUU5JTk5JUE0JTIyJTJDJTBBJTA5JTdEJTJDJTBBJTA5JTdCJTBBJTA5JTA5dmFsdWUlM0ElMjAlMjJhc3NpZ25fdGFzayUyMiUyQyUwQSUwOSUwOWxhYmVsJTNBJTIwJTIyJUU1JThGJUFGJUU0JUJCJUE1JUU1JUIwJTg2JUU0JUJCJUJCJUU1JThBJUExJUU2JThDJTg3JUU2JUI0JUJFJUU3JUJCJTk5JUU1JTg1JUI2JUU0JUJCJTk2JUU0JUJBJUJBJTIyJTJDJTBBJTA5JTdEJTJDJTBBJTA5JTdCJTBBJTA5JTA5dmFsdWUlM0ElMjAlMjJhaSUyMiUyQyUwQSUwOSUwOWxhYmVsJTNBJTIwJTIyJUU1JThGJUFGJUU0JUJCJUE1JUU0JUJEJUJGJUU3JTk0JUE4QUklRTUlOEElQTklRTYlODklOEIlMjIlMkMlMEElMDklN0QlMkMlMEElNUQlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div></div><div class="code"><span class="hljs-comment">/// web/src/config/index.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">PERMISSIONS</span> = [
+	{
+		<span class="hljs-attr">value</span>: <span class="hljs-string">&quot;manage_all_task&quot;</span>,
+		<span class="hljs-attr">label</span>: <span class="hljs-string">&quot;可以管理所有任务&quot;</span>,
+	},
+	{
+		<span class="hljs-attr">value</span>: <span class="hljs-string">&quot;manage_user&quot;</span>,
+		<span class="hljs-attr">label</span>: <span class="hljs-string">&quot;可以进行用户管理&quot;</span>,
+	},
+	{
+		<span class="hljs-attr">value</span>: <span class="hljs-string">&quot;root&quot;</span>,
+		<span class="hljs-attr">label</span>: <span class="hljs-string">&quot;可以更改用户权限，更改用户角色，同时不能被删除&quot;</span>,
+	},
+	{
+		<span class="hljs-attr">value</span>: <span class="hljs-string">&quot;assign_task&quot;</span>,
+		<span class="hljs-attr">label</span>: <span class="hljs-string">&quot;可以将任务指派给其他人&quot;</span>,
+	},
+	{
+		<span class="hljs-attr">value</span>: <span class="hljs-string">&quot;ai&quot;</span>,
+		<span class="hljs-attr">label</span>: <span class="hljs-string">&quot;可以使用AI助手&quot;</span>,
+	},
+];
+</div></code></pre>
+<p>其中 root 权限需要手动执行 sql 语句赋予。其他的权限可以由拥有 root 权限的用户赋予
+设置灵活分配的这些权限，可以实现不同的用户角色
+例如，对于普通用户，可以不分配任何权限，普通用户可以创建任务并将任务分配给自己，进行自由学习。对于学生，可以赋予 <code>ai</code> 权限，允许学生使用 AI 功能。对于教师，可以分配 <code>assign_task</code> 权限，教师可以创建任务并指派给他人。对于管理员，可以分配 <code>assign_task</code> 、<code>manage_all_task</code>，<code>manage_user</code> 权限，对所有的任务和用户进行管理。对于超级管理员则可分配所有权限。
+在 router 层进行权限检查，如</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcm91dGVyJTJGdGFzay5ycyUwQSUyMyU1QmhhbmRsZXIlNUQlMEFwdWIlMjBhc3luYyUyMGZuJTIwZGVsZXRlX3Rhc2socmVxJTNBJTIwJTI2bXV0JTIwUmVxdWVzdCUyQyUyMGRlcG90JTNBJTIwJTI2bXV0JTIwRGVwb3QpJTIwLSUzRSUyMFJvdXRlclJlc3VsdCUyMCU3QiUwQSUyMCUyMCUyMCUyMGxldCUyMGlkJTIwJTNEJTIwcmVxLnF1ZXJ5JTNBJTNBJTNDdTMyJTNFKCUyMmlkJTIyKS5va19vcihBcHBFcnJvciUzQSUzQUFyZ3VtZW50RXJyb3IpJTNGJTNCJTBBJTIwJTIwJTIwJTIwbGV0JTIwdGFzayUyMCUzRCUyMHNlcnZpY2UlM0ElM0F0YXNrJTNBJTNBZ2V0KGlkKS5hd2FpdCUzRi5va19vcihhbnlob3chKCUyMiVFNCVCQiVCQiVFNSU4QSVBMSVFNCVCOCU4RCVFNSVBRCU5OCVFNSU5QyVBOCUyMikpJTNGJTNCJTBBJTIwJTIwJTIwJTIwbGV0JTIwY29udGV4dCUyMCUzRCUyMGRlcG90Lm9idGFpbiUzQSUzQSUzQ0FwcENvbnRleHQlM0UoKS51bndyYXAoKSUzQiUwQSUyMCUyMCUyMCUyMCUyRiUyRiUyMCVFNSVBNiU4MiVFNiU5RSU5QyVFNCVCOCU4RCVFNiU5OCVBRiVFNCVCQiVCQiVFNSU4QSVBMSVFNyU5QSU4NCVFNSU4OCU5QiVFNSVCQiVCQSVFOCU4MCU4NSVFRiVCQyU4QyVFNCVCOCU5NCVFNiVCMiVBMSVFNiU5QyU4OSUyMG1hbmFnZV9hbGxfdGFzayUyMCVFNiU5RCU4MyVFOSU5OSU5MCVFRiVCQyU4QyVFNSU4OCU5OSVFNiU4QiU5MiVFNyVCQiU5RCUwQSUyMCUyMCUyMCUyMGlmJTIwY29udGV4dC51c2VyLnVpZCUyMCElM0QlMjB0YXNrLnB1Ymxpc2hlciUyMCUyNiUyNiUyMCFjb250ZXh0LnBlcm1pc3Npb25zLm1hbmFnZV9hbGxfdGFzaygpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwcmV0dXJuJTIwRXJyKEFwcEVycm9yJTNBJTNBUGVybWlzc2lvbkRlbmllZC5pbnRvKCkpJTNCJTBBJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwLi4uJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div></div><div class="code"><span class="hljs-comment">/// server/src/router/task.rs</span>
+<span class="hljs-meta">#[handler]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">delete_task</span>(req: &amp;<span class="hljs-keyword">mut</span> Request, depot: &amp;<span class="hljs-keyword">mut</span> Depot) <span class="hljs-punctuation">-&gt;</span> RouterResult {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">id</span> = req.query::&lt;<span class="hljs-type">u32</span>&gt;(<span class="hljs-string">&quot;id&quot;</span>).<span class="hljs-title function_ invoke__">ok_or</span>(AppError::ArgumentError)?;
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">task</span> = service::task::<span class="hljs-title function_ invoke__">get</span>(id).<span class="hljs-keyword">await</span>?.<span class="hljs-title function_ invoke__">ok_or</span>(anyhow!(<span class="hljs-string">&quot;任务不存在&quot;</span>))?;
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">context</span> = depot.obtain::&lt;AppContext&gt;().<span class="hljs-title function_ invoke__">unwrap</span>();
+    <span class="hljs-comment">// 如果不是任务的创建者，且没有 manage_all_task 权限，则拒绝</span>
+    <span class="hljs-keyword">if</span> context.user.uid != task.publisher &amp;&amp; !context.permissions.<span class="hljs-title function_ invoke__">manage_all_task</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Err</span>(AppError::PermissionDenied.<span class="hljs-title function_ invoke__">into</span>());
+    }
+    ...
+}
+</div></code></pre>
+<h3 id="2-4-ren-wu-guan-li" tabindex="-1">2.4 任务管理</h3>
+<h4 id="2-4-1-ye-wu-xu-qiu-shu-li" tabindex="-1">2.4.1 业务需求梳理</h4>
+<p>根据作业文档的表述，我们可以梳理出一个任务应包含：任务标题，任务描述，任务的截止时间，任务的预计耗时，任务的优先级，任务的发布者。
+作业中提到了很多任务类型，但除了小组任务之外，其他任务并无本质区别，因此我们将任务类型也作为任务的一个属性。
+对于小组任务，我们可能要考虑将小组与任务相关联。
+考虑到作业中“自由学习者”这个字眼，我们设计为允许用户自行创建任务，也可以创建一个任务，然后把这个任务指派给其他人。为了和权限系统打配合，我们设置只有拥有 <code>assign_task</code> 权限才可以把一个任务指派给其他人（拥有这个权限的人可以被视为教师角色），如果没有的话只能把这个任务指派给自己。
+为了将任务指派和小组更好地结合，我们设计为：每个任务在创建后都有一个默认的分组，对于一般的任务，增删人员都视为给这个默认的分组里增删人员，一般的任务不允许再增加分组。对于小组任务，则可以增删分组，并把不同的用户添加到不同的小组中。
+为了简单起见，我们暂时仅支持由任务的创建者将任务指派，而不支持用户主动请求加入一个任务。我们暂时只支持任务创建者来分组，决定哪些用户在同一个小组，而不支持用户自行挑选分组。
+作业中还要求支持多级子任务，于是我们做出这样的设计：每个任务都可以设置前置任务，只有完成了前置任务才可以完成当前任务。简单起见，每个任务只能设置一个前置任务，同时一旦任务创建后，其依赖的任务就不能被修改了。这样的约定保证了任务的依赖关系一定是一个树或者说是森林结构，不会出现循环依赖关系。</p>
+<h4 id="2-4-2-fen-zu" tabindex="-1">2.4.2 分组</h4>
+<p>我们建立 tb_group 表，表示每个任务底下的分组</p>
+<pre><div class="head"><div class="language">sql</div><div class="copy" data="Y3JlYXRlJTIwdGFibGUlMjB0Yl9ncm91cCUwQSglMEElMjAlMjAlMjAlMjBpZCUyMCUyMGludCUyMHVuc2lnbmVkJTIwYXV0b19pbmNyZW1lbnQlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBwcmltYXJ5JTIwa2V5JTJDJTBBJTIwJTIwJTIwJTIwdGlkJTIwaW50JTIwdW5zaWduZWQlMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwY29uc3RyYWludCUyMHRiX2dyb3VwX2liZmtfMSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGZvcmVpZ24lMjBrZXklMjAodGlkKSUyMHJlZmVyZW5jZXMlMjB0Yl90YXNrJTIwKGlkKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMG9uJTIwZGVsZXRlJTIwY2FzY2FkZSUwQSklM0IlMEFjcmVhdGUlMjBpbmRleCUyMHRpZCUwQSUyMCUyMCUyMCUyMG9uJTIwdGJfZ3JvdXAlMjAodGlkKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-keyword">create table</span> tb_group
+(
+    id  <span class="hljs-type">int</span> unsigned auto_increment
+        <span class="hljs-keyword">primary key</span>,
+    tid <span class="hljs-type">int</span> unsigned <span class="hljs-keyword">not null</span>,
+    <span class="hljs-keyword">constraint</span> tb_group_ibfk_1
+        <span class="hljs-keyword">foreign key</span> (tid) <span class="hljs-keyword">references</span> tb_task (id)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade
+);
+<span class="hljs-keyword">create</span> index tid
+    <span class="hljs-keyword">on</span> tb_group (tid);
+</div></code></pre>
+<p>然后建立 link_group_user 表，将分组和用户关联起来，其中 finish 字段记录用户是否完成这个任务</p>
+<pre><div class="head"><div class="language">sql</div><div class="copy" data="Y3JlYXRlJTIwdGFibGUlMjBsaW5rX2dyb3VwX3VzZXIlMEEoJTBBJTIwJTIwJTIwJTIwZ2lkJTIwJTIwJTIwJTIwaW50JTIwdW5zaWduZWQlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwdWlkJTIwJTIwJTIwJTIwaW50JTIwdW5zaWduZWQlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwZmluaXNoJTIwdGlueWludCgxKSUyMGRlZmF1bHQlMjAwJTIwbm90JTIwbnVsbCUyQyUwQSUyMCUyMCUyMCUyMHByaW1hcnklMjBrZXklMjAoZ2lkJTJDJTIwdWlkKSUyQyUwQSUyMCUyMCUyMCUyMGNvbnN0cmFpbnQlMjBsaW5rX2dyb3VwX3VzZXJfaWJma18yJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZm9yZWlnbiUyMGtleSUyMCh1aWQpJTIwcmVmZXJlbmNlcyUyMHRiX3VzZXIlMjAodWlkKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMG9uJTIwZGVsZXRlJTIwY2FzY2FkZSUyQyUwQSUyMCUyMCUyMCUyMGNvbnN0cmFpbnQlMjBsaW5rX2dyb3VwX3VzZXJfaWJma18zJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZm9yZWlnbiUyMGtleSUyMChnaWQpJTIwcmVmZXJlbmNlcyUyMHRiX2dyb3VwJTIwKGlkKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMG9uJTIwZGVsZXRlJTIwY2FzY2FkZSUwQSklM0IlMEFjcmVhdGUlMjBpbmRleCUyMHVpZCUwQSUyMCUyMCUyMCUyMG9uJTIwbGlua19ncm91cF91c2VyJTIwKHVpZCklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div></div><div class="code"><span class="hljs-keyword">create table</span> link_group_user
+(
+    gid    <span class="hljs-type">int</span> unsigned         <span class="hljs-keyword">not null</span>,
+    uid    <span class="hljs-type">int</span> unsigned         <span class="hljs-keyword">not null</span>,
+    finish tinyint(<span class="hljs-number">1</span>) <span class="hljs-keyword">default</span> <span class="hljs-number">0</span> <span class="hljs-keyword">not null</span>,
+    <span class="hljs-keyword">primary key</span> (gid, uid),
+    <span class="hljs-keyword">constraint</span> link_group_user_ibfk_2
+        <span class="hljs-keyword">foreign key</span> (uid) <span class="hljs-keyword">references</span> tb_user (uid)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade,
+    <span class="hljs-keyword">constraint</span> link_group_user_ibfk_3
+        <span class="hljs-keyword">foreign key</span> (gid) <span class="hljs-keyword">references</span> tb_group (id)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade
+);
+<span class="hljs-keyword">create</span> index uid
+    <span class="hljs-keyword">on</span> link_group_user (uid);
+</div></code></pre>
+<p>由于用户和任务之间的关系间隔了一个小组，所以很多的操作需要较为复杂的连表查询，如获取一个用户参加的所有任务：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcmVwb3NpdG9yeSUyRnRhc2sucnMlMEFwdWIlMjBhc3luYyUyMGZuJTIwZ2V0X3BhcnRpY2lwYXRlZCh1aWQlM0ElMjB1MzIpJTIwLSUzRSUyMFJlc3VsdCUzQ1ZlYyUzQyhUYXNrJTJDJTIwYm9vbCklM0UlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjByZXMlMjAlM0QlMjBzcWx4JTNBJTNBcXVlcnkhKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHIlMjMlMjIlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBTRUxFQ1QlMjB0YXNrLmlkJTJDJTIwdGFzay50aXRsZSUyQyUyMHRhc2sudHlwZSUyMEFTJTIwJTIydHlwISUyMiUyQyUyMHRhc2sucHJpb3JpdHklMkMlMjB0YXNrLmNvc3QlMkMlMjB0YXNrLmRlYWRsaW5lJTJDJTIwdGFzay5wdWJsaXNoZXIlMkMlMjB0YXNrLnByZXYlMkMlMjBsaW5rX2dyb3VwX3VzZXIuZmluaXNoJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwRlJPTSUyMHRiX3Rhc2slMjB0YXNrJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwSU5ORVIlMjBKT0lOJTIwdGJfZ3JvdXAlMjBPTiUyMHRhc2suaWQlMjAlM0QlMjB0Yl9ncm91cC50aWQlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBJTk5FUiUyMEpPSU4lMjBsaW5rX2dyb3VwX3VzZXIlMjBPTiUyMHRiX2dyb3VwLmlkJTIwJTNEJTIwbGlua19ncm91cF91c2VyLmdpZCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFdIRVJFJTIwbGlua19ncm91cF91c2VyLnVpZCUyMCUzRCUyMCUzRiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMiUyMyUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHVpZCUwQSUyMCUyMCUyMCUyMCkuZmV0Y2hfYWxsKGRiKCkuYXdhaXQpLmF3YWl0JTNGLmludG9faXRlcigpLm1hcCglN0NyJTdDJTIwKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC4uLi4lMEElMjAlMjAlMjAlMjApKS5jb2xsZWN0JTNBJTNBJTNDVmVjJTNDXyUzRSUzRSgpJTNCJTBBJTIwJTIwJTIwJTIwT2socmVzKSUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div></div><div class="code"><span class="hljs-comment">/// server/src/repository/task.rs</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">get_participated</span>(uid: <span class="hljs-type">u32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">Vec</span>&lt;(Task, <span class="hljs-type">bool</span>)&gt;&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">res</span> = sqlx::query!(
+        <span class="hljs-string">r#&quot;
+        SELECT task.id, task.title, task.type AS &quot;typ!&quot;, task.priority, task.cost, task.deadline, task.publisher, task.prev, link_group_user.finish
+        FROM tb_task task
+        INNER JOIN tb_group ON task.id = tb_group.tid
+        INNER JOIN link_group_user ON tb_group.id = link_group_user.gid
+        WHERE link_group_user.uid = ?
+        &quot;#</span>,
+        uid
+    ).<span class="hljs-title function_ invoke__">fetch_all</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>).<span class="hljs-keyword">await</span>?.<span class="hljs-title function_ invoke__">into_iter</span>().<span class="hljs-title function_ invoke__">map</span>(|r| (
+        ....
+    )).collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;();
+    <span class="hljs-title function_ invoke__">Ok</span>(res)
+}
+</div></code></pre>
+<p>在前端添加小组成员的时候，我们需要根据关键词，对用户进行搜索。后端提供一个接口，可以列出所有用户名中包含给定关键词的用户。通过 sql 语句中的 LIKE 关键字实现：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcmVwb3NpdG9yeSUyRnVzZXIucnMlMEFwdWIlMjBhc3luYyUyMGZuJTIwc2VhcmNoKGtleXdvcmQlM0ElMjAlMjZzdHIpJTIwLSUzRSUyMFJlc3VsdCUzQ1ZlYyUzQ1VzZXJCYXNpY0luZm8lM0UlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjByZXMlMjAlM0QlMjBzcWx4JTNBJTNBcXVlcnlfYXMhKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFVzZXJCYXNpY0luZm8lMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByJTIzJTIyJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwU0VMRUNUJTIwdWlkJTJDJTIwdXNlcm5hbWUlMkMlMjBlbWFpbCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMEZST00lMjB0Yl91c2VyJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwV0hFUkUlMjB1c2VybmFtZSUyMExJS0UlMjAlM0YlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjIlMjMlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBmb3JtYXQhKCUyMiUyNSU3QiU3RCUyNSUyMiUyQyUyMGtleXdvcmQpJTBBJTIwJTIwJTIwJTIwKSUwQSUyMCUyMCUyMCUyMC5mZXRjaF9hbGwoZGIoKS5hd2FpdCklMEElMjAlMjAlMjAlMjAuYXdhaXQlM0YlM0IlMEElMjAlMjAlMjAlMjBPayhyZXMpJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div></div><div class="code"><span class="hljs-comment">/// server/src/repository/user.rs</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">search</span>(keyword: &amp;<span class="hljs-type">str</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">Vec</span>&lt;UserBasicInfo&gt;&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">res</span> = sqlx::query_as!(
+        UserBasicInfo,
+        <span class="hljs-string">r#&quot;
+        SELECT uid, username, email
+        FROM tb_user
+        WHERE username LIKE ?
+        &quot;#</span>,
+        <span class="hljs-built_in">format!</span>(<span class="hljs-string">&quot;%{}%&quot;</span>, keyword)
+    )
+    .<span class="hljs-title function_ invoke__">fetch_all</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+    .<span class="hljs-keyword">await</span>?;
+    <span class="hljs-title function_ invoke__">Ok</span>(res)
+}
+</div></code></pre>
+<p>前端基于 lodash，搜索时采用防抖技术</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBoYW5kbGVTZWFyY2glMjAlM0QlMjBfLmRlYm91bmNlKGFzeW5jJTIwKHZhbHVlJTNBJTIwc3RyaW5nKSUyMCUzRCUzRSUyMCU3QiUwQSUyMCUyMCUyMCUyMC4uLiUwQSU3RCUyQyUyMDEwMDApJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">const</span> handleSearch = _.<span class="hljs-title function_">debounce</span>(<span class="hljs-title function_">async</span> (<span class="hljs-attr">value</span>: <span class="hljs-built_in">string</span>) =&gt; {
+    ...
+}, <span class="hljs-number">1000</span>);
+</div></code></pre>
+<h4 id="2-4-3-ren-wu-yi-lai" tabindex="-1">2.4.3 任务依赖</h4>
+<p>根据 2.4.1 内容，我们对任务的依赖关系做了很大的简化，但仍有很多地方需要考虑
+由于任务的依赖关系是自身对自身的，所以无需再建立一个表，只需要给 tb_task 表设置一个 prev 字段，表示当前任务的前置任务id</p>
+<pre><div class="head"><div class="language">sql</div><div class="copy" data="Y3JlYXRlJTIwdGFibGUlMjB0Yl90YXNrJTBBKCUwQSUyMCUyMCUyMCUyMGlkJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaW50JTIwdW5zaWduZWQlMjBhdXRvX2luY3JlbWVudCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHByaW1hcnklMjBrZXklMkMlMEElMjAlMjAlMjAlMjB0aXRsZSUyMCUyMCUyMCUyMCUyMCUyMCUyMHZhcmNoYXIoMjU1KSUyMCUyMCUyMCUyMG5vdCUyMG51bGwlMkMlMEElMjAlMjAlMjAlMjBkZXNjcmlwdGlvbiUyMHRleHQlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwdHlwZSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHZhcmNoYXIoMjU1KSUyMCUyMCUyMCUyMG5vdCUyMG51bGwlMkMlMEElMjAlMjAlMjAlMjBwcmlvcml0eSUyMCUyMCUyMCUyMGludCUyMHVuc2lnbmVkJTIwJTIwJTIwJTIwbm90JTIwbnVsbCUyQyUwQSUyMCUyMCUyMCUyMGNvc3QlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpbnQlMjB1bnNpZ25lZCUyMCUyMCUyMCUyMG5vdCUyMG51bGwlMkMlMEElMjAlMjAlMjAlMjBkZWFkbGluZSUyMCUyMCUyMCUyMGJpZ2ludCUyMHVuc2lnbmVkJTIwbm90JTIwbnVsbCUyQyUwQSUyMCUyMCUyMCUyMHB1Ymxpc2hlciUyMCUyMCUyMGludCUyMHVuc2lnbmVkJTIwJTIwJTIwJTIwbm90JTIwbnVsbCUyQyUwQSUyMCUyMCUyMCUyMHByZXYlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpbnQlMjB1bnNpZ25lZCUyMCUyMCUyMCUyMG51bGwlMkMlMEElMjAlMjAlMjAlMjBjb25zdHJhaW50JTIwZmtfcHVibGlzaGVyJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZm9yZWlnbiUyMGtleSUyMChwdWJsaXNoZXIpJTIwcmVmZXJlbmNlcyUyMHRiX3VzZXIlMjAodWlkKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMG9uJTIwZGVsZXRlJTIwY2FzY2FkZSUwQSklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div></div><div class="code"><span class="hljs-keyword">create table</span> tb_task
+(
+    id          <span class="hljs-type">int</span> unsigned auto_increment
+        <span class="hljs-keyword">primary key</span>,
+    title       <span class="hljs-type">varchar</span>(<span class="hljs-number">255</span>)    <span class="hljs-keyword">not null</span>,
+    description text            <span class="hljs-keyword">not null</span>,
+    type        <span class="hljs-type">varchar</span>(<span class="hljs-number">255</span>)    <span class="hljs-keyword">not null</span>,
+    priority    <span class="hljs-type">int</span> unsigned    <span class="hljs-keyword">not null</span>,
+    cost        <span class="hljs-type">int</span> unsigned    <span class="hljs-keyword">not null</span>,
+    deadline    <span class="hljs-type">bigint</span> unsigned <span class="hljs-keyword">not null</span>,
+    publisher   <span class="hljs-type">int</span> unsigned    <span class="hljs-keyword">not null</span>,
+    prev        <span class="hljs-type">int</span> unsigned    <span class="hljs-keyword">null</span>,
+    <span class="hljs-keyword">constraint</span> fk_publisher
+        <span class="hljs-keyword">foreign key</span> (publisher) <span class="hljs-keyword">references</span> tb_user (uid)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade
+);
+</div></code></pre>
+<p>首先，一个任务（下文称为子任务）添加成员的时候，必须这个任务所依赖的任务（下文称之为父任务）已经添加了目标成员，才可以允许添加，否则，父任务没有指派给目标成员的话，那么目标成员永远无法完成子任务
+同样，父任务在删除一个成员的时候，如果存在一个子任务指派给了目标成员，那么不应该允许这个删除操作，否则会破坏依赖关系的完整。由于一个任务的子任务可能有多个，所以仍然需要一个较为复杂的连表查询去检查这一点</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcmVwb3NpdG9yeSUyRnRhc2sucnMlMEElMkYlMkYlMkYlMjAlRTYlQTMlODAlRTYlOUYlQTUlRTYlOUYlOTAlRTQlQjglQUElRTclOTQlQTglRTYlODglQjclRTYlOTglQUYlRTUlOTAlQTYlRTQlQjklOUYlRTUlOEElQTAlRTUlODUlQTUlRTQlQkElODYlRTQlQkUlOUQlRTglQjUlOTYlRTQlQkElOEUlRTYlOUYlOTAlRTQlQjglQUElRTQlQkIlQkIlRTUlOEElQTElRTclOUElODQlRTQlQkIlQkIlRTUlOEElQTElMEFwdWIlMjBhc3luYyUyMGZuJTIwY2hlY2tfcmVseSh1aWQlM0ElMjB1MzIlMkMlMjB0YXNrX2lkJTNBJTIwdTMyKSUyMC0lM0UlMjBSZXN1bHQlM0N1MzIlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjByZXMlMjAlM0QlMjBzcWx4JTNBJTNBcXVlcnkhKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHIlMjMlMjIlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBTRUxFQ1QlMjBDT1VOVChESVNUSU5DVCUyMHRiX3Rhc2suaWQpJTIwQVMlMjBjb3VudCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMEZST00lMjB0Yl90YXNrJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwSU5ORVIlMjBKT0lOJTIwdGJfZ3JvdXAlMjBPTiUyMHRiX3Rhc2suaWQlMjAlM0QlMjB0Yl9ncm91cC50aWQlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBJTk5FUiUyMEpPSU4lMjBsaW5rX2dyb3VwX3VzZXIlMjBPTiUyMHRiX2dyb3VwLmlkJTIwJTNEJTIwbGlua19ncm91cF91c2VyLmdpZCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFdIRVJFJTIwbGlua19ncm91cF91c2VyLnVpZCUyMCUzRCUyMCUzRiUyMEFORCUyMHRiX3Rhc2sucHJldiUyMCUzRCUyMCUzRiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMiUyMyUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHVpZCUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHRhc2tfaWQlMEElMjAlMjAlMjAlMjApJTBBJTIwJTIwJTIwJTIwLmZldGNoX29uZShkYigpLmF3YWl0KSUwQSUyMCUyMCUyMCUyMC5hd2FpdCUzRiUzQiUwQSUyMCUyMCUyMCUyME9rKHJlcy5jb3VudCUyMGFzJTIwdTMyKSUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div></div><div class="code"><span class="hljs-comment">/// server/src/repository/task.rs</span>
+<span class="hljs-comment">/// 检查某个用户是否也加入了依赖于某个任务的任务</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">check_rely</span>(uid: <span class="hljs-type">u32</span>, task_id: <span class="hljs-type">u32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">u32</span>&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">res</span> = sqlx::query!(
+        <span class="hljs-string">r#&quot;
+        SELECT COUNT(DISTINCT tb_task.id) AS count
+        FROM tb_task
+        INNER JOIN tb_group ON tb_task.id = tb_group.tid
+        INNER JOIN link_group_user ON tb_group.id = link_group_user.gid
+        WHERE link_group_user.uid = ? AND tb_task.prev = ?
+        &quot;#</span>,
+        uid,
+        task_id
+    )
+    .<span class="hljs-title function_ invoke__">fetch_one</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+    .<span class="hljs-keyword">await</span>?;
+    <span class="hljs-title function_ invoke__">Ok</span>(res.count <span class="hljs-keyword">as</span> <span class="hljs-type">u32</span>)
+}
+</div></code></pre>
+<p>同理，如果一个任务被其他任务依赖，那么这个任务是不被允许删除的。本项目可以在删除失败的时候给出当前任务被哪些任务依赖，做法是简单的：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcmVwb3NpdG9yeSUyRnRhc2sucnMlMEElMkYlMkYlMkYlMjAlRTglQTIlQUIlRTUlOTMlQUElRTQlQkElOUIlRTQlQkIlQkIlRTUlOEElQTElRTQlQkQlOUMlRTQlQjglQkElRTQlQkUlOUQlRTglQjUlOTYlMEFwdWIlMjBhc3luYyUyMGZuJTIwZ2V0X2FzX3ByZXYoaWQlM0ElMjB1MzIpJTIwLSUzRSUyMFJlc3VsdCUzQ1ZlYyUzQ1Rhc2slM0UlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjByZXMlMjAlM0QlMjBzcWx4JTNBJTNBcXVlcnkhKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHIlMjMlMjIlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBTRUxFQ1QlMjBpZCUyQyUyMHRpdGxlJTJDJTIwdHlwZSUyMEFTJTIwJTIydHlwISUyMiUyQyUyMHByaW9yaXR5JTJDJTIwY29zdCUyQyUyMGRlYWRsaW5lJTJDJTIwcHVibGlzaGVyJTJDJTIwcHJldiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMEZST00lMjB0Yl90YXNrJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwV0hFUkUlMjBwcmV2JTIwJTNEJTIwJTNGJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIyJTIzJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWQlMEElMjAlMjAlMjAlMjApJTBBJTIwJTIwJTIwJTIwLmZldGNoX2FsbChkYigpLmF3YWl0KSUwQSUyMCUyMCUyMCUyMC5hd2FpdCUzRiUwQSUyMCUyMCUyMCUyMC5pbnRvX2l0ZXIoKSUwQSUyMCUyMCUyMCUyMC5tYXAoJTdDciU3QyUyMFRhc2slMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpZCUzQSUyMHIuaWQlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpbmZvJTNBJTIwVGFza0luZm8lMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjB0aXRsZSUzQSUyMHIudGl0bGUlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjB0eXAlM0ElMjByLnR5cC5pbnRvKCklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBwcmlvcml0eSUzQSUyMHIucHJpb3JpdHkuaW50bygpJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwY29zdCUzQSUyMHIuY29zdCUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGRlYWRsaW5lJTNBJTIwci5kZWFkbGluZSUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHB1Ymxpc2hlciUzQSUyMHIucHVibGlzaGVyJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwcHJldiUzQSUyMHIucHJldiUyQyUwQSUyMCUyMCUyMCUyMCU3RCklMEElMjAlMjAlMjAlMjAuY29sbGVjdCUzQSUzQSUzQ1ZlYyUzQ18lM0UlM0UoKSUzQiUwQSUyMCUyMCUyMCUyME9rKHJlcyklMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div></div><div class="code"><span class="hljs-comment">/// server/src/repository/task.rs</span>
+<span class="hljs-comment">/// 被哪些任务作为依赖</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">get_as_prev</span>(id: <span class="hljs-type">u32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">Vec</span>&lt;Task&gt;&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">res</span> = sqlx::query!(
+        <span class="hljs-string">r#&quot;
+        SELECT id, title, type AS &quot;typ!&quot;, priority, cost, deadline, publisher, prev
+        FROM tb_task
+        WHERE prev = ?
+        &quot;#</span>,
+        id
+    )
+    .<span class="hljs-title function_ invoke__">fetch_all</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+    .<span class="hljs-keyword">await</span>?
+    .<span class="hljs-title function_ invoke__">into_iter</span>()
+    .<span class="hljs-title function_ invoke__">map</span>(|r| Task {
+        id: r.id,
+        info: TaskInfo {
+            title: r.title,
+            typ: r.typ.<span class="hljs-title function_ invoke__">into</span>(),
+            priority: r.priority.<span class="hljs-title function_ invoke__">into</span>(),
+            cost: r.cost,
+            deadline: r.deadline,
+        },
+        publisher: r.publisher,
+        prev: r.prev,
+    })
+    .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;();
+    <span class="hljs-title function_ invoke__">Ok</span>(res)
+}
+</div></code></pre>
+<h4 id="2-4-4-zi-dong-jin-ji-zhong-yao-si-xiang-xian-fen-lei" tabindex="-1">2.4.4 自动紧急/重要四象限分类</h4>
+<p>我们在前端，根据任务的优先级，剩余时间，来判断一个任务是否重要与是否紧急
+考虑分类的数量较多（五个，四象限分类再加上全部未完成任务），我们考虑对分类也进行列表渲染</p>
+<pre><div class="head"><div class="language">tsx</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGYXBwJTJGSG9tZS50c3glMEFjb25zdCUyMFRhc2tDYXRlZ29yaWVzJTIwJTNEJTIwJTVCJTBBJTA5JTdCJTBBJTA5JTA5bmFtZSUzQSUyMCUyMiVFNiU4OSU4MCVFNiU5QyU4OSVFNCVCQiVCQiVFNSU4QSVBMSUyMiUyQyUwQSUwOSUwOWlkJTNBJTIwJTIyYWxsJTIyJTJDJTBBJTA5JTA5aWNvbiUzQSUyMCUzQ0Zvcm1hdExpbmVTcGFjaW5nT3V0bGluZWQlMjAlMkYlM0UlMkMlMEElMDklN0QlMkMlMEElMDklN0IlMEElMDklMDluYW1lJTNBJTIwJTIyJUU5JTg3JThEJUU4JUE2JTgxJUU0JUI4JTk0JUU3JUI0JUE3JUU2JTgwJUE1JTIyJTJDJTBBJTA5JTA5aWQlM0ElMjAlMjJpbXBvcnRhbnRfYW5kX3VyZ2VudCUyMiUyQyUwQSUwOSUwOWljb24lM0ElMjAlM0NXYXJuaW5nQW1iZXJPdXRsaW5lZCUyMCUyRiUzRSUyQyUwQSUwOSU3RCUyQyUwQSUwOSU3QiUwQSUwOSUwOW5hbWUlM0ElMjAlMjIlRTklODclOEQlRTglQTYlODElRTQlQkQlODYlRTQlQjglOEQlRTclQjQlQTclRTYlODAlQTUlMjIlMkMlMEElMDklMDlpZCUzQSUyMCUyMmltcG9ydGFudF9idXRfbm90X3VyZ2VudCUyMiUyQyUwQSUwOSUwOWljb24lM0ElMjAlM0NMaWdodGJ1bGJPdXRsaW5lZCUyMCUyRiUzRSUyQyUwQSUwOSU3RCUyQyUwQSUwOSU3QiUwQSUwOSUwOW5hbWUlM0ElMjAlMjIlRTclQjQlQTclRTYlODAlQTUlRTQlQkQlODYlRTQlQjglOEQlRTklODclOEQlRTglQTYlODElMjIlMkMlMEElMDklMDlpZCUzQSUyMCUyMnVyZ2VudF9idXRfbm90X2ltcG9ydGFudCUyMiUyQyUwQSUwOSUwOWljb24lM0ElMjAlM0NEaXJlY3Rpb25zQmlrZU91dGxpbmVkJTIwJTJGJTNFJTJDJTBBJTA5JTdEJTJDJTBBJTA5JTdCJTBBJTA5JTA5bmFtZSUzQSUyMCUyMiVFNCVCOCU4RCVFOSU4NyU4RCVFOCVBNiU4MSVFNCVCOCU5NCVFNCVCOCU4RCVFNyVCNCVBNyVFNiU4MCVBNSUyMiUyQyUwQSUwOSUwOWlkJTNBJTIwJTIybm90X2ltcG9ydGFudF9hbmRfbm90X3VyZ2VudCUyMiUyQyUwQSUwOSUwOWljb24lM0ElMjAlM0NIb3RlbE91dGxpbmVkJTIwJTJGJTNFJTJDJTBBJTA5JTdEJTJDJTBBJTVEJTNCJTBBaW50ZXJmYWNlJTIwVW5jb21wbGV0ZWRUYXNrQ2F0ZWdvcnklMjAlN0IlMEElMDlhbGwlM0ElMjBUYXNrJTVCJTVEJTNCJTBBJTA5aW1wb3J0YW50X2FuZF91cmdlbnQlM0ElMjBUYXNrJTVCJTVEJTNCJTBBJTA5aW1wb3J0YW50X2J1dF9ub3RfdXJnZW50JTNBJTIwVGFzayU1QiU1RCUzQiUwQSUwOXVyZ2VudF9idXRfbm90X2ltcG9ydGFudCUzQSUyMFRhc2slNUIlNUQlM0IlMEElMDlub3RfaW1wb3J0YW50X2FuZF9ub3RfdXJnZW50JTNBJTIwVGFzayU1QiU1RCUzQiUwQSUwOSU1QmluZGV4JTNBJTIwc3RyaW5nJTVEJTNBJTIwVGFzayU1QiU1RCUzQiUwQSU3RCUwQS4uLi4lMEFjb25zdCUyMHVuY29tcGxldGVkX3Rhc2slM0ElMjBVbmNvbXBsZXRlZFRhc2tDYXRlZ29yeSUyMCUzRCUyMCU3QiUwQSUyMCUyMCUyMCUyMGFsbCUzQSUyMCU1QiU1RCUyQyUwQSUyMCUyMCUyMCUyMGltcG9ydGFudF9hbmRfdXJnZW50JTNBJTIwJTVCJTVEJTJDJTBBJTIwJTIwJTIwJTIwaW1wb3J0YW50X2J1dF9ub3RfdXJnZW50JTNBJTIwJTVCJTVEJTJDJTBBJTIwJTIwJTIwJTIwdXJnZW50X2J1dF9ub3RfaW1wb3J0YW50JTNBJTIwJTVCJTVEJTJDJTBBJTIwJTIwJTIwJTIwbm90X2ltcG9ydGFudF9hbmRfbm90X3VyZ2VudCUzQSUyMCU1QiU1RCUyQyUwQSU3RCUzQiUwQS4uLi4lMEEuLi4uJTBBbGlzdC5mb3JFYWNoKChpdGVtKSUyMCUzRCUzRSUyMCU3QiUwQSUyMCUyMCUyMCUyMGNvbnN0JTIwc3RhdHVzJTIwJTNEJTIwZ2V0VGFza1N0YXR1cyhpdGVtLnRhc2suaW5mby5kZWFkbGluZSklM0IlMEElMjAlMjAlMjAlMjBpZiUyMChpdGVtLmZpbmlzaCklMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBjb21wbGV0ZWRfdGFzay5wdXNoKGl0ZW0udGFzayklM0IlMEElMjAlMjAlMjAlMjAlN0QlMjBlbHNlJTIwaWYlMjAoc3RhdHVzJTIwJTNEJTNEJTNEJTIwJTIyZXhwaXJlZCUyMiklMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBleHBpcmVkX3Rhc2sucHVzaChpdGVtLnRhc2spJTNCJTBBJTIwJTIwJTIwJTIwJTdEJTIwZWxzZSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHVuY29tcGxldGVkX3Rhc2suYWxsLnB1c2goaXRlbS50YXNrKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyRiUyRiUyMCVFNCVCQyU5OCVFNSU4NSU4OCVFNyVCQSVBNyVFNCVCOCVCQSVFOSVBQiU5OCVFNSVCMCVCMSVFNiU5OCVBRiVFOSU4NyU4RCVFOCVBNiU4MSVFRiVCQyU4QyVFNSU4RiU4RCVFNCVCOSU4QiVFNSU4OCU5OSVFNCVCOCU4RCVFOSU4NyU4RCVFOCVBNiU4MSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGNvbnN0JTIwaW1wb3J0YW50JTIwJTNEJTIwaXRlbS50YXNrLmluZm8ucHJpb3JpdHklMjAlM0QlM0QlM0QlMjAlMjJoaWdoJTIyJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTJGJTJGJTIwJUU2JUEwJUI5JUU2JThEJUFFJUU5JUEyJTlDJUU4JTg5JUIyJUU2JTlEJUE1JUU1JTg4JUE0JUU2JTk2JUFEJUU2JTk4JUFGJUU1JTkwJUE2JUU3JUI0JUE3JUU2JTgwJUE1JTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwY29uc3QlMjB1cmdlbnQlMjAlM0QlMjBzdGF0dXMlMjAlM0QlM0QlM0QlMjAlMjJyZWQlMjIlMjAlN0MlN0MlMjBzdGF0dXMlMjAlM0QlM0QlM0QlMjAlMjJvcmFuZ2UlMjIlM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpZiUyMChpbXBvcnRhbnQlMjAlMjYlMjYlMjB1cmdlbnQpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwdW5jb21wbGV0ZWRfdGFzay5pbXBvcnRhbnRfYW5kX3VyZ2VudC5wdXNoKGl0ZW0udGFzayklM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpZiUyMChpbXBvcnRhbnQlMjAlMjYlMjYlMjAhdXJnZW50KSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHVuY29tcGxldGVkX3Rhc2suaW1wb3J0YW50X2J1dF9ub3RfdXJnZW50LnB1c2goaXRlbS50YXNrKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGlmJTIwKCFpbXBvcnRhbnQlMjAlMjYlMjYlMjB1cmdlbnQpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwdW5jb21wbGV0ZWRfdGFzay51cmdlbnRfYnV0X25vdF9pbXBvcnRhbnQucHVzaChpdGVtLnRhc2spJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWYlMjAoIWltcG9ydGFudCUyMCUyNiUyNiUyMCF1cmdlbnQpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwdW5jb21wbGV0ZWRfdGFzay5ub3RfaW1wb3J0YW50X2FuZF9ub3RfdXJnZW50LnB1c2goaXRlbS50YXNrKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCU3RCUwQSU3RCklM0IlMEEuLi4uJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div></div><div class="code"><span class="hljs-comment">/// web/src/app/Home.tsx</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">TaskCategories</span> = [
+	{
+		<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;所有任务&quot;</span>,
+		<span class="hljs-attr">id</span>: <span class="hljs-string">&quot;all&quot;</span>,
+		<span class="hljs-attr">icon</span>: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">FormatLineSpacingOutlined</span> /&gt;</span></span>,
+	},
+	{
+		<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;重要且紧急&quot;</span>,
+		<span class="hljs-attr">id</span>: <span class="hljs-string">&quot;important_and_urgent&quot;</span>,
+		<span class="hljs-attr">icon</span>: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">WarningAmberOutlined</span> /&gt;</span></span>,
+	},
+	{
+		<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;重要但不紧急&quot;</span>,
+		<span class="hljs-attr">id</span>: <span class="hljs-string">&quot;important_but_not_urgent&quot;</span>,
+		<span class="hljs-attr">icon</span>: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">LightbulbOutlined</span> /&gt;</span></span>,
+	},
+	{
+		<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;紧急但不重要&quot;</span>,
+		<span class="hljs-attr">id</span>: <span class="hljs-string">&quot;urgent_but_not_important&quot;</span>,
+		<span class="hljs-attr">icon</span>: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">DirectionsBikeOutlined</span> /&gt;</span></span>,
+	},
+	{
+		<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;不重要且不紧急&quot;</span>,
+		<span class="hljs-attr">id</span>: <span class="hljs-string">&quot;not_important_and_not_urgent&quot;</span>,
+		<span class="hljs-attr">icon</span>: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">HotelOutlined</span> /&gt;</span></span>,
+	},
+];
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">UncompletedTaskCategory</span> {
+	<span class="hljs-attr">all</span>: <span class="hljs-title class_">Task</span>[];
+	<span class="hljs-attr">important_and_urgent</span>: <span class="hljs-title class_">Task</span>[];
+	<span class="hljs-attr">important_but_not_urgent</span>: <span class="hljs-title class_">Task</span>[];
+	<span class="hljs-attr">urgent_but_not_important</span>: <span class="hljs-title class_">Task</span>[];
+	<span class="hljs-attr">not_important_and_not_urgent</span>: <span class="hljs-title class_">Task</span>[];
+	[<span class="hljs-attr">index</span>: <span class="hljs-built_in">string</span>]: <span class="hljs-title class_">Task</span>[];
+}
+....
+<span class="hljs-keyword">const</span> <span class="hljs-attr">uncompleted_task</span>: <span class="hljs-title class_">UncompletedTaskCategory</span> = {
+    <span class="hljs-attr">all</span>: [],
+    <span class="hljs-attr">important_and_urgent</span>: [],
+    <span class="hljs-attr">important_but_not_urgent</span>: [],
+    <span class="hljs-attr">urgent_but_not_important</span>: [],
+    <span class="hljs-attr">not_important_and_not_urgent</span>: [],
+};
+....
+....
+list.<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> {
+    <span class="hljs-keyword">const</span> status = <span class="hljs-title function_">getTaskStatus</span>(item.<span class="hljs-property">task</span>.<span class="hljs-property">info</span>.<span class="hljs-property">deadline</span>);
+    <span class="hljs-keyword">if</span> (item.<span class="hljs-property">finish</span>) {
+        completed_task.<span class="hljs-title function_">push</span>(item.<span class="hljs-property">task</span>);
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (status === <span class="hljs-string">&quot;expired&quot;</span>) {
+        expired_task.<span class="hljs-title function_">push</span>(item.<span class="hljs-property">task</span>);
+    } <span class="hljs-keyword">else</span> {
+        uncompleted_task.<span class="hljs-property">all</span>.<span class="hljs-title function_">push</span>(item.<span class="hljs-property">task</span>);
+        <span class="hljs-comment">// 优先级为高就是重要，反之则不重要</span>
+        <span class="hljs-keyword">const</span> important = item.<span class="hljs-property">task</span>.<span class="hljs-property">info</span>.<span class="hljs-property">priority</span> === <span class="hljs-string">&quot;high&quot;</span>;
+        <span class="hljs-comment">// 根据颜色来判断是否紧急</span>
+        <span class="hljs-keyword">const</span> urgent = status === <span class="hljs-string">&quot;red&quot;</span> || status === <span class="hljs-string">&quot;orange&quot;</span>;
+        <span class="hljs-keyword">if</span> (important &amp;&amp; urgent) {
+            uncompleted_task.<span class="hljs-property">important_and_urgent</span>.<span class="hljs-title function_">push</span>(item.<span class="hljs-property">task</span>);
+        }
+        <span class="hljs-keyword">if</span> (important &amp;&amp; !urgent) {
+            uncompleted_task.<span class="hljs-property">important_but_not_urgent</span>.<span class="hljs-title function_">push</span>(item.<span class="hljs-property">task</span>);
+        }
+        <span class="hljs-keyword">if</span> (!important &amp;&amp; urgent) {
+            uncompleted_task.<span class="hljs-property">urgent_but_not_important</span>.<span class="hljs-title function_">push</span>(item.<span class="hljs-property">task</span>);
+        }
+        <span class="hljs-keyword">if</span> (!important &amp;&amp; !urgent) {
+            uncompleted_task.<span class="hljs-property">not_important_and_not_urgent</span>.<span class="hljs-title function_">push</span>(item.<span class="hljs-property">task</span>);
+        }
+    }
+});
+....
+</div></code></pre>
+<p>我们设计了一个 getTaskStatus 函数，根据一个任务的剩余时间来返回不同的颜色，用于前端的显示。剩余时间较多则为绿色，较少则为红色</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGdXRpbHMlMkZ0YXNrLnRzJTBBZXhwb3J0JTIwY29uc3QlMjBnZXRUYXNrU3RhdHVzJTIwJTNEJTIwKGRlYWRsaW5lJTNBJTIwbnVtYmVyKSUyMCUzRCUzRSUyMCU3QiUwQSUwOWNvbnN0JTIwbm93JTIwJTNEJTIwbmV3JTIwRGF0ZSgpLmdldFRpbWUoKSUzQiUwQSUwOWNvbnN0JTIwcmVtYWluX3RpbWUlMjAlM0QlMjBkZWFkbGluZSUyMC0lMjBub3clM0IlMEElMDlpZiUyMChyZW1haW5fdGltZSUyMCUzQyUzRCUyMDApJTIwJTdCJTBBJTA5JTA5cmV0dXJuJTIwJTIyZXhwaXJlZCUyMiUzQiUwQSUwOSU3RCUyMGVsc2UlMjBpZiUyMChyZW1haW5fdGltZSUyMCUzQyUzRCUyMFRBU0tfUkVEX0xJTUlUKSUyMCU3QiUwQSUwOSUwOXJldHVybiUyMCUyMnJlZCUyMiUzQiUwQSUwOSU3RCUyMGVsc2UlMjBpZiUyMChyZW1haW5fdGltZSUyMCUzQyUzRCUyMFRBU0tfT1JBTkdFX0xJTUlUKSUyMCU3QiUwQSUwOSUwOXJldHVybiUyMCUyMm9yYW5nZSUyMiUzQiUwQSUwOSU3RCUyMGVsc2UlMjBpZiUyMChyZW1haW5fdGltZSUyMCUzQyUzRCUyMFRBU0tfTElNRV9MSU1JVCklMjAlN0IlMEElMDklMDlyZXR1cm4lMjAlMjJsaW1lJTIyJTNCJTBBJTA5JTdEJTIwZWxzZSUyMCU3QiUwQSUwOSUwOXJldHVybiUyMCUyMmdyZWVuJTIyJTNCJTBBJTA5JTdEJTBBJTdEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div></div><div class="code"><span class="hljs-comment">/// web/src/utils/task.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">getTaskStatus</span> = (<span class="hljs-params"><span class="hljs-attr">deadline</span>: <span class="hljs-built_in">number</span></span>) =&gt; {
+	<span class="hljs-keyword">const</span> now = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>().<span class="hljs-title function_">getTime</span>();
+	<span class="hljs-keyword">const</span> remain_time = deadline - now;
+	<span class="hljs-keyword">if</span> (remain_time &lt;= <span class="hljs-number">0</span>) {
+		<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;expired&quot;</span>;
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (remain_time &lt;= <span class="hljs-variable constant_">TASK_RED_LIMIT</span>) {
+		<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;red&quot;</span>;
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (remain_time &lt;= <span class="hljs-variable constant_">TASK_ORANGE_LIMIT</span>) {
+		<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;orange&quot;</span>;
+	} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (remain_time &lt;= <span class="hljs-variable constant_">TASK_LIME_LIMIT</span>) {
+		<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;lime&quot;</span>;
+	} <span class="hljs-keyword">else</span> {
+		<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;green&quot;</span>;
+	}
+};
+</div></code></pre>
+<p>每个颜色的阈值定义如下：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGY29uZmlnJTJGaW5kZXgudHMlMEFleHBvcnQlMjBjb25zdCUyMFRBU0tfUkVEX0xJTUlUJTIwJTNEJTIwMTAwMCUyMColMjA2MCUyMColMjA2MCUyMColMjAzJTNCJTIwJTJGJTJGJTIwMyUyMGhvdXJzJTBBZXhwb3J0JTIwY29uc3QlMjBUQVNLX09SQU5HRV9MSU1JVCUyMCUzRCUyMDEwMDAlMjAqJTIwNjAlMjAqJTIwNjAlMjAqJTIwMjQlM0IlMjAlMkYlMkYlMjAxJTIwZGF5JTBBZXhwb3J0JTIwY29uc3QlMjBUQVNLX0xJTUVfTElNSVQlMjAlM0QlMjAxMDAwJTIwKiUyMDYwJTIwKiUyMDYwJTIwKiUyMDI0JTIwKiUyMDMlM0IlMjAlMkYlMkYlMjAzJTIwZGF5JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-comment">/// web/src/config/index.ts</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">TASK_RED_LIMIT</span> = <span class="hljs-number">1000</span> * <span class="hljs-number">60</span> * <span class="hljs-number">60</span> * <span class="hljs-number">3</span>; <span class="hljs-comment">// 3 hours</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">TASK_ORANGE_LIMIT</span> = <span class="hljs-number">1000</span> * <span class="hljs-number">60</span> * <span class="hljs-number">60</span> * <span class="hljs-number">24</span>; <span class="hljs-comment">// 1 day</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">TASK_LIME_LIMIT</span> = <span class="hljs-number">1000</span> * <span class="hljs-number">60</span> * <span class="hljs-number">60</span> * <span class="hljs-number">24</span> * <span class="hljs-number">3</span>; <span class="hljs-comment">// 3 day</span>
+</div></code></pre>
+<p>颜色的具体定义参考 <code>tailwind.config.js</code> 。</p>
+<h4 id="2-4-5-xiu-xi-jian-yi-shi-jian-fen-pei-jian-yi" tabindex="-1">2.4.5 休息建议/时间分配建议</h4>
+<p>见 4.2 和 4.3 节内容。</p>
+<h3 id="2-5-xue-xi-zi-yuan" tabindex="-1">2.5 学习资源</h3>
+<h4 id="2-5-1-ye-wu-xu-qiu-shu-li" tabindex="-1">2.5.1 业务需求梳理</h4>
+<p>为了简单起见，我们把资源关联在任务上，作为每个任务的附件。
+作业文件中提到的若干学习资源本质上可以分为两类：文件和链接。
+为了简单起见，资源的评分设为点赞和点踩两类。
+可以给资源添加标签，并且可以给资源进行评论。</p>
+<h4 id="2-5-2-zi-yuan-ping-fen" tabindex="-1">2.5.2 资源评分</h4>
+<p>我们不仅需要维护一个资源点赞和点踩的数量，还需要知道每个用户是点赞还是点踩了，所以需要开一个表 link_user_resource 进行维护，其定义如下：</p>
+<pre><div class="head"><div class="language">sql</div><div class="copy" data="Y3JlYXRlJTIwdGFibGUlMjBsaW5rX3VzZXJfcmVzb3VyY2UlMEEoJTBBJTIwJTIwJTIwJTIwcmlkJTIwJTIwJTIwJTIwJTIwJTIwaW50JTIwdW5zaWduZWQlMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwdWlkJTIwJTIwJTIwJTIwJTIwJTIwaW50JTIwdW5zaWduZWQlMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwYXR0aXR1ZGUlMjB2YXJjaGFyKDI1NSklMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwcHJpbWFyeSUyMGtleSUyMChyaWQlMkMlMjB1aWQpJTJDJTBBJTIwJTIwJTIwJTIwY29uc3RyYWludCUyMGxpbmtfdXNlcl9yZXNvdXJjZV9pYmZrXzElMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBmb3JlaWduJTIwa2V5JTIwKHJpZCklMjByZWZlcmVuY2VzJTIwdGJfcmVzb3VyY2UlMjAoaWQpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwb24lMjBkZWxldGUlMjBjYXNjYWRlJTJDJTBBJTIwJTIwJTIwJTIwY29uc3RyYWludCUyMGxpbmtfdXNlcl9yZXNvdXJjZV9pYmZrXzIlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBmb3JlaWduJTIwa2V5JTIwKHVpZCklMjByZWZlcmVuY2VzJTIwdGJfdXNlciUyMCh1aWQpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwb24lMjBkZWxldGUlMjBjYXNjYWRlJTBBKSUzQiUwQWNyZWF0ZSUyMGluZGV4JTIwdWlkJTBBJTIwJTIwJTIwJTIwb24lMjBsaW5rX3VzZXJfcmVzb3VyY2UlMjAodWlkKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div></div><div class="code"><span class="hljs-keyword">create table</span> link_user_resource
+(
+    rid      <span class="hljs-type">int</span> unsigned <span class="hljs-keyword">not null</span>,
+    uid      <span class="hljs-type">int</span> unsigned <span class="hljs-keyword">not null</span>,
+    attitude <span class="hljs-type">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">not null</span>,
+    <span class="hljs-keyword">primary key</span> (rid, uid),
+    <span class="hljs-keyword">constraint</span> link_user_resource_ibfk_1
+        <span class="hljs-keyword">foreign key</span> (rid) <span class="hljs-keyword">references</span> tb_resource (id)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade,
+    <span class="hljs-keyword">constraint</span> link_user_resource_ibfk_2
+        <span class="hljs-keyword">foreign key</span> (uid) <span class="hljs-keyword">references</span> tb_user (uid)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade
+);
+<span class="hljs-keyword">create</span> index uid
+    <span class="hljs-keyword">on</span> link_user_resource (uid);
+</div></code></pre>
+<p>attitude 表示用户对资源的态度，如果不存在或为 none 则为未作评价，为 up 则为点赞，为 down 则为点踩。
+考虑到在前端，我们可能从即没点赞也没点踩到点赞或点踩，也可能取消点赞或点踩，也可能从点赞到点踩，情况比较多，分别提供点赞和点踩的接口并不明智。我们选择直接提供“设置对资源的态度”的接口，其对应于的 repository 层的核心代码如下：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcmVwb3NpdG9yeSUyRnJlc291cmNlLnJzJTBBcHViJTIwYXN5bmMlMjBmbiUyMHVwZGF0ZV9hdHRpdHVkZShyZXNvdXJjZV9pZCUzQSUyMHUzMiUyQyUyMHVpZCUzQSUyMHUzMiUyQyUyMGF0dGl0dWRlJTNBJTIwUmVzb3VyY2VBdHRpdHVkZSklMjAtJTNFJTIwUmVzdWx0JTNDKCklM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBzcWx4JTNBJTNBcXVlcnkhKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHIlMjMlMjIlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBJTlNFUlQlMjBJTlRPJTIwbGlua191c2VyX3Jlc291cmNlJTIwKHVpZCUyQyUyMHJpZCUyQyUyMGF0dGl0dWRlKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFZBTFVFUyUyMCglM0YlMkMlMjAlM0YlMkMlMjAlM0YpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwT04lMjBEVVBMSUNBVEUlMjBLRVklMjBVUERBVEUlMjBhdHRpdHVkZSUyMCUzRCUyMCUzRiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMiUyMyUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHVpZCUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHJlc291cmNlX2lkJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwU3RyaW5nJTNBJTNBZnJvbShhdHRpdHVkZSklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBTdHJpbmclM0ElM0Fmcm9tKGF0dGl0dWRlKSUwQSUyMCUyMCUyMCUyMCklMEElMjAlMjAlMjAlMjAuZXhlY3V0ZShkYigpLmF3YWl0KSUwQSUyMCUyMCUyMCUyMC5hd2FpdCUzRiUzQiUwQSUyMCUyMCUyMCUyME9rKCgpKSUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div></div><div class="code"><span class="hljs-comment">/// server/src/repository/resource.rs</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">update_attitude</span>(resource_id: <span class="hljs-type">u32</span>, uid: <span class="hljs-type">u32</span>, attitude: ResourceAttitude) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;()&gt; {
+    sqlx::query!(
+        <span class="hljs-string">r#&quot;
+        INSERT INTO link_user_resource (uid, rid, attitude)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE attitude = ?
+        &quot;#</span>,
+        uid,
+        resource_id,
+        <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(attitude),
+        <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(attitude)
+    )
+    .<span class="hljs-title function_ invoke__">execute</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+    .<span class="hljs-keyword">await</span>?;
+    <span class="hljs-title function_ invoke__">Ok</span>(())
+}
+</div></code></pre>
+<h4 id="2-5-3-zi-yuan-ping-lun" tabindex="-1">2.5.3 资源评论</h4>
+<p>评论功能是简单的，我们定义了一个 tb_comment 表存储评论：</p>
+<pre><div class="head"><div class="language">sql</div><div class="copy" data="Y3JlYXRlJTIwdGFibGUlMjB0Yl9jb21tZW50JTBBKCUwQSUyMCUyMCUyMCUyMGlkJTIwJTIwJTIwJTIwJTIwJTIwaW50JTIwdW5zaWduZWQlMjBhdXRvX2luY3JlbWVudCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHByaW1hcnklMjBrZXklMkMlMEElMjAlMjAlMjAlMjBjb250ZW50JTIwdGV4dCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMG5vdCUyMG51bGwlMkMlMEElMjAlMjAlMjAlMjByaWQlMjAlMjAlMjAlMjAlMjBpbnQlMjB1bnNpZ25lZCUyMCUyMCUyMCUyMG5vdCUyMG51bGwlMkMlMEElMjAlMjAlMjAlMjB0aW1lJTIwJTIwJTIwJTIwYmlnaW50JTIwdW5zaWduZWQlMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwdWlkJTIwJTIwJTIwJTIwJTIwaW50JTIwdW5zaWduZWQlMjAlMjAlMjAlMjBub3QlMjBudWxsJTJDJTBBJTIwJTIwJTIwJTIwY29uc3RyYWludCUyMHRiX2NvbW1lbnRfaWJma18yJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZm9yZWlnbiUyMGtleSUyMCh1aWQpJTIwcmVmZXJlbmNlcyUyMHRiX3VzZXIlMjAodWlkKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMG9uJTIwZGVsZXRlJTIwY2FzY2FkZSUyQyUwQSUyMCUyMCUyMCUyMGNvbnN0cmFpbnQlMjB0Yl9jb21tZW50X2liZmtfMyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGZvcmVpZ24lMjBrZXklMjAocmlkKSUyMHJlZmVyZW5jZXMlMjB0Yl9yZXNvdXJjZSUyMChpZCklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBvbiUyMGRlbGV0ZSUyMGNhc2NhZGUlMEEpJTNCJTBBY3JlYXRlJTIwaW5kZXglMjByaWQlMEElMjAlMjAlMjAlMjBvbiUyMHRiX2NvbW1lbnQlMjAocmlkKSUzQiUwQWNyZWF0ZSUyMGluZGV4JTIwdWlkJTBBJTIwJTIwJTIwJTIwb24lMjB0Yl9jb21tZW50JTIwKHVpZCklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div></div><div class="code"><span class="hljs-keyword">create table</span> tb_comment
+(
+    id      <span class="hljs-type">int</span> unsigned auto_increment
+        <span class="hljs-keyword">primary key</span>,
+    content text            <span class="hljs-keyword">not null</span>,
+    rid     <span class="hljs-type">int</span> unsigned    <span class="hljs-keyword">not null</span>,
+    <span class="hljs-type">time</span>    <span class="hljs-type">bigint</span> unsigned <span class="hljs-keyword">not null</span>,
+    uid     <span class="hljs-type">int</span> unsigned    <span class="hljs-keyword">not null</span>,
+    <span class="hljs-keyword">constraint</span> tb_comment_ibfk_2
+        <span class="hljs-keyword">foreign key</span> (uid) <span class="hljs-keyword">references</span> tb_user (uid)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade,
+    <span class="hljs-keyword">constraint</span> tb_comment_ibfk_3
+        <span class="hljs-keyword">foreign key</span> (rid) <span class="hljs-keyword">references</span> tb_resource (id)
+            <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade
+);
+<span class="hljs-keyword">create</span> index rid
+    <span class="hljs-keyword">on</span> tb_comment (rid);
+<span class="hljs-keyword">create</span> index uid
+    <span class="hljs-keyword">on</span> tb_comment (uid);
+</div></code></pre>
+<p>其在 repository 层对应的增删查代码都很简单：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcmVwb3NpdG9yeSUyRnJlc291cmNlLnJzJTBBcHViJTIwYXN5bmMlMjBmbiUyMGFkZF9jb21tZW50KHJlc291cmNlX2lkJTNBJTIwdTMyJTJDJTIwdWlkJTNBJTIwdTMyJTJDJTIwY29udGVudCUzQSUyMFN0cmluZyklMjAtJTNFJTIwUmVzdWx0JTNDdTMyJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIwbGV0JTIwcmVzJTIwJTNEJTIwc3FseCUzQSUzQXF1ZXJ5ISglMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByJTIzJTIyJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwSU5TRVJUJTIwSU5UTyUyMHRiX2NvbW1lbnQlMjAocmlkJTJDJTIwdWlkJTJDJTIwY29udGVudCUyQyUyMHRpbWUpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwVkFMVUVTJTIwKCUzRiUyQyUyMCUzRiUyQyUyMCUzRiUyQyUyMCUzRiklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjIlMjMlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByZXNvdXJjZV9pZCUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHVpZCUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGNvbnRlbnQlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBVdGMlM0ElM0Fub3coKS50aW1lc3RhbXBfbWlsbGlzKCklMEElMjAlMjAlMjAlMjApJTBBJTIwJTIwJTIwJTIwLmV4ZWN1dGUoZGIoKS5hd2FpdCklMEElMjAlMjAlMjAlMjAuYXdhaXQlM0YlM0IlMEElMjAlMjAlMjAlMjBPayhyZXMubGFzdF9pbnNlcnRfaWQoKSUyMGFzJTIwdTMyKSUwQSU3RCUwQXB1YiUyMGFzeW5jJTIwZm4lMjBkZWxldGVfY29tbWVudChjb21tZW50X2lkJTNBJTIwdTMyKSUyMC0lM0UlMjBSZXN1bHQlM0MoKSUzRSUyMCU3QiUwQSUyMCUyMCUyMCUyMHNxbHglM0ElM0FxdWVyeSEoJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwciUyMyUyMiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMERFTEVURSUyMEZST00lMjB0Yl9jb21tZW50JTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwV0hFUkUlMjBpZCUyMCUzRCUyMCUzRiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMiUyMyUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGNvbW1lbnRfaWQlMEElMjAlMjAlMjAlMjApJTBBJTIwJTIwJTIwJTIwLmV4ZWN1dGUoZGIoKS5hd2FpdCklMEElMjAlMjAlMjAlMjAuYXdhaXQlM0YlM0IlMEElMjAlMjAlMjAlMjBPaygoKSklMEElN0QlMEFwdWIlMjBhc3luYyUyMGZuJTIwZ2V0X2NvbW1lbnRzKGlkJTNBJTIwdTMyKSUyMC0lM0UlMjBSZXN1bHQlM0NWZWMlM0NDb21tZW50JTNFJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIwbGV0JTIwcmVzJTIwJTNEJTIwc3FseCUzQSUzQXF1ZXJ5X2FzISglMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBDb21tZW50JTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwciUyMyUyMiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFNFTEVDVCUyMGlkJTJDJTIwY29udGVudCUyQyUyMHJpZCUyQyUyMHRpbWUlMkMlMjB1aWQlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBGUk9NJTIwdGJfY29tbWVudCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFdIRVJFJTIwcmlkJTIwJTNEJTIwJTNGJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIyJTIzJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWQlMEElMjAlMjAlMjAlMjApJTBBJTIwJTIwJTIwJTIwLmZldGNoX2FsbChkYigpLmF3YWl0KSUwQSUyMCUyMCUyMCUyMC5hd2FpdCUzRiUzQiUwQSUyMCUyMCUyMCUyME9rKHJlcyklMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div></div><div class="code"><span class="hljs-comment">/// server/src/repository/resource.rs</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">add_comment</span>(resource_id: <span class="hljs-type">u32</span>, uid: <span class="hljs-type">u32</span>, content: <span class="hljs-type">String</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">u32</span>&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">res</span> = sqlx::query!(
+        <span class="hljs-string">r#&quot;
+        INSERT INTO tb_comment (rid, uid, content, time)
+        VALUES (?, ?, ?, ?)
+        &quot;#</span>,
+        resource_id,
+        uid,
+        content,
+        Utc::<span class="hljs-title function_ invoke__">now</span>().<span class="hljs-title function_ invoke__">timestamp_millis</span>()
+    )
+    .<span class="hljs-title function_ invoke__">execute</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+    .<span class="hljs-keyword">await</span>?;
+    <span class="hljs-title function_ invoke__">Ok</span>(res.<span class="hljs-title function_ invoke__">last_insert_id</span>() <span class="hljs-keyword">as</span> <span class="hljs-type">u32</span>)
+}
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">delete_comment</span>(comment_id: <span class="hljs-type">u32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;()&gt; {
+    sqlx::query!(
+        <span class="hljs-string">r#&quot;
+        DELETE FROM tb_comment
+        WHERE id = ?
+        &quot;#</span>,
+        comment_id
+    )
+    .<span class="hljs-title function_ invoke__">execute</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+    .<span class="hljs-keyword">await</span>?;
+    <span class="hljs-title function_ invoke__">Ok</span>(())
+}
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">get_comments</span>(id: <span class="hljs-type">u32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">Vec</span>&lt;Comment&gt;&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">res</span> = sqlx::query_as!(
+        Comment,
+        <span class="hljs-string">r#&quot;
+        SELECT id, content, rid, time, uid
+        FROM tb_comment
+        WHERE rid = ?
+        &quot;#</span>,
+        id
+    )
+    .<span class="hljs-title function_ invoke__">fetch_all</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+    .<span class="hljs-keyword">await</span>?;
+    <span class="hljs-title function_ invoke__">Ok</span>(res)
+}
+</div></code></pre>
+<h4 id="2-5-4-zi-yuan-tui-jian" tabindex="-1">2.5.4 资源推荐</h4>
+<p>简单起见，我们只实现了一个基于资源标签的推荐策略。每个资源的详情页都有一个资源推荐列表。
+对于给定资源 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span>，设其拥有的标签为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mi>a</mi><msub><mi>g</mi><mi>u</mi></msub></mrow><annotation encoding="application/x-tex">tag_u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8095em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">t</span><span class="mord mathnormal">a</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">u</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，其对应的任务为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mi>a</mi><mi>s</mi><msub><mi>k</mi><mi>u</mi></msub></mrow><annotation encoding="application/x-tex">task_u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord mathnormal">t</span><span class="mord mathnormal">a</span><span class="mord mathnormal">s</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">u</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。
+然后我们找出当前用户所有参加的任务对应的所有资源，在其中，如果一个资源 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span></span></span></span>，满足 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mi>a</mi><msub><mi>g</mi><mi>v</mi></msub><mo>∩</mo><mi>t</mi><mi>a</mi><msub><mi>g</mi><mi>u</mi></msub><mo mathvariant="normal">≠</mo><mi mathvariant="normal">∅</mi></mrow><annotation encoding="application/x-tex">tag_v \cap tag_u \neq \emptyset</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8095em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">t</span><span class="mord mathnormal">a</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">v</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∩</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">t</span><span class="mord mathnormal">a</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">u</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mrel"><span class="mord vbox"><span class="thinbox"><span class="rlap"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="inner"><span class="mord"><span class="mrel"></span></span></span><span class="fix"></span></span></span></span></span><span class="mrel">=</span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">∅</span></span></span></span> 那么资源 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span></span></span></span> 加入推荐列表。
+实现代码如下：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGc2VydmljZSUyRnJlc291cmNlLnJzJTBBcHViJTIwYXN5bmMlMjBmbiUyMGdldF9yZWNvbW1lbmQodWlkJTNBJTIwdTMyJTJDJTIwdGFza19pZCUzQSUyMHUzMiklMjAtJTNFJTIwUmVzdWx0JTNDVmVjJTNDUmVzb3VyY2UlM0UlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjB0YWdzJTIwJTNEJTIwc3FseCUzQSUzQXF1ZXJ5ISglMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByJTIzJTIyJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwU0VMRUNUJTIwRElTVElOQ1QlMjB2YWx1ZSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMEZST00lMjB0Yl9yZXNvdXJjZV90YWclMjBXSEVSRSUyMHJpZCUyMElOJTIwKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFNFTEVDVCUyMGlkJTIwRlJPTSUyMHRiX3Jlc291cmNlJTIwV0hFUkUlMjB0aWQlMjAlM0QlMjAlM0YlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjApJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIyJTIzJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwdGFza19pZCUwQSUyMCUyMCUyMCUyMCklMEElMjAlMjAlMjAlMjAuZmV0Y2hfYWxsKGRiKCkuYXdhaXQpJTBBJTIwJTIwJTIwJTIwLmF3YWl0JTNGJTBBJTIwJTIwJTIwJTIwLmludG9faXRlcigpJTBBJTIwJTIwJTIwJTIwLm1hcCglN0N4JTdDJTIweC52YWx1ZSklMEElMjAlMjAlMjAlMjAuY29sbGVjdCUzQSUzQSUzQ1ZlYyUzQ18lM0UlM0UoKSUzQiUwQSUyMCUyMCUyMCUyMGlmJTIwdGFncy5pc19lbXB0eSgpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwcmV0dXJuJTIwT2sodmVjISU1QiU1RCklM0IlMEElMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjBsZXQlMjBwYXJ0aWNpcGF0ZWQlMjAlM0QlMjByZXBvc2l0b3J5JTNBJTNBdGFzayUzQSUzQWdldF9wYXJ0aWNpcGF0ZWQodWlkKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5hd2FpdCUzRiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5pbnRvX2l0ZXIoKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5tYXAoJTdDKHRhc2slMkMlMjBfKSU3QyUyMHRhc2suaWQpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLmZpbHRlciglN0N4JTdDJTIwKnglMjAhJTNEJTIwdGFza19pZCklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAuY29sbGVjdCUzQSUzQSUzQ1ZlYyUzQ18lM0UlM0UoKSUzQiUwQSUyMCUyMCUyMCUyMGlmJTIwcGFydGljaXBhdGVkLmlzX2VtcHR5KCklMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByZXR1cm4lMjBPayh2ZWMhJTVCJTVEKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMGxldCUyMHNxbCUyMCUzRCUyMGZvcm1hdCEoJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwciUyMyUyMiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFNFTEVDVCUyMERJU1RJTkNUJTIwdGJfcmVzb3VyY2UuaWQlMjBhcyUyMGlkJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwRlJPTSUyMHRiX3Jlc291cmNlJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwSU5ORVIlMjBKT0lOJTIwdGJfcmVzb3VyY2VfdGFnJTIwT04lMjB0Yl9yZXNvdXJjZS5pZCUyMCUzRCUyMHRiX3Jlc291cmNlX3RhZy5yaWQlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBXSEVSRSUyMHRiX3Jlc291cmNlX3RhZy52YWx1ZSUyMElOJTIwKCU3QiU3RCklMjBBTkQlMjB0Yl9yZXNvdXJjZS50aWQlMjBJTiUyMCglN0IlN0QpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIyJTIzJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwc3RkJTNBJTNBaXRlciUzQSUzQXJlcGVhdCglMjIlM0YlMjIpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLnRha2UodGFncy5sZW4oKSklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAuY29sbGVjdCUzQSUzQSUzQ1ZlYyUzQ18lM0UlM0UoKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5qb2luKCUyMiUyQyUyMiklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBzdGQlM0ElM0FpdGVyJTNBJTNBcmVwZWF0KCUyMiUzRiUyMiklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAudGFrZShwYXJ0aWNpcGF0ZWQubGVuKCkpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLmNvbGxlY3QlM0ElM0ElM0NWZWMlM0NfJTNFJTNFKCklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAuam9pbiglMjIlMkMlMjIpJTBBJTIwJTIwJTIwJTIwKSUzQiUwQSUyMCUyMCUyMCUyMGxldCUyMG11dCUyMHF1ZXJ5JTIwJTNEJTIwc3FseCUzQSUzQXF1ZXJ5KCUyNnNxbCklM0IlMEElMjAlMjAlMjAlMjBmb3IlMjB0YWclMjBpbiUyMHRhZ3MlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBxdWVyeSUyMCUzRCUyMHF1ZXJ5LmJpbmQodGFnKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMGZvciUyMHRhc2slMjBpbiUyMHBhcnRpY2lwYXRlZCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHF1ZXJ5JTIwJTNEJTIwcXVlcnkuYmluZCh0YXNrKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMGxldCUyMHJlcyUyMCUzRCUyMHF1ZXJ5JTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLmZldGNoX2FsbChkYigpLmF3YWl0KSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5hd2FpdCUzRiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5pbnRvX2l0ZXIoKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5tYXAoJTdDeCU3QyUyMHguZ2V0KCUyMmlkJTIyKSklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAuY29sbGVjdCUzQSUzQSUzQ1ZlYyUzQ3UzMiUzRSUzRSgpJTNCJTBBJTIwJTIwJTIwJTIwaWYlMjByZXMuaXNfZW1wdHkoKSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHJldHVybiUyME9rKHZlYyElNUIlNUQpJTNCJTBBJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwbGV0JTIwc3FsJTIwJTNEJTIwZm9ybWF0ISglMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByJTIzJTIyJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwU0VMRUNUJTIwaWQlMkMlMjB0eXBlJTIwQVMlMjB0eXAlMkMlMjBjb250ZW50JTJDJTIwbmFtZSUyQyUyMHRpZCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMEZST00lMjB0Yl9yZXNvdXJjZSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMFdIRVJFJTIwaWQlMjBJTiUyMCglN0IlN0QpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIyJTIzJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwc3RkJTNBJTNBaXRlciUzQSUzQXJlcGVhdCglMjIlM0YlMjIpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLnRha2UocmVzLmxlbigpKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5jb2xsZWN0JTNBJTNBJTNDVmVjJTNDXyUzRSUzRSgpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLmpvaW4oJTIyJTJDJTIyKSUwQSUyMCUyMCUyMCUyMCklM0IlMEElMjAlMjAlMjAlMjBsZXQlMjBtdXQlMjBxdWVyeSUyMCUzRCUyMHNxbHglM0ElM0FxdWVyeV9hcyUzQSUzQSUzQ18lMkMlMjBSZXNvdXJjZSUzRSglMjZzcWwpJTNCJTBBJTIwJTIwJTIwJTIwZm9yJTIwaWQlMjBpbiUyMHJlcyUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHF1ZXJ5JTIwJTNEJTIwcXVlcnkuYmluZChpZCklM0IlMEElMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjBsZXQlMjByZXMlMjAlM0QlMjBxdWVyeS5mZXRjaF9hbGwoZGIoKS5hd2FpdCkuYXdhaXQlM0YlM0IlMEElMjAlMjAlMjAlMjBPayhyZXMpJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div></div><div class="code"><span class="hljs-comment">/// server/src/service/resource.rs</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">get_recommend</span>(uid: <span class="hljs-type">u32</span>, task_id: <span class="hljs-type">u32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">Vec</span>&lt;Resource&gt;&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">tags</span> = sqlx::query!(
+        <span class="hljs-string">r#&quot;
+        SELECT DISTINCT value
+        FROM tb_resource_tag WHERE rid IN (
+            SELECT id FROM tb_resource WHERE tid = ?
+        )
+        &quot;#</span>,
+        task_id
+    )
+    .<span class="hljs-title function_ invoke__">fetch_all</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+    .<span class="hljs-keyword">await</span>?
+    .<span class="hljs-title function_ invoke__">into_iter</span>()
+    .<span class="hljs-title function_ invoke__">map</span>(|x| x.value)
+    .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;();
+    <span class="hljs-keyword">if</span> tags.<span class="hljs-title function_ invoke__">is_empty</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-built_in">vec!</span>[]);
+    }
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">participated</span> = repository::task::<span class="hljs-title function_ invoke__">get_participated</span>(uid)
+        .<span class="hljs-keyword">await</span>?
+        .<span class="hljs-title function_ invoke__">into_iter</span>()
+        .<span class="hljs-title function_ invoke__">map</span>(|(task, _)| task.id)
+        .<span class="hljs-title function_ invoke__">filter</span>(|x| *x != task_id)
+        .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;();
+    <span class="hljs-keyword">if</span> participated.<span class="hljs-title function_ invoke__">is_empty</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-built_in">vec!</span>[]);
+    }
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">sql</span> = <span class="hljs-built_in">format!</span>(
+        <span class="hljs-string">r#&quot;
+        SELECT DISTINCT tb_resource.id as id
+        FROM tb_resource
+        INNER JOIN tb_resource_tag ON tb_resource.id = tb_resource_tag.rid
+        WHERE tb_resource_tag.value IN ({}) AND tb_resource.tid IN ({})
+        &quot;#</span>,
+        std::iter::<span class="hljs-title function_ invoke__">repeat</span>(<span class="hljs-string">&quot;?&quot;</span>)
+            .<span class="hljs-title function_ invoke__">take</span>(tags.<span class="hljs-title function_ invoke__">len</span>())
+            .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;()
+            .<span class="hljs-title function_ invoke__">join</span>(<span class="hljs-string">&quot;,&quot;</span>),
+        std::iter::<span class="hljs-title function_ invoke__">repeat</span>(<span class="hljs-string">&quot;?&quot;</span>)
+            .<span class="hljs-title function_ invoke__">take</span>(participated.<span class="hljs-title function_ invoke__">len</span>())
+            .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;()
+            .<span class="hljs-title function_ invoke__">join</span>(<span class="hljs-string">&quot;,&quot;</span>)
+    );
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">query</span> = sqlx::<span class="hljs-title function_ invoke__">query</span>(&amp;sql);
+    <span class="hljs-keyword">for</span> <span class="hljs-variable">tag</span> <span class="hljs-keyword">in</span> tags {
+        query = query.<span class="hljs-title function_ invoke__">bind</span>(tag);
+    }
+    <span class="hljs-keyword">for</span> <span class="hljs-variable">task</span> <span class="hljs-keyword">in</span> participated {
+        query = query.<span class="hljs-title function_ invoke__">bind</span>(task);
+    }
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">res</span> = query
+        .<span class="hljs-title function_ invoke__">fetch_all</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>)
+        .<span class="hljs-keyword">await</span>?
+        .<span class="hljs-title function_ invoke__">into_iter</span>()
+        .<span class="hljs-title function_ invoke__">map</span>(|x| x.<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&quot;id&quot;</span>))
+        .collect::&lt;<span class="hljs-type">Vec</span>&lt;<span class="hljs-type">u32</span>&gt;&gt;();
+    <span class="hljs-keyword">if</span> res.<span class="hljs-title function_ invoke__">is_empty</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-built_in">vec!</span>[]);
+    }
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">sql</span> = <span class="hljs-built_in">format!</span>(
+        <span class="hljs-string">r#&quot;
+        SELECT id, type AS typ, content, name, tid
+        FROM tb_resource
+        WHERE id IN ({})
+        &quot;#</span>,
+        std::iter::<span class="hljs-title function_ invoke__">repeat</span>(<span class="hljs-string">&quot;?&quot;</span>)
+            .<span class="hljs-title function_ invoke__">take</span>(res.<span class="hljs-title function_ invoke__">len</span>())
+            .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;()
+            .<span class="hljs-title function_ invoke__">join</span>(<span class="hljs-string">&quot;,&quot;</span>)
+    );
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">query</span> = sqlx::query_as::&lt;_, Resource&gt;(&amp;sql);
+    <span class="hljs-keyword">for</span> <span class="hljs-variable">id</span> <span class="hljs-keyword">in</span> res {
+        query = query.<span class="hljs-title function_ invoke__">bind</span>(id);
+    }
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">res</span> = query.<span class="hljs-title function_ invoke__">fetch_all</span>(<span class="hljs-title function_ invoke__">db</span>().<span class="hljs-keyword">await</span>).<span class="hljs-keyword">await</span>?;
+    <span class="hljs-title function_ invoke__">Ok</span>(res)
+}
+</div></code></pre>
+<p>考虑到这个推荐列表需要多条 sql 语句查询，并且目测会比较耗时，所以获取推荐资源列表单独作为一个接口，并且不由服务端组件进行数据获取。</p>
+<h4 id="2-5-5-zi-yuan-huo-qu-jian-quan" tabindex="-1">2.5.5 资源获取鉴权</h4>
+<p>对于文件资源，如果用户在下载资源时，直接给出其对应文件的下载地址，那么用户在获取到这个地址后可以把这个下载地址给没有参与该资源对应任务的用户，这样会容易造成资源的泄露，会不妥。为此，我们做如下设计：当需要下载一个资源的时候，先像后端发送请求，得到一个 ticket，这个 ticket 有效期很短，然后再根据这个 ticket 从后端获取文件。</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTJGJTIwd2ViJTJGc3JjJTJGYXBwJTJGcmVzb3VyY2UlMkZkZXRhaWwlMkZwYWdlLnRzeCUwQWNvbnN0JTIwaGFuZGxlRmV0Y2hSZXNvdXJjZSUyMCUzRCUyMGFzeW5jJTIwKCklMjAlM0QlM0UlMjAlN0IlMEElMDlzZXRMb2FkaW5nKCUyMmZldGNoJTIyKSUzQiUwQSUwOXRyeSUyMCU3QiUwQSUwOSUwOWNvbnN0JTIwcmVzJTIwJTNEJTIwYXdhaXQlMjBmZXRjaFJlc291cmNlKHJlcXVlc3QlMkMlMjByZXNvdXJjZS5pbmZvLmlkKSUzQiUwQSUwOSUwOWlmJTIwKHJlc291cmNlLmluZm8udHlwZSUyMCUzRCUzRCUyMCUyMmZpbGUlMjIpJTIwJTdCJTBBJTA5JTA5JTA5d2luZG93Lm9wZW4oJTBBJTA5JTA5JTA5JTA5QVBJX1VSTF9SRU1PVEUlMjAlMkIlMjAlMjIlMkZyZXNvdXJjZSUyRmRvd25sb2FkJTNGdGlja2V0JTNEJTIyJTIwJTJCJTIwcmVzJTJDJTBBJTA5JTA5JTA5JTA5JTIyX2JsYW5rJTIyJTJDJTBBJTA5JTA5JTA5KSUzQiUwQSUwOSUwOSU3RCUyMGVsc2UlMjAlN0IlMEElMDklMDklMDl3aW5kb3cub3BlbihyZXMlMkMlMjAlMjJfYmxhbmslMjIpJTNCJTBBJTA5JTA5JTdEJTBBJTA5JTdEJTIwY2F0Y2glMjAlN0IlN0QlMEElMDlzZXRMb2FkaW5nKCUyMiUyMiklM0IlMEElN0QlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div></div><div class="code"><span class="hljs-comment">/// web/src/app/resource/detail/page.tsx</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">handleFetchResource</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
+	<span class="hljs-title function_">setLoading</span>(<span class="hljs-string">&quot;fetch&quot;</span>);
+	<span class="hljs-keyword">try</span> {
+		<span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchResource</span>(request, resource.<span class="hljs-property">info</span>.<span class="hljs-property">id</span>);
+		<span class="hljs-keyword">if</span> (resource.<span class="hljs-property">info</span>.<span class="hljs-property">type</span> == <span class="hljs-string">&quot;file&quot;</span>) {
+			<span class="hljs-variable language_">window</span>.<span class="hljs-title function_">open</span>(
+				<span class="hljs-variable constant_">API_URL_REMOTE</span> + <span class="hljs-string">&quot;/resource/download?ticket=&quot;</span> + res,
+				<span class="hljs-string">&quot;_blank&quot;</span>,
+			);
+		} <span class="hljs-keyword">else</span> {
+			<span class="hljs-variable language_">window</span>.<span class="hljs-title function_">open</span>(res, <span class="hljs-string">&quot;_blank&quot;</span>);
+		}
+	} <span class="hljs-keyword">catch</span> {}
+	<span class="hljs-title function_">setLoading</span>(<span class="hljs-string">&quot;&quot;</span>);
+};
+</div></code></pre>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGc2VydmljZSUyRnJlc291cmNlLnJzJTBBcHViJTIwYXN5bmMlMjBmbiUyMGdlbmVyYXRlX3RpY2tldChpZCUzQSUyMHUzMiUyQyUyMGZpbGVfbmFtZSUzQSUyMFN0cmluZyklMjAtJTNFJTIwUmVzdWx0JTNDU3RyaW5nJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIwbGV0JTIwdGlja2V0JTIwJTNEJTIwY29tcHV0ZV9zdHJfbWQ1KGZvcm1hdCEoJTIycmVzb3VyY2VfJTdCJTdEXyU3QiU3RCUyMiUyQyUyMGlkJTJDJTIwVXRjJTNBJTNBbm93KCkudGltZXN0YW1wX21pbGxpcygpKSklM0IlMEElMjAlMjAlMjAlMjBDQUNIRSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5pbnNlcnQoQ2FjaGVUeXBlJTNBJTNBUmVzb3VyY2VUaWNrZXQodGlja2V0LmNsb25lKCkpJTJDJTIwZmlsZV9uYW1lKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5hd2FpdCUzQiUwQSUyMCUyMCUyMCUyME9rKHRpY2tldCklMEElN0QlMEFwdWIlMjBhc3luYyUyMGZuJTIwY2hlY2tfdGlja2V0KHRpY2tldCUzQSUyMFN0cmluZyklMjAtJTNFJTIwUmVzdWx0JTNDT3B0aW9uJTNDU3RyaW5nJTNFJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIwaWYlMjBsZXQlMjBTb21lKGZpbGVfbmFtZSklMjAlM0QlMjBDQUNIRS5nZXQoJTI2Q2FjaGVUeXBlJTNBJTNBUmVzb3VyY2VUaWNrZXQodGlja2V0LmNsb25lKCkpKS5hd2FpdCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMENBQ0hFLnJlbW92ZSglMjZDYWNoZVR5cGUlM0ElM0FSZXNvdXJjZVRpY2tldCh0aWNrZXQpKS5hd2FpdCUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyME9rKFNvbWUoZmlsZV9uYW1lKSklMEElMjAlMjAlMjAlMjAlN0QlMjBlbHNlJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwT2soTm9uZSklMEElMjAlMjAlMjAlMjAlN0QlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div></div><div class="code"><span class="hljs-comment">/// server/src/service/resource.rs</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">generate_ticket</span>(id: <span class="hljs-type">u32</span>, file_name: <span class="hljs-type">String</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">String</span>&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">ticket</span> = <span class="hljs-title function_ invoke__">compute_str_md5</span>(<span class="hljs-built_in">format!</span>(<span class="hljs-string">&quot;resource_{}_{}&quot;</span>, id, Utc::<span class="hljs-title function_ invoke__">now</span>().<span class="hljs-title function_ invoke__">timestamp_millis</span>()));
+    CACHE
+        .<span class="hljs-title function_ invoke__">insert</span>(CacheType::<span class="hljs-title function_ invoke__">ResourceTicket</span>(ticket.<span class="hljs-title function_ invoke__">clone</span>()), file_name)
+        .<span class="hljs-keyword">await</span>;
+    <span class="hljs-title function_ invoke__">Ok</span>(ticket)
+}
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">check_ticket</span>(ticket: <span class="hljs-type">String</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;<span class="hljs-type">Option</span>&lt;<span class="hljs-type">String</span>&gt;&gt; {
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> <span class="hljs-variable">Some</span>(file_name) = CACHE.<span class="hljs-title function_ invoke__">get</span>(&amp;CacheType::<span class="hljs-title function_ invoke__">ResourceTicket</span>(ticket.<span class="hljs-title function_ invoke__">clone</span>())).<span class="hljs-keyword">await</span> {
+        CACHE.<span class="hljs-title function_ invoke__">remove</span>(&amp;CacheType::<span class="hljs-title function_ invoke__">ResourceTicket</span>(ticket)).<span class="hljs-keyword">await</span>;
+        <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-title function_ invoke__">Some</span>(file_name))
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-literal">None</span>)
+    }
+}
+</div></code></pre>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcm91dGVyJTJGcmVzb3VyY2UucnMlMEElMjMlNUJoYW5kbGVyJTVEJTBBcHViJTIwYXN5bmMlMjBmbiUyMGZldGNoKHJlcSUzQSUyMCUyNm11dCUyMFJlcXVlc3QlMkMlMjBkZXBvdCUzQSUyMCUyNm11dCUyMERlcG90KSUyMC0lM0UlMjBSb3V0ZXJSZXN1bHQlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjBpZCUyMCUzRCUyMHJlcSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5xdWVyeSUzQSUzQSUzQ3UzMiUzRSglMjJyZXNvdXJjZV9pZCUyMiklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAub2tfb3IoQXBwRXJyb3IlM0ElM0FBcmd1bWVudEVycm9yKSUzRiUzQiUwQSUyMCUyMCUyMCUyMGxldCUyMGNvbnRleHQlMjAlM0QlMjBkZXBvdC5vYnRhaW4lM0ElM0ElM0NBcHBDb250ZXh0JTNFKCkudW53cmFwKCklM0IlMEElMjAlMjAlMjAlMjBsZXQlMjByZXNvdXJjZSUyMCUzRCUyMHNlcnZpY2UlM0ElM0FyZXNvdXJjZSUzQSUzQWdldChpZCkuYXdhaXQlM0YlM0IlMEElMjAlMjAlMjAlMjBsZXQlMjB0YXNrJTIwJTNEJTIwc2VydmljZSUzQSUzQXRhc2slM0ElM0FnZXRfd2l0aF9yZXNvdXJjZShpZCklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAuYXdhaXQlM0YlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAub2tfb3IoYW55aG93ISglMjIlRTglQjUlODQlRTYlQkElOTAlRTQlQjglOEQlRTUlQUQlOTglRTUlOUMlQTglMjIpKSUzRiUzQiUwQSUyMCUyMCUyMCUyMGlmJTIwIXNlcnZpY2UlM0ElM0F0YXNrJTNBJTNBaXNfcGFydGljaXBhdGVkKGNvbnRleHQudXNlci51aWQlMkMlMjB0YXNrLmlkKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5hd2FpdCUzRiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5pc19zb21lKCklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjYlMjYlMjB0YXNrLnB1Ymxpc2hlciUyMCElM0QlMjBjb250ZXh0LnVzZXIudWlkJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTI2JTI2JTIwIWNvbnRleHQucGVybWlzc2lvbnMubWFuYWdlX2FsbF90YXNrKCklMEElMjAlMjAlMjAlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByZXR1cm4lMjBFcnIoQXBwRXJyb3IlM0ElM0FQZXJtaXNzaW9uRGVuaWVkKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCUyRiUyRiUyMFRPRE8lMjAlRTUlODYlOTklRTUlODglQjAlRTglQkYlOTklRTklODclOEMlRTclQUElODElRTclODQlQjYlRTUlOEYlOTElRTclOEUlQjAlMjBSZXNvdXJjZSUyMCVFNyVCQiU5MyVFNiU5RSU4NCVFNCVCRCU5MyVFOSU4NyU4QyVFNyU5QSU4NCUyMHR5cCUyMCVFNSVCQSU5NCVFNCVCOCVCQSUyMFJlc291cmNlVHlwZSVFRiVCQyU4QyVFNCVCRCU4NiVFNiU5OCVBRiVFNSVCNyVCMiVFNyVCQiU4RiVFNiU4NyU5MiVFNSVCRSU5NyVFNiU5NCVCOSVFNCVCQSU4NiUwQSUyMCUyMCUyMCUyMGxldCUyMHR5cCUyMCUzRCUyMHJlc291cmNlLnR5cC5hc19zdHIoKSUzQiUwQSUyMCUyMCUyMCUyMG1hdGNoJTIwdHlwJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIybGluayUyMiUyMCUzRCUzRSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHJldHVybiUyME9rKHJlc291cmNlLmNvbnRlbnQuaW50bygpKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMmZpbGUlMjIlMjAlM0QlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBsZXQlMjB0aWNrZXQlMjAlM0QlMjBzZXJ2aWNlJTNBJTNBcmVzb3VyY2UlM0ElM0FnZW5lcmF0ZV90aWNrZXQoaWQlMkMlMjByZXNvdXJjZS5jb250ZW50KS5hd2FpdCUzRiUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHJldHVybiUyME9rKHRpY2tldC5pbnRvKCkpJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwXyUyMCUzRCUzRSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHJldHVybiUyMEVycihhbnlob3chKCUyMiVFNiU5QyVBQSVFNyU5RiVBNSVFOCVCNSU4NCVFNiVCQSU5MCVFNyVCMSVCQiVFNSU5RSU4QiUyMikuaW50bygpKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCU3RCUzQiUwQSU3RCUwQSUyMyU1QmhhbmRsZXIlNUQlMEFwdWIlMjBhc3luYyUyMGZuJTIwZG93bmxvYWQocmVxJTNBJTIwJTI2bXV0JTIwUmVxdWVzdCUyQyUyMHJlcyUzQSUyMCUyNm11dCUyMFJlc3BvbnNlKSUyMCU3QiUwQSUyMCUyMCUyMCUyMGxldCUyMGFwcF9yZXN1bHQlMjAlM0QlMjBhc3luY19mdW5jKGFzeW5jJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwbGV0JTIwdGlja2V0JTIwJTNEJTIwcmVxJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLnF1ZXJ5JTNBJTNBJTNDU3RyaW5nJTNFKCUyMnRpY2tldCUyMiklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAub2tfb3IoQXBwRXJyb3IlM0ElM0FBcmd1bWVudEVycm9yKSUzRiUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGxldCUyMGZpbGVfbmFtZSUyMCUzRCUyMHNlcnZpY2UlM0ElM0FyZXNvdXJjZSUzQSUzQWNoZWNrX3RpY2tldCh0aWNrZXQpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLmF3YWl0JTNGJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLm9rX29yKGFueWhvdyEoJTIydGlja2V0JTIwJUU2JTk3JUEwJUU2JTk1JTg4JUU2JTg4JTk2JUU1JUI3JUIyJUU4JUJGJTg3JUU2JTlDJTlGJUVGJUJDJThDJUU4JUFGJUI3JUU5JTg3JThEJUU4JUFGJTk1JTIyKSklM0YlM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBsZXQlMjBmaWxlX3BhdGglMjAlM0QlMjBmb3JtYXQhKCUyMmRhdGElMkZmaWxlcyUyRiU3QiU3RCUyMiUyQyUyMGZpbGVfbmFtZSklM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByZXMuc2VuZF9maWxlKCUyNmZpbGVfcGF0aCUyQyUyMHJlcS5oZWFkZXJzKCkpLmF3YWl0JTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwT2soKCkuaW50bygpKSUwQSUyMCUyMCUyMCUyMCU3RCklMEElMjAlMjAlMjAlMjAuYXdhaXQlM0IlMEElMjAlMjAlMjAlMjBtYXRjaCUyMGFwcF9yZXN1bHQlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBPayhfKSUyMCUzRCUzRSUyMCgpJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwRXJyKGUpJTIwJTNEJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwcmVzLnJlbmRlcihlKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCU3RCUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div></div><div class="code"><span class="hljs-comment">/// server/src/router/resource.rs</span>
+<span class="hljs-meta">#[handler]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">fetch</span>(req: &amp;<span class="hljs-keyword">mut</span> Request, depot: &amp;<span class="hljs-keyword">mut</span> Depot) <span class="hljs-punctuation">-&gt;</span> RouterResult {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">id</span> = req
+        .query::&lt;<span class="hljs-type">u32</span>&gt;(<span class="hljs-string">&quot;resource_id&quot;</span>)
+        .<span class="hljs-title function_ invoke__">ok_or</span>(AppError::ArgumentError)?;
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">context</span> = depot.obtain::&lt;AppContext&gt;().<span class="hljs-title function_ invoke__">unwrap</span>();
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">resource</span> = service::resource::<span class="hljs-title function_ invoke__">get</span>(id).<span class="hljs-keyword">await</span>?;
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">task</span> = service::task::<span class="hljs-title function_ invoke__">get_with_resource</span>(id)
+        .<span class="hljs-keyword">await</span>?
+        .<span class="hljs-title function_ invoke__">ok_or</span>(anyhow!(<span class="hljs-string">&quot;资源不存在&quot;</span>))?;
+    <span class="hljs-keyword">if</span> !service::task::<span class="hljs-title function_ invoke__">is_participated</span>(context.user.uid, task.id)
+        .<span class="hljs-keyword">await</span>?
+        .<span class="hljs-title function_ invoke__">is_some</span>()
+        &amp;&amp; task.publisher != context.user.uid
+        &amp;&amp; !context.permissions.<span class="hljs-title function_ invoke__">manage_all_task</span>()
+    {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Err</span>(AppError::PermissionDenied);
+    }
+    <span class="hljs-comment">// TODO 写到这里突然发现 Resource 结构体里的 typ 应为 ResourceType，但是已经懒得改了</span>
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">typ</span> = resource.typ.<span class="hljs-title function_ invoke__">as_str</span>();
+    <span class="hljs-keyword">match</span> typ {
+        <span class="hljs-string">&quot;link&quot;</span> =&gt; {
+            <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(resource.content.<span class="hljs-title function_ invoke__">into</span>());
+        }
+        <span class="hljs-string">&quot;file&quot;</span> =&gt; {
+            <span class="hljs-keyword">let</span> <span class="hljs-variable">ticket</span> = service::resource::<span class="hljs-title function_ invoke__">generate_ticket</span>(id, resource.content).<span class="hljs-keyword">await</span>?;
+            <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(ticket.<span class="hljs-title function_ invoke__">into</span>());
+        }
+        _ =&gt; {
+            <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Err</span>(anyhow!(<span class="hljs-string">&quot;未知资源类型&quot;</span>).<span class="hljs-title function_ invoke__">into</span>());
+        }
+    };
+}
+<span class="hljs-meta">#[handler]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">download</span>(req: &amp;<span class="hljs-keyword">mut</span> Request, res: &amp;<span class="hljs-keyword">mut</span> Response) {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">app_result</span> = <span class="hljs-title function_ invoke__">async_func</span>(<span class="hljs-keyword">async</span> {
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">ticket</span> = req
+            .query::&lt;<span class="hljs-type">String</span>&gt;(<span class="hljs-string">&quot;ticket&quot;</span>)
+            .<span class="hljs-title function_ invoke__">ok_or</span>(AppError::ArgumentError)?;
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">file_name</span> = service::resource::<span class="hljs-title function_ invoke__">check_ticket</span>(ticket)
+            .<span class="hljs-keyword">await</span>?
+            .<span class="hljs-title function_ invoke__">ok_or</span>(anyhow!(<span class="hljs-string">&quot;ticket 无效或已过期，请重试&quot;</span>))?;
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">file_path</span> = <span class="hljs-built_in">format!</span>(<span class="hljs-string">&quot;data/files/{}&quot;</span>, file_name);
+        res.<span class="hljs-title function_ invoke__">send_file</span>(&amp;file_path, req.<span class="hljs-title function_ invoke__">headers</span>()).<span class="hljs-keyword">await</span>;
+        <span class="hljs-title function_ invoke__">Ok</span>(().<span class="hljs-title function_ invoke__">into</span>())
+    })
+    .<span class="hljs-keyword">await</span>;
+    <span class="hljs-keyword">match</span> app_result {
+        <span class="hljs-title function_ invoke__">Ok</span>(_) =&gt; (),
+        <span class="hljs-title function_ invoke__">Err</span>(e) =&gt; {
+            res.<span class="hljs-title function_ invoke__">render</span>(e);
+        }
+    };
+}
+</div></code></pre>
+<h3 id="2-6-zong-jie" tabindex="-1">2.6 总结</h3>
+<p>本项目宏观上使用了前后端分离的架构。
+对于前端，使用了 React 作为主要的技术栈，使用 Material Design 风格进行 UI 界面的设计。使用 Next.js 来进行 SSR（服务端渲染）。并且前端界面是响应式的，能够在不同大小的设备上有良好呈现。并使用了防抖等技术。
+对于后端，使用 Rust 语言进行编写，Salvo 作为主要的后端框架，采用类似 MVC 结构的 router-service-repository 分层，实现了较好的异常处理，日志管理，配置文件加载。使用 MySQL 进行数据的可持久化。
+对于用户，支持用户登录，用户注册，注册时发送邮件验证码验证。支持灵活的用户权限管理。支持关键词用户搜索。
+对于任务，支持任务增删改查，支持任务之间的依赖，支持任务分配小组，并做到根据任务依赖关系、优先级、预计耗时、截止时间，使用拓扑排序和优先队列安排任务执行顺序。接入了 DeepSeek 来实现任务的时间分配建议和休息建议。支持对任务进行自动紧急/重要四象限分类。
+对于资源，支持增删改查，支持资源的点赞/点踩，支持评论，支持增删标签，支持基于标签的资源推荐。</p>
+<h2 id="san-shi-yan-shou-huo" tabindex="-1">三. 实验收获</h2>
+<h3 id="3-1-jia-gou" tabindex="-1">3.1 架构</h3>
+<p>在本次大作业之前已经很久没接触过前后端项目了，这次大作业又重新复习了一下前后端开发。并摸索出 router-service-repository 的后端分层架构和服务端组件请求数据，数据注入到客户端组件的前端 SSR 的架构。不过我仍发现目前的结构可能存在一些问题：
+一个是 repository 的必要性，本项目中 service 层中很多代码都是直接转发 repository 的函数，似乎 repository 的分层有点多余。也可能是本项目业务逻辑比较简单，几乎都是简单的数据库操作的原因。
+另一个是 SSR 的利用似乎不足。由于本项目为了清楚地分离服务端组件和客户端组件，直接让服务端组件只负责数据的获取，几乎所有的渲染都还是由客户端组件承担，这使得本项目严格意义上并不能算作一个 SSR。我们仍需要继续探索 SSR 的最佳实践。</p>
+<h3 id="3-2-ji-shu" tabindex="-1">3.2 技术</h3>
+<p>通过本次大作业我强化了对 rust 语言的应用，在 6 个月前我还不能使用 rust 写一个简单的 crud 的后端程序。同时我也熟悉了 rust 的开发生态，对一些 rust 库有了一些了解。
+Next.js 在国内的资料比较少，同时 Next.js 中间出现过较大的版本变化，这使得即使询问 ai 很多时候也无法得到满意的结果。本次大作业中我踩了 Next.js 的一些坑，如中间件的路由匹配，中间件获取的数据传递给后续服务端组件等。
+同时这次大作业我一开始考虑使用 orm，但后续因为一些原因放弃，转而手写 sql 语句，也强化了 sql 语句的知识，特别是联表查询。</p>
+<h3 id="3-3-da-mo-xing-li-yong" tabindex="-1">3.3 大模型利用</h3>
+<p>在本次大作业最后我突然想到可以接入 deepseek，并花了半天的时间简单的完成了接入。这是我首次尝试在一个项目中接入大模型，我感觉对于大模型的利用还有很多可以发挥的地方。</p>
+<h3 id="3-4-mian-xiang-dui-xiang-de-si-kao" tabindex="-1">3.4 面向对象的思考</h3>
+<p>本项目在业务逻辑部分几乎没有用到面向对象，这也让我产生了关于面向对象的一些思考。一个类，和结构体+函数，函数传递结构体引用进去，似乎本质相同。那么面向对象的意义在哪里？我认为多态是面向对象的核心，没有利用到多态的话，面向对象就是假的。以及我认为要以业务逻辑优先，如果一个业务逻辑并不需要用到面向对象，那么强行套面向对象也是无意义的。以本项目举例，本项目至少在我的设计下，无论是用户、任务还是资源，都不需要涉及到多态。即使考虑到后面的拓展，那也应该视后续具体的业务需求而定。而且，对于一个前后端项目，数据的持久化是放在关系型数据库中的，本身不太可能搞成复杂的对象。以及后端的所有操作基本都是在一个请求里进行的，进行复杂的对象操作也不合适。除非是一些较为特殊的逻辑，不然难以遇到一定使用面向对象才好解决的场景。本次作业给出的需求我认为并不适合，或者说不是一定需要用面向对象。</p>
+<h2 id="si-shi-yan-kuo-zhan" tabindex="-1">四. 实验扩展</h2>
+<h3 id="4-1-you-xiang-yan-zheng" tabindex="-1">4.1 邮箱验证</h3>
+<p>我们实现了注册时需要通过邮箱验证才能完成注册。
+邮箱使用阿里云的企业邮箱，绑定了自己的域名：<code>gcteamo.com</code> 。
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/05/28/6836f914048ee.png" style="transform: scale(1)" width=1492 height=1037><div class="img-title">image-20250523201958388</div></div>
+使用 lettre 库来进行邮件的发送，具体细节见 <code>server/src/mail.rs</code> 。
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/05/28/6836f9270fffb.png" style="transform: scale(1)" width=1559 height=934><div class="img-title">image-20250523202334541</div></div>
+后端还提供一个验证邮件的接口，客户端拿用户输入的验证码请求该接口，如果验证码正确，那么客户端会下发一个 ticket 。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcm91dGVyJTJGdXNlci5ycyUwQSUyMyU1QmhhbmRsZXIlNUQlMEFwdWIlMjBhc3luYyUyMGZuJTIwZW1haWxfdmVyaWZ5KHJlcSUzQSUyMCUyNm11dCUyMFJlcXVlc3QpJTIwLSUzRSUyMFJvdXRlclJlc3VsdCUyMCU3QiUwQSUyMCUyMCUyMCUyMGxldCUyMGFyZyUzQSUyMEVtYWlsVmVyaWZ5Rm9ybSUyMCUzRCUyMHJlcS5leHRyYWN0KCkuYXdhaXQlM0YlM0IlMEElMjAlMjAlMjAlMjBpZiUyMGFyZy52YWxpZGF0ZSgpLmlzX2VycigpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwcmV0dXJuJTIwRXJyKEFwcEVycm9yJTNBJTNBQXJndW1lbnRFcnJvciklM0IlMEElMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjBsZXQlMjB0aWNrZXQlMjAlM0QlMjBzZXJ2aWNlJTNBJTNBdXNlciUzQSUzQXZlcmlmeV9lbWFpbF9jb2RlKGFyZy5lbWFpbC5hc19zdHIoKSUyQyUyMGFyZy5jb2RlKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5hd2FpdCUzRiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5va19vcihhbnlob3chKCUyMiVFOSVBQSU4QyVFOCVBRiU4MSVFNyVBMCU4MSVFOSU5NCU5OSVFOCVBRiVBRiUyMikpJTNGJTNCJTBBJTIwJTIwJTIwJTIwT2sodGlja2V0LmludG8oKSklMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div></div><div class="code"><span class="hljs-comment">/// server/src/router/user.rs</span>
+<span class="hljs-meta">#[handler]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">email_verify</span>(req: &amp;<span class="hljs-keyword">mut</span> Request) <span class="hljs-punctuation">-&gt;</span> RouterResult {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">arg</span>: EmailVerifyForm = req.<span class="hljs-title function_ invoke__">extract</span>().<span class="hljs-keyword">await</span>?;
+    <span class="hljs-keyword">if</span> arg.<span class="hljs-title function_ invoke__">validate</span>().<span class="hljs-title function_ invoke__">is_err</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Err</span>(AppError::ArgumentError);
+    }
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">ticket</span> = service::user::<span class="hljs-title function_ invoke__">verify_email_code</span>(arg.email.<span class="hljs-title function_ invoke__">as_str</span>(), arg.code)
+        .<span class="hljs-keyword">await</span>?
+        .<span class="hljs-title function_ invoke__">ok_or</span>(anyhow!(<span class="hljs-string">&quot;验证码错误&quot;</span>))?;
+    <span class="hljs-title function_ invoke__">Ok</span>(ticket.<span class="hljs-title function_ invoke__">into</span>())
+}
+</div></code></pre>
+<p>拿到 ticket 就可以证明邮箱的所有权了。后续需要证明邮箱所有权的接口，如用户注册，找回密码，都需要提供 ticket。
+为了防止邮件发送接口被滥用，我们设置了一个频率限制，即每个邮件地址每分钟只能发一个邮件。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTJGJTIwc2VydmVyJTJGc3JjJTJGcm91dGVyJTJGdXNlci5ycyUwQSUyMyU1QmhhbmRsZXIlNUQlMEFwdWIlMjBhc3luYyUyMGZuJTIwZW1haWxfc2VuZChyZXElM0ElMjAlMjZtdXQlMjBSZXF1ZXN0KSUyMC0lM0UlMjBSb3V0ZXJSZXN1bHQlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjBlbWFpbCUzQSUyMFN0cmluZyUyMCUzRCUyMHJlcS5xdWVyeSglMjJlbWFpbCUyMikub2tfb3IoQXBwRXJyb3IlM0ElM0FBcmd1bWVudEVycm9yKSUzRiUzQiUwQSUyMCUyMCUyMCUyMGlmJTIwIWVtYWlsLnZhbGlkYXRlX2VtYWlsKCklMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByZXR1cm4lMjBFcnIoQXBwRXJyb3IlM0ElM0FBcmd1bWVudEVycm9yKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMGlmJTIwQ0FDSEUlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAuZ2V0KCUyNkNhY2hlVHlwZSUzQSUzQUVtYWlsQ29kZUxvY2soZW1haWwuY2xvbmUoKSkpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLmF3YWl0JTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwLmlzX3NvbWUoKSUwQSUyMCUyMCUyMCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHJldHVybiUyMEVycihhbnlob3chKCUyMiVFNSU4RiU5MSVFOSU4MCU4MSVFOSVBQSU4QyVFOCVBRiU4MSVFNyVBMCU4MSVFOSVBMiU5MSVFNyVCOSU4MSVFRiVCQyU4QyVFOCVBRiVCNyVFNyVBOCU4RCVFNSU5MCU4RSVFNSU4NiU4RCVFOCVBRiU5NSUyMikuaW50bygpKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMHNlcnZpY2UlM0ElM0F1c2VyJTNBJTNBc2VuZF9lbWFpbF9jb2RlKGVtYWlsLmFzX3N0cigpKS5hd2FpdCUzRiUzQiUwQSUyMCUyMCUyMCUyMCUyRiUyRiUyMENBQ0hFJTIwJUU2JTk4JUFGJTIwbW9rYSUyMCVFNSVBRSU5RSVFNCVCRSU4QiVFRiVCQyU4QyVFOCVBNyU4MSUyMHNlcnZlciUyRnNyYyUyRmNhY2hlLnJzJTBBJTIwJTIwJTIwJTIwQ0FDSEUlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAuaW5zZXJ0KENhY2hlVHlwZSUzQSUzQUVtYWlsQ29kZUxvY2soZW1haWwuY2xvbmUoKSklMkMlMjAlMjIxJTIyLnRvX3N0cmluZygpKSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC5hd2FpdCUzQiUwQSUyMCUyMCUyMCUyME9rKCgpLmludG8oKSklMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div></div><div class="code"><span class="hljs-comment">/// server/src/router/user.rs</span>
+<span class="hljs-meta">#[handler]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">email_send</span>(req: &amp;<span class="hljs-keyword">mut</span> Request) <span class="hljs-punctuation">-&gt;</span> RouterResult {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">email</span>: <span class="hljs-type">String</span> = req.<span class="hljs-title function_ invoke__">query</span>(<span class="hljs-string">&quot;email&quot;</span>).<span class="hljs-title function_ invoke__">ok_or</span>(AppError::ArgumentError)?;
+    <span class="hljs-keyword">if</span> !email.<span class="hljs-title function_ invoke__">validate_email</span>() {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Err</span>(AppError::ArgumentError);
+    }
+    <span class="hljs-keyword">if</span> CACHE
+        .<span class="hljs-title function_ invoke__">get</span>(&amp;CacheType::<span class="hljs-title function_ invoke__">EmailCodeLock</span>(email.<span class="hljs-title function_ invoke__">clone</span>()))
+        .<span class="hljs-keyword">await</span>
+        .<span class="hljs-title function_ invoke__">is_some</span>()
+    {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Err</span>(anyhow!(<span class="hljs-string">&quot;发送验证码频繁，请稍后再试&quot;</span>).<span class="hljs-title function_ invoke__">into</span>());
+    }
+    service::user::<span class="hljs-title function_ invoke__">send_email_code</span>(email.<span class="hljs-title function_ invoke__">as_str</span>()).<span class="hljs-keyword">await</span>?;
+    <span class="hljs-comment">// CACHE 是 moka 实例，见 server/src/cache.rs</span>
+    CACHE
+        .<span class="hljs-title function_ invoke__">insert</span>(CacheType::<span class="hljs-title function_ invoke__">EmailCodeLock</span>(email.<span class="hljs-title function_ invoke__">clone</span>()), <span class="hljs-string">&quot;1&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>())
+        .<span class="hljs-keyword">await</span>;
+    <span class="hljs-title function_ invoke__">Ok</span>(().<span class="hljs-title function_ invoke__">into</span>())
+}
+</div></code></pre>
+<p>验证码有效期也是类似的手段实现的。</p>
+<h3 id="4-2-tuo-pu-pai-xu-he-you-xian-dui-lie" tabindex="-1">4.2 拓扑排序和优先队列</h3>
+<p>我们希望首页显示的任务是按照一个较好的顺序给出的。具体来说，我们需要保证按照首页的排列顺序从上到下依次做任务，能解决任务的依赖关系（父任务在上，子任务在下），同时更紧急的任务先做（同等剩余时间，优先级越高越先做。同等优先级，剩余时间越小越先做）。为此，我们应用了拓扑排序算法来解决依赖关系。传统拓扑排序算法是一个普通队列，为了满足“更紧急的任务先做”这个要求，我们使用优先队列来维护。算法的代码如下：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwV2VpZ2h0V3JhcHBlciUzQ1QlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBkZWFkbGluZSUzQSUyMHU2NCUyQyUyMCUyRiUyRiUyMCVFNiU4OCVBQSVFNiVBRCVBMiVFNiU5NyVCNiVFOSU5NyVCNCVFNSVCMCU4RiVFNyU5QSU4NCVFNSU4NSU4OCVFNSU4MSU5QSUwQSUyMCUyMCUyMCUyMHdlaWdodCUzQSUyMHUzMiUyQyUyMCUyMCUyMCUyRiUyRiUyMCVFNiU4OCVBQSVFNiVBRCVBMiVFNiU5NyVCNiVFOSU5NyVCNCVFNyU5QiVCOCVFNSU5MCU4QyVFNiU5NyVCNiVFRiVCQyU4QyVFNiU5RCU4MyVFOSU4NyU4RCVFNSVCMCU4RiVFNyU5QSU4NCVFNSU4NSU4OCVFNSU4MSU5QSUwQSUyMCUyMCUyMCUyMGlubmVyJTNBJTIwVCUyQyUwQSU3RCUwQWltcGwlM0NUJTNFJTIwT3JkJTIwZm9yJTIwV2VpZ2h0V3JhcHBlciUzQ1QlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBmbiUyMGNtcCglMjZzZWxmJTJDJTIwb3RoZXIlM0ElMjAlMjZTZWxmKSUyMC0lM0UlMjBPcmRlcmluZyUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGlmJTIwc2VsZi5kZWFkbGluZSUyMCUzRCUzRCUyMG90aGVyLmRlYWRsaW5lJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwb3RoZXIud2VpZ2h0LmNtcCglMjZzZWxmLndlaWdodCklMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMjBlbHNlJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwb3RoZXIuZGVhZGxpbmUuY21wKCUyNnNlbGYuZGVhZGxpbmUpJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwJTdEJTBBJTdEJTBBaW1wbCUyMFdlaWdodFdyYXBwZXIlM0MoVGFzayUyQyUyMGJvb2wpJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIwZm4lMjBuZXcodGFzayUzQSUyMFRhc2slMkMlMjBmaW5pc2glM0ElMjBib29sKSUyMC0lM0UlMjBTZWxmJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwU2VsZiUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGRlYWRsaW5lJTNBJTIwdGFzay5pbmZvLmRlYWRsaW5lJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTJGJTJGJTIwJUU2JTlEJTgzJUU5JTg3JThEJUU1JUI5JUI2JUU0JUI4JThEJUU2JTk4JUFGJUU3JTlCJUI0JUU2JThFJUE1JUU0JUI4JUJBJUU0JUJDJTk4JUU1JTg1JTg4JUU3JUJBJUE3JUVGJUJDJThDJUU4JTgwJThDJUU2JTk4JUFGJTIwJUU5JUEyJTg0JUU4JUFFJUExJUU4JTgwJTk3JUU4JUI0JUI5JUU2JTk3JUI2JUU5JTk3JUI0JTIwJTJGJTIwJUU0JUJDJTk4JUU1JTg1JTg4JUU3JUJBJUE3JTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwd2VpZ2h0JTNBJTIwdGFzay5pbmZvLmNvc3QlMjAlMkYlMjAodTMyJTNBJTNBZnJvbSh0YXNrLmluZm8ucHJpb3JpdHkpJTIwJTJCJTIwMSklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpbm5lciUzQSUyMCh0YXNrJTJDJTIwZmluaXNoKSUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCU3RCUwQSU3RCUwQXB1YiUyMGFzeW5jJTIwZm4lMjBhcnJhbmdlX3Rhc2sobGlzdCUzQSUyMFZlYyUzQyhUYXNrJTJDJTIwYm9vbCklM0UpJTIwLSUzRSUyMFZlYyUzQyhUYXNrJTJDJTIwYm9vbCklM0UlMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjBtdXQlMjBkZWclMjAlM0QlMjBIYXNoTWFwJTNBJTNBbmV3KCklM0IlMjAlMkYlMkYlMjAlRTYlQUYlOEYlRTQlQjglQUElRTclODIlQjklRTclOUElODQlRTUlODUlQTUlRTUlQkElQTYlMEElMjAlMjAlMjAlMjBsZXQlMjBtdXQlMjB0YXNrcyUyMCUzRCUyMEhhc2hNYXAlM0ElM0FuZXcoKSUzQiUyMCUyRiUyRiUyMCVFNiVBMCVCOSVFNiU4RCVBRSVFNyVCQyU5NiVFNSU4RiVCNyVFOCU4RSVCNyVFNSVCRSU5NyVFNCVCQiVCQiVFNSU4QSVBMSVFNSVBRSU5RSVFNCVCRCU5MyUwQSUyMCUyMCUyMCUyMGxldCUyMG11dCUyMHF1ZSUyMCUzRCUyMEJpbmFyeUhlYXAlM0ElM0FuZXcoKSUzQiUyMCUyRiUyRiUyMCVFNCVCQyU5OCVFNSU4NSU4OCVFOSU5OCU5RiVFNSU4OCU5NyUwQSUyMCUyMCUyMCUyMGxldCUyMG11dCUyMGclMjAlM0QlMjBIYXNoTWFwJTNBJTNBbmV3KCklM0IlMjAlMkYlMkYlMjAlRTklODIlQkIlRTYlOEUlQTUlRTglQTElQTglMEElMjAlMjAlMjAlMjBsZXQlMjBtdXQlMjByZXMlMjAlM0QlMjBWZWMlM0ElM0FuZXcoKSUzQiUyMCUyRiUyRiUyMCVFNyVCQiU5MyVFNiU5RSU5QyUwQSUyMCUyMCUyMCUyMGZvciUyMCh0YXNrJTJDJTIwZmluaXNoKSUyMGluJTIwbGlzdCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGlmJTIwbGV0JTIwU29tZShwcmV2KSUyMCUzRCUyMHRhc2sucHJldiUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGcuZW50cnkocHJldikub3JfaW5zZXJ0KHZlYyElNUIlNUQpLnB1c2godGFzay5pZCklM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAqZGVnLmVudHJ5KHRhc2suaWQpLm9yX2luc2VydCgwKSUyMCUyQiUzRCUyMDElM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMjBlbHNlJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwcXVlLnB1c2goV2VpZ2h0V3JhcHBlciUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGRlYWRsaW5lJTNBJTIwdGFzay5pbmZvLmRlYWRsaW5lJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwd2VpZ2h0JTNBJTIwdGFzay5pbmZvLmNvc3QlMjAlMkYlMjAodTMyJTNBJTNBZnJvbSh0YXNrLmluZm8ucHJpb3JpdHkpJTIwJTJCJTIwMSklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpbm5lciUzQSUyMCh0YXNrLmNsb25lKCklMkMlMjBmaW5pc2gpJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHRhc2tzLmluc2VydCh0YXNrLmlkJTJDJTIwKHRhc2slMkMlMjBmaW5pc2gpKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMHdoaWxlJTIwbGV0JTIwU29tZShXZWlnaHRXcmFwcGVyJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZGVhZGxpbmUlM0ElMjBfJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwd2VpZ2h0JTNBJTIwXyUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGlubmVyJTNBJTIwKHRhc2slMkMlMjBmaW5pc2gpJTJDJTBBJTIwJTIwJTIwJTIwJTdEKSUyMCUzRCUyMHF1ZS5wb3AoKSUwQSUyMCUyMCUyMCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGlmJTIwbGV0JTIwU29tZShuZXh0X3Rhc2tzKSUyMCUzRCUyMGcuZ2V0KCUyNnRhc2suaWQpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZm9yJTIwbmV4dF9pZCUyMGluJTIwbmV4dF90YXNrcyUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGxldCUyMG5leHRfZGVnJTIwJTNEJTIwZGVnLmdldF9tdXQobmV4dF9pZCkudW53cmFwKCklM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAqbmV4dF9kZWclMjAtJTNEJTIwMSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGlmJTIwKm5leHRfZGVnJTIwJTNEJTNEJTIwMCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGxldCUyMChuZXh0X3Rhc2slMkMlMjBuZXh0X3Rhc2tfZmluaXNoKSUyMCUzRCUyMHRhc2tzLnJlbW92ZShuZXh0X2lkKS51bndyYXAoKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHF1ZS5wdXNoKFdlaWdodFdyYXBwZXIlM0ElM0FuZXcobmV4dF90YXNrJTJDJTIwbmV4dF90YXNrX2ZpbmlzaCkpJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwcmVzLnB1c2goKHRhc2slMkMlMjBmaW5pc2gpKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMHJlcyUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">WeightWrapper</span>&lt;T&gt; {
+    deadline: <span class="hljs-type">u64</span>, <span class="hljs-comment">// 截止时间小的先做</span>
+    weight: <span class="hljs-type">u32</span>,   <span class="hljs-comment">// 截止时间相同时，权重小的先做</span>
+    inner: T,
+}
+<span class="hljs-keyword">impl</span>&lt;T&gt; <span class="hljs-built_in">Ord</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">WeightWrapper</span>&lt;T&gt; {
+    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">cmp</span>(&amp;<span class="hljs-keyword">self</span>, other: &amp;<span class="hljs-keyword">Self</span>) <span class="hljs-punctuation">-&gt;</span> Ordering {
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">self</span>.deadline == other.deadline {
+            other.weight.<span class="hljs-title function_ invoke__">cmp</span>(&amp;<span class="hljs-keyword">self</span>.weight)
+        } <span class="hljs-keyword">else</span> {
+            other.deadline.<span class="hljs-title function_ invoke__">cmp</span>(&amp;<span class="hljs-keyword">self</span>.deadline)
+        }
+    }
+}
+<span class="hljs-keyword">impl</span> <span class="hljs-title class_">WeightWrapper</span>&lt;(Task, <span class="hljs-type">bool</span>)&gt; {
+    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">new</span>(task: Task, finish: <span class="hljs-type">bool</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-keyword">Self</span> {
+        <span class="hljs-keyword">Self</span> {
+            deadline: task.info.deadline,
+            <span class="hljs-comment">// 权重并不是直接为优先级，而是 预计耗费时间 / 优先级</span>
+            weight: task.info.cost / (<span class="hljs-type">u32</span>::<span class="hljs-title function_ invoke__">from</span>(task.info.priority) + <span class="hljs-number">1</span>),
+            inner: (task, finish),
+        }
+    }
+}
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">arrange_task</span>(list: <span class="hljs-type">Vec</span>&lt;(Task, <span class="hljs-type">bool</span>)&gt;) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Vec</span>&lt;(Task, <span class="hljs-type">bool</span>)&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">deg</span> = HashMap::<span class="hljs-title function_ invoke__">new</span>(); <span class="hljs-comment">// 每个点的入度</span>
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">tasks</span> = HashMap::<span class="hljs-title function_ invoke__">new</span>(); <span class="hljs-comment">// 根据编号获得任务实体</span>
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">que</span> = BinaryHeap::<span class="hljs-title function_ invoke__">new</span>(); <span class="hljs-comment">// 优先队列</span>
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">g</span> = HashMap::<span class="hljs-title function_ invoke__">new</span>(); <span class="hljs-comment">// 邻接表</span>
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">res</span> = <span class="hljs-type">Vec</span>::<span class="hljs-title function_ invoke__">new</span>(); <span class="hljs-comment">// 结果</span>
+    <span class="hljs-keyword">for</span> (task, finish) <span class="hljs-keyword">in</span> list {
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> <span class="hljs-variable">Some</span>(prev) = task.prev {
+            g.<span class="hljs-title function_ invoke__">entry</span>(prev).<span class="hljs-title function_ invoke__">or_insert</span>(<span class="hljs-built_in">vec!</span>[]).<span class="hljs-title function_ invoke__">push</span>(task.id);
+            *deg.<span class="hljs-title function_ invoke__">entry</span>(task.id).<span class="hljs-title function_ invoke__">or_insert</span>(<span class="hljs-number">0</span>) += <span class="hljs-number">1</span>;
+        } <span class="hljs-keyword">else</span> {
+            que.<span class="hljs-title function_ invoke__">push</span>(WeightWrapper {
+                deadline: task.info.deadline,
+                weight: task.info.cost / (<span class="hljs-type">u32</span>::<span class="hljs-title function_ invoke__">from</span>(task.info.priority) + <span class="hljs-number">1</span>),
+                inner: (task.<span class="hljs-title function_ invoke__">clone</span>(), finish),
+            });
+        }
+        tasks.<span class="hljs-title function_ invoke__">insert</span>(task.id, (task, finish));
+    }
+    <span class="hljs-keyword">while</span> <span class="hljs-keyword">let</span> <span class="hljs-variable">Some</span>(WeightWrapper {
+        deadline: _,
+        weight: _,
+        inner: (task, finish),
+    }) = que.<span class="hljs-title function_ invoke__">pop</span>()
+    {
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> <span class="hljs-variable">Some</span>(next_tasks) = g.<span class="hljs-title function_ invoke__">get</span>(&amp;task.id) {
+            <span class="hljs-keyword">for</span> <span class="hljs-variable">next_id</span> <span class="hljs-keyword">in</span> next_tasks {
+                <span class="hljs-keyword">let</span> <span class="hljs-variable">next_deg</span> = deg.<span class="hljs-title function_ invoke__">get_mut</span>(next_id).<span class="hljs-title function_ invoke__">unwrap</span>();
+                *next_deg -= <span class="hljs-number">1</span>;
+                <span class="hljs-keyword">if</span> *next_deg == <span class="hljs-number">0</span> {
+                    <span class="hljs-keyword">let</span> (next_task, next_task_finish) = tasks.<span class="hljs-title function_ invoke__">remove</span>(next_id).<span class="hljs-title function_ invoke__">unwrap</span>();
+                    que.<span class="hljs-title function_ invoke__">push</span>(WeightWrapper::<span class="hljs-title function_ invoke__">new</span>(next_task, next_task_finish));
+                }
+            }
+        }
+        res.<span class="hljs-title function_ invoke__">push</span>((task, finish));
+    }
+    res
+}
+</div></code></pre>
+<h3 id="4-3-jie-ru-deep-seek" tabindex="-1">4.3 接入 DeepSeek</h3>
+<p>作业中的 “最优时间分配建议” 和 “学习疲劳预警” 这项功能，如果使用传统的算法不太好实现，即使实现效果也难以保证。因此，我们考虑直接接入大模型，借助大模型来实现这个功能。
+在 deepseek 开放平台上购买相应的额度。
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/05/28/6836f9461dede.png" style="transform: scale(1)" width=2239 height=581><div class="img-title">image-20250523211446896</div></div>
+根据用户当前参与的，且没过期的任务，构造提示词：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwcHJvbXB0JTIwJTNEJTIwdGFzayUwQSUyMCUyMCUyMCUyMC5pbnRvX2l0ZXIoKSUwQSUyMCUyMCUyMCUyMC5tYXAoJTdDKHRhc2slMkMlMjBfKSU3QyUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGxldCUyMHNlY29uZHMlMjAlM0QlMjB0YXNrLmluZm8uZGVhZGxpbmUlMjAlMkYlMjAxMDAwJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwbGV0JTIwbmFub3MlMjAlM0QlMjAodGFzay5pbmZvLmRlYWRsaW5lJTIwJTI1JTIwMTAwMCklMjAqJTIwMV8wMDBfMDAwJTNCJTIwJTJGJTJGJTIwJUU4JUJEJUFDJUU2JThEJUEyJUU0JUI4JUJBJUU3JUJBJUIzJUU3JUE3JTkyJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwbGV0JTIwdXRjX3RpbWUlMjAlM0QlMjBEYXRlVGltZSUzQSUzQSUzQ1V0YyUzRSUzQSUzQWZyb21fdXRjKCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyME5haXZlRGF0ZVRpbWUlM0ElM0Fmcm9tX3RpbWVzdGFtcF9vcHQoc2Vjb25kcyUyMGFzJTIwaTY0JTJDJTIwbmFub3MlMjBhcyUyMHUzMikudW53cmFwKCklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBVdGMlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjApJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTJGJTJGJTIwJUU4JUJEJUFDJUU2JThEJUEyJUU0JUI4JUJBJTIwVVRDJTJCOCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGxldCUyMHV0Y19wbHVzXzglMjAlM0QlMjBGaXhlZE9mZnNldCUzQSUzQWVhc3Rfb3B0KDglMjAqJTIwMzYwMCkudW53cmFwKCklM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBsZXQlMjBiZWlqaW5nX3RpbWUlMjAlM0QlMjB1dGNfdGltZS53aXRoX3RpbWV6b25lKCUyNnV0Y19wbHVzXzgpJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZm9ybWF0ISglMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjIlM0NiZWdpbiUzRSU3QiU3RCU1Q24lN0IlN0QlNUNuJTdCJTdEJTVDbiU3QiU3RCUzQ2VuZCUzRSUyMiUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHRhc2suaW5mby50aXRsZSUyQyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGJlaWppbmdfdGltZS5mb3JtYXQoJTIyJTI1WS0lMjVtLSUyNWQlMjAlMjVIJTNBJTI1TSUyMiklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBtYXRjaCUyMHRhc2suaW5mby5wcmlvcml0eSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGNyYXRlJTNBJTNBZW50aXR5JTNBJTNBdGFzayUzQSUzQVRhc2tQcmlvcml0eSUzQSUzQUhpZ2glMjAlM0QlM0UlMjAlMjIlRTklQUIlOTglRTQlQkMlOTglRTUlODUlODglRTclQkElQTclMjIlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBjcmF0ZSUzQSUzQWVudGl0eSUzQSUzQXRhc2slM0ElM0FUYXNrUHJpb3JpdHklM0ElM0FNZWRpdW0lMjAlM0QlM0UlMjAlMjIlRTQlQjglQUQlRTQlQkMlOTglRTUlODUlODglRTclQkElQTclMjIlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBjcmF0ZSUzQSUzQWVudGl0eSUzQSUzQXRhc2slM0ElM0FUYXNrUHJpb3JpdHklM0ElM0FMb3clMjAlM0QlM0UlMjAlMjIlRTQlQkQlOEUlRTQlQkMlOTglRTUlODUlODglRTclQkElQTclMjIlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjB0YXNrLmluZm8uY29zdCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCklMEElMjAlMjAlMjAlMjAlN0QpJTBBJTIwJTIwJTIwJTIwLmNvbGxlY3QlM0ElM0ElM0NWZWMlM0NfJTNFJTNFKCklMEElMjAlMjAlMjAlMjAuam9pbiglMjIlNUNuJTIyKSUzQiUwQWxldCUyMGRhdGElMjAlM0QlMjBqc29uISglN0IlMEElMjAlMjAlMjAlMjAlMjJtb2RlbCUyMiUzQSUyMCUyMmRlZXBzZWVrLWNoYXQlMjIlMkMlMEElMjAlMjAlMjAlMjAlMjJtZXNzYWdlcyUyMiUzQSUyMCU1QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMnJvbGUlMjIlM0ElMjAlMjJzeXN0ZW0lMjIlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjJjb250ZW50JTIyJTNBJTIwciUyMyUyMiVFNCVCRCVBMCVFNyU4RSVCMCVFNSU5QyVBOCVFNiU5OCVBRiVFNCVCOCU4MCVFNCVCOCVBQSVFNiU5NyVCNiVFOSU5NyVCNCVFOCVBNyU4NCVFNSU4OCU5MiVFNSVBNCVBNyVFNSVCOCU4OCVFRiVCQyU4QyVFNiU4OCU5MSVFNSVCMCU4NiVFNyVCQiU5OSVFNCVCRCVBMCVFOCU4QiVBNSVFNSVCOSVCMiVFNCVCOCVBQSVFNCVCQiVCQiVFNSU4QSVBMSVFRiVCQyU4QyVFNiVBRiU4RiVFNCVCOCVBQSVFNCVCQiVCQiVFNSU4QSVBMSVFNCVCQiVBNSUzQ2JlZ2luJTNFJUU1JUJDJTgwJUU1JUE3JThCJTNDZW5kJTNFJUU3JUJCJTkzJUU2JTlEJTlGJUVGJUJDJThDJUU2JUFGJThGJUU0JUI4JUFBJUU0JUJCJUJCJUU1JThBJUExJUU1JThDJTg1JUU1JTkwJUFCJUU1JUE0JTlBJUU4JUExJThDJUU0JUJGJUExJUU2JTgxJUFGJUVGJUJDJThDJUU1JTg1JUI3JUU0JUJEJTkzJUU1JTlDJUIwJUVGJUJDJThDJUU3JUFDJUFDJUU0JUI4JTgwJUU4JUExJThDJUU0JUI4JUJBJUU0JUJCJUJCJUU1JThBJUExJUU3JTlBJTg0JUU1JTkwJThEJUU3JUE3JUIwJUVGJUJDJThDJUU3JUFDJUFDJUU0JUJBJThDJUU4JUExJThDJUU0JUI4JUJBJUU0JUJCJUJCJUU1JThBJUExJUU3JTlBJTg0JUU2JTg4JUFBJUU2JUFEJUEyJUU2JTk3JUI2JUU5JTk3JUI0JUVGJUJDJThDJUU3JUFDJUFDJUU0JUI4JTg5JUU4JUExJThDJUU0JUI4JUJBJUU0JUJCJUJCJUU1JThBJUExJUU3JTlBJTg0JUU0JUJDJTk4JUU1JTg1JTg4JUU3JUJBJUE3JUVGJUJDJThDJUU3JUFDJUFDJUU1JTlCJTlCJUU4JUExJThDJUU0JUI4JUJBJUU0JUJCJUJCJUU1JThBJUExJUU3JTlBJTg0JUU5JUEyJTg0JUU4JUFFJUExJUU4JTgwJTk3JUU2JTk3JUI2JUUzJTgwJTgyJUU0JUJEJUEwJUU5JTlDJTgwJUU4JUE2JTgxJUU0JUI4JUJBJUU2JTg4JTkxJUU1JUFFJTg5JUU2JThFJTkyJUU0JUI4JTgwJUU0JUI4JUFBJUU2JTk3JUI2JUU5JTk3JUI0JUU4JUE3JTg0JUU1JTg4JTkyJUU2JTk2JUI5JUU2JUExJTg4JUUzJTgwJTgyJUU4JUE3JTg0JUU1JTg4JTkyJUU2JTk2JUI5JUU2JUExJTg4JUU1JThGJUFGJUU0JUJCJUE1JUU2JUEwJUI5JUU2JThEJUFFJUU1JUJEJTkzJUU1JTg5JThEJUU2JTk3JUE1JUU2JTlDJTlGJUU4JTgwJTgzJUU4JTk5JTkxJUU1JTg1JUI2JUU0JUJCJTk2JUU1JUE0JTk2JUU3JTk1JThDJUU1JTlCJUEwJUU3JUI0JUEwJUUzJTgwJTgyJUU4JUE3JTg0JUU1JTg4JTkyJUU2JTk2JUI5JUU2JUExJTg4JUU1JThGJUFGJUU0JUJCJUE1JUU2JUI3JUJCJUU1JThBJUEwJUU0JUJDJTkxJUU2JTgxJUFGJUU1JUJCJUJBJUU4JUFFJUFFJUVGJUJDJThDJUU2JUIzJUE4JUU2JTg0JThGJUU1JThBJUIzJUU5JTgwJUI4JUU3JUJCJTkzJUU1JTkwJTg4JUUzJTgwJTgyJUU2JUIzJUE4JUU2JTg0JThGJUVGJUJDJThDJUU0JUJEJUEwJUU1JThGJUFBJUU5JTlDJTgwJUU4JUE2JTgxJUU3JUJCJTk5JUU1JTg3JUJBJUU4JUE3JTg0JUU1JTg4JTkyJUU2JTk2JUI5JUU2JUExJTg4JUU1JTkyJThDJUU4JUE3JTg0JUU1JTg4JTkyJUU3JTkwJTg2JUU3JTk0JUIxJUVGJUJDJThDJUU1JTg1JUI2JUU0JUJCJTk2JUU3JTlBJTg0JUU0JUJCJUJCJUU0JUJEJTk1JUU1JTg2JTg1JUU1JUFFJUI5JUU5JTgzJUJEJUU0JUI4JThEJUU4JUE2JTgxJUU1JTlCJTlFJUU3JUFEJTk0JUUzJTgwJTgyJUU0JUJEJUEwJUU3JTlBJTg0JUU1JTlCJTlFJUU3JUFEJTk0JUU1JUJBJTk0JUU3JUFFJTgwJUU3JTlGJUFEJTIyJTIzJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIycm9sZSUyMiUzQSUyMCUyMnVzZXIlMjIlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjJjb250ZW50JTIyJTNBJTIwcHJvbXB0JTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwJTVEJTJDJTBBJTdEKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">prompt</span> = task
+    .<span class="hljs-title function_ invoke__">into_iter</span>()
+    .<span class="hljs-title function_ invoke__">map</span>(|(task, _)| {
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">seconds</span> = task.info.deadline / <span class="hljs-number">1000</span>;
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">nanos</span> = (task.info.deadline % <span class="hljs-number">1000</span>) * <span class="hljs-number">1_000_000</span>; <span class="hljs-comment">// 转换为纳秒</span>
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">utc_time</span> = DateTime::&lt;Utc&gt;::<span class="hljs-title function_ invoke__">from_utc</span>(
+            NaiveDateTime::<span class="hljs-title function_ invoke__">from_timestamp_opt</span>(seconds <span class="hljs-keyword">as</span> <span class="hljs-type">i64</span>, nanos <span class="hljs-keyword">as</span> <span class="hljs-type">u32</span>).<span class="hljs-title function_ invoke__">unwrap</span>(),
+            Utc,
+        );
+        <span class="hljs-comment">// 转换为 UTC+8</span>
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">utc_plus_8</span> = FixedOffset::<span class="hljs-title function_ invoke__">east_opt</span>(<span class="hljs-number">8</span> * <span class="hljs-number">3600</span>).<span class="hljs-title function_ invoke__">unwrap</span>();
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">beijing_time</span> = utc_time.<span class="hljs-title function_ invoke__">with_timezone</span>(&amp;utc_plus_8);
+        <span class="hljs-built_in">format!</span>(
+            <span class="hljs-string">&quot;&lt;begin&gt;{}\n{}\n{}\n{}&lt;end&gt;&quot;</span>,
+            task.info.title,
+            beijing_time.format(<span class="hljs-string">&quot;%Y-%m-%d %H:%M&quot;</span>),
+            <span class="hljs-keyword">match</span> task.info.priority {
+                crate::entity::task::TaskPriority::High =&gt; <span class="hljs-string">&quot;高优先级&quot;</span>,
+                crate::entity::task::TaskPriority::Medium =&gt; <span class="hljs-string">&quot;中优先级&quot;</span>,
+                crate::entity::task::TaskPriority::Low =&gt; <span class="hljs-string">&quot;低优先级&quot;</span>,
+            },
+            task.info.cost
+        )
+    })
+    .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;()
+    .<span class="hljs-title function_ invoke__">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+<span class="hljs-keyword">let</span> <span class="hljs-variable">data</span> = json!({
+    <span class="hljs-string">&quot;model&quot;</span>: <span class="hljs-string">&quot;deepseek-chat&quot;</span>,
+    <span class="hljs-string">&quot;messages&quot;</span>: [
+        {
+            <span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;system&quot;</span>,
+            <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">r#&quot;你现在是一个时间规划大师，我将给你若干个任务，每个任务以&lt;begin&gt;开始&lt;end&gt;结束，每个任务包含多行信息，具体地，第一行为任务的名称，第二行为任务的截止时间，第三行为任务的优先级，第四行为任务的预计耗时。你需要为我安排一个时间规划方案。规划方案可以根据当前日期考虑其他外界因素。规划方案可以添加休息建议，注意劳逸结合。注意，你只需要给出规划方案和规划理由，其他的任何内容都不要回答。你的回答应简短&quot;#</span>
+        },
+        {
+            <span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,
+            <span class="hljs-string">&quot;content&quot;</span>: prompt
+        }
+    ],
+});
+</div></code></pre>
+<p>构造后提示词大概是这样：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JUU0JUJEJUEwJUU3JThFJUIwJUU1JTlDJUE4JUU2JTk4JUFGJUU0JUI4JTgwJUU0JUI4JUFBJUU2JTk3JUI2JUU5JTk3JUI0JUU4JUE3JTg0JUU1JTg4JTkyJUU1JUE0JUE3JUU1JUI4JTg4JUVGJUJDJThDJUU2JTg4JTkxJUU1JUIwJTg2JUU3JUJCJTk5JUU0JUJEJUEwJUU4JThCJUE1JUU1JUI5JUIyJUU0JUI4JUFBJUU0JUJCJUJCJUU1JThBJUExJUVGJUJDJThDJUU2JUFGJThGJUU0JUI4JUFBJUU0JUJCJUJCJUU1JThBJUExJUU0JUJCJUE1JTNDYmVnaW4lM0UlRTUlQkMlODAlRTUlQTclOEIlM0NlbmQlM0UlRTclQkIlOTMlRTYlOUQlOUYlRUYlQkMlOEMlRTYlQUYlOEYlRTQlQjglQUElRTQlQkIlQkIlRTUlOEElQTElRTUlOEMlODUlRTUlOTAlQUIlRTUlQTQlOUElRTglQTElOEMlRTQlQkYlQTElRTYlODElQUYlRUYlQkMlOEMlRTUlODUlQjclRTQlQkQlOTMlRTUlOUMlQjAlRUYlQkMlOEMlRTclQUMlQUMlRTQlQjglODAlRTglQTElOEMlRTQlQjglQkElRTQlQkIlQkIlRTUlOEElQTElRTclOUElODQlRTUlOTAlOEQlRTclQTclQjAlRUYlQkMlOEMlRTclQUMlQUMlRTQlQkElOEMlRTglQTElOEMlRTQlQjglQkElRTQlQkIlQkIlRTUlOEElQTElRTclOUElODQlRTYlODglQUElRTYlQUQlQTIlRTYlOTclQjYlRTklOTclQjQlRUYlQkMlOEMlRTclQUMlQUMlRTQlQjglODklRTglQTElOEMlRTQlQjglQkElRTQlQkIlQkIlRTUlOEElQTElRTclOUElODQlRTQlQkMlOTglRTUlODUlODglRTclQkElQTclRUYlQkMlOEMlRTclQUMlQUMlRTUlOUIlOUIlRTglQTElOEMlRTQlQjglQkElRTQlQkIlQkIlRTUlOEElQTElRTclOUElODQlRTklQTIlODQlRTglQUUlQTElRTglODAlOTclRTYlOTclQjYlRTMlODAlODIlRTQlQkQlQTAlRTklOUMlODAlRTglQTYlODElRTQlQjglQkElRTYlODglOTElRTUlQUUlODklRTYlOEUlOTIlRTQlQjglODAlRTQlQjglQUElRTYlOTclQjYlRTklOTclQjQlRTglQTclODQlRTUlODglOTIlRTYlOTYlQjklRTYlQTElODglRTMlODAlODIlRTglQTclODQlRTUlODglOTIlRTYlOTYlQjklRTYlQTElODglRTUlOEYlQUYlRTQlQkIlQTUlRTYlQTAlQjklRTYlOEQlQUUlRTUlQkQlOTMlRTUlODklOEQlRTYlOTclQTUlRTYlOUMlOUYlRTglODAlODMlRTglOTklOTElRTUlODUlQjYlRTQlQkIlOTYlRTUlQTQlOTYlRTclOTUlOEMlRTUlOUIlQTAlRTclQjQlQTAlRTMlODAlODIlRTglQTclODQlRTUlODglOTIlRTYlOTYlQjklRTYlQTElODglRTUlOEYlQUYlRTQlQkIlQTUlRTYlQjclQkIlRTUlOEElQTAlRTQlQkMlOTElRTYlODElQUYlRTUlQkIlQkElRTglQUUlQUUlRUYlQkMlOEMlRTYlQjMlQTglRTYlODQlOEYlRTUlOEElQjMlRTklODAlQjglRTclQkIlOTMlRTUlOTAlODglRTMlODAlODIlRTYlQjMlQTglRTYlODQlOEYlRUYlQkMlOEMlRTQlQkQlQTAlRTUlOEYlQUElRTklOUMlODAlRTglQTYlODElRTclQkIlOTklRTUlODclQkElRTglQTclODQlRTUlODglOTIlRTYlOTYlQjklRTYlQTElODglRTUlOTIlOEMlRTglQTclODQlRTUlODglOTIlRTclOTAlODYlRTclOTQlQjElRUYlQkMlOEMlRTUlODUlQjYlRTQlQkIlOTYlRTclOUElODQlRTQlQkIlQkIlRTQlQkQlOTUlRTUlODYlODUlRTUlQUUlQjklRTklODMlQkQlRTQlQjglOEQlRTglQTYlODElRTUlOUIlOUUlRTclQUQlOTQlRTMlODAlODIlRTQlQkQlQTAlRTclOUElODQlRTUlOUIlOUUlRTclQUQlOTQlRTUlQkElOTQlRTclQUUlODAlRTclOUYlQUQlMEElM0NzdGFydCUzRSUwQSVFNiVCNSU4QiVFOCVBRiU5NSVFNCVCQiVCQiVFNSU4QSVBMWFhYWElMEEyMDI1LTA1LTI1JTIwMTIlM0EzMCUwQSVFNCVCOCVBRCVFNCVCQyU5OCVFNSU4NSU4OCVFNyVCQSVBNyUwQTEwMCVFNSU4OCU4NiVFOSU5MiU5RiUwQSUzQ2VuZCUzRSUwQSUzQ3N0YXJ0JTNFJTBBJUU1JUIwJThGJUU3JUJCJTg0JUU0JUJCJUJCJUU1JThBJUExJTBBMjAyNS0wOC0wMSUyMDEyJTNBMDAlMEElRTklQUIlOTglRTQlQkMlOTglRTUlODUlODglRTclQkElQTclMEExMDAwMDAwMDAlRTUlODglODYlRTklOTIlOUYlMEElM0NlbmQlM0UlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div></div><div class="code">你现在是一个时间规划大师，我将给你若干个任务，每个任务以&lt;begin&gt;开始&lt;end&gt;结束，每个任务包含多行信息，具体地，第一行为任务的名称，第二行为任务的截止时间，第三行为任务的优先级，第四行为任务的预计耗时。你需要为我安排一个时间规划方案。规划方案可以根据当前日期考虑其他外界因素。规划方案可以添加休息建议，注意劳逸结合。注意，你只需要给出规划方案和规划理由，其他的任何内容都不要回答。你的回答应简短
+&lt;start&gt;
+测试任务aaaa
+2025-05-25 12:30
+中优先级
+100分钟
+&lt;end&gt;
+&lt;start&gt;
+小组任务
+2025-08-01 12:00
+高优先级
+100000000分钟
+&lt;end&gt;
+</div></code></pre>
+<p>根据其 api 文档：<a href="https://api-docs.deepseek.com/zh-cn/api/create-chat-completion%EF%BC%8C%E5%8F%91%E9%80%81%E8%AF%B7%E6%B1%82%E5%B9%B6%E8%A7%A3%E6%9E%90%EF%BC%9A">https://api-docs.deepseek.com/zh-cn/api/create-chat-completion，发送请求并解析：</a></p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTIzJTVCZGVyaXZlKERlc2VyaWFsaXplKSU1RCUwQXN0cnVjdCUyMERlZXBTZWVrUmVzcG9uc2UlMjAlN0IlMEElMjAlMjAlMjAlMjBwdWIlMjBpZCUzQSUyMFN0cmluZyUyQyUwQSUyMCUyMCUyMCUyMHB1YiUyMG9iamVjdCUzQSUyMFN0cmluZyUyQyUwQSUyMCUyMCUyMCUyMHB1YiUyMGNyZWF0ZWQlM0ElMjB1NjQlMkMlMEElMjAlMjAlMjAlMjBwdWIlMjBtb2RlbCUzQSUyMFN0cmluZyUyQyUwQSUyMCUyMCUyMCUyMHB1YiUyMGNob2ljZXMlM0ElMjBWZWMlM0NEZWVwU2Vla0Nob2ljZSUzRSUyQyUwQSU3RCUwQSUyMyU1QmRlcml2ZShEZXNlcmlhbGl6ZSklNUQlMEFzdHJ1Y3QlMjBEZWVwU2Vla0Nob2ljZSUyMCU3QiUwQSUyMCUyMCUyMCUyMHB1YiUyMGluZGV4JTNBJTIwdTMyJTJDJTBBJTIwJTIwJTIwJTIwcHViJTIwbWVzc2FnZSUzQSUyMERlZXBTZWVrTWVzc2FnZSUyQyUwQSUyMCUyMCUyMCUyMHB1YiUyMGZpbmlzaF9yZWFzb24lM0ElMjBTdHJpbmclMkMlMEElN0QlMEElMjMlNUJkZXJpdmUoRGVzZXJpYWxpemUpJTVEJTBBc3RydWN0JTIwRGVlcFNlZWtNZXNzYWdlJTIwJTdCJTBBJTIwJTIwJTIwJTIwcHViJTIwcm9sZSUzQSUyMFN0cmluZyUyQyUwQSUyMCUyMCUyMCUyMHB1YiUyMGNvbnRlbnQlM0ElMjBTdHJpbmclMkMlMEElN0QlMEFsZXQlMjBjbGllbnQlMjAlM0QlMjBnZXRfY2xpZW50KCkuYXdhaXQlM0IlMEFsZXQlMjByZXNwb25zZSUyMCUzRCUyMGNsaWVudCUwQSUyMCUyMCUyMCUyMC5wb3N0KCUyMmh0dHBzJTNBJTJGJTJGYXBpLmRlZXBzZWVrLmNvbSUyRmNoYXQlMkZjb21wbGV0aW9ucyUyMiklMEElMjAlMjAlMjAlMjAuanNvbiglMjZkYXRhKSUwQSUyMCUyMCUyMCUyMC5zZW5kKCklMEElMjAlMjAlMjAlMjAuYXdhaXQlM0YlM0IlMEFpZiUyMHJlc3BvbnNlLnN0YXR1cygpJTIwISUzRCUyMDIwMCUyMCU3QiUwQSUyMCUyMCUyMCUyMG1hdGNoJTIwcmVzcG9uc2Uuc3RhdHVzKCkuYXNfdTE2KCklMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjA0MDElMjAlM0QlM0UlMjByZXR1cm4lMjBPayglMjJEZWVwU2VlayUyMCVFNSVBRiU4NiVFOSU5MiVBNSVFOSU5NCU5OSVFOCVBRiVBRiVFRiVCQyU4QyVFOCVBRiVCNyVFOCU4MSU5NCVFNyVCMyVCQiVFNyVBRSVBMSVFNyU5MCU4NiVFNSU5MSU5OCVFOCVBNyVBMyVFNSU4NiVCMyUyMi50b19zdHJpbmcoKSklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjA0MDIlMjAlM0QlM0UlMjByZXR1cm4lMjBPayglMjJEZWVwU2VlayUyMCVFOSVBMiU5RCVFNSVCQSVBNiVFNCVCOCU4RCVFOCVCNiVCMyVFRiVCQyU4QyVFOCVBRiVCNyVFOCU4MSU5NCVFNyVCMyVCQiVFNyVBRSVBMSVFNyU5MCU4NiVFNSU5MSU5OCVFOCVBNyVBMyVFNSU4NiVCMyUyMi50b19zdHJpbmcoKSklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjA0MjklMjAlM0QlM0UlMjByZXR1cm4lMjBPayglMjJEZWVwU2VlayUyMCVFOCVBRiVCNyVFNiVCMSU4MiVFOCVCRiU4NyVFNCVCQSU4RSVFOSVBMiU5MSVFNyVCOSU4MSVFRiVCQyU4QyVFOCVBRiVCNyVFNyVBOCU4RCVFNSU5MCU4RSVFNSU4NiU4RCVFOCVBRiU5NSUyMi50b19zdHJpbmcoKSklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjA1MDAlMjAlM0QlM0UlMjByZXR1cm4lMjBPayglMjJEZWVwU2VlayUyMCVFNiU5QyU4RCVFNSU4QSVBMSVFNSU5OSVBOCVFOSU5NCU5OSVFOCVBRiVBRiVFRiVCQyU4QyVFOCVBRiVCNyVFNyVBOCU4RCVFNSU5MCU4RSVFNSU4NiU4RCVFOCVBRiU5NSUyMi50b19zdHJpbmcoKSklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjA1MDMlMjAlM0QlM0UlMjByZXR1cm4lMjBPayglMjJEZWVwU2VlayUyMCVFNiU5QyU4RCVFNSU4QSVBMSVFNSU5OSVBOCVFNyVCOSU4MSVFNSVCRiU5OSVFRiVCQyU4QyVFOCVBRiVCNyVFNyVBOCU4RCVFNSU5MCU4RSVFNSU4NiU4RCVFOCVBRiU5NSUyMi50b19zdHJpbmcoKSklMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBfJTIwJTNEJTNFJTIwcmV0dXJuJTIwT2soZm9ybWF0ISglMjIlRTglQUYlQjclRTYlQjElODIlMjBEZWVwU2VlayUyMCVFNSVBNCVCMSVFOCVCNCVBNSVFRiVCQyU4QyVFOSU5NCU5OSVFOCVBRiVBRiVFNyVBMCU4MSVFRiVCQyU5QSU3QiU3RCUyMiUyQyUyMHJlc3BvbnNlLnN0YXR1cygpKSklMkMlMEElMjAlMjAlMjAlMjAlN0QlMEElN0QlMEFsZXQlMjByZXNwb25zZSUyMCUzRCUyMHJlc3BvbnNlLmpzb24lM0ElM0ElM0NEZWVwU2Vla1Jlc3BvbnNlJTNFKCkuYXdhaXQlM0YlM0IlMEFPayhyZXNwb25zZSUwQSUyMCUyMCUyMCUyMC5jaG9pY2VzJTBBJTIwJTIwJTIwJTIwLmdldCgwKSUwQSUyMCUyMCUyMCUyMC5va19vcihhbnlob3chKCUyMkRlZXBTZWVrJTIwJUU4JUJGJTk0JUU1JTlCJTlFJUU3JUE5JUJBJUU1JTkzJThEJUU1JUJBJTk0JUVGJUJDJTgxJTIyKSklM0YlMEElMjAlMjAlMjAlMjAubWVzc2FnZSUwQSUyMCUyMCUyMCUyMC5jb250ZW50JTBBJTIwJTIwJTIwJTIwLmNsb25lKCkpJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div></div><div class="code"><span class="hljs-meta">#[derive(Deserialize)]</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">DeepSeekResponse</span> {
+    <span class="hljs-keyword">pub</span> id: <span class="hljs-type">String</span>,
+    <span class="hljs-keyword">pub</span> object: <span class="hljs-type">String</span>,
+    <span class="hljs-keyword">pub</span> created: <span class="hljs-type">u64</span>,
+    <span class="hljs-keyword">pub</span> model: <span class="hljs-type">String</span>,
+    <span class="hljs-keyword">pub</span> choices: <span class="hljs-type">Vec</span>&lt;DeepSeekChoice&gt;,
+}
+<span class="hljs-meta">#[derive(Deserialize)]</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">DeepSeekChoice</span> {
+    <span class="hljs-keyword">pub</span> index: <span class="hljs-type">u32</span>,
+    <span class="hljs-keyword">pub</span> message: DeepSeekMessage,
+    <span class="hljs-keyword">pub</span> finish_reason: <span class="hljs-type">String</span>,
+}
+<span class="hljs-meta">#[derive(Deserialize)]</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">DeepSeekMessage</span> {
+    <span class="hljs-keyword">pub</span> role: <span class="hljs-type">String</span>,
+    <span class="hljs-keyword">pub</span> content: <span class="hljs-type">String</span>,
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">client</span> = <span class="hljs-title function_ invoke__">get_client</span>().<span class="hljs-keyword">await</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">response</span> = client
+    .<span class="hljs-title function_ invoke__">post</span>(<span class="hljs-string">&quot;https://api.deepseek.com/chat/completions&quot;</span>)
+    .<span class="hljs-title function_ invoke__">json</span>(&amp;data)
+    .<span class="hljs-title function_ invoke__">send</span>()
+    .<span class="hljs-keyword">await</span>?;
+<span class="hljs-keyword">if</span> response.<span class="hljs-title function_ invoke__">status</span>() != <span class="hljs-number">200</span> {
+    <span class="hljs-keyword">match</span> response.<span class="hljs-title function_ invoke__">status</span>().<span class="hljs-title function_ invoke__">as_u16</span>() {
+        <span class="hljs-number">401</span> =&gt; <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-string">&quot;DeepSeek 密钥错误，请联系管理员解决&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>()),
+        <span class="hljs-number">402</span> =&gt; <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-string">&quot;DeepSeek 额度不足，请联系管理员解决&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>()),
+        <span class="hljs-number">429</span> =&gt; <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-string">&quot;DeepSeek 请求过于频繁，请稍后再试&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>()),
+        <span class="hljs-number">500</span> =&gt; <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-string">&quot;DeepSeek 服务器错误，请稍后再试&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>()),
+        <span class="hljs-number">503</span> =&gt; <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-string">&quot;DeepSeek 服务器繁忙，请稍后再试&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>()),
+        _ =&gt; <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Ok</span>(<span class="hljs-built_in">format!</span>(<span class="hljs-string">&quot;请求 DeepSeek 失败，错误码：{}&quot;</span>, response.<span class="hljs-title function_ invoke__">status</span>())),
+    }
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">response</span> = response.json::&lt;DeepSeekResponse&gt;().<span class="hljs-keyword">await</span>?;
+<span class="hljs-title function_ invoke__">Ok</span>(response
+    .choices
+    .<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-number">0</span>)
+    .<span class="hljs-title function_ invoke__">ok_or</span>(anyhow!(<span class="hljs-string">&quot;DeepSeek 返回空响应！&quot;</span>))?
+    .message
+    .content
+    .<span class="hljs-title function_ invoke__">clone</span>())
+</div></code></pre>
+<p>由于大模型的生成比较慢，我们会先把大模型的响应放到数据库中缓存，每次获取时间安排方案的时候直接从数据库里获取。如果当前参加的任务有变动，则需要用户手动更新。
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/05/28/6836f97897bde.png" style="transform: scale(1)" width=2331 height=1325><div class="img-title">image-20250523212242078</div></div>
+大模型生成的内容是 markdown 格式的，为了在前端很好地呈现，我们使用 markdown-it 来渲染 markdown，并采用 github 的 markdown 主题。
+我们平常使用的大模型都采用了 SSE（服务端推送）的技术。这个技术可以做到大模型生成了什么就先返回什么，不必等到完全生成。由于大模型生成速度比较慢，目前的实现中，用户在手动更新后会有一个较长的等待时间，不太友好。理论上采用 SSE 的话会有更好的用户体验，但由于时间原因，我们没有做这一点。</p>

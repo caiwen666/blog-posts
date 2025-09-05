@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"target": "ESNext", // 编译目标（可根据需求调整，如 ES2020）
+		"module": "ESNext", // 模块系统（ESNext 适合现代工具链）
+		"outDir": "./dist", // 编译输出目录
+		"strict": true, // 启用所有严格类型检查选项
+		"esModuleInterop": true, // 允许 CommonJS/ES Module 互操作
+		"skipLibCheck": true, // 跳过库文件的类型检查（提升速度）
+		"moduleResolution": "bundler",
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": ["./src/**/*"], // 包含 src 目录下的所有文件
+	"exclude": ["node_modules"] // 排除 node_modules
+}

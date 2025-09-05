@@ -1,0 +1,1097 @@
+<p>在最开始接触typescript的时候，很多地方感觉非常麻烦，或者不知道如何处理，直接any了事。后来在豆瓣上发现了 <em>Effective Typescript</em> 这本书，看评价说还不错，于是就搞了本看了看，大概不到一周就看完了，感觉收获很多，非常值得推荐。这里记录一下读书笔记。
+本书由 62 个 item 组成，每个 item 的最后有一个 Things to remember，可以视为一个总结。</p>
+<h2 id="ts-he-js-de-guan-xi" tabindex="-1">ts 和 js 的关系</h2>
+<ul>
+<li>ts 是 js 的超集</li>
+</ul>
+<h2 id="pei-zhi-ts" tabindex="-1">配置 ts</h2>
+<ul>
+<li>从 tsconfig.json 中配置 ts 而不是在命令行中</li>
+<li>尽可能把所有严格的检查打开，尤其是 noImplicitAny 和 strickNullChecks</li>
+<li>开启 noEmitOnError 来阻止没通过类型检查的代码产生编译结果</li>
+<li>开启 sourceMap 来使得在浏览器中 debug 时可以看到原始的 ts 代码</li>
+</ul>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTIwdHNjb25maWcuanNvbiUwQSU3QiUwQSUyMCUyMmNvbXBpbGVyT3B0aW9ucyUyMiUzQSUyMCU3QiUwQSUyMCUyMnNvdXJjZU1hcCUyMiUzQSUyMHRydWUlMEElMjAlN0QlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-comment">// tsconfig.json</span>
+{
+ <span class="hljs-string">&quot;compilerOptions&quot;</span>: {
+ <span class="hljs-string">&quot;sourceMap&quot;</span>: <span class="hljs-literal">true</span>
+ }
+}
+</div></code></pre>
+<h2 id="lei-xing" tabindex="-1">类型</h2>
+<h3 id="dai-ma-de-sheng-cheng-he-lei-xing-shi-du-li-de" tabindex="-1">代码的生成和类型是独立的</h3>
+<p>基本的思想是，ts 中的类型仅仅是影响你在编写代码的时候，而对于代码的执行是不会有影响的，在编译后，所有与类型相关的东西都会被移除。这会有如下的影响：</p>
+<ul>
+<li>没有通过类型检查的ts代码也会产生编译后的js代码。可以在 tsconfig.json 中开启 noEmitOnError 来阻止没通过类型检查的代码产生编译结果</li>
+<li>由于在编译后，所有与类型相关的东西都会被移除，这会导致比如你定义了个 interface，然后你不能使用 instanceof 来判断一个变量的类型是不是这个 interface，因为 interface 在代码编译后会被清除</li>
+<li>你在 ts 中的类型操作并不会影响到变量的值。比如有一个 string 类型的变量 <code>a</code> ，然后你进行了这么一个操作 <code>const b = a as number</code>。虽然后面 ts 仍然会推断 <code>b</code> 为一个 number ，但实际在运行过程中， <code>b</code> 仍然是一个 string。</li>
+<li>在运行的时候的类型不一定和代码中声明的类型相同</li>
+<li>ts 的类型相当于一种零成本抽象，不会使代码有任何的性能影响。</li>
+</ul>
+<h3 id="type-space-he-value-space" tabindex="-1">type space 和 value space</h3>
+<p>ts 中的标识符存在于两个地方： type space 和 value space
+type space 中的东西会在运行时消失
+interface 就是处于 type space 中，这就导致你不能使用 instanceof 来判断一个变量是否为某个 interface 类型
+字面量既可以是 type space 也可以是 value space，如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMFQxJTIwJTNEJTIwJTIyc3RyaW5nJTIwbGl0ZXJhbCUyMiUzQiUwQXR5cGUlMjBUMiUyMCUzRCUyMDEyMyUzQiUwQWNvbnN0JTIwdjElMjAlM0QlMjAlMjJzdHJpbmclMjBsaXRlcmFsJTIyJTNCJTBBY29uc3QlMjB2MiUyMCUzRCUyMDEyMyUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-variable constant_">T1</span> = <span class="hljs-string">&quot;string literal&quot;</span>;
+<span class="hljs-keyword">type</span> <span class="hljs-variable constant_">T2</span> = <span class="hljs-number">123</span>;
+<span class="hljs-keyword">const</span> v1 = <span class="hljs-string">&quot;string literal&quot;</span>;
+<span class="hljs-keyword">const</span> v2 = <span class="hljs-number">123</span>;
+</div></code></pre>
+<p>class 处于这两个 space 中，既可以用作类型也可以作为一个值（这就是为什么可以使用 instanceof）
+typeof 的运算符在不同的 space 中有不同的作用：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMFQxJTIwJTNEJTIwdHlwZW9mJTIwcCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMFBlcnNvbiUwQXR5cGUlMjBUMiUyMCUzRCUyMHR5cGVvZiUyMGVtYWlsJTNCJTBBJTJGJTJGJTIwVHlwZSUyMGlzJTIwKHAlM0ElMjBQZXJzb24lMkMlMjBzdWJqZWN0JTNBJTIwc3RyaW5nJTJDJTIwYm9keSUzQSUyMHN0cmluZyklMjAlM0QlM0UlMjBSZXNwb25zZSUwQWNvbnN0JTIwdjElMjAlM0QlMjB0eXBlb2YlMjBwJTNCJTIwJTJGJTJGJTIwVmFsdWUlMjBpcyUyMCUyMm9iamVjdCUyMiUwQWNvbnN0JTIwdjIlMjAlM0QlMjB0eXBlb2YlMjBlbWFpbCUzQiUyMCUyRiUyRiUyMFZhbHVlJTIwaXMlMjAlMjJmdW5jdGlvbiUyMiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-variable constant_">T1</span> = <span class="hljs-keyword">typeof</span> p; <span class="hljs-comment">// Type is Person</span>
+<span class="hljs-keyword">type</span> <span class="hljs-variable constant_">T2</span> = <span class="hljs-keyword">typeof</span> email;
+<span class="hljs-comment">// Type is (p: Person, subject: string, body: string) =&gt; Response</span>
+<span class="hljs-keyword">const</span> v1 = <span class="hljs-keyword">typeof</span> p; <span class="hljs-comment">// Value is &quot;object&quot;</span>
+<span class="hljs-keyword">const</span> v2 = <span class="hljs-keyword">typeof</span> email; <span class="hljs-comment">// Value is &quot;function&quot;</span>
+</div></code></pre>
+<p>如果我们有一个名为 <code>Cylinder</code> 的 class，则有：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjB2JTIwJTNEJTIwdHlwZW9mJTIwQ3lsaW5kZXIlM0IlMjAlMkYlMkYlMjBWYWx1ZSUyMGlzJTIwJTIyZnVuY3Rpb24lMjIlMEF0eXBlJTIwVCUyMCUzRCUyMHR5cGVvZiUyMEN5bGluZGVyJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwdHlwZW9mJTIwQ3lsaW5kZXIlMEF0eXBlJTIwQyUyMCUzRCUyMEluc3RhbmNlVHlwZSUzQ3R5cGVvZiUyMEN5bGluZGVyJTNFJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwQ3lsaW5kZXIlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">const</span> v = <span class="hljs-keyword">typeof</span> <span class="hljs-title class_">Cylinder</span>; <span class="hljs-comment">// Value is &quot;function&quot;</span>
+<span class="hljs-keyword">type</span> T = <span class="hljs-keyword">typeof</span> <span class="hljs-title class_">Cylinder</span>; <span class="hljs-comment">// Type is typeof Cylinder</span>
+<span class="hljs-keyword">type</span> C = <span class="hljs-title class_">InstanceType</span>&lt;<span class="hljs-keyword">typeof</span> <span class="hljs-title class_">Cylinder</span>&gt;; <span class="hljs-comment">// Type is Cylinder</span>
+</div></code></pre>
+<h3 id="yun-hang-shi-lei-xing-pan-duan" tabindex="-1">运行时类型判断</h3>
+<p>如果你确实想在运行时判断类型，你可以有如下两个方式：</p>
+<ul>
+<li>判断某个特定的属性是否存在
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/28/679882395f50b.png" style="transform: scale(1)" width=562 height=120></div></li>
+<li>在 interface 上搞一个用于标记类型的属性
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/28/679882ec4113c.png" style="transform: scale(1)" width=373 height=162></div>
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/28/6798831e2021a.png" style="transform: scale(1)" width=573 height=140></div></li>
+<li>使用 class ，然后你就可以使用 instanceof 了</li>
+</ul>
+<h3 id="han-shu-zhong-zai" tabindex="-1">函数重载</h3>
+<p>在 ts 中你不能像 java 那样搞函数重载，比如：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/28/679887303634b.png" style="transform: scale(1)" width=854 height=182></div>
+一个函数只能有一个具体的实现
+你需要以这样的形式实现函数重载：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/28/6798877c48466.png" style="transform: scale(1)" width=943 height=348></div>
+但还是有一些不足，如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBkb3VibGUoeCUzQSUyMG51bWJlciklM0ElMjBudW1iZXIlM0IlMEFmdW5jdGlvbiUyMGRvdWJsZSh4JTNBJTIwc3RyaW5nKSUzQSUyMHN0cmluZyUzQiUwQWZ1bmN0aW9uJTIwZG91YmxlKHglM0ElMjBhbnkpJTIwJTdCJTBBJTA5cmV0dXJuJTIweCUyMCUyQiUyMHglM0IlMEElN0QlMEFjb25zdCUyMG51bSUyMCUzRCUyMGRvdWJsZSgxMiklM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBudW1iZXIlMEFjb25zdCUyMHN0ciUyMCUzRCUyMGRvdWJsZSglMjJ4JTIyKSUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMHN0cmluZyUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params"><span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-built_in">number</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params"><span class="hljs-attr">x</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">string</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params"><span class="hljs-attr">x</span>: <span class="hljs-built_in">any</span></span>) {
+	<span class="hljs-keyword">return</span> x + x;
+}
+<span class="hljs-keyword">const</span> num = <span class="hljs-title function_">double</span>(<span class="hljs-number">12</span>); <span class="hljs-comment">// Type is number</span>
+<span class="hljs-keyword">const</span> str = <span class="hljs-title function_">double</span>(<span class="hljs-string">&quot;x&quot;</span>); <span class="hljs-comment">// Type is string</span>
+</div></code></pre>
+<p>如果再搞一个函数包装一下，可能出现问题：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBmKHglM0ElMjBudW1iZXIlMjAlN0MlMjBzdHJpbmcpJTIwJTdCJTBBJTA5cmV0dXJuJTIwZG91YmxlKHgpJTNCJTBBJTA5JTJGJTJGJTIwfiUyMEFyZ3VtZW50JTIwb2YlMjB0eXBlJTIwJ3N0cmluZyUyMCU3QyUyMG51bWJlciclMjBpcyUyMG5vdCUyMGFzc2lnbmFibGUlMEElMDklMkYlMkYlMjB0byUyMHBhcmFtZXRlciUyMG9mJTIwdHlwZSUyMCdzdHJpbmcnJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"><span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span> | <span class="hljs-built_in">string</span></span>) {
+	<span class="hljs-keyword">return</span> <span class="hljs-title function_">double</span>(x);
+	<span class="hljs-comment">// ~ Argument of type &#x27;string | number&#x27; is not assignable</span>
+	<span class="hljs-comment">// to parameter of type &#x27;string&#x27;</span>
+}
+</div></code></pre>
+<h4 id="conditional-type" tabindex="-1">conditional type</h4>
+<p>更好的解决方案是使用 conditional type</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBkb3VibGUlM0NUJTIwZXh0ZW5kcyUyMG51bWJlciUyMCU3QyUyMHN0cmluZyUzRSglMEElMDl4JTNBJTIwVCUyQyUwQSklM0ElMjBUJTIwZXh0ZW5kcyUyMHN0cmluZyUyMCUzRiUyMHN0cmluZyUyMCUzQSUyMG51bWJlciUzQiUwQWZ1bmN0aW9uJTIwZG91YmxlKHglM0ElMjBhbnkpJTIwJTdCJTBBJTA5cmV0dXJuJTIweCUyMCUyQiUyMHglM0IlMEElN0QlMEElMkYlMkYlMjBmdW5jdGlvbiUyMGYoeCUzQSUyMHN0cmluZyUyMCU3QyUyMG51bWJlciklM0ElMjBzdHJpbmclMjAlN0MlMjBudW1iZXIlMEFmdW5jdGlvbiUyMGYoeCUzQSUyMG51bWJlciUyMCU3QyUyMHN0cmluZyklMjAlN0IlMEElMDlyZXR1cm4lMjBkb3VibGUoeCklM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-keyword">function</span> double&lt;T <span class="hljs-keyword">extends</span> <span class="hljs-built_in">number</span> | <span class="hljs-built_in">string</span>&gt;(
+	<span class="hljs-attr">x</span>: T,
+): T <span class="hljs-keyword">extends</span> <span class="hljs-built_in">string</span> ? <span class="hljs-built_in">string</span> : <span class="hljs-built_in">number</span>;
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">double</span>(<span class="hljs-params"><span class="hljs-attr">x</span>: <span class="hljs-built_in">any</span></span>) {
+	<span class="hljs-keyword">return</span> x + x;
+}
+<span class="hljs-comment">// function f(x: string | number): string | number</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"><span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span> | <span class="hljs-built_in">string</span></span>) {
+	<span class="hljs-keyword">return</span> <span class="hljs-title function_">double</span>(x);
+}
+</div></code></pre>
+<h3 id="ji-he-jiao-du" tabindex="-1">集合角度</h3>
+<p>你可以把 ts 中的类型看成集合。如果所有是 A 类型 是 B 类型 的子集，那么是 A 类型的值也是 B 类型。你可以将其与鸭子类型结合起来看</p>
+<h3 id="ya-zi-lei-xing" tabindex="-1">鸭子类型</h3>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwVmVjdG9yMkQlMjAlN0IlMEElMDl4JTNBJTIwbnVtYmVyJTNCJTBBJTA5eSUzQSUyMG51bWJlciUzQiUwQSU3RCUwQWZ1bmN0aW9uJTIwY2FsY3VsYXRlTGVuZ3RoKHYlM0ElMjBWZWN0b3IyRCklMjAlN0IlMEElMDlyZXR1cm4lMjBNYXRoLnNxcnQodi54JTIwKiUyMHYueCUyMCUyQiUyMHYueSUyMColMjB2LnkpJTNCJTBBJTdEJTBBY29uc3QlMjB2JTNBJTIwTmFtZWRWZWN0b3IlMjAlM0QlMjAlN0IlMjB4JTNBJTIwMyUyQyUyMHklM0ElMjA0JTJDJTIwbmFtZSUzQSUyMCUyMlplZSUyMiUyMCU3RCUzQiUwQWNhbGN1bGF0ZUxlbmd0aCh2KSUzQiUyMCUyRiUyRiUyME9LJTJDJTIwcmVzdWx0JTIwaXMlMjA1JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Vector2D</span> {
+	<span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">y</span>: <span class="hljs-built_in">number</span>;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">calculateLength</span>(<span class="hljs-params"><span class="hljs-attr">v</span>: <span class="hljs-title class_">Vector2D</span></span>) {
+	<span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(v.<span class="hljs-property">x</span> * v.<span class="hljs-property">x</span> + v.<span class="hljs-property">y</span> * v.<span class="hljs-property">y</span>);
+}
+<span class="hljs-keyword">const</span> <span class="hljs-attr">v</span>: <span class="hljs-title class_">NamedVector</span> = { <span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">4</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Zee&quot;</span> };
+<span class="hljs-title function_">calculateLength</span>(v); <span class="hljs-comment">// OK, result is 5</span>
+</div></code></pre>
+<p>可以看到，只要满足了目标类型的特征，那么就可以视为目标类型。
+class 也不例外</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y2xhc3MlMjBDJTIwJTdCJTBBJTA5Zm9vJTNBJTIwc3RyaW5nJTNCJTBBJTA5Y29uc3RydWN0b3IoZm9vJTNBJTIwc3RyaW5nKSUyMCU3QiUwQSUwOSUwOXRoaXMuZm9vJTIwJTNEJTIwZm9vJTNCJTBBJTA5JTdEJTBBJTdEJTBBY29uc3QlMjBjJTIwJTNEJTIwbmV3JTIwQyglMjJpbnN0YW5jZSUyMG9mJTIwQyUyMiklM0IlMEFjb25zdCUyMGQlM0ElMjBDJTIwJTNEJTIwJTdCJTIwZm9vJTNBJTIwJTIyb2JqZWN0JTIwbGl0ZXJhbCUyMiUyMCU3RCUzQiUyMCUyRiUyRiUyME9LISUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">class</span> <span class="hljs-title class_">C</span> {
+	<span class="hljs-attr">foo</span>: <span class="hljs-built_in">string</span>;
+	<span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-attr">foo</span>: <span class="hljs-built_in">string</span></span>) {
+		<span class="hljs-variable language_">this</span>.<span class="hljs-property">foo</span> = foo;
+	}
+}
+<span class="hljs-keyword">const</span> c = <span class="hljs-keyword">new</span> <span class="hljs-title function_">C</span>(<span class="hljs-string">&quot;instance of C&quot;</span>);
+<span class="hljs-keyword">const</span> <span class="hljs-attr">d</span>: C = { <span class="hljs-attr">foo</span>: <span class="hljs-string">&quot;object literal&quot;</span> }; <span class="hljs-comment">// OK!</span>
+</div></code></pre>
+<p>你可以利用这一点进行单元测试，比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwQXV0aG9yJTIwJTdCJTBBJTA5Zmlyc3QlM0ElMjBzdHJpbmclM0IlMEElMDlsYXN0JTNBJTIwc3RyaW5nJTNCJTBBJTdEJTBBZnVuY3Rpb24lMjBnZXRBdXRob3JzKGRhdGFiYXNlJTNBJTIwUG9zdGdyZXNEQiklM0ElMjBBdXRob3IlNUIlNUQlMjAlN0IlMEElMDljb25zdCUyMGF1dGhvclJvd3MlMjAlM0QlMjBkYXRhYmFzZS5ydW5RdWVyeSglNjBTRUxFQ1QlMjBGSVJTVCUyQyUyMExBU1QlMjBGUk9NJTIwQVVUSE9SUyU2MCklM0IlMEElMDlyZXR1cm4lMjBhdXRob3JSb3dzLm1hcCgocm93KSUyMCUzRCUzRSUyMCglN0IlMjBmaXJzdCUzQSUyMHJvdyU1QjAlNUQlMkMlMjBsYXN0JTNBJTIwcm93JTVCMSU1RCUyMCU3RCkpJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Author</span> {
+	<span class="hljs-attr">first</span>: <span class="hljs-built_in">string</span>;
+	<span class="hljs-attr">last</span>: <span class="hljs-built_in">string</span>;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getAuthors</span>(<span class="hljs-params"><span class="hljs-attr">database</span>: <span class="hljs-title class_">PostgresDB</span></span>): <span class="hljs-title class_">Author</span>[] {
+	<span class="hljs-keyword">const</span> authorRows = database.<span class="hljs-title function_">runQuery</span>(<span class="hljs-string">`SELECT FIRST, LAST FROM AUTHORS`</span>);
+	<span class="hljs-keyword">return</span> authorRows.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> ({ <span class="hljs-attr">first</span>: row[<span class="hljs-number">0</span>], <span class="hljs-attr">last</span>: row[<span class="hljs-number">1</span>] }));
+}
+</div></code></pre>
+<p>你可以把 database 的类型搞得更精确一些：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwREIlMjAlN0IlMEElMDlydW5RdWVyeSUzQSUyMChzcWwlM0ElMjBzdHJpbmcpJTIwJTNEJTNFJTIwYW55JTVCJTVEJTNCJTBBJTdEJTBBZnVuY3Rpb24lMjBnZXRBdXRob3JzKGRhdGFiYXNlJTNBJTIwREIpJTNBJTIwQXV0aG9yJTVCJTVEJTIwJTdCJTBBJTA5Y29uc3QlMjBhdXRob3JSb3dzJTIwJTNEJTIwZGF0YWJhc2UucnVuUXVlcnkoJTYwU0VMRUNUJTIwRklSU1QlMkMlMjBMQVNUJTIwRlJPTSUyMEFVVEhPUlMlNjApJTNCJTBBJTA5cmV0dXJuJTIwYXV0aG9yUm93cy5tYXAoKHJvdyklMjAlM0QlM0UlMjAoJTdCJTIwZmlyc3QlM0ElMjByb3clNUIwJTVEJTJDJTIwbGFzdCUzQSUyMHJvdyU1QjElNUQlMjAlN0QpKSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">interface</span> DB {
+	<span class="hljs-attr">runQuery</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">sql</span>: <span class="hljs-built_in">string</span></span>) =&gt;</span> <span class="hljs-built_in">any</span>[];
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getAuthors</span>(<span class="hljs-params"><span class="hljs-attr">database</span>: DB</span>): <span class="hljs-title class_">Author</span>[] {
+	<span class="hljs-keyword">const</span> authorRows = database.<span class="hljs-title function_">runQuery</span>(<span class="hljs-string">`SELECT FIRST, LAST FROM AUTHORS`</span>);
+	<span class="hljs-keyword">return</span> authorRows.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">row</span>) =&gt;</span> ({ <span class="hljs-attr">first</span>: row[<span class="hljs-number">0</span>], <span class="hljs-attr">last</span>: row[<span class="hljs-number">1</span>] }));
+}
+</div></code></pre>
+<p>代码仍然和上面一样可以正常工作， 但是这回你可以自己编写一个简单的 DB 类型的一个东西，来模拟数据库，从而测试这个函数。</p>
+<h3 id="gui-bi-ya-zi-lei-xing" tabindex="-1">规避鸭子类型</h3>
+<p>类似运行时类型判断，你可以搞一个标记属性</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwVmVjdG9yMkQlMjAlN0IlMEElMDlfYnJhbmQlM0ElMjAlMjIyZCUyMiUzQiUwQSUwOXglM0ElMjBudW1iZXIlM0IlMEElMDl5JTNBJTIwbnVtYmVyJTNCJTBBJTdEJTBBZnVuY3Rpb24lMjB2ZWMyRCh4JTNBJTIwbnVtYmVyJTJDJTIweSUzQSUyMG51bWJlciklM0ElMjBWZWN0b3IyRCUyMCU3QiUwQSUwOXJldHVybiUyMCU3QiUyMHglMkMlMjB5JTJDJTIwX2JyYW5kJTNBJTIwJTIyMmQlMjIlMjAlN0QlM0IlMEElN0QlMEFmdW5jdGlvbiUyMGNhbGN1bGF0ZU5vcm0ocCUzQSUyMFZlY3RvcjJEKSUyMCU3QiUwQSUwOXJldHVybiUyME1hdGguc3FydChwLnglMjAqJTIwcC54JTIwJTJCJTIwcC55JTIwKiUyMHAueSklM0IlMjAlMkYlMkYlMjBTYW1lJTIwYXMlMjBiZWZvcmUlMEElN0QlMEFjYWxjdWxhdGVOb3JtKHZlYzJEKDMlMkMlMjA0KSklM0IlMjAlMkYlMkYlMjBPSyUyQyUyMHJldHVybnMlMjA1JTBBY29uc3QlMjB2ZWMzRCUyMCUzRCUyMCU3QiUyMHglM0ElMjAzJTJDJTIweSUzQSUyMDQlMkMlMjB6JTNBJTIwMSUyMCU3RCUzQiUwQWNhbGN1bGF0ZU5vcm0odmVjM0QpJTNCJTBBJTJGJTJGJTIwfn5+fn4lMjBQcm9wZXJ0eSUyMCdfYnJhbmQnJTIwaXMlMjBtaXNzaW5nJTIwaW4lMjB0eXBlLi4uJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Vector2D</span> {
+	<span class="hljs-attr">_brand</span>: <span class="hljs-string">&quot;2d&quot;</span>;
+	<span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">y</span>: <span class="hljs-built_in">number</span>;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">vec2D</span>(<span class="hljs-params"><span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">y</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-title class_">Vector2D</span> {
+	<span class="hljs-keyword">return</span> { x, y, <span class="hljs-attr">_brand</span>: <span class="hljs-string">&quot;2d&quot;</span> };
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">calculateNorm</span>(<span class="hljs-params"><span class="hljs-attr">p</span>: <span class="hljs-title class_">Vector2D</span></span>) {
+	<span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">sqrt</span>(p.<span class="hljs-property">x</span> * p.<span class="hljs-property">x</span> + p.<span class="hljs-property">y</span> * p.<span class="hljs-property">y</span>); <span class="hljs-comment">// Same as before</span>
+}
+<span class="hljs-title function_">calculateNorm</span>(<span class="hljs-title function_">vec2D</span>(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>)); <span class="hljs-comment">// OK, returns 5</span>
+<span class="hljs-keyword">const</span> vec3D = { <span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">4</span>, <span class="hljs-attr">z</span>: <span class="hljs-number">1</span> };
+<span class="hljs-title function_">calculateNorm</span>(vec3D);
+<span class="hljs-comment">// ~~~~~ Property &#x27;_brand&#x27; is missing in type...</span>
+</div></code></pre>
+<p>对于一些基本的数据类型，比如 string ， number，这么附带一个标记属性就不太好搞了，当然你可以在创建一个 interface，但是这样就比较臃肿了，你还可以这样：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMEFic29sdXRlUGF0aCUyMCUzRCUyMHN0cmluZyUyMCUyNiUyMCU3QiUyMF9icmFuZCUzQSUyMCUyMmFicyUyMiUyMCU3RCUzQiUwQWZ1bmN0aW9uJTIwbGlzdEFic29sdXRlUGF0aChwYXRoJTNBJTIwQWJzb2x1dGVQYXRoKSUyMCU3QiUwQSUwOSUyRiUyRiUyMC4uLiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">AbsolutePath</span> = <span class="hljs-built_in">string</span> &amp; { <span class="hljs-attr">_brand</span>: <span class="hljs-string">&quot;abs&quot;</span> };
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">listAbsolutePath</span>(<span class="hljs-params"><span class="hljs-attr">path</span>: <span class="hljs-title class_">AbsolutePath</span></span>) {
+	<span class="hljs-comment">// ...</span>
+}
+</div></code></pre>
+<p>然后可以结合 type guard</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBpc0Fic29sdXRlUGF0aChwYXRoJTNBJTIwc3RyaW5nKSUzQSUyMHBhdGglMjBpcyUyMEFic29sdXRlUGF0aCUyMCU3QiUwQSUwOXJldHVybiUyMHBhdGguc3RhcnRzV2l0aCglMjIlMkYlMjIpJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isAbsolutePath</span>(<span class="hljs-params"><span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span></span>): path is <span class="hljs-title class_">AbsolutePath</span> {
+	<span class="hljs-keyword">return</span> path.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;/&quot;</span>);
+}
+</div></code></pre>
+<p>或者像下面这样再搞一个函数去生成这样的类型：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyME1ldGVycyUyMCUzRCUyMG51bWJlciUyMCUyNiUyMCU3QiUyMF9icmFuZCUzQSUyMCUyMm1ldGVycyUyMiUyMCU3RCUzQiUwQXR5cGUlMjBTZWNvbmRzJTIwJTNEJTIwbnVtYmVyJTIwJTI2JTIwJTdCJTIwX2JyYW5kJTNBJTIwJTIyc2Vjb25kcyUyMiUyMCU3RCUzQiUwQWNvbnN0JTIwbWV0ZXJzJTIwJTNEJTIwKG0lM0ElMjBudW1iZXIpJTIwJTNEJTNFJTIwbSUyMGFzJTIwTWV0ZXJzJTNCJTBBY29uc3QlMjBzZWNvbmRzJTIwJTNEJTIwKHMlM0ElMjBudW1iZXIpJTIwJTNEJTNFJTIwcyUyMGFzJTIwU2Vjb25kcyUzQiUwQWNvbnN0JTIwb25lS20lMjAlM0QlMjBtZXRlcnMoMTAwMCklM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBNZXRlcnMlMEFjb25zdCUyMG9uZU1pbiUyMCUzRCUyMHNlY29uZHMoNjApJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwU2Vjb25kcyUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Meters</span> = <span class="hljs-built_in">number</span> &amp; { <span class="hljs-attr">_brand</span>: <span class="hljs-string">&quot;meters&quot;</span> };
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Seconds</span> = <span class="hljs-built_in">number</span> &amp; { <span class="hljs-attr">_brand</span>: <span class="hljs-string">&quot;seconds&quot;</span> };
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">meters</span> = (<span class="hljs-params"><span class="hljs-attr">m</span>: <span class="hljs-built_in">number</span></span>) =&gt; m <span class="hljs-keyword">as</span> <span class="hljs-title class_">Meters</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">seconds</span> = (<span class="hljs-params"><span class="hljs-attr">s</span>: <span class="hljs-built_in">number</span></span>) =&gt; s <span class="hljs-keyword">as</span> <span class="hljs-title class_">Seconds</span>;
+<span class="hljs-keyword">const</span> oneKm = <span class="hljs-title function_">meters</span>(<span class="hljs-number">1000</span>); <span class="hljs-comment">// Type is Meters</span>
+<span class="hljs-keyword">const</span> oneMin = <span class="hljs-title function_">seconds</span>(<span class="hljs-number">60</span>); <span class="hljs-comment">// Type is Seconds</span>
+</div></code></pre>
+<p>不过比较尴尬的一点是，因为我们说类型的操作并不影响变量本身，因此上面这个例子中的 meters 和 seconds 仍然可以进行数值运算，但是运算后就又变成数字了</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjB0ZW5LbSUyMCUzRCUyMG9uZUttJTIwKiUyMDEwJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwbnVtYmVyJTBBY29uc3QlMjB2JTIwJTNEJTIwb25lS20lMjAlMkYlMjBvbmVNaW4lM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBudW1iZXIlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">const</span> tenKm = oneKm * <span class="hljs-number">10</span>; <span class="hljs-comment">// Type is number</span>
+<span class="hljs-keyword">const</span> v = oneKm / oneMin; <span class="hljs-comment">// Type is number</span>
+</div></code></pre>
+<h3 id="interface-he-type-de-qu-bie" tabindex="-1">interface 和 type 的区别</h3>
+<p>两者都可以继承，interface 可以使用 extends ，type 可以使用 &amp; 运算符，但是 interface 不可以继承一个复杂的类型，如 union 类型
+同时，只有 type 有 union ，interface 没有</p>
+<h4 id="augmented" tabindex="-1">augmented</h4>
+<p>interface 可以 augmented ，比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwSVN0YXRlJTIwJTdCJTBBJTA5bmFtZSUzQSUyMHN0cmluZyUzQiUwQSUwOWNhcGl0YWwlM0ElMjBzdHJpbmclM0IlMEElN0QlMEFpbnRlcmZhY2UlMjBJU3RhdGUlMjAlN0IlMEElMDlwb3B1bGF0aW9uJTNBJTIwbnVtYmVyJTNCJTBBJTdEJTBBY29uc3QlMjB3eW9taW5nJTNBJTIwSVN0YXRlJTIwJTNEJTIwJTdCJTBBJTA5bmFtZSUzQSUyMCUyMld5b21pbmclMjIlMkMlMEElMDljYXBpdGFsJTNBJTIwJTIyQ2hleWVubmUlMjIlMkMlMEElMDlwb3B1bGF0aW9uJTNBJTIwNTAwXzAwMCUyQyUwQSU3RCUzQiUyMCUyRiUyRiUyME9LJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">IState</span> {
+	<span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+	<span class="hljs-attr">capital</span>: <span class="hljs-built_in">string</span>;
+}
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">IState</span> {
+	<span class="hljs-attr">population</span>: <span class="hljs-built_in">number</span>;
+}
+<span class="hljs-keyword">const</span> <span class="hljs-attr">wyoming</span>: <span class="hljs-title class_">IState</span> = {
+	<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Wyoming&quot;</span>,
+	<span class="hljs-attr">capital</span>: <span class="hljs-string">&quot;Cheyenne&quot;</span>,
+	<span class="hljs-attr">population</span>: <span class="hljs-number">500_000</span>,
+}; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>类似一种类型合并。但是 type 没有
+不过很多情况下，这种重复定义可能是代码写错了。因此建议使用 type 来定义类型</p>
+<h3 id="readonly" tabindex="-1">readonly</h3>
+<p>你可以使用 readonly 来避免被改变</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBhcnJheVN1bShhcnIlM0ElMjByZWFkb25seSUyMG51bWJlciU1QiU1RCklMjAlN0IlMEElMDlsZXQlMjBzdW0lMjAlM0QlMjAwJTJDJTBBJTA5JTA5bnVtJTNCJTBBJTA5d2hpbGUlMjAoKG51bSUyMCUzRCUyMGFyci5wb3AoKSklMjAhJTNEJTNEJTIwdW5kZWZpbmVkKSUyMCU3QiUwQSUwOSUwOSUyRiUyRiUyMH5+fiUyMCdwb3AnJTIwZG9lcyUyMG5vdCUyMGV4aXN0JTIwb24lMjB0eXBlJTIwJ3JlYWRvbmx5JTIwbnVtYmVyJTVCJTVEJyUwQSUwOSUwOXN1bSUyMCUyQiUzRCUyMG51bSUzQiUwQSUwOSU3RCUwQSUwOXJldHVybiUyMHN1bSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">arraySum</span>(<span class="hljs-params"><span class="hljs-attr">arr</span>: <span class="hljs-keyword">readonly</span> <span class="hljs-built_in">number</span>[]</span>) {
+	<span class="hljs-keyword">let</span> sum = <span class="hljs-number">0</span>,
+		num;
+	<span class="hljs-keyword">while</span> ((num = arr.<span class="hljs-title function_">pop</span>()) !== <span class="hljs-literal">undefined</span>) {
+		<span class="hljs-comment">// ~~~ &#x27;pop&#x27; does not exist on type &#x27;readonly number[]&#x27;</span>
+		sum += num;
+	}
+	<span class="hljs-keyword">return</span> sum;
+}
+</div></code></pre>
+<p>非 readonly 类型可以赋值给 readonly类型，但 readonly 的类型不能赋值给非 readonly 类型</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBhJTNBJTIwbnVtYmVyJTVCJTVEJTIwJTNEJTIwJTVCMSUyQyUyMDIlMkMlMjAzJTVEJTNCJTBBY29uc3QlMjBiJTNBJTIwcmVhZG9ubHklMjBudW1iZXIlNUIlNUQlMjAlM0QlMjBhJTNCJTBBY29uc3QlMjBjJTNBJTIwbnVtYmVyJTVCJTVEJTIwJTNEJTIwYiUzQiUwQSUyRiUyRiUyMH4lMjBUeXBlJTIwJ3JlYWRvbmx5JTIwbnVtYmVyJTVCJTVEJyUyMGlzJTIwJ3JlYWRvbmx5JyUyMGFuZCUyMGNhbm5vdCUyMGJlJTBBJTJGJTJGJTIwYXNzaWduZWQlMjB0byUyMHRoZSUyMG11dGFibGUlMjB0eXBlJTIwJ251bWJlciU1QiU1RCclMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">a</span>: <span class="hljs-built_in">number</span>[] = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>];
+<span class="hljs-keyword">const</span> <span class="hljs-attr">b</span>: <span class="hljs-keyword">readonly</span> <span class="hljs-built_in">number</span>[] = a;
+<span class="hljs-keyword">const</span> <span class="hljs-attr">c</span>: <span class="hljs-built_in">number</span>[] = b;
+<span class="hljs-comment">// ~ Type &#x27;readonly number[]&#x27; is &#x27;readonly&#x27; and cannot be</span>
+<span class="hljs-comment">// assigned to the mutable type &#x27;number[]&#x27;</span>
+</div></code></pre>
+<p>注意 readonly 的影响是 shallow 的，比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwT3V0ZXIlMjAlN0IlMEElMDlpbm5lciUzQSUyMCU3QiUwQSUwOSUwOXglM0ElMjBudW1iZXIlM0IlMEElMDklN0QlM0IlMEElN0QlMEFjb25zdCUyMG8lM0ElMjBSZWFkb25seSUzQ091dGVyJTNFJTIwJTNEJTIwJTdCJTIwaW5uZXIlM0ElMjAlN0IlMjB4JTNBJTIwMCUyMCU3RCUyMCU3RCUzQiUwQW8uaW5uZXIlMjAlM0QlMjAlN0IlMjB4JTNBJTIwMSUyMCU3RCUzQiUwQSUyRiUyRiUyMH5+fn4lMjBDYW5ub3QlMjBhc3NpZ24lMjB0byUyMCdpbm5lciclMjBiZWNhdXNlJTIwaXQlMjBpcyUyMGElMjByZWFkLW9ubHklMjBwcm9wZXJ0eSUwQW8uaW5uZXIueCUyMCUzRCUyMDElM0IlMjAlMkYlMkYlMjBPSyUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Outer</span> {
+	<span class="hljs-attr">inner</span>: {
+		<span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span>;
+	};
+}
+<span class="hljs-keyword">const</span> <span class="hljs-attr">o</span>: <span class="hljs-title class_">Readonly</span>&lt;<span class="hljs-title class_">Outer</span>&gt; = { <span class="hljs-attr">inner</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">0</span> } };
+o.<span class="hljs-property">inner</span> = { <span class="hljs-attr">x</span>: <span class="hljs-number">1</span> };
+<span class="hljs-comment">// ~~~~ Cannot assign to &#x27;inner&#x27; because it is a read-only property</span>
+o.<span class="hljs-property">inner</span>.<span class="hljs-property">x</span> = <span class="hljs-number">1</span>; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>虽然 inner 是 readonly 但是其内部的 x 仍是可变的。你可以使用 ts-essentials 的 DeepReadonly 泛型来使深层的部分也是 readonly
+同时，如果给 index signature 设置 readonly ，那么可以使用解构来绕过</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="bGV0JTIwb2JqJTNBJTIwJTdCJTIwcmVhZG9ubHklMjAlNUJrJTNBJTIwc3RyaW5nJTVEJTNBJTIwbnVtYmVyJTIwJTdEJTIwJTNEJTIwJTdCJTdEJTNCJTBBJTJGJTJGJTIwT3IlMjBSZWFkb25seSUzQyU3QiU1QmslM0ElMjBzdHJpbmclNUQlM0ElMjBudW1iZXIlN0QlMEFvYmouaGklMjAlM0QlMjA0NSUzQiUwQSUyRiUyRiUyMH5+JTIwSW5kZXglMjBzaWduYXR1cmUlMjBpbiUyMHR5cGUlMjAuLi4lMjBvbmx5JTIwcGVybWl0cyUyMHJlYWRpbmclMEFvYmolMjAlM0QlMjAlN0IlMjAuLi5vYmolMkMlMjBoaSUzQSUyMDEyJTIwJTdEJTNCJTIwJTJGJTJGJTIwT0slMEFvYmolMjAlM0QlMjAlN0IlMjAuLi5vYmolMkMlMjBieWUlM0ElMjAzNCUyMCU3RCUzQiUyMCUyRiUyRiUyME9LJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-attr">obj</span>: { <span class="hljs-keyword">readonly</span> [<span class="hljs-attr">k</span>: <span class="hljs-built_in">string</span>]: <span class="hljs-built_in">number</span> } = {};
+<span class="hljs-comment">// Or Readonly&lt;{[k: string]: number}</span>
+obj.<span class="hljs-property">hi</span> = <span class="hljs-number">45</span>;
+<span class="hljs-comment">// ~~ Index signature in type ... only permits reading</span>
+obj = { ...obj, <span class="hljs-attr">hi</span>: <span class="hljs-number">12</span> }; <span class="hljs-comment">// OK</span>
+obj = { ...obj, <span class="hljs-attr">bye</span>: <span class="hljs-number">34</span> }; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<h3 id="shi-yong-index-signature-biao-shi-dong-tai-shu-ju" tabindex="-1">使用 index signature 表示动态数据</h3>
+<p>比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMFJvY2tldCUyMCUzRCUyMCU3QiUyMCU1QnByb3BlcnR5JTNBJTIwc3RyaW5nJTVEJTNBJTIwbnVtYmVyJTIwJTdEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Rocket</span> = { [<span class="hljs-attr">property</span>: <span class="hljs-built_in">string</span>]: <span class="hljs-built_in">number</span> };
+</div></code></pre>
+<p><code>[property: string]: number</code> 就是一个 index signature</p>
+<ul>
+<li>property 只是一个表示，并没有什么用</li>
+<li>string 表示 index 的类型</li>
+<li>number 表示取出来的值的类型
+实际上，js 中无论 index 是什么类型，再内部都是按 string 类型存储的，比如：</li>
+</ul>
+<blockquote>
+<p>&gt; <strong>x = {}</strong></p>
+<p>{}</p>
+<p>&gt; <strong>x[[1, 2, 3]] = 2</strong></p>
+<p>2</p>
+<p>&gt; <strong>x</strong></p>
+<p>{ '1,2,3': 1 }</p>
+<p>&gt; <strong>{ 1: 2, 3: 4}</strong></p>
+<p>{ '1': 2, '3': 4 }
+同时，数组也被视为对象，数组的下角标作为 key ，如：
+&gt; <strong>typeof []</strong></p>
+<p>'object'</p>
+<p>&gt; <strong>x = [1, 2, 3]</strong></p>
+<p>[ 1, 2, 3 ]</p>
+<p>&gt; <strong>x[0]</strong></p>
+<p>1</p>
+<p>&gt; <strong>x['1']</strong></p>
+<p>2</p>
+<p>&gt; <strong>Object.keys(x)</strong></p>
+<p>[ '0', '1', '2' ]</p>
+</blockquote>
+<h3 id="mei-ju-dui-xiang-de-zi-duan" tabindex="-1">枚举对象的字段</h3>
+<p>朴素地遍历对象的字段可能会报错：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBvYmolMjAlM0QlMjAlN0IlMEElMDlvbmUlM0ElMjAlMjJ1bm8lMjIlMkMlMEElMDl0d28lM0ElMjAlMjJkb3MlMjIlMkMlMEElMDl0aHJlZSUzQSUyMCUyMnRyZXMlMjIlMkMlMEElN0QlM0IlMEFmb3IlMjAoY29uc3QlMjBrJTIwaW4lMjBvYmopJTIwJTdCJTBBJTA5Y29uc3QlMjB2JTIwJTNEJTIwb2JqJTVCayU1RCUzQiUwQSUwOSUyRiUyRiUyMH5+fn5+fiUyMEVsZW1lbnQlMjBpbXBsaWNpdGx5JTIwaGFzJTIwYW4lMjAnYW55JyUyMHR5cGUlMEElMDklMkYlMkYlMjBiZWNhdXNlJTIwdHlwZSUyMC4uLiUyMGhhcyUyMG5vJTIwaW5kZXglMjBzaWduYXR1cmUlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-keyword">const</span> obj = {
+	<span class="hljs-attr">one</span>: <span class="hljs-string">&quot;uno&quot;</span>,
+	<span class="hljs-attr">two</span>: <span class="hljs-string">&quot;dos&quot;</span>,
+	<span class="hljs-attr">three</span>: <span class="hljs-string">&quot;tres&quot;</span>,
+};
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> k <span class="hljs-keyword">in</span> obj) {
+	<span class="hljs-keyword">const</span> v = obj[k];
+	<span class="hljs-comment">// ~~~~~~ Element implicitly has an &#x27;any&#x27; type</span>
+	<span class="hljs-comment">// because type ... has no index signature</span>
+}
+</div></code></pre>
+<p>因为这里的 k 仅仅是一个 string 类型
+还可以这么改进：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="bGV0JTIwayUzQSUyMGtleW9mJTIwdHlwZW9mJTIwb2JqJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwJTIyb25lJTIyJTIwJTdDJTIwJTIydHdvJTIyJTIwJTdDJTIwJTIydGhyZWUlMjIlMEFmb3IlMjAoayUyMGluJTIwb2JqKSUyMCU3QiUwQSUwOWNvbnN0JTIwdiUyMCUzRCUyMG9iaiU1QmslNUQlM0IlMjAlMkYlMkYlMjBPSyUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-attr">k</span>: keyof <span class="hljs-keyword">typeof</span> obj; <span class="hljs-comment">// Type is &quot;one&quot; | &quot;two&quot; | &quot;three&quot;</span>
+<span class="hljs-keyword">for</span> (k <span class="hljs-keyword">in</span> obj) {
+	<span class="hljs-keyword">const</span> v = obj[k]; <span class="hljs-comment">// OK</span>
+}
+</div></code></pre>
+<p>不过这又带来了一个问题，由于 ts 鸭子类型的特性，我们可以传递含有其他多于属性的对象。这样 ts 的推导就不准确了
+当然我们还可以这样：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBmb28oYWJjJTNBJTIwQUJDKSUyMCU3QiUwQSUwOWZvciUyMChjb25zdCUyMCU1QmslMkMlMjB2JTVEJTIwb2YlMjBPYmplY3QuZW50cmllcyhhYmMpKSUyMCU3QiUwQSUwOSUwOWslM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBzdHJpbmclMEElMDklMDl2JTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwYW55JTBBJTA5JTdEJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"><span class="hljs-attr">abc</span>: ABC</span>) {
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [k, v] <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(abc)) {
+		k; <span class="hljs-comment">// Type is string</span>
+		v; <span class="hljs-comment">// Type is any</span>
+	}
+}
+</div></code></pre>
+<p>不过这样的话还需要更多的判断去确定 v 的类型</p>
+<h2 id="guan-yu-any" tabindex="-1">关于 any</h2>
+<h3 id="shi-yong-any-de-fan-wei-jin-ke-neng-xiao" tabindex="-1">使用 any 的范围尽可能小</h3>
+<p>如果你真的要用 any 的话，使用的范围尽可能小一点：
+比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBwcm9jZXNzQmFyKGIlM0ElMjBCYXIpJTIwJTdCJTBBJTA5JTJGKiUyMC4uLiUyMColMkYlMEElN0QlMEFmdW5jdGlvbiUyMGYoKSUyMCU3QiUwQSUwOWNvbnN0JTIweCUyMCUzRCUyMGV4cHJlc3Npb25SZXR1cm5pbmdGb28oKSUzQiUwQSUwOXByb2Nlc3NCYXIoeCklM0IlMEElMDklMkYlMkYlMjB+JTIwQXJndW1lbnQlMjBvZiUyMHR5cGUlMjAnRm9vJyUyMGlzJTIwbm90JTIwYXNzaWduYWJsZSUyMHRvJTBBJTA5JTJGJTJGJTIwcGFyYW1ldGVyJTIwb2YlMjB0eXBlJTIwJ0JhciclMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">processBar</span>(<span class="hljs-params"><span class="hljs-attr">b</span>: <span class="hljs-title class_">Bar</span></span>) {
+	<span class="hljs-comment">/* ... */</span>
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">f</span>(<span class="hljs-params"></span>) {
+	<span class="hljs-keyword">const</span> x = <span class="hljs-title function_">expressionReturningFoo</span>();
+	<span class="hljs-title function_">processBar</span>(x);
+	<span class="hljs-comment">// ~ Argument of type &#x27;Foo&#x27; is not assignable to</span>
+	<span class="hljs-comment">// parameter of type &#x27;Bar&#x27;</span>
+}
+</div></code></pre>
+<p>如果你确定 x 传给 processBar 没问题的话，你可以这么做：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="cHJvY2Vzc0Jhcih4JTIwYXMlMjBhbnkpJTNCJTIwJTJGJTJGJTIwUHJlZmVyJTIwdGhpcyUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-title function_">processBar</span>(x <span class="hljs-keyword">as</span> <span class="hljs-built_in">any</span>); <span class="hljs-comment">// Prefer this</span>
+</div></code></pre>
+<p>而不是这样：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjB4JTNBJTIwYW55JTIwJTNEJTIwZXhwcmVzc2lvblJldHVybmluZ0ZvbygpJTNCJTIwJTJGJTJGJTIwRG9uJ3QlMjBkbyUyMHRoaXMlMEFwcm9jZXNzQmFyKHgpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">x</span>: <span class="hljs-built_in">any</span> = <span class="hljs-title function_">expressionReturningFoo</span>(); <span class="hljs-comment">// Don&#x27;t do this</span>
+<span class="hljs-title function_">processBar</span>(x);
+</div></code></pre>
+<p>这样可以把 any 的影响降到最低
+同样的，在创建 obj 的时候：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBjb25maWclM0ElMjBDb25maWclMjAlM0QlMjAlN0IlMEElMDlhJTNBJTIwMSUyQyUwQSUwOWIlM0ElMjAyJTJDJTBBJTA5YyUzQSUyMCU3QiUwQSUwOSUwOWtleSUzQSUyMHZhbHVlJTJDJTBBJTA5JTA5JTJGJTJGJTIwfn5+JTIwUHJvcGVydHklMjAuLi4lMjBtaXNzaW5nJTIwaW4lMjB0eXBlJTIwJ0JhciclMjBidXQlMjByZXF1aXJlZCUyMGluJTIwdHlwZSUyMCdGb28nJTBBJTA5JTdEJTJDJTBBJTdEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">config</span>: <span class="hljs-title class_">Config</span> = {
+	<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,
+	<span class="hljs-attr">b</span>: <span class="hljs-number">2</span>,
+	<span class="hljs-attr">c</span>: {
+		<span class="hljs-attr">key</span>: value,
+		<span class="hljs-comment">// ~~~ Property ... missing in type &#x27;Bar&#x27; but required in type &#x27;Foo&#x27;</span>
+	},
+};
+</div></code></pre>
+<p>这样：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBjb25maWclM0ElMjBDb25maWclMjAlM0QlMjAlN0IlMEElMDlhJTNBJTIwMSUyQyUwQSUwOWIlM0ElMjAyJTJDJTIwJTJGJTJGJTIwVGhlc2UlMjBwcm9wZXJ0aWVzJTIwYXJlJTIwc3RpbGwlMjBjaGVja2VkJTBBJTA5YyUzQSUyMCU3QiUwQSUwOSUwOWtleSUzQSUyMHZhbHVlJTIwYXMlMjBhbnklMkMlMEElMDklN0QlMkMlMEElN0QlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">config</span>: <span class="hljs-title class_">Config</span> = {
+	<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,
+	<span class="hljs-attr">b</span>: <span class="hljs-number">2</span>, <span class="hljs-comment">// These properties are still checked</span>
+	<span class="hljs-attr">c</span>: {
+		<span class="hljs-attr">key</span>: value <span class="hljs-keyword">as</span> <span class="hljs-built_in">any</span>,
+	},
+};
+</div></code></pre>
+<p>而不是：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBjb25maWclM0ElMjBDb25maWclMjAlM0QlMjAlN0IlMEElMDlhJTNBJTIwMSUyQyUwQSUwOWIlM0ElMjAyJTJDJTBBJTA5YyUzQSUyMCU3QiUwQSUwOSUwOWtleSUzQSUyMHZhbHVlJTJDJTBBJTA5JTdEJTJDJTBBJTdEJTIwYXMlMjBhbnklM0IlMjAlMkYlMkYlMjBEb24ndCUyMGRvJTIwdGhpcyElMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">config</span>: <span class="hljs-title class_">Config</span> = {
+	<span class="hljs-attr">a</span>: <span class="hljs-number">1</span>,
+	<span class="hljs-attr">b</span>: <span class="hljs-number">2</span>,
+	<span class="hljs-attr">c</span>: {
+		<span class="hljs-attr">key</span>: value,
+	},
+} <span class="hljs-keyword">as</span> <span class="hljs-built_in">any</span>; <span class="hljs-comment">// Don&#x27;t do this!</span>
+</div></code></pre>
+<h3 id="jin-ke-neng-shi-yong-any-de-geng-jing-que-de-xing-shi" tabindex="-1">尽可能使用 any 的更精确的形式</h3>
+<p>假如我们要写一个获取数组长度的函数，由于我们不知道，也没必要知道是什么类型的数组，我们可以这样：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBnZXRMZW5ndGgoYXJyYXklM0ElMjBhbnklNUIlNUQpJTIwJTdCJTBBJTA5cmV0dXJuJTIwYXJyYXkubGVuZ3RoJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getLength</span>(<span class="hljs-params"><span class="hljs-attr">array</span>: <span class="hljs-built_in">any</span>[]</span>) {
+	<span class="hljs-keyword">return</span> array.<span class="hljs-property">length</span>;
+}
+</div></code></pre>
+<p>而不是：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBnZXRMZW5ndGhCYWQoYXJyYXklM0ElMjBhbnkpJTIwJTdCJTBBJTA5JTJGJTJGJTIwRG9uJ3QlMjBkbyUyMHRoaXMhJTBBJTA5cmV0dXJuJTIwYXJyYXkubGVuZ3RoJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getLengthBad</span>(<span class="hljs-params"><span class="hljs-attr">array</span>: <span class="hljs-built_in">any</span></span>) {
+	<span class="hljs-comment">// Don&#x27;t do this!</span>
+	<span class="hljs-keyword">return</span> array.<span class="hljs-property">length</span>;
+}
+</div></code></pre>
+<p>又比如这样：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBoYXNUd2VsdmVMZXR0ZXJLZXkobyUzQSUyMCU3QiUyMCU1QmtleSUzQSUyMHN0cmluZyU1RCUzQSUyMGFueSUyMCU3RCklMjAlN0IlMEElMDlmb3IlMjAoY29uc3QlMjBrZXklMjBpbiUyMG8pJTIwJTdCJTBBJTA5JTA5aWYlMjAoa2V5Lmxlbmd0aCUyMCUzRCUzRCUzRCUyMDEyKSUyMCU3QiUwQSUwOSUwOSUwOXJldHVybiUyMHRydWUlM0IlMEElMDklMDklN0QlMEElMDklN0QlMEElMDlyZXR1cm4lMjBmYWxzZSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">hasTwelveLetterKey</span>(<span class="hljs-params"><span class="hljs-attr">o</span>: { [key: <span class="hljs-built_in">string</span>]: <span class="hljs-built_in">any</span> }</span>) {
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> key <span class="hljs-keyword">in</span> o) {
+		<span class="hljs-keyword">if</span> (key.<span class="hljs-property">length</span> === <span class="hljs-number">12</span>) {
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+		}
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+}
+</div></code></pre>
+<p>而不是直接把 o 类型设为 any</p>
+<h4 id="ren-yi-ge-can-shu-de-han-shu" tabindex="-1">任意个参数的函数</h4>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBudW1BcmdzQmFkJTIwJTNEJTIwKC4uLmFyZ3MlM0ElMjBhbnkpJTIwJTNEJTNFJTIwYXJncy5sZW5ndGglM0IlMjAlMkYlMkYlMjBSZXR1cm5zJTIwYW55JTBBY29uc3QlMjBudW1BcmdzR29vZCUyMCUzRCUyMCguLi5hcmdzJTNBJTIwYW55JTVCJTVEKSUyMCUzRCUzRSUyMGFyZ3MubGVuZ3RoJTNCJTIwJTJGJTJGJTIwUmV0dXJucyUyMG51bWJlciUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-title function_">numArgsBad</span> = (<span class="hljs-params">...<span class="hljs-attr">args</span>: <span class="hljs-built_in">any</span></span>) =&gt; args.<span class="hljs-property">length</span>; <span class="hljs-comment">// Returns any</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">numArgsGood</span> = (<span class="hljs-params">...<span class="hljs-attr">args</span>: <span class="hljs-built_in">any</span>[]</span>) =&gt; args.<span class="hljs-property">length</span>; <span class="hljs-comment">// Returns number</span>
+</div></code></pre>
+<p>要像上面这样而不是下面这样</p>
+<h3 id="ba-yi-xie-bu-tai-an-quan-de-lei-xing-duan-yan-yin-cang-zai-han-shu-zhong" tabindex="-1">把一些不太安全的类型断言隐藏在函数中</h3>
+<p>比如我们要实现一个函数，可以做到缓存函数最后一次的返回结果：
+下面是一个实现：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBjYWNoZUxhc3QlM0NUJTIwZXh0ZW5kcyUyMEZ1bmN0aW9uJTNFKGZuJTNBJTIwVCklM0ElMjBUJTIwJTdCJTBBJTA5bGV0JTIwbGFzdEFyZ3MlM0ElMjBhbnklNUIlNUQlMjAlN0MlMjBudWxsJTIwJTNEJTIwbnVsbCUzQiUwQSUwOWxldCUyMGxhc3RSZXN1bHQlM0ElMjBhbnklM0IlMEElMDlyZXR1cm4lMjBmdW5jdGlvbiUyMCguLi5hcmdzJTNBJTIwYW55JTVCJTVEKSUyMCU3QiUwQSUwOSUwOSUyRiUyRiUyMH5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+JTBBJTA5JTA5JTJGJTJGJTIwVHlwZSUyMCcoLi4uYXJncyUzQSUyMGFueSU1QiU1RCklMjAlM0QlM0UlMjBhbnknJTIwaXMlMjBub3QlMjBhc3NpZ25hYmxlJTIwdG8lMjB0eXBlJTIwJ1QnJTBBJTA5JTA5aWYlMjAoIWxhc3RBcmdzJTIwJTdDJTdDJTIwIXNoYWxsb3dFcXVhbChsYXN0QXJncyUyQyUyMGFyZ3MpKSUyMCU3QiUwQSUwOSUwOSUwOWxhc3RSZXN1bHQlMjAlM0QlMjBmbiguLi5hcmdzKSUzQiUwQSUwOSUwOSUwOWxhc3RBcmdzJTIwJTNEJTIwYXJncyUzQiUwQSUwOSUwOSU3RCUwQSUwOSUwOXJldHVybiUyMGxhc3RSZXN1bHQlM0IlMEElMDklN0QlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div></div><div class="code"><span class="hljs-keyword">function</span> cacheLast&lt;T <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Function</span>&gt;(<span class="hljs-attr">fn</span>: T): T {
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">lastArgs</span>: <span class="hljs-built_in">any</span>[] | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">lastResult</span>: <span class="hljs-built_in">any</span>;
+	<span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params">...<span class="hljs-attr">args</span>: <span class="hljs-built_in">any</span>[]</span>) {
+		<span class="hljs-comment">// ~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+		<span class="hljs-comment">// Type &#x27;(...args: any[]) =&gt; any&#x27; is not assignable to type &#x27;T&#x27;</span>
+		<span class="hljs-keyword">if</span> (!lastArgs || !<span class="hljs-title function_">shallowEqual</span>(lastArgs, args)) {
+			lastResult = <span class="hljs-title function_">fn</span>(...args);
+			lastArgs = args;
+		}
+		<span class="hljs-keyword">return</span> lastResult;
+	};
+}
+</div></code></pre>
+<p>根据我们的代码实现，最后的返回值一定是可以与 T 类型匹配的，但是 ts 仍报错，虽然我们可以写出没报错的形式，但可能有点麻烦。我们知道这里一定是没问题的，所以可以进行类型断言：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBjYWNoZUxhc3QlM0NUJTIwZXh0ZW5kcyUyMEZ1bmN0aW9uJTNFKGZuJTNBJTIwVCklM0ElMjBUJTIwJTdCJTBBJTA5bGV0JTIwbGFzdEFyZ3MlM0ElMjBhbnklNUIlNUQlMjAlN0MlMjBudWxsJTIwJTNEJTIwbnVsbCUzQiUwQSUwOWxldCUyMGxhc3RSZXN1bHQlM0ElMjBhbnklM0IlMEElMDlyZXR1cm4lMjBmdW5jdGlvbiUyMCguLi5hcmdzJTNBJTIwYW55JTVCJTVEKSUyMCU3QiUwQSUwOSUwOSUyRiUyRiUyMH5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+fn5+JTBBJTA5JTA5JTJGJTJGJTIwVHlwZSUyMCcoLi4uYXJncyUzQSUyMGFueSU1QiU1RCklMjAlM0QlM0UlMjBhbnknJTIwaXMlMjBub3QlMjBhc3NpZ25hYmxlJTIwdG8lMjB0eXBlJTIwJ1QnJTBBJTA5JTA5aWYlMjAoIWxhc3RBcmdzJTIwJTdDJTdDJTIwIXNoYWxsb3dFcXVhbChsYXN0QXJncyUyQyUyMGFyZ3MpKSUyMCU3QiUwQSUwOSUwOSUwOWxhc3RSZXN1bHQlMjAlM0QlMjBmbiguLi5hcmdzKSUzQiUwQSUwOSUwOSUwOWxhc3RBcmdzJTIwJTNEJTIwYXJncyUzQiUwQSUwOSUwOSU3RCUwQSUwOSUwOXJldHVybiUyMGxhc3RSZXN1bHQlM0IlMEElMDklN0QlMjBhcyUyMHVua25vd24lMjBhcyUyMFQlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div></div><div class="code"><span class="hljs-keyword">function</span> cacheLast&lt;T <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Function</span>&gt;(<span class="hljs-attr">fn</span>: T): T {
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">lastArgs</span>: <span class="hljs-built_in">any</span>[] | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">lastResult</span>: <span class="hljs-built_in">any</span>;
+	<span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params">...<span class="hljs-attr">args</span>: <span class="hljs-built_in">any</span>[]</span>) {
+		<span class="hljs-comment">// ~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+		<span class="hljs-comment">// Type &#x27;(...args: any[]) =&gt; any&#x27; is not assignable to type &#x27;T&#x27;</span>
+		<span class="hljs-keyword">if</span> (!lastArgs || !<span class="hljs-title function_">shallowEqual</span>(lastArgs, args)) {
+			lastResult = <span class="hljs-title function_">fn</span>(...args);
+			lastArgs = args;
+		}
+		<span class="hljs-keyword">return</span> lastResult;
+	} <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span> <span class="hljs-keyword">as</span> T;
+}
+</div></code></pre>
+<p>我们出于一些原因，不得已使用了 any 和一些类型断言，但这仅仅发生在这个函数体中，我们把这些限定了一个范围。我们只要确保函数的签名部分并没有什么 any 之类的泄露出来就好了</p>
+<h3 id="kao-lu-shi-yong-unknown-he-never" tabindex="-1">考虑使用 unknown 和 never</h3>
+<p>any 有如下的特性：</p>
+<ul>
+<li>任何类型都可以赋值给 any 类型</li>
+<li>any 类型可以赋值给其他任意的类型
+unknown 只满足第一条，即任何类型都可以赋值给 unknown 类型。但不满足第二条，即只能赋值给其他的 unknown 和 any 类型
+never 只满足第二条，即可以赋值给其他任意的类型。但不满足第一条，即任何类型都不能赋值给 never （包括 any）
+比如现在要做一个 yaml 的解析函数，我们自然是无法知道解析出来的类型是什么，我们可能考虑使用 any 作为其返回值，但还是不够 type safety。更好的做法是将返回值设置为 unknown，这样的话，任何的值都可以作为返回值给出去，但是调用者接收到返回值后无法使用，必须使用类型断言，转为自己期望的类型，从而保证了类型安全。
+当然有人可能想用泛型来包装一下，比如：</li>
+</ul>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="ZnVuY3Rpb24lMjBzYWZlUGFyc2VZQU1MJTNDVCUzRSh5YW1sJTNBJTIwc3RyaW5nKSUzQSUyMFQlMjAlN0IlMEElMjByZXR1cm4lMjBwYXJzZVlBTUwoeWFtbCklM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">function <span class="hljs-built_in">safeParseYAML</span>&lt;T&gt;(yaml: string): T {
+ <span class="hljs-keyword">return</span> <span class="hljs-built_in">parseYAML</span>(yaml);
+}
+</div></code></pre>
+<p>但这在 ts 中并不是一个好的代码风格</p>
+<h4 id="shuang-zhong-duan-yan" tabindex="-1">双重断言</h4>
+<p>unknown 还可以用来双重断言：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="bGV0JTIwYmFyVW5rJTIwJTNEJTIwZm9vJTIwYXMlMjB1bmtub3duJTIwYXMlMjBCYXIlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">let</span> barUnk = foo <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">Bar</span>;
+</div></code></pre>
+<p>这样的话，即使后面我们进行代码重构，两次断言被分开了，也会报错，不会出现什么大问题。但是如果是先转成 any 在转成 Bar 的话就没有了这个效果</p>
+<h4 id="object-he" tabindex="-1">object 和 {}</h4>
+<p>这两个具有和 unknown 类似的特性，但是比 unknown 表示的范围更加小一点</p>
+<ul>
+<li>object 包括所有的 对象 和 数组，但是不包括一些 primitive type ，比如 <code>true</code> <code>12</code> <code>&quot;foo&quot;</code></li>
+<li>{} 包括所有的值，除了 null 和 undefined</li>
+</ul>
+<h3 id="jian-cha-xiang-mu-de-lei-xing-fu-gai-shuai" tabindex="-1">检查项目的类型覆盖率</h3>
+<p>使用 <code>npx type-coverage</code> 可以看到项目的类型覆盖率。使用 any 会使这个值下降。
+使用 <code>npx type-coverage --detail</code> 可以看到项目中哪里使用了 any</p>
+<h2 id="lei-xing-tui-dao" tabindex="-1">类型推导</h2>
+<h3 id="excess-property-checking" tabindex="-1">Excess property checking</h3>
+<p>Excess property checking 可以检查你在书写一个特定类型的 obj 的时候是否引入了多余的属性。在声明变量的时候添加显式的类型标注可以开启这个检查：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwUm9vbSUyMCU3QiUwQSUwOW51bURvb3JzJTNBJTIwbnVtYmVyJTNCJTBBJTA5Y2VpbGluZ0hlaWdodEZ0JTNBJTIwbnVtYmVyJTNCJTBBJTdEJTBBY29uc3QlMjByJTNBJTIwUm9vbSUyMCUzRCUyMCU3QiUwQSUwOW51bURvb3JzJTNBJTIwMSUyQyUwQSUwOWNlaWxpbmdIZWlnaHRGdCUzQSUyMDEwJTJDJTBBJTA5ZWxlcGhhbnQlM0ElMjAlMjJwcmVzZW50JTIyJTJDJTBBJTA5JTJGJTJGJTIwfn5+fn5+fn5+fn5+fn5+fn5+JTIwT2JqZWN0JTIwbGl0ZXJhbCUyMG1heSUyMG9ubHklMjBzcGVjaWZ5JTIwa25vd24lMjBwcm9wZXJ0aWVzJTJDJTBBJTA5JTJGJTJGJTIwYW5kJTIwJ2VsZXBoYW50JyUyMGRvZXMlMjBub3QlMjBleGlzdCUyMGluJTIwdHlwZSUyMCdSb29tJyUwQSU3RCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Room</span> {
+	<span class="hljs-attr">numDoors</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">ceilingHeightFt</span>: <span class="hljs-built_in">number</span>;
+}
+<span class="hljs-keyword">const</span> <span class="hljs-attr">r</span>: <span class="hljs-title class_">Room</span> = {
+	<span class="hljs-attr">numDoors</span>: <span class="hljs-number">1</span>,
+	<span class="hljs-attr">ceilingHeightFt</span>: <span class="hljs-number">10</span>,
+	<span class="hljs-attr">elephant</span>: <span class="hljs-string">&quot;present&quot;</span>,
+	<span class="hljs-comment">// ~~~~~~~~~~~~~~~~~~ Object literal may only specify known properties,</span>
+	<span class="hljs-comment">// and &#x27;elephant&#x27; does not exist in type &#x27;Room&#x27;</span>
+};
+</div></code></pre>
+<p>这也是为什么我们在这种情况下要用类型标注而不是类型断言。
+作为函数的参数传递时，也有这个检查：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwT3B0aW9ucyUyMCU3QiUwQSUwOXRpdGxlJTNBJTIwc3RyaW5nJTNCJTBBJTA5ZGFya01vZGUlM0YlM0ElMjBib29sZWFuJTNCJTBBJTdEJTBBZnVuY3Rpb24lMjBjcmVhdGVXaW5kb3cob3B0aW9ucyUzQSUyME9wdGlvbnMpJTIwJTdCJTBBJTA5aWYlMjAob3B0aW9ucy5kYXJrTW9kZSklMjAlN0IlMEElMDklMDlzZXREYXJrTW9kZSgpJTNCJTBBJTA5JTdEJTBBJTA5JTJGJTJGJTIwLi4uJTBBJTdEJTBBY3JlYXRlV2luZG93KCU3QiUwQSUwOXRpdGxlJTNBJTIwJTIyU3BpZGVyJTIwU29saXRhaXJlJTIyJTJDJTBBJTA5ZGFya21vZGUlM0ElMjB0cnVlJTJDJTBBJTA5JTJGJTJGJTIwfn5+fn5+fn5+fn5+fiUyME9iamVjdCUyMGxpdGVyYWwlMjBtYXklMjBvbmx5JTIwc3BlY2lmeSUyMGtub3duJTIwcHJvcGVydGllcyUyQyUyMGJ1dCUwQSUwOSUyRiUyRiUyMCdkYXJrbW9kZSclMjBkb2VzJTIwbm90JTIwZXhpc3QlMjBpbiUyMHR5cGUlMjAnT3B0aW9ucycuJTBBJTA5JTJGJTJGJTIwRGlkJTIweW91JTIwbWVhbiUyMHRvJTIwd3JpdGUlMjAnZGFya01vZGUnJTNGJTBBJTdEKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Options</span> {
+	<span class="hljs-attr">title</span>: <span class="hljs-built_in">string</span>;
+	<span class="hljs-attr">darkMode</span>?: <span class="hljs-built_in">boolean</span>;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">createWindow</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">Options</span></span>) {
+	<span class="hljs-keyword">if</span> (options.<span class="hljs-property">darkMode</span>) {
+		<span class="hljs-title function_">setDarkMode</span>();
+	}
+	<span class="hljs-comment">// ...</span>
+}
+<span class="hljs-title function_">createWindow</span>({
+	<span class="hljs-attr">title</span>: <span class="hljs-string">&quot;Spider Solitaire&quot;</span>,
+	<span class="hljs-attr">darkmode</span>: <span class="hljs-literal">true</span>,
+	<span class="hljs-comment">// ~~~~~~~~~~~~~ Object literal may only specify known properties, but</span>
+	<span class="hljs-comment">// &#x27;darkmode&#x27; does not exist in type &#x27;Options&#x27;.</span>
+	<span class="hljs-comment">// Did you mean to write &#x27;darkMode&#x27;?</span>
+});
+</div></code></pre>
+<p>但是注意只有字面量可以</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBvJTNBJTIwT3B0aW9ucyUyMCUzRCUyMCU3QiUyMGRhcmttb2RlJTNBJTIwdHJ1ZSUyQyUyMHRpdGxlJTNBJTIwJTIyU2tpJTIwRnJlZSUyMiUyMCU3RCUzQiUwQSUyRiUyRiUyMH5+fn5+fn5+JTIwJ2Rhcmttb2RlJyUyMGRvZXMlMjBub3QlMjBleGlzdCUyMGluJTIwdHlwZSUyMCdPcHRpb25zJy4uLiUwQWNvbnN0JTIwbzElM0ElMjBPcHRpb25zJTIwJTNEJTIwZG9jdW1lbnQlM0IlMjAlMkYlMkYlMjBPSyUwQWNvbnN0JTIwbzIlM0ElMjBPcHRpb25zJTIwJTNEJTIwbmV3JTIwSFRNTEFuY2hvckVsZW1lbnQoKSUzQiUyMCUyRiUyRiUyME9LJTBBY29uc3QlMjBpbnRlcm1lZGlhdGUlMjAlM0QlMjAlN0IlMjBkYXJrbW9kZSUzQSUyMHRydWUlMkMlMjB0aXRsZSUzQSUyMCUyMlNraSUyMEZyZWUlMjIlMjAlN0QlM0IlMEFjb25zdCUyMG8lM0ElMjBPcHRpb25zJTIwJTNEJTIwaW50ZXJtZWRpYXRlJTNCJTIwJTJGJTJGJTIwT0slMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">o</span>: <span class="hljs-title class_">Options</span> = { <span class="hljs-attr">darkmode</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">title</span>: <span class="hljs-string">&quot;Ski Free&quot;</span> };
+<span class="hljs-comment">// ~~~~~~~~ &#x27;darkmode&#x27; does not exist in type &#x27;Options&#x27;...</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">o1</span>: <span class="hljs-title class_">Options</span> = <span class="hljs-variable language_">document</span>; <span class="hljs-comment">// OK</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">o2</span>: <span class="hljs-title class_">Options</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HTMLAnchorElement</span>(); <span class="hljs-comment">// OK</span>
+<span class="hljs-keyword">const</span> intermediate = { <span class="hljs-attr">darkmode</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">title</span>: <span class="hljs-string">&quot;Ski Free&quot;</span> };
+<span class="hljs-keyword">const</span> <span class="hljs-attr">o</span>: <span class="hljs-title class_">Options</span> = intermediate; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>如果你使用了字面量，也开启了类型标注，但是还使用了类型断言，这个检查也不会开启
+你可以添加一个 index signature 来禁用这个检查：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwT3B0aW9ucyUyMCU3QiUwQSUwOWRhcmtNb2RlJTNGJTNBJTIwYm9vbGVhbiUzQiUwQSUwOSU1Qm90aGVyT3B0aW9ucyUzQSUyMHN0cmluZyU1RCUzQSUyMHVua25vd24lM0IlMEElN0QlMEFjb25zdCUyMG8lM0ElMjBPcHRpb25zJTIwJTNEJTIwJTdCJTIwZGFya21vZGUlM0ElMjB0cnVlJTIwJTdEJTNCJTIwJTJGJTJGJTIwT0slMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Options</span> {
+	<span class="hljs-attr">darkMode</span>?: <span class="hljs-built_in">boolean</span>;
+	[<span class="hljs-attr">otherOptions</span>: <span class="hljs-built_in">string</span>]: <span class="hljs-built_in">unknown</span>;
+}
+<span class="hljs-keyword">const</span> <span class="hljs-attr">o</span>: <span class="hljs-title class_">Options</span> = { <span class="hljs-attr">darkmode</span>: <span class="hljs-literal">true</span> }; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>如果一个 interface 的所有属性都可以为空，那么就称其为弱类型：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwTGluZUNoYXJ0T3B0aW9ucyUyMCU3QiUwQSUwOWxvZ3NjYWxlJTNGJTNBJTIwYm9vbGVhbiUzQiUwQSUwOWludmVydGVkWUF4aXMlM0YlM0ElMjBib29sZWFuJTNCJTBBJTA5YXJlYUNoYXJ0JTNGJTNBJTIwYm9vbGVhbiUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">LineChartOptions</span> {
+	<span class="hljs-attr">logscale</span>?: <span class="hljs-built_in">boolean</span>;
+	<span class="hljs-attr">invertedYAxis</span>?: <span class="hljs-built_in">boolean</span>;
+	<span class="hljs-attr">areaChart</span>?: <span class="hljs-built_in">boolean</span>;
+}
+</div></code></pre>
+<p>根据 ts 鸭子类型的特性，任何的 obj 都可以称为 LineChartOptions 类型，但是 ts 又引入了另一个检查，一个 obj 必须与弱类型至少有一个属性相同才可以赋值：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBvcHRzJTIwJTNEJTIwJTdCJTIwbG9nU2NhbGUlM0ElMjB0cnVlJTIwJTdEJTNCJTBBY29uc3QlMjBvJTNBJTIwTGluZUNoYXJ0T3B0aW9ucyUyMCUzRCUyMG9wdHMlM0IlMjAlMkYlMkZlcnJvciUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">const</span> opts = { <span class="hljs-attr">logScale</span>: <span class="hljs-literal">true</span> };
+<span class="hljs-keyword">const</span> <span class="hljs-attr">o</span>: <span class="hljs-title class_">LineChartOptions</span> = opts; <span class="hljs-comment">//error</span>
+</div></code></pre>
+<h3 id="tui-dao-chi-du" tabindex="-1">推导尺度</h3>
+<p>const 声明的变量的推导比 let 的更加精确，如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="bGV0JTIweCUyMCUzRCUyMCUyMnglMjIlM0IlMjAlMkYlMkYlMjB0eXBlJTIwaXMlMjBzdHJpbmclMEFjb25zdCUyMHglMjAlM0QlMjAlMjJ4JTIyJTNCJTIwJTJGJTJGJTIwdHlwZSUyMGlzJTIwJTIyeCUyMiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">let</span> x = <span class="hljs-string">&quot;x&quot;</span>; <span class="hljs-comment">// type is string</span>
+<span class="hljs-keyword">const</span> x = <span class="hljs-string">&quot;x&quot;</span>; <span class="hljs-comment">// type is &quot;x&quot;</span>
+</div></code></pre>
+<p>但 const 声明的对象内的属性没有这个：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjB2JTIwJTNEJTIwJTdCJTBBJTA5eCUzQSUyMDElMkMlMjAlMkYlMkYlMjB0eXBlJTIwaXMlMjBudW1iZXIlMEElN0QlM0IlMEF2LnglMjAlM0QlMjAzJTNCJTIwJTJGJTJGJTIwT0slMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">const</span> v = {
+	<span class="hljs-attr">x</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// type is number</span>
+};
+v.<span class="hljs-property">x</span> = <span class="hljs-number">3</span>; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>有时你想让推导变得更加精确，你可以手动标注类型：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjB2JTNBJTIwJTdCJTIweCUzQSUyMDElMjAlN0MlMjAzJTIwJTdDJTIwNSUyMCU3RCUyMCUzRCUyMCU3QiUwQSUwOXglM0ElMjAxJTJDJTBBJTdEJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwJTdCJTIweCUzQSUyMDElMjAlN0MlMjAzJTIwJTdDJTIwNSUzQiUyMCU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">v</span>: { <span class="hljs-attr">x</span>: <span class="hljs-number">1</span> | <span class="hljs-number">3</span> | <span class="hljs-number">5</span> } = {
+	<span class="hljs-attr">x</span>: <span class="hljs-number">1</span>,
+}; <span class="hljs-comment">// Type is { x: 1 | 3 | 5; }</span>
+</div></code></pre>
+<p>或者使用 as const</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjB2MSUyMCUzRCUyMCU3QiUwQSUwOXglM0ElMjAxJTJDJTBBJTA5eSUzQSUyMDIlMkMlMEElN0QlM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjAlN0IlMjB4JTNBJTIwbnVtYmVyJTNCJTIweSUzQSUyMG51bWJlciUzQiUyMCU3RCUwQWNvbnN0JTIwdjIlMjAlM0QlMjAlN0IlMEElMDl4JTNBJTIwMSUyMGFzJTIwY29uc3QlMkMlMEElMDl5JTNBJTIwMiUyQyUwQSU3RCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMCU3QiUyMHglM0ElMjAxJTNCJTIweSUzQSUyMG51bWJlciUzQiUyMCU3RCUwQWNvbnN0JTIwdjMlMjAlM0QlMjAlN0IlMEElMDl4JTNBJTIwMSUyQyUwQSUwOXklM0ElMjAyJTJDJTBBJTdEJTIwYXMlMjBjb25zdCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMCU3QiUyMHJlYWRvbmx5JTIweCUzQSUyMDElM0IlMjByZWFkb25seSUyMHklM0ElMjAyJTNCJTIwJTdEJTBBY29uc3QlMjBhMSUyMCUzRCUyMCU1QjElMkMlMjAyJTJDJTIwMyU1RCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMG51bWJlciU1QiU1RCUwQWNvbnN0JTIwYTIlMjAlM0QlMjAlNUIxJTJDJTIwMiUyQyUyMDMlNUQlMjBhcyUyMGNvbnN0JTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwcmVhZG9ubHklMjAlNUIxJTJDJTIwMiUyQyUyMDMlNUQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div></div><div class="code"><span class="hljs-keyword">const</span> v1 = {
+	<span class="hljs-attr">x</span>: <span class="hljs-number">1</span>,
+	<span class="hljs-attr">y</span>: <span class="hljs-number">2</span>,
+}; <span class="hljs-comment">// Type is { x: number; y: number; }</span>
+<span class="hljs-keyword">const</span> v2 = {
+	<span class="hljs-attr">x</span>: <span class="hljs-number">1</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>,
+	<span class="hljs-attr">y</span>: <span class="hljs-number">2</span>,
+}; <span class="hljs-comment">// Type is { x: 1; y: number; }</span>
+<span class="hljs-keyword">const</span> v3 = {
+	<span class="hljs-attr">x</span>: <span class="hljs-number">1</span>,
+	<span class="hljs-attr">y</span>: <span class="hljs-number">2</span>,
+} <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>; <span class="hljs-comment">// Type is { readonly x: 1; readonly y: 2; }</span>
+<span class="hljs-keyword">const</span> a1 = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]; <span class="hljs-comment">// Type is number[]</span>
+<span class="hljs-keyword">const</span> a2 = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>; <span class="hljs-comment">// Type is readonly [1, 2, 3]</span>
+</div></code></pre>
+<p>数组和 tuple 类型也有类似的问题，如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTIwUGFyYW1ldGVyJTIwaXMlMjBhJTIwKGxhdGl0dWRlJTJDJTIwbG9uZ2l0dWRlKSUyMHBhaXIuJTBBZnVuY3Rpb24lMjBwYW5Ubyh3aGVyZSUzQSUyMCU1Qm51bWJlciUyQyUyMG51bWJlciU1RCklMjAlN0IlMEElMDklMkYqJTIwLi4uJTIwKiUyRiUwQSU3RCUwQXBhblRvKCU1QjEwJTJDJTIwMjAlNUQpJTNCJTIwJTJGJTJGJTIwT0slMEFjb25zdCUyMGxvYyUyMCUzRCUyMCU1QjEwJTJDJTIwMjAlNUQlM0IlMEFwYW5Ubyhsb2MpJTNCJTBBJTJGJTJGJTIwfn5+JTIwQXJndW1lbnQlMjBvZiUyMHR5cGUlMjAnbnVtYmVyJTVCJTVEJyUyMGlzJTIwbm90JTIwYXNzaWduYWJsZSUyMHRvJTBBJTJGJTJGJTIwcGFyYW1ldGVyJTIwb2YlMjB0eXBlJTIwJyU1Qm51bWJlciUyQyUyMG51bWJlciU1RCclMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-comment">// Parameter is a (latitude, longitude) pair.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">panTo</span>(<span class="hljs-params"><span class="hljs-attr">where</span>: [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>]</span>) {
+	<span class="hljs-comment">/* ... */</span>
+}
+<span class="hljs-title function_">panTo</span>([<span class="hljs-number">10</span>, <span class="hljs-number">20</span>]); <span class="hljs-comment">// OK</span>
+<span class="hljs-keyword">const</span> loc = [<span class="hljs-number">10</span>, <span class="hljs-number">20</span>];
+<span class="hljs-title function_">panTo</span>(loc);
+<span class="hljs-comment">// ~~~ Argument of type &#x27;number[]&#x27; is not assignable to</span>
+<span class="hljs-comment">// parameter of type &#x27;[number, number]&#x27;</span>
+</div></code></pre>
+<p>你可以这么做：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBsb2MlM0ElMjAlNUJudW1iZXIlMkMlMjBudW1iZXIlNUQlMjAlM0QlMjAlNUIxMCUyQyUyMDIwJTVEJTNCJTBBcGFuVG8obG9jKSUzQiUyMCUyRiUyRiUyME9LJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">loc</span>: [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>] = [<span class="hljs-number">10</span>, <span class="hljs-number">20</span>];
+<span class="hljs-title function_">panTo</span>(loc); <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>使用 as const 可能出问题：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBsb2MlMjAlM0QlMjAlNUIxMCUyQyUyMDIwJTVEJTIwYXMlMjBjb25zdCUzQiUwQXBhblRvKGxvYyklM0IlMEElMkYlMkYlMjB+fn4lMjBUeXBlJTIwJ3JlYWRvbmx5JTIwJTVCMTAlMkMlMjAyMCU1RCclMjBpcyUyMCdyZWFkb25seSclMEElMkYlMkYlMjBhbmQlMjBjYW5ub3QlMjBiZSUyMGFzc2lnbmVkJTIwdG8lMjB0aGUlMjBtdXRhYmxlJTIwdHlwZSUyMCclNUJudW1iZXIlMkMlMjBudW1iZXIlNUQnJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">const</span> loc = [<span class="hljs-number">10</span>, <span class="hljs-number">20</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>;
+<span class="hljs-title function_">panTo</span>(loc);
+<span class="hljs-comment">// ~~~ Type &#x27;readonly [10, 20]&#x27; is &#x27;readonly&#x27;</span>
+<span class="hljs-comment">// and cannot be assigned to the mutable type &#x27;[number, number]&#x27;</span>
+</div></code></pre>
+<h3 id="type-guard" tabindex="-1">type guard</h3>
+<p>你可以手动编写一个函数，来判断一个值是否是某个类型，帮助 ts 更好地推导</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBpc0lucHV0RWxlbWVudChlbCUzQSUyMEhUTUxFbGVtZW50KSUzQSUyMGVsJTIwaXMlMjBIVE1MSW5wdXRFbGVtZW50JTIwJTdCJTBBJTA5cmV0dXJuJTIwJTIydmFsdWUlMjIlMjBpbiUyMGVsJTNCJTBBJTdEJTBBZnVuY3Rpb24lMjBnZXRFbGVtZW50Q29udGVudChlbCUzQSUyMEhUTUxFbGVtZW50KSUyMCU3QiUwQSUwOWlmJTIwKGlzSW5wdXRFbGVtZW50KGVsKSklMjAlN0IlMEElMDklMDllbCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMEhUTUxJbnB1dEVsZW1lbnQlMEElMDklMDlyZXR1cm4lMjBlbC52YWx1ZSUzQiUwQSUwOSU3RCUwQSUwOWVsJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwSFRNTEVsZW1lbnQlMEElMDlyZXR1cm4lMjBlbC50ZXh0Q29udGVudCUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isInputElement</span>(<span class="hljs-params"><span class="hljs-attr">el</span>: <span class="hljs-title class_">HTMLElement</span></span>): el is <span class="hljs-title class_">HTMLInputElement</span> {
+	<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;value&quot;</span> <span class="hljs-keyword">in</span> el;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">getElementContent</span>(<span class="hljs-params"><span class="hljs-attr">el</span>: <span class="hljs-title class_">HTMLElement</span></span>) {
+	<span class="hljs-keyword">if</span> (<span class="hljs-title function_">isInputElement</span>(el)) {
+		el; <span class="hljs-comment">// Type is HTMLInputElement</span>
+		<span class="hljs-keyword">return</span> el.<span class="hljs-property">value</span>;
+	}
+	el; <span class="hljs-comment">// Type is HTMLElement</span>
+	<span class="hljs-keyword">return</span> el.<span class="hljs-property">textContent</span>;
+}
+</div></code></pre>
+<h3 id="li-jie-any-lei-xing-de-jin-hua" tabindex="-1">理解 any 类型的&quot;进化&quot;</h3>
+<p>有的变量，可能你在往里面存放具体的值之前，ts 将其为推断为 any 类型，但是存放具体的值之后，ts 将其推断为更加具体的类型，比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjByYW5nZShzdGFydCUzQSUyMG51bWJlciUyQyUyMGxpbWl0JTNBJTIwbnVtYmVyKSUyMCU3QiUwQSUwOWNvbnN0JTIwb3V0JTIwJTNEJTIwJTVCJTVEJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwYW55JTVCJTVEJTBBJTA5Zm9yJTIwKGxldCUyMGklMjAlM0QlMjBzdGFydCUzQiUyMGklMjAlM0MlMjBsaW1pdCUzQiUyMGklMkIlMkIpJTIwJTdCJTBBJTA5JTA5b3V0LnB1c2goaSklM0IlMjAlMkYlMkYlMjBUeXBlJTIwb2YlMjBvdXQlMjBpcyUyMGFueSU1QiU1RCUwQSUwOSU3RCUwQSUwOXJldHVybiUyMG91dCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMG51bWJlciU1QiU1RCUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">range</span>(<span class="hljs-params"><span class="hljs-attr">start</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">limit</span>: <span class="hljs-built_in">number</span></span>) {
+	<span class="hljs-keyword">const</span> out = []; <span class="hljs-comment">// Type is any[]</span>
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = start; i &lt; limit; i++) {
+		out.<span class="hljs-title function_">push</span>(i); <span class="hljs-comment">// Type of out is any[]</span>
+	}
+	<span class="hljs-keyword">return</span> out; <span class="hljs-comment">// Type is number[]</span>
+}
+</div></code></pre>
+<p>和上面那一条不一样，这种 &quot;进化&quot; 是可以 &quot;膨胀&quot; 的：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjByZXN1bHQlMjAlM0QlMjAlNUIlNUQlM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBhbnklNUIlNUQlMEFyZXN1bHQucHVzaCglMjJhJTIyKSUzQiUwQXJlc3VsdCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMHN0cmluZyU1QiU1RCUwQXJlc3VsdC5wdXNoKDEpJTNCJTBBcmVzdWx0JTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwKHN0cmluZyUyMCU3QyUyMG51bWJlciklNUIlNUQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">const</span> result = []; <span class="hljs-comment">// Type is any[]</span>
+result.<span class="hljs-title function_">push</span>(<span class="hljs-string">&quot;a&quot;</span>);
+result; <span class="hljs-comment">// Type is string[]</span>
+result.<span class="hljs-title function_">push</span>(<span class="hljs-number">1</span>);
+result; <span class="hljs-comment">// Type is (string | number)[]</span>
+</div></code></pre>
+<p>除了循环结构，分支结构和 try-catch 结构也可以有这种特性：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="bGV0JTIwdmFsJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwYW55JTBBaWYlMjAoTWF0aC5yYW5kb20oKSUyMCUzQyUyMDAuNSklMjAlN0IlMEElMDl2YWwlMjAlM0QlMjAlMkZoZWxsbyUyRiUzQiUwQSUwOXZhbCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMFJlZ0V4cCUwQSU3RCUyMGVsc2UlMjAlN0IlMEElMDl2YWwlMjAlM0QlMjAxMiUzQiUwQSUwOXZhbCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMG51bWJlciUwQSU3RCUwQXZhbCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMG51bWJlciUyMCU3QyUyMFJlZ0V4cCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">let</span> val; <span class="hljs-comment">// Type is any</span>
+<span class="hljs-keyword">if</span> (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() &lt; <span class="hljs-number">0.5</span>) {
+	val = <span class="hljs-regexp">/hello/</span>;
+	val; <span class="hljs-comment">// Type is RegExp</span>
+} <span class="hljs-keyword">else</span> {
+	val = <span class="hljs-number">12</span>;
+	val; <span class="hljs-comment">// Type is number</span>
+}
+val; <span class="hljs-comment">// Type is number | RegExp</span>
+</div></code></pre>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="bGV0JTIwdmFsJTIwJTNEJTIwbnVsbCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMGFueSUwQXRyeSUyMCU3QiUwQSUwOXNvbWV0aGluZ0Rhbmdlcm91cygpJTNCJTBBJTA5dmFsJTIwJTNEJTIwMTIlM0IlMEElMDl2YWwlM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBudW1iZXIlMEElN0QlMjBjYXRjaCUyMChlKSUyMCU3QiUwQSUwOWNvbnNvbGUud2FybiglMjJhbGFzISUyMiklM0IlMEElN0QlMEF2YWwlM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBudW1iZXIlMjAlN0MlMjBudWxsJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">let</span> val = <span class="hljs-literal">null</span>; <span class="hljs-comment">// Type is any</span>
+<span class="hljs-keyword">try</span> {
+	<span class="hljs-title function_">somethingDangerous</span>();
+	val = <span class="hljs-number">12</span>;
+	val; <span class="hljs-comment">// Type is number</span>
+} <span class="hljs-keyword">catch</span> (e) {
+	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">warn</span>(<span class="hljs-string">&quot;alas!&quot;</span>);
+}
+val; <span class="hljs-comment">// Type is number | null</span>
+</div></code></pre>
+<p>但是在函数闭包里没有这种特性：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBtYWtlU3F1YXJlcyhzdGFydCUzQSUyMG51bWJlciUyQyUyMGxpbWl0JTNBJTIwbnVtYmVyKSUyMCU3QiUwQSUwOWNvbnN0JTIwb3V0JTIwJTNEJTIwJTVCJTVEJTNCJTBBJTA5JTJGJTJGJTIwfn5+JTIwVmFyaWFibGUlMjAnb3V0JyUyMGltcGxpY2l0bHklMjBoYXMlMjB0eXBlJTIwJ2FueSU1QiU1RCclMjBpbiUyMHNvbWUlMjBsb2NhdGlvbnMlMEElMDlyYW5nZShzdGFydCUyQyUyMGxpbWl0KS5mb3JFYWNoKChpKSUyMCUzRCUzRSUyMCU3QiUwQSUwOSUwOW91dC5wdXNoKGklMjAqJTIwaSklM0IlMEElMDklN0QpJTNCJTBBJTA5cmV0dXJuJTIwb3V0JTNCJTBBJTA5JTJGJTJGJTIwfn5+JTIwVmFyaWFibGUlMjAnb3V0JyUyMGltcGxpY2l0bHklMjBoYXMlMjBhbiUyMCdhbnklNUIlNUQnJTIwdHlwZSUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">makeSquares</span>(<span class="hljs-params"><span class="hljs-attr">start</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">limit</span>: <span class="hljs-built_in">number</span></span>) {
+	<span class="hljs-keyword">const</span> out = [];
+	<span class="hljs-comment">// ~~~ Variable &#x27;out&#x27; implicitly has type &#x27;any[]&#x27; in some locations</span>
+	<span class="hljs-title function_">range</span>(start, limit).<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">i</span>) =&gt;</span> {
+		out.<span class="hljs-title function_">push</span>(i * i);
+	});
+	<span class="hljs-keyword">return</span> out;
+	<span class="hljs-comment">// ~~~ Variable &#x27;out&#x27; implicitly has an &#x27;any[]&#x27; type</span>
+}
+</div></code></pre>
+<p>当然，在&quot;进化&quot;之前，他还是 any，比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBvdXQlMjAlM0QlMjAlNUIlNUQlM0IlMEElMjAlMkYlMkYlMjB+fn4lMjBWYXJpYWJsZSUyMCdvdXQnJTIwaW1wbGljaXRseSUyMGhhcyUyMHR5cGUlMjAnYW55JTVCJTVEJyUyMGluJTIwc29tZSUwQSUyMCUyRiUyRiUyMGxvY2F0aW9ucyUyMHdoZXJlJTIwaXRzJTIwdHlwZSUyMGNhbm5vdCUyMGJlJTIwZGV0ZXJtaW5lZCUwQSUyMGlmJTIwKHN0YXJ0JTIwJTNEJTNEJTNEJTIwbGltaXQpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwcmV0dXJuJTIwb3V0JTNCJTBBJTIwJTIwJTIwJTIwJTIwJTJGJTJGJTIwfn5+JTIwVmFyaWFibGUlMjAnb3V0JyUyMGltcGxpY2l0bHklMjBoYXMlMjBhbiUyMCdhbnklNUIlNUQnJTIwdHlwZSUwQSUyMCU3RCUwQSUyMGZvciUyMChsZXQlMjBpJTIwJTNEJTIwc3RhcnQlM0IlMjBpJTIwJTNDJTIwbGltaXQlM0IlMjBpJTJCJTJCKSUyMCU3QiUwQSUyMCUwOW91dC5wdXNoKGkpJTNCJTBBJTIwJTdEJTBBJTIwcmV0dXJuJTIwb3V0JTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div></div><div class="code"><span class="hljs-keyword">const</span> out = [];
+ <span class="hljs-comment">// ~~~ Variable &#x27;out&#x27; implicitly has type &#x27;any[]&#x27; in some</span>
+ <span class="hljs-comment">// locations where its type cannot be determined</span>
+ <span class="hljs-keyword">if</span> (start === limit) {
+     <span class="hljs-keyword">return</span> out;
+     <span class="hljs-comment">// ~~~ Variable &#x27;out&#x27; implicitly has an &#x27;any[]&#x27; type</span>
+ }
+ <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = start; i &lt; limit; i++) {
+ 	out.<span class="hljs-title function_">push</span>(i);
+ }
+ <span class="hljs-keyword">return</span> out;
+}
+</div></code></pre>
+<p>不过还是建议使用显式的类型标注，以便更好地代码补全的错误检查</p>
+<h3 id="aliase-de-tui-dao" tabindex="-1">aliase 的推导</h3>
+<p>ts 无法很好地推导 aliase</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBpc1BvaW50SW5Qb2x5Z29uKHBvbHlnb24lM0ElMjBQb2x5Z29uJTJDJTIwcHQlM0ElMjBDb29yZGluYXRlKSUyMCU3QiUwQSUwOWNvbnN0JTIwYm94JTIwJTNEJTIwcG9seWdvbi5iYm94JTNCJTBBJTA5aWYlMjAocG9seWdvbi5iYm94KSUyMCU3QiUwQSUwOSUwOWlmJTIwKCUwQSUwOSUwOSUwOXB0LnglMjAlM0MlMjBib3gueCU1QjAlNUQlMjAlN0MlN0MlMEElMDklMDklMDlwdC54JTIwJTNFJTIwYm94LnglNUIxJTVEJTIwJTdDJTdDJTBBJTA5JTA5JTA5JTJGJTJGJTIwfn5+JTIwfn5+JTIwT2JqZWN0JTIwaXMlMjBwb3NzaWJseSUyMCd1bmRlZmluZWQnJTBBJTA5JTA5JTA5cHQueSUyMCUzQyUyMGJveC55JTVCMSU1RCUyMCU3QyU3QyUwQSUwOSUwOSUwOXB0LnklMjAlM0UlMjBib3gueSU1QjElNUQlMEElMDklMDkpJTIwJTdCJTBBJTA5JTA5JTA5JTJGJTJGJTIwfn5+JTIwfn5+JTIwT2JqZWN0JTIwaXMlMjBwb3NzaWJseSUyMCd1bmRlZmluZWQnJTBBJTA5JTA5JTA5cmV0dXJuJTIwZmFsc2UlM0IlMEElMDklMDklN0QlMEElMDklN0QlMEElMDklMkYlMkYlMjAuLi4lMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isPointInPolygon</span>(<span class="hljs-params"><span class="hljs-attr">polygon</span>: <span class="hljs-title class_">Polygon</span>, <span class="hljs-attr">pt</span>: <span class="hljs-title class_">Coordinate</span></span>) {
+	<span class="hljs-keyword">const</span> box = polygon.<span class="hljs-property">bbox</span>;
+	<span class="hljs-keyword">if</span> (polygon.<span class="hljs-property">bbox</span>) {
+		<span class="hljs-keyword">if</span> (
+			pt.<span class="hljs-property">x</span> &lt; box.<span class="hljs-property">x</span>[<span class="hljs-number">0</span>] ||
+			pt.<span class="hljs-property">x</span> &gt; box.<span class="hljs-property">x</span>[<span class="hljs-number">1</span>] ||
+			<span class="hljs-comment">// ~~~ ~~~ Object is possibly &#x27;undefined&#x27;</span>
+			pt.<span class="hljs-property">y</span> &lt; box.<span class="hljs-property">y</span>[<span class="hljs-number">1</span>] ||
+			pt.<span class="hljs-property">y</span> &gt; box.<span class="hljs-property">y</span>[<span class="hljs-number">1</span>]
+		) {
+			<span class="hljs-comment">// ~~~ ~~~ Object is possibly &#x27;undefined&#x27;</span>
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+		}
+	}
+	<span class="hljs-comment">// ...</span>
+}
+</div></code></pre>
+<p>因此一直使用一个 aliase</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBpc1BvaW50SW5Qb2x5Z29uKHBvbHlnb24lM0ElMjBQb2x5Z29uJTJDJTIwcHQlM0ElMjBDb29yZGluYXRlKSUyMCU3QiUwQSUwOWNvbnN0JTIwYm94JTIwJTNEJTIwcG9seWdvbi5iYm94JTNCJTBBJTA5aWYlMjAoYm94KSUyMCU3QiUwQSUwOSUwOWlmJTIwKCUwQSUwOSUwOSUwOXB0LnglMjAlM0MlMjBib3gueCU1QjAlNUQlMjAlN0MlN0MlMEElMDklMDklMDlwdC54JTIwJTNFJTIwYm94LnglNUIxJTVEJTIwJTdDJTdDJTBBJTA5JTA5JTA5cHQueSUyMCUzQyUyMGJveC55JTVCMSU1RCUyMCU3QyU3QyUwQSUwOSUwOSUwOXB0LnklMjAlM0UlMjBib3gueSU1QjElNUQlMEElMDklMDkpJTIwJTdCJTBBJTA5JTA5JTA5JTJGJTJGJTIwT0slMEElMDklMDklMDlyZXR1cm4lMjBmYWxzZSUzQiUwQSUwOSUwOSU3RCUwQSUwOSU3RCUwQSUwOSUyRiUyRiUyMC4uLiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">isPointInPolygon</span>(<span class="hljs-params"><span class="hljs-attr">polygon</span>: <span class="hljs-title class_">Polygon</span>, <span class="hljs-attr">pt</span>: <span class="hljs-title class_">Coordinate</span></span>) {
+	<span class="hljs-keyword">const</span> box = polygon.<span class="hljs-property">bbox</span>;
+	<span class="hljs-keyword">if</span> (box) {
+		<span class="hljs-keyword">if</span> (
+			pt.<span class="hljs-property">x</span> &lt; box.<span class="hljs-property">x</span>[<span class="hljs-number">0</span>] ||
+			pt.<span class="hljs-property">x</span> &gt; box.<span class="hljs-property">x</span>[<span class="hljs-number">1</span>] ||
+			pt.<span class="hljs-property">y</span> &lt; box.<span class="hljs-property">y</span>[<span class="hljs-number">1</span>] ||
+			pt.<span class="hljs-property">y</span> &gt; box.<span class="hljs-property">y</span>[<span class="hljs-number">1</span>]
+		) {
+			<span class="hljs-comment">// OK</span>
+			<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+		}
+	}
+	<span class="hljs-comment">// ...</span>
+}
+</div></code></pre>
+<h3 id="async-han-shu-fan-hui-zhi-tui-dao" tabindex="-1">async 函数返回值推导</h3>
+<p>ts 推导 async 函数返回值时，会自动将类型用 Promise 泛型包裹：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTIwZnVuY3Rpb24lMjBnZXROdW1iZXIoKSUzQSUyMFByb21pc2UlM0NudW1iZXIlM0UlMEFhc3luYyUyMGZ1bmN0aW9uJTIwZ2V0TnVtYmVyKCklMjAlN0IlMEElMDlyZXR1cm4lMjA0MiUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-comment">// function getNumber(): Promise&lt;number&gt;</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">getNumber</span>(<span class="hljs-params"></span>) {
+	<span class="hljs-keyword">return</span> <span class="hljs-number">42</span>;
+}
+</div></code></pre>
+<h3 id="dui-yu-dom-de-lei-xing-tui-dao" tabindex="-1">对于 dom 的类型推导</h3>
+<p>ts 可以推断 dom 的类型：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZG9jdW1lbnQuZ2V0RWxlbWVudHNCeVRhZ05hbWUoJTIycCUyMiklNUIwJTVEJTNCJTIwJTJGJTJGJTIwSFRNTFBhcmFncmFwaEVsZW1lbnQlMEFkb2N1bWVudC5jcmVhdGVFbGVtZW50KCUyMmJ1dHRvbiUyMiklM0IlMjAlMkYlMkYlMjBIVE1MQnV0dG9uRWxlbWVudCUwQWRvY3VtZW50LnF1ZXJ5U2VsZWN0b3IoJTIyZGl2JTIyKSUzQiUyMCUyRiUyRiUyMEhUTUxEaXZFbGVtZW50JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementsByTagName</span>(<span class="hljs-string">&quot;p&quot;</span>)[<span class="hljs-number">0</span>]; <span class="hljs-comment">// HTMLParagraphElement</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;button&quot;</span>); <span class="hljs-comment">// HTMLButtonElement</span>
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;div&quot;</span>); <span class="hljs-comment">// HTMLDivElement</span>
+</div></code></pre>
+<p>但是这种就不灵了：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJTIybXktZGl2JTIyKSUzQiUyMCUyRiUyRiUyMEhUTUxFbGVtZW50JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;my-div&quot;</span>); <span class="hljs-comment">// HTMLElement</span>
+</div></code></pre>
+<h2 id="dai-ma-jian-yi" tabindex="-1">代码建议</h2>
+<h3 id="bu-yao-shi-yong-object-wrapper-types" tabindex="-1">不要使用 Object wrapper types</h3>
+<p>比如 String、Number、Boolean、Symbol、Bigint 这种类型
+这种类型相当于对象，直接比较，即使是用 === ，比较的也是对象的地址，地址不同的对象即使看起来完全一致也会判定为 false</p>
+<blockquote>
+<p>&gt; <strong>&quot;hello&quot; === new String(&quot;hello&quot;)</strong></p>
+<p>false</p>
+<p>&gt; <strong>new String(&quot;hello&quot;) === new String(&quot;hello&quot;)</strong></p>
+<p>false
+对于 primitive type ，当需要将其视为其所对应的 object wrapper type 的时候，则会创建一个临时的对象，然后在操作结束后将对象销毁，如：
+&gt; <strong>x = &quot;hello&quot;</strong></p>
+<p>&gt; <strong>x.language = 'English'</strong></p>
+<p>'English'</p>
+<p>&gt; <strong>x.language</strong></p>
+<p>undefined
+此外，primitive type 和 object wrapper type 在 ts 中视为不同的类型。primitive type 可以赋值为 object wrapper type ，而反之则不可以。但注意前者，即使你可以赋值，但是在运行时，他的值仍然为 primitive type，这会导致一些疑惑的地方。</p>
+</blockquote>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBnZXRTdHJpbmdMZW4oZm9vJTNBJTIwU3RyaW5nKSUyMCU3QiUwQSUwOXJldHVybiUyMGZvby5sZW5ndGglM0IlMEElN0QlMEFnZXRTdHJpbmdMZW4oJTIyaGVsbG8lMjIpJTNCJTIwJTJGJTJGJTIwT0slMEFnZXRTdHJpbmdMZW4obmV3JTIwU3RyaW5nKCUyMmhlbGxvJTIyKSklM0IlMjAlMkYlMkYlMjBPSyUwQWZ1bmN0aW9uJTIwaXNHcmVldGluZyhwaHJhc2UlM0ElMjBTdHJpbmcpJTIwJTdCJTBBJTA5cmV0dXJuJTIwJTVCJTIyaGVsbG8lMjIlMkMlMjAlMjJnb29kJTIwZGF5JTIyJTVELmluY2x1ZGVzKHBocmFzZSklM0IlMEElMDklMkYlMkYlMjB+fn5+fn4lMEElMDklMkYlMkYlMjBBcmd1bWVudCUyMG9mJTIwdHlwZSUyMCdTdHJpbmcnJTIwaXMlMjBub3QlMjBhc3NpZ25hYmxlJTIwdG8lMjBwYXJhbWV0ZXIlMEElMDklMkYlMkYlMjBvZiUyMHR5cGUlMjAnc3RyaW5nJy4lMEElMDklMkYlMkYlMjAnc3RyaW5nJyUyMGlzJTIwYSUyMHByaW1pdGl2ZSUyQyUyMGJ1dCUyMCdTdHJpbmcnJTIwaXMlMjBhJTIwd3JhcHBlciUyMG9iamVjdCUzQiUwQSUwOSUyRiUyRiUyMHByZWZlciUyMHVzaW5nJTIwJ3N0cmluZyclMjB3aGVuJTIwcG9zc2libGUlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">getStringLen</span>(<span class="hljs-params"><span class="hljs-attr">foo</span>: <span class="hljs-title class_">String</span></span>) {
+	<span class="hljs-keyword">return</span> foo.<span class="hljs-property">length</span>;
+}
+<span class="hljs-title function_">getStringLen</span>(<span class="hljs-string">&quot;hello&quot;</span>); <span class="hljs-comment">// OK</span>
+<span class="hljs-title function_">getStringLen</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>(<span class="hljs-string">&quot;hello&quot;</span>)); <span class="hljs-comment">// OK</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isGreeting</span>(<span class="hljs-params"><span class="hljs-attr">phrase</span>: <span class="hljs-title class_">String</span></span>) {
+	<span class="hljs-keyword">return</span> [<span class="hljs-string">&quot;hello&quot;</span>, <span class="hljs-string">&quot;good day&quot;</span>].<span class="hljs-title function_">includes</span>(phrase);
+	<span class="hljs-comment">// ~~~~~~</span>
+	<span class="hljs-comment">// Argument of type &#x27;String&#x27; is not assignable to parameter</span>
+	<span class="hljs-comment">// of type &#x27;string&#x27;.</span>
+	<span class="hljs-comment">// &#x27;string&#x27; is a primitive, but &#x27;String&#x27; is a wrapper object;</span>
+	<span class="hljs-comment">// prefer using &#x27;string&#x27; when possible</span>
+}
+</div></code></pre>
+<p>所以还是一律使用 primitive type 比较好</p>
+<h3 id="bu-tong-lei-xing-de-bian-liang-shi-yong-bu-tong-de-ming-cheng" tabindex="-1">不同类型的变量使用不同的名称</h3>
+<p>在 js 中可以给一个变量先后赋值不同类型的值，但在 ts 中不可以。你可能考虑这么做：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="bGV0JTIwaWQlM0ElMjBzdHJpbmclMjAlN0MlMjBudW1iZXIlMjAlM0QlMjAlMjIxMi0zNC01NiUyMiUzQiUwQWZldGNoUHJvZHVjdChpZCklM0IlMEFpZCUyMCUzRCUyMDEyMzQ1NiUzQiUyMCUyRiUyRiUyME9LJTBBZmV0Y2hQcm9kdWN0QnlTZXJpYWxOdW1iZXIoaWQpJTNCJTIwJTJGJTJGJTIwT0slMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span> | <span class="hljs-built_in">number</span> = <span class="hljs-string">&quot;12-34-56&quot;</span>;
+<span class="hljs-title function_">fetchProduct</span>(id);
+id = <span class="hljs-number">123456</span>; <span class="hljs-comment">// OK</span>
+<span class="hljs-title function_">fetchProductBySerialNumber</span>(id); <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>但是不要这么做，最好是再开一个变量：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBpZCUyMCUzRCUyMCUyMjEyLTM0LTU2JTIyJTNCJTBBZmV0Y2hQcm9kdWN0KGlkKSUzQiUwQWNvbnN0JTIwc2VyaWFsJTIwJTNEJTIwMTIzNDU2JTNCJTIwJTJGJTJGJTIwT0slMEFmZXRjaFByb2R1Y3RCeVNlcmlhbE51bWJlcihzZXJpYWwpJTNCJTIwJTJGJTJGJTIwT0slMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">const</span> id = <span class="hljs-string">&quot;12-34-56&quot;</span>;
+<span class="hljs-title function_">fetchProduct</span>(id);
+<span class="hljs-keyword">const</span> serial = <span class="hljs-number">123456</span>; <span class="hljs-comment">// OK</span>
+<span class="hljs-title function_">fetchProductBySerialNumber</span>(serial); <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>此外，变量遮盖也不是一个好的代码习惯：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGRG9uJ3QlMjBkbyUyMHRoaXMlMEFjb25zdCUyMGlkJTIwJTNEJTIwJTIyMTItMzQtNTYlMjIlM0IlMEFmZXRjaFByb2R1Y3QoaWQpJTNCJTBBJTdCJTBBJTA5Y29uc3QlMjBpZCUyMCUzRCUyMDEyMzQ1NiUzQiUyMCUyRiUyRiUyME9LJTBBJTA5ZmV0Y2hQcm9kdWN0QnlTZXJpYWxOdW1iZXIoaWQpJTNCJTIwJTJGJTJGJTIwT0slMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-comment">//Don&#x27;t do this</span>
+<span class="hljs-keyword">const</span> id = <span class="hljs-string">&quot;12-34-56&quot;</span>;
+<span class="hljs-title function_">fetchProduct</span>(id);
+{
+	<span class="hljs-keyword">const</span> id = <span class="hljs-number">123456</span>; <span class="hljs-comment">// OK</span>
+	<span class="hljs-title function_">fetchProductBySerialNumber</span>(id); <span class="hljs-comment">// OK</span>
+}
+</div></code></pre>
+<h3 id="shan-yong-han-shu-qian-ming-de-lei-xing" tabindex="-1">善用函数签名的类型</h3>
+<p>比如下面这个代码：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBhZGQoYSUzQSUyMG51bWJlciUyQyUyMGIlM0ElMjBudW1iZXIpJTIwJTdCJTBBJTA5cmV0dXJuJTIwYSUyMCUyQiUyMGIlM0IlMEElN0QlMEFmdW5jdGlvbiUyMHN1YihhJTNBJTIwbnVtYmVyJTJDJTIwYiUzQSUyMG51bWJlciklMjAlN0IlMEElMDlyZXR1cm4lMjBhJTIwLSUyMGIlM0IlMEElN0QlMEFmdW5jdGlvbiUyMG11bChhJTNBJTIwbnVtYmVyJTJDJTIwYiUzQSUyMG51bWJlciklMjAlN0IlMEElMDlyZXR1cm4lMjBhJTIwKiUyMGIlM0IlMEElN0QlMEFmdW5jdGlvbiUyMGRpdihhJTNBJTIwbnVtYmVyJTJDJTIwYiUzQSUyMG51bWJlciklMjAlN0IlMEElMDlyZXR1cm4lMjBhJTIwJTJGJTIwYiUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">b</span>: <span class="hljs-built_in">number</span></span>) {
+	<span class="hljs-keyword">return</span> a + b;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">sub</span>(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">b</span>: <span class="hljs-built_in">number</span></span>) {
+	<span class="hljs-keyword">return</span> a - b;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">mul</span>(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">b</span>: <span class="hljs-built_in">number</span></span>) {
+	<span class="hljs-keyword">return</span> a * b;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">div</span>(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">b</span>: <span class="hljs-built_in">number</span></span>) {
+	<span class="hljs-keyword">return</span> a / b;
+}
+</div></code></pre>
+<p>可以优化为下面的代码：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMEJpbmFyeUZuJTIwJTNEJTIwKGElM0ElMjBudW1iZXIlMkMlMjBiJTNBJTIwbnVtYmVyKSUyMCUzRCUzRSUyMG51bWJlciUzQiUwQWNvbnN0JTIwYWRkJTNBJTIwQmluYXJ5Rm4lMjAlM0QlMjAoYSUyQyUyMGIpJTIwJTNEJTNFJTIwYSUyMCUyQiUyMGIlM0IlMEFjb25zdCUyMHN1YiUzQSUyMEJpbmFyeUZuJTIwJTNEJTIwKGElMkMlMjBiKSUyMCUzRCUzRSUyMGElMjAtJTIwYiUzQiUwQWNvbnN0JTIwbXVsJTNBJTIwQmluYXJ5Rm4lMjAlM0QlMjAoYSUyQyUyMGIpJTIwJTNEJTNFJTIwYSUyMColMjBiJTNCJTBBY29uc3QlMjBkaXYlM0ElMjBCaW5hcnlGbiUyMCUzRCUyMChhJTJDJTIwYiklMjAlM0QlM0UlMjBhJTIwJTJGJTIwYiUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">BinaryFn</span> = <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">a</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">b</span>: <span class="hljs-built_in">number</span></span>) =&gt;</span> <span class="hljs-built_in">number</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-attr">add</span>: <span class="hljs-title class_">BinaryFn</span> = <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a + b;
+<span class="hljs-keyword">const</span> <span class="hljs-attr">sub</span>: <span class="hljs-title class_">BinaryFn</span> = <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a - b;
+<span class="hljs-keyword">const</span> <span class="hljs-attr">mul</span>: <span class="hljs-title class_">BinaryFn</span> = <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a * b;
+<span class="hljs-keyword">const</span> <span class="hljs-attr">div</span>: <span class="hljs-title class_">BinaryFn</span> = <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> a / b;
+</div></code></pre>
+<p>这个非常适用于定义回调函数的类型
+另外，比如你现在想要写一个函数，来改善原有的函数，你可以利用 typeof 来获取到原有函数的签名，就不用再费劲照抄原函数的参数和返回值类型</p>
+<h3 id="shan-yu-li-yong-ts-de-lei-xing-tui-duan" tabindex="-1">善于利用 ts 的类型推断</h3>
+<p>如果 ts 能正确推断出类型，就不要再去自己标注了，比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="bGV0JTIweCUyMCUzRCUyMDEyJTNCJTBBbGV0JTIweCUzQSUyMG51bWJlciUyMCUzRCUyMDEyJTNCJTIwJTJGJTJGJTIwRG9uJ3QlMjBkbyUyMHRoaXMlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">let</span> x = <span class="hljs-number">12</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span> = <span class="hljs-number">12</span>; <span class="hljs-comment">// Don&#x27;t do this</span>
+</div></code></pre>
+<p>如果参数有默认值，那么也没必要再去标注类型了：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBwYXJzZU51bWJlcihzdHIlM0ElMjBzdHJpbmclMkMlMjBiYXNlJTIwJTNEJTIwMTApJTIwJTdCJTBBJTA5JTJGJTJGJTIwLi4uJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">parseNumber</span>(<span class="hljs-params"><span class="hljs-attr">str</span>: <span class="hljs-built_in">string</span>, base = <span class="hljs-number">10</span></span>) {
+	<span class="hljs-comment">// ...</span>
+}
+</div></code></pre>
+<p>传递闭包时，闭包的类型也没必要标注：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTIwRG9uJ3QlMjBkbyUyMHRoaXMlM0ElMEFhcHAuZ2V0KCUyMiUyRmhlYWx0aCUyMiUyQyUyMChyZXF1ZXN0JTNBJTIwZXhwcmVzcy5SZXF1ZXN0JTJDJTIwcmVzcG9uc2UlM0ElMjBleHByZXNzLlJlc3BvbnNlKSUyMCUzRCUzRSUyMCU3QiUwQSUwOXJlc3BvbnNlLnNlbmQoJTIyT0slMjIpJTNCJTBBJTdEKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-comment">// Don&#x27;t do this:</span>
+app.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;/health&quot;</span>, <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">request</span>: express.<span class="hljs-title class_">Request</span>, <span class="hljs-attr">response</span>: express.<span class="hljs-title class_">Response</span></span>) =&gt;</span> {
+	response.<span class="hljs-title function_">send</span>(<span class="hljs-string">&quot;OK&quot;</span>);
+});
+</div></code></pre>
+<p>但是用字面量声明对象时，需要标注类型，开启 excess property checking
+此外，函数的返回值最好也标注好类型，而不是让 ts 自己推导</p>
+<h3 id="jin-ke-neng-shi-yong-lei-xing-sheng-ming-er-bu-shi-lei-xing-duan-yan" tabindex="-1">尽可能使用类型声明而不是类型断言</h3>
+<p>如果你要定义一个特定 interface 类型的变量，你最好是这样做：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwUGVyc29uJTIwJTdCJTBBJTA5bmFtZSUzQSUyMHN0cmluZyUzQiUwQSU3RCUwQWNvbnN0JTIwYWxpY2UlM0ElMjBQZXJzb24lMjAlM0QlMjAlN0IlMjBuYW1lJTNBJTIwJTIyQWxpY2UlMjIlMjAlN0QlM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBQZXJzb24lMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Person</span> {
+	<span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>;
+}
+<span class="hljs-keyword">const</span> <span class="hljs-attr">alice</span>: <span class="hljs-title class_">Person</span> = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Alice&quot;</span> }; <span class="hljs-comment">// Type is Person</span>
+</div></code></pre>
+<p>而不是：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBib2IlMjAlM0QlMjAlN0IlMjBuYW1lJTNBJTIwJTIyQm9iJTIyJTIwJTdEJTIwYXMlMjBQZXJzb24lM0IlMjAlMkYlMkYlMjBUeXBlJTIwaXMlMjBQZXJzb24lMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">const</span> bob = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Bob&quot;</span> } <span class="hljs-keyword">as</span> <span class="hljs-title class_">Person</span>; <span class="hljs-comment">// Type is Person</span>
+</div></code></pre>
+<p>因为前者有 excess property check ，可以保证你确保写代码的过程中仍有代码补全和类型安全
+对于箭头函数同理：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBwZW9wbGUlMjAlM0QlMjAlNUIlMjJhbGljZSUyMiUyQyUyMCUyMmJvYiUyMiUyQyUyMCUyMmphbiUyMiU1RC5tYXAoKG5hbWUpJTNBJTIwUGVyc29uJTIwJTNEJTNFJTIwKCU3QiUyMG5hbWUlMjAlN0QpKSUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMFBlcnNvbiU1QiU1RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">const</span> people = [<span class="hljs-string">&quot;alice&quot;</span>, <span class="hljs-string">&quot;bob&quot;</span>, <span class="hljs-string">&quot;jan&quot;</span>].<span class="hljs-title function_">map</span>((name): <span class="hljs-function"><span class="hljs-params">Person</span> =&gt;</span> ({ name })); <span class="hljs-comment">// Type is Person[]</span>
+</div></code></pre>
+<p>注意类型声明作用在箭头函数的返回值上，而不是引入一个 <code>const person: Person = {name};</code> 这样太麻烦了
+当然有时候你确实需要类型断言：</p>
+<ul>
+<li>把一个宽泛的类型断言为一个精确的类型：</li>
+</ul>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZG9jdW1lbnQucXVlcnlTZWxlY3RvciglMjIlMjNteUJ1dHRvbiUyMikuYWRkRXZlbnRMaXN0ZW5lciglMjJjbGljayUyMiUyQyUyMChlKSUyMCUzRCUzRSUyMCU3QiUwQSUwOWUuY3VycmVudFRhcmdldCUzQiUyMCUyRiUyRiUyMFR5cGUlMjBpcyUyMEV2ZW50VGFyZ2V0JTBBJTA5Y29uc3QlMjBidXR0b24lMjAlM0QlMjBlLmN1cnJlbnRUYXJnZXQlMjBhcyUyMEhUTUxCdXR0b25FbGVtZW50JTNCJTBBJTA5YnV0dG9uJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwSFRNTEJ1dHRvbkVsZW1lbnQlMEElN0QpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;#myButton&quot;</span>).<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&quot;click&quot;</span>, <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> {
+	e.<span class="hljs-property">currentTarget</span>; <span class="hljs-comment">// Type is EventTarget</span>
+	<span class="hljs-keyword">const</span> button = e.<span class="hljs-property">currentTarget</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">HTMLButtonElement</span>;
+	button; <span class="hljs-comment">// Type is HTMLButtonElement</span>
+});
+</div></code></pre>
+<ul>
+<li>非 null / undefined 断言：如果你确定这个值不会为 null / undefined ，则可以再该值后面加一个 <code>!</code></li>
+</ul>
+<h3 id="bu-yao-fen-bu-chuang-jian-yi-ge-dui-xiang" tabindex="-1">不要分步创建一个对象</h3>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGRG9uJ3QlMjBkbyUyMHRoaXMlMEFjb25zdCUyMHB0JTIwJTNEJTIwJTdCJTdEJTIwYXMlMjBQb2ludCUzQiUwQXB0LnglMjAlM0QlMjAzJTNCJTBBcHQueSUyMCUzRCUyMDQlM0IlMEElMkYlMkZEbyUyMHRoaXMlMEFjb25zdCUyMHB0JTNBJTIwUG9pbnQlMjAlM0QlMjAlN0IlMEElMDl4JTNBJTIwMyUyQyUwQSUwOXklM0ElMjA0JTJDJTBBJTdEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-comment">//Don&#x27;t do this</span>
+<span class="hljs-keyword">const</span> pt = {} <span class="hljs-keyword">as</span> <span class="hljs-title class_">Point</span>;
+pt.<span class="hljs-property">x</span> = <span class="hljs-number">3</span>;
+pt.<span class="hljs-property">y</span> = <span class="hljs-number">4</span>;
+<span class="hljs-comment">//Do this</span>
+<span class="hljs-keyword">const</span> <span class="hljs-attr">pt</span>: <span class="hljs-title class_">Point</span> = {
+	<span class="hljs-attr">x</span>: <span class="hljs-number">3</span>,
+	<span class="hljs-attr">y</span>: <span class="hljs-number">4</span>,
+};
+</div></code></pre>
+<p>如果你需要用一个小的对象创建一个大的对象，考虑使用解构：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGRG9uJ3QlMjBkbyUyMHRoaXMlMEFjb25zdCUyMHB0JTIwJTNEJTIwJTdCJTIweCUzQSUyMDMlMkMlMjB5JTNBJTIwNCUyMCU3RCUzQiUwQWNvbnN0JTIwaWQlMjAlM0QlMjAlN0IlMjBuYW1lJTNBJTIwJTIyUHl0aGFnb3JhcyUyMiUyMCU3RCUzQiUwQWNvbnN0JTIwbmFtZWRQb2ludCUyMCUzRCUyMCU3QiU3RCUzQiUwQU9iamVjdC5hc3NpZ24obmFtZWRQb2ludCUyQyUyMHB0JTJDJTIwaWQpJTNCJTBBbmFtZWRQb2ludC5uYW1lJTNCJTBBJTJGJTJGJTIwfn5+fiUyMFByb3BlcnR5JTIwJ25hbWUnJTIwZG9lcyUyMG5vdCUyMGV4aXN0JTIwb24lMjB0eXBlJTIwJyU3QiU3RCclMEElMkYlMkZEbyUyMHRoaXMlMEFjb25zdCUyMG5hbWVkUG9pbnQlMjAlM0QlMjAlN0IlMjAuLi5wdCUyQyUyMC4uLmlkJTIwJTdEJTNCJTBBbmFtZWRQb2ludC5uYW1lJTNCJTIwJTJGJTJGJTIwT0slMkMlMjB0eXBlJTIwaXMlMjBzdHJpbmclMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-comment">//Don&#x27;t do this</span>
+<span class="hljs-keyword">const</span> pt = { <span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">4</span> };
+<span class="hljs-keyword">const</span> id = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Pythagoras&quot;</span> };
+<span class="hljs-keyword">const</span> namedPoint = {};
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">assign</span>(namedPoint, pt, id);
+namedPoint.<span class="hljs-property">name</span>;
+<span class="hljs-comment">// ~~~~ Property &#x27;name&#x27; does not exist on type &#x27;{}&#x27;</span>
+<span class="hljs-comment">//Do this</span>
+<span class="hljs-keyword">const</span> namedPoint = { ...pt, ...id };
+namedPoint.<span class="hljs-property">name</span>; <span class="hljs-comment">// OK, type is string</span>
+</div></code></pre>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZGVjbGFyZSUyMGxldCUyMGhhc01pZGRsZSUzQSUyMGJvb2xlYW4lM0IlMEFjb25zdCUyMGZpcnN0TGFzdCUyMCUzRCUyMCU3QiUyMGZpcnN0JTNBJTIwJTIySGFycnklMjIlMkMlMjBsYXN0JTNBJTIwJTIyVHJ1bWFuJTIyJTIwJTdEJTNCJTBBY29uc3QlMjBwcmVzaWRlbnQlMjAlM0QlMjAlN0IlMjAuLi5maXJzdExhc3QlMkMlMjAuLi4oaGFzTWlkZGxlJTIwJTNGJTIwJTdCJTIwbWlkZGxlJTNBJTIwJTIyUyUyMiUyMCU3RCUyMCUzQSUyMCU3QiU3RCklMjAlN0QlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">declare</span> <span class="hljs-keyword">let</span> <span class="hljs-attr">hasMiddle</span>: <span class="hljs-built_in">boolean</span>;
+<span class="hljs-keyword">const</span> firstLast = { <span class="hljs-attr">first</span>: <span class="hljs-string">&quot;Harry&quot;</span>, <span class="hljs-attr">last</span>: <span class="hljs-string">&quot;Truman&quot;</span> };
+<span class="hljs-keyword">const</span> president = { ...firstLast, ...(hasMiddle ? { <span class="hljs-attr">middle</span>: <span class="hljs-string">&quot;S&quot;</span> } : {}) };
+</div></code></pre>
+<h3 id="han-shu-qian-ming-de-lei-xing-she-ji" tabindex="-1">函数签名的类型设计</h3>
+<p>一个函数的接受的类型应该很广泛，返回值的类型应该尽可能单一：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwTG5nTGF0JTIwJTdCJTBBJTA5bG5nJTNBJTIwbnVtYmVyJTNCJTBBJTA5bGF0JTNBJTIwbnVtYmVyJTNCJTBBJTdEJTBBdHlwZSUyMExuZ0xhdExpa2UlMjAlM0QlMjBMbmdMYXQlMjAlN0MlMjAlN0IlMjBsb24lM0ElMjBudW1iZXIlM0IlMjBsYXQlM0ElMjBudW1iZXIlMjAlN0QlMjAlN0MlMjAlNUJudW1iZXIlMkMlMjBudW1iZXIlNUQlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">LngLat</span> {
+	<span class="hljs-attr">lng</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">lat</span>: <span class="hljs-built_in">number</span>;
+}
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">LngLatLike</span> = <span class="hljs-title class_">LngLat</span> | { <span class="hljs-attr">lon</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">lat</span>: <span class="hljs-built_in">number</span> } | [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>];
+</div></code></pre>
+<p>将参数类型设置为 LngLatLike ，尽可能接收更多形式</p>
+<h3 id="bu-yao-zai-zhu-shi-zhong-zhong-fu-lei-xing" tabindex="-1">不要在注释中重复类型</h3>
+<p>函数的参数是什么类型，返回值是什么类型，都写在代码里了，不需要你再从代码注释里再写一遍</p>
+<h3 id="jin-ke-neng-ba-zheng-ti-she-zhi-wei-null" tabindex="-1">尽可能把整体设置为 null</h3>
+<p>如果两个变量，要么都不为 null ， 要么都为 null，那么你应该考虑使用 tuple 把两者结合起来，而不是设两个变量，如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGJTJGJTIwRG9uJ3QlMjBkbyUyMHRoaXMlMEFmdW5jdGlvbiUyMGV4dGVudChudW1zJTNBJTIwbnVtYmVyJTVCJTVEKSUyMCU3QiUwQSUwOWxldCUyMG1pbiUyQyUyMG1heCUzQiUwQSUwOWZvciUyMChjb25zdCUyMG51bSUyMG9mJTIwbnVtcyklMjAlN0IlMEElMDklMDlpZiUyMCghbWluKSUyMCU3QiUwQSUwOSUwOSUwOW1pbiUyMCUzRCUyMG51bSUzQiUwQSUwOSUwOSUwOW1heCUyMCUzRCUyMG51bSUzQiUwQSUwOSUwOSU3RCUyMGVsc2UlMjAlN0IlMEElMDklMDklMDltaW4lMjAlM0QlMjBNYXRoLm1pbihtaW4lMkMlMjBudW0pJTNCJTBBJTA5JTA5JTA5bWF4JTIwJTNEJTIwTWF0aC5tYXgobWF4JTJDJTIwbnVtKSUzQiUwQSUwOSUwOSUwOSUyRiUyRiUyMH5+fiUyMEFyZ3VtZW50JTIwb2YlMjB0eXBlJTIwJ251bWJlciUyMCU3QyUyMHVuZGVmaW5lZCclMjBpcyUyMG5vdCUwQSUwOSUwOSUwOSUyRiUyRiUyMGFzc2lnbmFibGUlMjB0byUyMHBhcmFtZXRlciUyMG9mJTIwdHlwZSUyMCdudW1iZXInJTBBJTA5JTA5JTdEJTBBJTA5JTdEJTBBJTA5cmV0dXJuJTIwJTVCbWluJTJDJTIwbWF4JTVEJTNCJTBBJTdEJTBBY29uc3QlMjAlNUJtaW4lMkMlMjBtYXglNUQlMjAlM0QlMjBleHRlbnQoJTVCMCUyQyUyMDElMkMlMjAyJTVEKSUzQiUwQWNvbnN0JTIwc3BhbiUyMCUzRCUyMG1heCUyMC0lMjBtaW4lM0IlMEElMkYlMkYlMjB+fn4lMjB+fn4lMjBPYmplY3QlMjBpcyUyMHBvc3NpYmx5JTIwJ3VuZGVmaW5lZCclMEElMkYlMkYlMjBEbyUyMHRoaXMlMEFmdW5jdGlvbiUyMGV4dGVudChudW1zJTNBJTIwbnVtYmVyJTVCJTVEKSUyMCU3QiUwQSUwOWxldCUyMHJlc3VsdCUzQSUyMCU1Qm51bWJlciUyQyUyMG51bWJlciU1RCUyMCU3QyUyMG51bGwlMjAlM0QlMjBudWxsJTNCJTBBJTA5Zm9yJTIwKGNvbnN0JTIwbnVtJTIwb2YlMjBudW1zKSUyMCU3QiUwQSUwOSUwOWlmJTIwKCFyZXN1bHQpJTIwJTdCJTBBJTA5JTA5JTA5cmVzdWx0JTIwJTNEJTIwJTVCbnVtJTJDJTIwbnVtJTVEJTNCJTBBJTA5JTA5JTdEJTIwZWxzZSUyMCU3QiUwQSUwOSUwOSUwOXJlc3VsdCUyMCUzRCUyMCU1Qk1hdGgubWluKG51bSUyQyUyMHJlc3VsdCU1QjAlNUQpJTJDJTIwTWF0aC5tYXgobnVtJTJDJTIwcmVzdWx0JTVCMSU1RCklNUQlM0IlMEElMDklMDklN0QlMEElMDklN0QlMEElMDlyZXR1cm4lMjByZXN1bHQlM0IlMEElN0QlMEFjb25zdCUyMHJhbmdlJTIwJTNEJTIwZXh0ZW50KCU1QjAlMkMlMjAxJTJDJTIwMiU1RCklM0IlMEFpZiUyMChyYW5nZSklMjAlN0IlMEElMDljb25zdCUyMCU1Qm1pbiUyQyUyMG1heCU1RCUyMCUzRCUyMHJhbmdlJTNCJTBBJTA5Y29uc3QlMjBzcGFuJTIwJTNEJTIwbWF4JTIwLSUyMG1pbiUzQiUyMCUyRiUyRiUyME9LJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div></div><div class="code"><span class="hljs-comment">// Don&#x27;t do this</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">extent</span>(<span class="hljs-params"><span class="hljs-attr">nums</span>: <span class="hljs-built_in">number</span>[]</span>) {
+	<span class="hljs-keyword">let</span> min, max;
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> num <span class="hljs-keyword">of</span> nums) {
+		<span class="hljs-keyword">if</span> (!min) {
+			min = num;
+			max = num;
+		} <span class="hljs-keyword">else</span> {
+			min = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(min, num);
+			max = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(max, num);
+			<span class="hljs-comment">// ~~~ Argument of type &#x27;number | undefined&#x27; is not</span>
+			<span class="hljs-comment">// assignable to parameter of type &#x27;number&#x27;</span>
+		}
+	}
+	<span class="hljs-keyword">return</span> [min, max];
+}
+<span class="hljs-keyword">const</span> [min, max] = <span class="hljs-title function_">extent</span>([<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>]);
+<span class="hljs-keyword">const</span> span = max - min;
+<span class="hljs-comment">// ~~~ ~~~ Object is possibly &#x27;undefined&#x27;</span>
+<span class="hljs-comment">// Do this</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">extent</span>(<span class="hljs-params"><span class="hljs-attr">nums</span>: <span class="hljs-built_in">number</span>[]</span>) {
+	<span class="hljs-keyword">let</span> <span class="hljs-attr">result</span>: [<span class="hljs-built_in">number</span>, <span class="hljs-built_in">number</span>] | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> num <span class="hljs-keyword">of</span> nums) {
+		<span class="hljs-keyword">if</span> (!result) {
+			result = [num, num];
+		} <span class="hljs-keyword">else</span> {
+			result = [<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(num, result[<span class="hljs-number">0</span>]), <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(num, result[<span class="hljs-number">1</span>])];
+		}
+	}
+	<span class="hljs-keyword">return</span> result;
+}
+<span class="hljs-keyword">const</span> range = <span class="hljs-title function_">extent</span>([<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>]);
+<span class="hljs-keyword">if</span> (range) {
+	<span class="hljs-keyword">const</span> [min, max] = range;
+	<span class="hljs-keyword">const</span> span = max - min; <span class="hljs-comment">// OK</span>
+}
+</div></code></pre>
+<h3 id="ba-suo-you-de-lei-xing-du-dao-chu" tabindex="-1">把所有的类型都导出</h3>
+<p>在编写一个供别人使用的模块时，最好是把所有的类型都导出，如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwU2VjcmV0TmFtZSUyMCU3QiUwQSUwOWZpcnN0JTNBJTIwc3RyaW5nJTNCJTBBJTA5bGFzdCUzQSUyMHN0cmluZyUzQiUwQSU3RCUwQWludGVyZmFjZSUyMFNlY3JldFNhbnRhJTIwJTdCJTBBJTA5bmFtZSUzQSUyMFNlY3JldE5hbWUlM0IlMEElMDlnaWZ0JTNBJTIwc3RyaW5nJTNCJTBBJTdEJTBBZXhwb3J0JTIwZnVuY3Rpb24lMjBnZXRHaWZ0KG5hbWUlM0ElMjBTZWNyZXROYW1lJTJDJTIwZ2lmdCUzQSUyMHN0cmluZyklM0ElMjBTZWNyZXRTYW50YSUyMCU3QiUwQSUwOSUyRiUyRiUyMC4uLiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">SecretName</span> {
+	<span class="hljs-attr">first</span>: <span class="hljs-built_in">string</span>;
+	<span class="hljs-attr">last</span>: <span class="hljs-built_in">string</span>;
+}
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">SecretSanta</span> {
+	<span class="hljs-attr">name</span>: <span class="hljs-title class_">SecretName</span>;
+	<span class="hljs-attr">gift</span>: <span class="hljs-built_in">string</span>;
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">getGift</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-title class_">SecretName</span>, <span class="hljs-attr">gift</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">SecretSanta</span> {
+	<span class="hljs-comment">// ...</span>
+}
+</div></code></pre>
+<p>如果这样，别人在使用的时候无法导入 SecretName 和 SecretSanta 这两个类型，就会给使用者带来一些麻烦。
+如果你作为一个使用者，遇到了这种情况，那么可以使用如下的方法解决：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyME15U2FudGElMjAlM0QlMjBSZXR1cm5UeXBlJTNDdHlwZW9mJTIwZ2V0R2lmdCUzRSUzQiUyMCUyRiUyRiUyMFNlY3JldFNhbnRhJTBBdHlwZSUyME15TmFtZSUyMCUzRCUyMFBhcmFtZXRlcnMlM0N0eXBlb2YlMjBnZXRHaWZ0JTNFJTVCMCU1RCUzQiUyMCUyRiUyRiUyMFNlY3JldE5hbWUlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">MySanta</span> = <span class="hljs-title class_">ReturnType</span>&lt;<span class="hljs-keyword">typeof</span> getGift&gt;; <span class="hljs-comment">// SecretSanta</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">MyName</span> = <span class="hljs-title class_">Parameters</span>&lt;<span class="hljs-keyword">typeof</span> getGift&gt;[<span class="hljs-number">0</span>]; <span class="hljs-comment">// SecretName</span>
+</div></code></pre>
+<h3 id="gei-hui-tiao-han-shu-she-zhi-this-lei-xing" tabindex="-1">给回调函数设置 this 类型</h3>
+<p>目前对 js 的 this 还不太了解，以后有机会再补</p>
+<h3 id="ba-yi-lai-qi-ta-ku-de-lei-xing-chou-xiang-chu-lai" tabindex="-1">把依赖其他库的类型抽象出来</h3>
+<p>比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZnVuY3Rpb24lMjBwYXJzZUNTVihjb250ZW50cyUzQSUyMHN0cmluZyUyMCU3QyUyMEJ1ZmZlciklM0ElMjAlN0IlMjAlNUJjb2x1bW4lM0ElMjBzdHJpbmclNUQlM0ElMjBzdHJpbmclMjAlN0QlNUIlNUQlMjAlN0IlMEElMDlpZiUyMCh0eXBlb2YlMjBjb250ZW50cyUyMCUzRCUzRCUzRCUyMCUyMm9iamVjdCUyMiklMjAlN0IlMEElMDklMDklMkYlMkYlMjBJdCdzJTIwYSUyMGJ1ZmZlciUwQSUwOSUwOXJldHVybiUyMHBhcnNlQ1NWKGNvbnRlbnRzLnRvU3RyaW5nKCUyMnV0ZjglMjIpKSUzQiUwQSUwOSU3RCUwQSUwOSUyRiUyRiUyMC4uLiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">function</span> <span class="hljs-title function_">parseCSV</span>(<span class="hljs-params"><span class="hljs-attr">contents</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">Buffer</span></span>): { [<span class="hljs-attr">column</span>: <span class="hljs-built_in">string</span>]: <span class="hljs-built_in">string</span> }[] {
+	<span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> contents === <span class="hljs-string">&quot;object&quot;</span>) {
+		<span class="hljs-comment">// It&#x27;s a buffer</span>
+		<span class="hljs-keyword">return</span> <span class="hljs-title function_">parseCSV</span>(contents.<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;utf8&quot;</span>));
+	}
+	<span class="hljs-comment">// ...</span>
+}
+</div></code></pre>
+<p>其中的 Buffer 是 node.js 特有的类型。如果这个函数作为一个模块发布，那么后面在浏览器环境使用这个函数的人会产生疑惑。
+解决方法是，考虑到我们只使用了 Buffer 类型的 toString 方法，我们可以把这个类型单独拿出来：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwQ3N2QnVmZmVyJTIwJTdCJTBBJTA5dG9TdHJpbmcoZW5jb2RpbmclM0ElMjBzdHJpbmcpJTNBJTIwc3RyaW5nJTNCJTBBJTdEJTBBZnVuY3Rpb24lMjBwYXJzZUNTViglMEElMDljb250ZW50cyUzQSUyMHN0cmluZyUyMCU3QyUyMENzdkJ1ZmZlciUyQyUwQSklM0ElMjAlN0IlMjAlNUJjb2x1bW4lM0ElMjBzdHJpbmclNUQlM0ElMjBzdHJpbmclMjAlN0QlNUIlNUQlMjAlN0IlMEElMDklMkYlMkYlMjAuLi4lMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">CsvBuffer</span> {
+	<span class="hljs-title function_">toString</span>(<span class="hljs-attr">encoding</span>: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">string</span>;
+}
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseCSV</span>(<span class="hljs-params">
+	<span class="hljs-attr">contents</span>: <span class="hljs-built_in">string</span> | <span class="hljs-title class_">CsvBuffer</span>,
+</span>): { [<span class="hljs-attr">column</span>: <span class="hljs-built_in">string</span>]: <span class="hljs-built_in">string</span> }[] {
+	<span class="hljs-comment">// ...</span>
+}
+</div></code></pre>
+<h3 id="shi-yong-xian-dai-de-js-yu-fa" tabindex="-1">使用现代的 js 语法</h3>
+<ol>
+<li>对于循环遍历：
+<ul>
+<li>如果只是变量数组的元素，那么使用 for-of</li>
+<li>如果还需要得到当前下表，那么使用 forEach</li>
+<li>如果需要中间跳出循环，那么使用 for</li>
+</ul>
+</li>
+<li>使用 import 和 export 语法而不是 require</li>
+<li>使用箭头函数而不是 function</li>
+<li>善于使用解构语法</li>
+</ol>
+<h3 id="you-chu-shi-chang-liang-zhi-jiu-bu-yong-xie-lei-xing-le" tabindex="-1">有初始常量值就不用写类型了</h3>
+<p>比如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBJTklUX09QVElPTlMlMjAlM0QlMjAlN0IlMEElMDl3aWR0aCUzQSUyMDY0MCUyQyUwQSUwOWhlaWdodCUzQSUyMDQ4MCUyQyUwQSUwOWNvbG9yJTNBJTIwJTIyJTIzMDBGRjAwJTIyJTJDJTBBJTA5bGFiZWwlM0ElMjAlMjJWR0ElMjIlMkMlMEElN0QlM0IlMEFpbnRlcmZhY2UlMjBPcHRpb25zJTIwJTdCJTBBJTA5d2lkdGglM0ElMjBudW1iZXIlM0IlMEElMDloZWlnaHQlM0ElMjBudW1iZXIlM0IlMEElMDljb2xvciUzQSUyMHN0cmluZyUzQiUwQSUwOWxhYmVsJTNBJTIwc3RyaW5nJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-variable constant_">INIT_OPTIONS</span> = {
+	<span class="hljs-attr">width</span>: <span class="hljs-number">640</span>,
+	<span class="hljs-attr">height</span>: <span class="hljs-number">480</span>,
+	<span class="hljs-attr">color</span>: <span class="hljs-string">&quot;#00FF00&quot;</span>,
+	<span class="hljs-attr">label</span>: <span class="hljs-string">&quot;VGA&quot;</span>,
+};
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Options</span> {
+	<span class="hljs-attr">width</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">height</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">color</span>: <span class="hljs-built_in">string</span>;
+	<span class="hljs-attr">label</span>: <span class="hljs-built_in">string</span>;
+}
+</div></code></pre>
+<p>可以把下面的 interface 的定义优化为：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyME9wdGlvbnMlMjAlM0QlMjB0eXBlb2YlMjBJTklUX09QVElPTlMlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Options</span> = <span class="hljs-keyword">typeof</span> <span class="hljs-variable constant_">INIT_OPTIONS</span>;
+</div></code></pre>
+<h3 id="mapped-type" tabindex="-1">mapped type</h3>
+<p>如：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMFZlYzNEJTIwJTNEJTIwJTdCJTIwJTVCayUyMGluJTIwJTIyeCUyMiUyMCU3QyUyMCUyMnklMjIlMjAlN0MlMjAlMjJ6JTIyJTVEJTNBJTIwbnVtYmVyJTIwJTdEJTNCJTBBJTJGJTJGJTIwVHlwZSUyMFZlYzNEJTIwJTNEJTIwJTdCJTBBJTJGJTJGJTIweCUzQSUyMG51bWJlciUzQiUwQSUyRiUyRiUyMHklM0ElMjBudW1iZXIlM0IlMEElMkYlMkYlMjB6JTNBJTIwbnVtYmVyJTNCJTBBJTJGJTJGJTIwJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Vec3D</span> = { [k <span class="hljs-keyword">in</span> <span class="hljs-string">&quot;x&quot;</span> | <span class="hljs-string">&quot;y&quot;</span> | <span class="hljs-string">&quot;z&quot;</span>]: <span class="hljs-built_in">number</span> };
+<span class="hljs-comment">// Type Vec3D = {</span>
+<span class="hljs-comment">// x: number;</span>
+<span class="hljs-comment">// y: number;</span>
+<span class="hljs-comment">// z: number;</span>
+<span class="hljs-comment">// }</span>
+</div></code></pre>
+<p>当然可以更加灵活：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMEFCQyUyMCUzRCUyMCU3QiUyMCU1QmslMjBpbiUyMCUyMmElMjIlMjAlN0MlMjAlMjJiJTIyJTIwJTdDJTIwJTIyYyUyMiU1RCUzQSUyMGslMjBleHRlbmRzJTIwJTIyYiUyMiUyMCUzRiUyMHN0cmluZyUyMCUzQSUyMG51bWJlciUyMCU3RCUzQiUwQSUyRiUyRiUyMFR5cGUlMjBBQkMlMjAlM0QlMjAlN0IlMEElMkYlMkYlMjBhJTNBJTIwbnVtYmVyJTNCJTBBJTJGJTJGJTIwYiUzQSUyMHN0cmluZyUzQiUwQSUyRiUyRiUyMGMlM0ElMjBudW1iZXIlM0IlMEElMkYlMkYlMjAlN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-variable constant_">ABC</span> = { [k <span class="hljs-keyword">in</span> <span class="hljs-string">&quot;a&quot;</span> | <span class="hljs-string">&quot;b&quot;</span> | <span class="hljs-string">&quot;c&quot;</span>]: k <span class="hljs-keyword">extends</span> <span class="hljs-string">&quot;b&quot;</span> ? <span class="hljs-built_in">string</span> : <span class="hljs-built_in">number</span> };
+<span class="hljs-comment">// Type ABC = {</span>
+<span class="hljs-comment">// a: number;</span>
+<span class="hljs-comment">// b: string;</span>
+<span class="hljs-comment">// c: number;</span>
+<span class="hljs-comment">// }</span>
+</div></code></pre>
+<p>从外，使用 mapped type 还可以用来保证相关联的类型和值的同步</p>
+<h3 id="shi-yong-union-chou-qu-lei-xing-de-gong-gong-bu-fen" tabindex="-1">使用 union 抽取类型的公共部分</h3>
+<p>比如下面的代码：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwU2F2ZUFjdGlvbiUyMCU3QiUwQSUwOXR5cGUlM0ElMjAlMjJzYXZlJTIyJTNCJTBBJTA5JTJGJTJGJTIwLi4uJTBBJTdEJTBBaW50ZXJmYWNlJTIwTG9hZEFjdGlvbiUyMCU3QiUwQSUwOXR5cGUlM0ElMjAlMjJsb2FkJTIyJTNCJTBBJTA5JTJGJTJGJTIwLi4uJTBBJTdEJTBBdHlwZSUyMEFjdGlvbiUyMCUzRCUyMFNhdmVBY3Rpb24lMjAlN0MlMjBMb2FkQWN0aW9uJTNCJTBBdHlwZSUyMEFjdGlvblR5cGUlMjAlM0QlMjAlMjJzYXZlJTIyJTIwJTdDJTIwJTIybG9hZCUyMiUzQiUyMCUyRiUyRiUyMFJlcGVhdGVkJTIwdHlwZXMhJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">SaveAction</span> {
+	<span class="hljs-attr">type</span>: <span class="hljs-string">&quot;save&quot;</span>;
+	<span class="hljs-comment">// ...</span>
+}
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">LoadAction</span> {
+	<span class="hljs-attr">type</span>: <span class="hljs-string">&quot;load&quot;</span>;
+	<span class="hljs-comment">// ...</span>
+}
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">Action</span> = <span class="hljs-title class_">SaveAction</span> | <span class="hljs-title class_">LoadAction</span>;
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">ActionType</span> = <span class="hljs-string">&quot;save&quot;</span> | <span class="hljs-string">&quot;load&quot;</span>; <span class="hljs-comment">// Repeated types!</span>
+</div></code></pre>
+<p>可以改进为：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMEFjdGlvblR5cGUlMjAlM0QlMjBBY3Rpb24lNUIlMjJ0eXBlJTIyJTVEJTNCJTIwJTJGJTJGJTIwVHlwZSUyMGlzJTIwJTIyc2F2ZSUyMiUyMCU3QyUyMCUyMmxvYWQlMjIlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">ActionType</span> = <span class="hljs-title class_">Action</span>[<span class="hljs-string">&quot;type&quot;</span>]; <span class="hljs-comment">// Type is &quot;save&quot; | &quot;load&quot;</span>
+</div></code></pre>
+<p>这个和 pick 泛型不太一样：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMEFjdGlvblJlYyUyMCUzRCUyMFBpY2slM0NBY3Rpb24lMkMlMjAlMjJ0eXBlJTIyJTNFJTNCJTIwJTJGJTJGJTIwJTdCdHlwZSUzQSUyMCUyMnNhdmUlMjIlMjAlN0MlMjAlMjJsb2FkJTIyJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">ActionRec</span> = <span class="hljs-title class_">Pick</span>&lt;<span class="hljs-title class_">Action</span>, <span class="hljs-string">&quot;type&quot;</span>&gt;; <span class="hljs-comment">// {type: &quot;save&quot; | &quot;load&quot;}</span>
+</div></code></pre>
+<h2 id="qi-ta" tabindex="-1">其他</h2>
+<h3 id="monkey-patching" tabindex="-1">Monkey patching</h3>
+<p>如果想以一个类型安全的方法进行 monkey patching，你可以使用 interface 的 augmented</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwRG9jdW1lbnQlMjAlN0IlMEElMDklMkYqKiUyMEdlbnVzJTIwb3IlMjBzcGVjaWVzJTIwb2YlMjBtb25rZXklMjBwYXRjaCUyMColMkYlMEElMDltb25rZXklM0ElMjBzdHJpbmclM0IlMEElN0QlMEFkb2N1bWVudC5tb25rZXklMjAlM0QlMjAlMjJUYW1hcmluJTIyJTNCJTIwJTJGJTJGJTIwT0slMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">Document</span> {
+	<span class="hljs-comment">/** Genus or species of monkey patch */</span>
+	<span class="hljs-attr">monkey</span>: <span class="hljs-built_in">string</span>;
+}
+<span class="hljs-variable language_">document</span>.<span class="hljs-property">monkey</span> = <span class="hljs-string">&quot;Tamarin&quot;</span>; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>如果你在编写一个模块，可以用 declare global</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="ZXhwb3J0JTIwJTdCJTdEJTNCJTBBZGVjbGFyZSUyMGdsb2JhbCUyMCU3QiUwQSUwOWludGVyZmFjZSUyMERvY3VtZW50JTIwJTdCJTBBJTA5JTA5JTJGKiolMjBHZW51cyUyMG9yJTIwc3BlY2llcyUyMG9mJTIwbW9ua2V5JTIwcGF0Y2glMjAqJTJGJTBBJTA5JTA5bW9ua2V5JTNBJTIwc3RyaW5nJTNCJTBBJTA5JTdEJTBBJTdEJTBBZG9jdW1lbnQubW9ua2V5JTIwJTNEJTIwJTIyVGFtYXJpbiUyMiUzQiUyMCUyRiUyRiUyME9LJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">export</span> {};
+<span class="hljs-keyword">declare</span> <span class="hljs-variable language_">global</span> {
+	<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Document</span> {
+		<span class="hljs-comment">/** Genus or species of monkey patch */</span>
+		<span class="hljs-attr">monkey</span>: <span class="hljs-built_in">string</span>;
+	}
+}
+<span class="hljs-variable language_">document</span>.<span class="hljs-property">monkey</span> = <span class="hljs-string">&quot;Tamarin&quot;</span>; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<p>但是这还是会出现问题：当你在别的地方引入了这个模块，其他没有引入这个模块的地方也被影响了
+最好是自己再开一个类型：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="aW50ZXJmYWNlJTIwTW9ua2V5RG9jdW1lbnQlMjBleHRlbmRzJTIwRG9jdW1lbnQlMjAlN0IlMEElMDklMkYqKiUyMEdlbnVzJTIwb3IlMjBzcGVjaWVzJTIwb2YlMjBtb25rZXklMjBwYXRjaCUyMColMkYlMEElMDltb25rZXklM0ElMjBzdHJpbmclM0IlMEElN0QlMEEoZG9jdW1lbnQlMjBhcyUyME1vbmtleURvY3VtZW50KS5tb25rZXklMjAlM0QlMjAlMjJNYWNhcXVlJTIyJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">interface</span> <span class="hljs-title class_">MonkeyDocument</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Document</span> {
+	<span class="hljs-comment">/** Genus or species of monkey patch */</span>
+	<span class="hljs-attr">monkey</span>: <span class="hljs-built_in">string</span>;
+}
+(<span class="hljs-variable language_">document</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">MonkeyDocument</span>).<span class="hljs-property">monkey</span> = <span class="hljs-string">&quot;Macaque&quot;</span>;
+</div></code></pre>
+<h3 id="ts-doc" tabindex="-1">TSDoc</h3>
+<p>可以按如下的形式编写注释，这种注释可以被 ide 识别，支持 markdown：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGKiolMEElMjAqJTIwR2VuZXJhdGUlMjBhJTIwZ3JlZXRpbmcuJTBBJTIwKiUyMCU0MHBhcmFtJTIwbmFtZSUyME5hbWUlMjBvZiUyMHRoZSUyMHBlcnNvbiUyMHRvJTIwZ3JlZXQlMEElMjAqJTIwJTQwcGFyYW0lMjBzYWx1dGF0aW9uJTIwVGhlJTIwcGVyc29uJ3MlMjB0aXRsZSUwQSUyMColMjAlNDByZXR1cm5zJTIwQSUyMGdyZWV0aW5nJTIwZm9ybWF0dGVkJTIwZm9yJTIwaHVtYW4lMjBjb25zdW1wdGlvbi4lMEElMjAqJTJGJTBBZnVuY3Rpb24lMjBncmVldEZ1bGxUU0RvYyhuYW1lJTNBJTIwc3RyaW5nJTJDJTIwdGl0bGUlM0ElMjBzdHJpbmcpJTIwJTdCJTBBJTA5cmV0dXJuJTIwJTYwSGVsbG8lMjAlMjQlN0J0aXRsZSU3RCUyMCUyNCU3Qm5hbWUlN0QlNjAlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-comment">/**
+ * Generate a greeting.
+ * <span class="hljs-doctag">@param</span> name Name of the person to greet
+ * <span class="hljs-doctag">@param</span> salutation The person&#x27;s title
+ * <span class="hljs-doctag">@returns</span> A greeting formatted for human consumption.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">greetFullTSDoc</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">title</span>: <span class="hljs-built_in">string</span></span>) {
+	<span class="hljs-keyword">return</span> <span class="hljs-string">`Hello <span class="hljs-subst">${title}</span> <span class="hljs-subst">${name}</span>`</span>;
+}
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/29/6799bb14957cd.png" style="transform: scale(1)" width=1182 height=349></div></p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="JTJGKiolMEElMjAqJTIwVGhpcyUyMF9pbnRlcmZhY2VfJTIwaGFzJTIwKip0aHJlZSoqJTIwcHJvcGVydGllcyUzQSUwQSUyMColMjAxLiUyMHglMEElMjAqJTIwMi4lMjB5JTBBJTIwKiUyMDMuJTIweiUwQSUyMColMkYlMEFpbnRlcmZhY2UlMjBWZWN0b3IzRCUyMCU3QiUwQSUwOXglM0ElMjBudW1iZXIlM0IlMEElMDl5JTNBJTIwbnVtYmVyJTNCJTBBJTA5eiUzQSUyMG51bWJlciUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-comment">/**
+ * This _interface_ has **three** properties:
+ * 1. x
+ * 2. y
+ * 3. z
+ */</span>
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Vector3D</span> {
+	<span class="hljs-attr">x</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">y</span>: <span class="hljs-built_in">number</span>;
+	<span class="hljs-attr">z</span>: <span class="hljs-built_in">number</span>;
+}
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/29/6799bb3b6ae68.png" style="transform: scale(1)" width=929 height=525></div></p>
+<h3 id="fang-wen-xiu-shi-fu" tabindex="-1">访问修饰符</h3>
+<p>ts 中支持使用 public private 和 protected</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y2xhc3MlMjBEaWFyeSUyMCU3QiUwQSUwOXByaXZhdGUlMjBzZWNyZXQlMjAlM0QlMjAlMjJjaGVhdGVkJTIwb24lMjBteSUyMEVuZ2xpc2glMjB0ZXN0JTIyJTNCJTBBJTdEJTBBY29uc3QlMjBkaWFyeSUyMCUzRCUyMG5ldyUyMERpYXJ5KCklM0IlMEFkaWFyeS5zZWNyZXQlM0IlMEElMkYlMkYlMjB+fn5+fn4lMjBQcm9wZXJ0eSUyMCdzZWNyZXQnJTIwaXMlMjBwcml2YXRlJTIwYW5kJTIwb25seSUwQSUyRiUyRiUyMGFjY2Vzc2libGUlMjB3aXRoaW4lMjBjbGFzcyUyMCdEaWFyeSclMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Diary</span> {
+	<span class="hljs-keyword">private</span> secret = <span class="hljs-string">&quot;cheated on my English test&quot;</span>;
+}
+<span class="hljs-keyword">const</span> diary = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Diary</span>();
+diary.<span class="hljs-property">secret</span>;
+<span class="hljs-comment">// ~~~~~~ Property &#x27;secret&#x27; is private and only</span>
+<span class="hljs-comment">// accessible within class &#x27;Diary&#x27;</span>
+</div></code></pre>
+<p>但是这仅仅是在 type space 做出的限制，可以很容易绕过：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y2xhc3MlMjBEaWFyeSUyMCU3QiUwQSUwOXByaXZhdGUlMjBzZWNyZXQlMjAlM0QlMjAlMjJjaGVhdGVkJTIwb24lMjBteSUyMEVuZ2xpc2glMjB0ZXN0JTIyJTNCJTBBJTdEJTBBY29uc3QlMjBkaWFyeSUyMCUzRCUyMG5ldyUyMERpYXJ5KCklM0IlMEEoZGlhcnklMjBhcyUyMGFueSkuc2VjcmV0JTNCJTIwJTJGJTJGJTIwT0slMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Diary</span> {
+	<span class="hljs-keyword">private</span> secret = <span class="hljs-string">&quot;cheated on my English test&quot;</span>;
+}
+<span class="hljs-keyword">const</span> diary = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Diary</span>();
+(diary <span class="hljs-keyword">as</span> <span class="hljs-built_in">any</span>).<span class="hljs-property">secret</span>; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<h3 id="yi-xie-gong-ju-lei-fan-xing" tabindex="-1">一些工具类泛型</h3>
+<h4 id="pick-t-k" tabindex="-1">Pick&lt;T,K&gt;</h4>
+<p>可以从类型 T 中选取字段 K 来组成新的类型，其定义：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMFBpY2slM0NUJTJDJTIwSyUyMGV4dGVuZHMlMjBrZXlvZiUyMFQlM0UlMjAlM0QlMjAlN0IlMEElMDklNUJrJTIwaW4lMjBLJTVEJTNBJTIwVCU1QmslNUQlM0IlMEElN0QlM0IlMjAlMkYlMkYlMjBPSyUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Pick</span>&lt;T, K <span class="hljs-keyword">extends</span> keyof T&gt; = {
+	[k <span class="hljs-keyword">in</span> K]: T[k];
+}; <span class="hljs-comment">// OK</span>
+</div></code></pre>
+<h4 id="partial-t" tabindex="-1">Partial&lt; T &gt;</h4>
+<p>将 T 中所有的属性都变为可选的，其定义：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMFBhcnRpYWwlM0NUJTNFJTIwJTNEJTIwJTdCJTIwJTVCayUyMGluJTIwa2V5b2YlMjBPcHRpb25zJTVEJTNGJTNBJTIwVCU1QmslNUQlMjAlN0QlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Partial</span>&lt;T&gt; = { [k <span class="hljs-keyword">in</span> keyof <span class="hljs-title class_">Options</span>]?: T[k] };
+</div></code></pre>
+<h4 id="fan-hui-zhi-he-can-shu-lei-xing" tabindex="-1">返回值和参数类型</h4>
+<p>ReturnType 可以用于获取一个函数的返回值类型。Parameters 可以获取一个函数的参数类型，如</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyME15U2FudGElMjAlM0QlMjBSZXR1cm5UeXBlJTNDdHlwZW9mJTIwZ2V0R2lmdCUzRSUzQiUyMCUyRiUyRiUyMFNlY3JldFNhbnRhJTBBdHlwZSUyME15TmFtZSUyMCUzRCUyMFBhcmFtZXRlcnMlM0N0eXBlb2YlMjBnZXRHaWZ0JTNFJTVCMCU1RCUzQiUyMCUyRiUyRiUyMFNlY3JldE5hbWUlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">MySanta</span> = <span class="hljs-title class_">ReturnType</span>&lt;<span class="hljs-keyword">typeof</span> getGift&gt;; <span class="hljs-comment">// SecretSanta</span>
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">MyName</span> = <span class="hljs-title class_">Parameters</span>&lt;<span class="hljs-keyword">typeof</span> getGift&gt;[<span class="hljs-number">0</span>]; <span class="hljs-comment">// SecretName</span>
+</div></code></pre>
+<h4 id="record" tabindex="-1">Record</h4>
+<p>可以用于简写多个类型相等的属性，如</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="dHlwZSUyMFZlYzNEJTIwJTNEJTIwUmVjb3JkJTNDJTIyeCUyMiUyMCU3QyUyMCUyMnklMjIlMjAlN0MlMjAlMjJ6JTIyJTJDJTIwbnVtYmVyJTNFJTNCJTBBJTJGJTJGJTIwVHlwZSUyMFZlYzNEJTIwJTNEJTIwJTdCJTBBJTJGJTJGJTIweCUzQSUyMG51bWJlciUzQiUwQSUyRiUyRiUyMHklM0ElMjBudW1iZXIlM0IlMEElMkYlMkYlMjB6JTNBJTIwbnVtYmVyJTNCJTBBJTJGJTJGJTIwJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-keyword">type</span> <span class="hljs-title class_">Vec3D</span> = <span class="hljs-title class_">Record</span>&lt;<span class="hljs-string">&quot;x&quot;</span> | <span class="hljs-string">&quot;y&quot;</span> | <span class="hljs-string">&quot;z&quot;</span>, <span class="hljs-built_in">number</span>&gt;;
+<span class="hljs-comment">// Type Vec3D = {</span>
+<span class="hljs-comment">// x: number;</span>
+<span class="hljs-comment">// y: number;</span>
+<span class="hljs-comment">// z: number;</span>
+<span class="hljs-comment">// }</span>
+</div></code></pre>
+<h4 id="readonly-t" tabindex="-1">Readonly&lt; T &gt;</h4>
+<p>可以将类型 T 的所有属性设置为 readonly</p>

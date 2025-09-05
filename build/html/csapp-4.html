@@ -1,0 +1,1343 @@
+<h2 id="zhun-bei" tabindex="-1">准备</h2>
+<h3 id="y86-64" tabindex="-1">Y86-64</h3>
+<p>本章首先介绍了一个简化的指令集：Y86-64
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/688069a7c877d.png" style="transform: scale(1)" width=1409 height=770></div>
+其中 <code>OPq</code> 、<code>jxx</code>、<code>cmovXX</code> 是三个大类，每个种类都共享第一个字节的高位，具体功能的不同取决于这个字节的低位。其中 <code>rrmovq</code> 视为 <code>cmovXX</code> 一类，可以看成是无条件数据传送
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68806a4ae1372.png" style="transform: scale(1)" width=1336 height=392></div>
+上述的 <code>rA</code> 和 <code>rB</code> 表示寄存器编号。寄存器名称和编号的对应如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68806a959d346.png" style="transform: scale(1)" width=1113 height=511></div>
+其中无寄存器的表示可以在后面设计电路的时候带来便利
+同时还有状态码寄存器 <code>CF</code>，<code>SF</code> 和 <code>OF</code>
+还有 <code>PC</code> 寄存器表示下一条指令的地址。<code>Stat</code> 寄存器描述当前处理器的状态，取值如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68806bd4abda7.png" style="transform: scale(1)" width=713 height=439></div>
+其他地方大多与 X86-64 相同</p>
+<h3 id="hcl" tabindex="-1">HCL</h3>
+<p>这一章还自己搞了个硬件控制语言 HCL，用来描述电路的控制逻辑
+与或非是电路中基本的逻辑门，其电路表示和对应的 HCL 表述如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68806d5079ecc.png" style="transform: scale(1)" width=796 height=182></div>
+其中 a 和 b 是一个 bit
+将逻辑门进行组合就得到组合电路。组合电路的构建有如下的要求：</p>
+<ul>
+<li>每个逻辑门的输入比如是主输入，或者另一个逻辑门的输出，或者是某个存储单元的输出</li>
+<li>两个或者多个逻辑门的输出不能连在一起，否则线上的信号会产生矛盾</li>
+<li>组合电路必须是无环的
+比如有：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68806e5c341f3.png" style="transform: scale(1)" width=778 height=414></div>
+对应的 HCL 为 <code>bool eq = (a &amp;&amp; b) || (!a &amp;&amp; !b);</code>，可以检测是否位相等
+还有：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68806ea2c9291.png" style="transform: scale(1)" width=749 height=472></div>
+对应的 HCL 为 <code>bool out= (s &amp;&amp; a) || (!s &amp;&amp; b);</code>，可以进行多路复用
+我们可以把单个的逻辑门组合成一个大的字级计算的组合电路
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68806f15c92f9.png" style="transform: scale(1)" width=1168 height=605></div>
+HCL 中可以直接表示，<code>bool Eq = (A == B);</code>
+字级的多路复用：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68807079d8c9d.png" style="transform: scale(1)" width=1231 height=941></div>
+HCL 中可以直接类似下面这样写：</li>
+</ul>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="d29yZCUyME91dCUyMCUzRCUyMCU1QiUwQSUwOSFzMSUyMCUyNiUyNiUyMCFzMCUzQSUyMEElM0IlMEElMDkhczElM0ElMjBCJTNCJTBBJTA5IXMwJTNBJTIwQyUzQiUwQSUwOTElM0ElMjBEJTNCJTBBJTVEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code">word Out = [
+	!s1 &amp;&amp; !s0: A;
+	!s1: B;
+	!s0: C;
+	1: D;
+]
+</div></code></pre>
+<p>这个表达式是按顺序求值的，只选择第一个为 1 的情况。最后的 1 表示默认情况
+组合逻辑电路还可以进行一些运算，不过具体的原理这里被忽略了，我们只抽象出一种叫做 算数/逻辑单元（ALU）的东西，它可以进行如下的操作：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/6880724693add.png" style="transform: scale(1)" width=1546 height=353></div>
+HCL 还支持集合关系语法：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="Ym9vbCUyMHMxJTIwJTNEJTIwY29kZSUyMGluJTIwJTdCJTIwMiUyQyUyMDMlMjAlN0QlM0IlMEFib29sJTIwczAlMjAlM0QlMjBjb2RlJTIwaW4lMjAlN0IlMjAxJTJDJTIwMyUyMCU3RCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">bool s1 = code in { 2, 3 };
+bool s0 = code in { 1, 3 };
+</div></code></pre>
+<h2 id="zhi-ling-she-ji" tabindex="-1">指令设计</h2>
+<p>我们把每个指令的处理统一成 6 个阶段：</p>
+<ul>
+<li>取值：从内存中读取指令</li>
+<li>译码：将指令中涉及到的寄存器具体的值取出</li>
+<li>执行：进行运算相关操作，比如运算指令，或者是地址的计算，增加或减少栈指针。对于有关条件的指令，对条件码的判断也在这个阶段</li>
+<li>访存：读取或者是写入内存</li>
+<li>写回：将数据写入到寄存器中</li>
+<li>更新 PC
+然后各个指令的设计如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68807910123cb.png" style="transform: scale(1)" width=1276 height=670></div>
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/688090049cf5f.png" style="transform: scale(1)" width=983 height=608></div>
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/688090aeb307e.png" style="transform: scale(1)" width=1275 height=594></div>
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/6880a1da13afa.png" style="transform: scale(1)" width=1150 height=464></div>
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/688093bc2e989.png" style="transform: scale(1)" width=1557 height=632></div></li>
+</ul>
+<h2 id="seq" tabindex="-1">SEQ</h2>
+<p>一个最简单的处理器设计如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/6880955359f74.png" style="transform: scale(1)" width=1143 height=1260></div>
+其中虚线表示单个位，细线表示单个字节，粗线表示一个字
+下表是一些常量：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/688096180341b.png" style="transform: scale(1)" width=989 height=894></div></p>
+<h3 id="qu-zhi-jie-duan" tabindex="-1">取指阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68809652daa41.png" style="transform: scale(1)" width=668 height=745></div>
+取指阶段首先根据 PC 来读一条指令的第一个字节，并拆分成 <code>icode</code> 和 <code>ifun</code> 两部分。如果之前 PC 指向的内存地址错误的话，那么指令内存会发生 <code>imem_error</code> 信号，这个信号将设置 <code>icode</code> 为 <code>nop</code>（无操作）指令
+如果 <code>icode</code> 是个非法指令的话，那么就会产生 <code>instr_valid</code> 信号
+合法的话，<code>icode</code> 将会决定这个指令是否用到寄存器和具体的数字。如果用到寄存器的话，产生 <code>need_regids</code> 信号，传递到 <code>align</code> ，使其读取后面一个字节（如果不传给 <code>align</code> 的话，那么 <code>align</code> 产生的值 <code>rA</code> 和 <code>rB</code> 均为 <code>F</code>，即无寄存器）。只需要一个寄存器的指令在我们之前的设计中已经要求字节的低位编码为 <code>F</code> 了，所以直接读就可以
+但是 <code>icode</code> 还会产生 <code>need_valc</code> 信号。但是这个信号不会决定 <code>align</code> 是否继续再向后读八个字节。我认为 <code>align</code> 会一直读后面八个字节的，因为多读没关系，PC 增加器才决定下一条地址从哪里读取
+<code>need_valc</code> 和 <code>need_regids</code> 共同决定 PC 增加的值
+总之，取值阶段完成之后我们可以得到 <code>icode</code>、<code>ifun</code>、<code>rA</code>、<code>rB</code>、<code>valC</code> 还有下一个 PC 值 <code>valP</code></p>
+<h3 id="yi-ma-he-xie-hui-jie-duan" tabindex="-1">译码和写回阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68809a975034e.png" style="transform: scale(1)" width=540 height=689></div>
+首先是根据 <code>icode</code> 和 <code>rA</code> 计算 <code>srcA</code> 以获得 <code>valA</code>。我们还要考虑 <code>icode</code> 的原因在于一些指令没有寄存器作为操作数，但是还是需要使用到寄存器的值，比如 <code>ret</code> 指令需要 <code>%rsp</code> 的值。<code>valB</code> 同理
+在写回阶段，我们也是根据 <code>icode</code> 和 <code>rA</code> 决定写回的寄存器 <code>dstM</code>。另一个 <code>dstE</code> 同理。<code>valE</code> 和 <code>valM</code> 需要通过别的阶段来获得。但值得注意的是 <code>Cnd</code> 信号也会影响到 <code>dstE</code> 的选取，<code>Cnd</code> 是后续执行阶段，根据条件码和 <code>ifun</code> 计算出来的信号，在这里用来实现条件传送
+译码阶段结束，我们就可以得到 <code>valA</code> 和 <code>valB</code> 了。同时我们也知道稍后在写回阶段要写入的目标 <code>dstM</code> 和 <code>dstE</code></p>
+<h3 id="zhi-hang-jie-duan" tabindex="-1">执行阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/68809df2c940c.png" style="transform: scale(1)" width=536 height=586></div>
+首先要根据 <code>icode</code> 判断 <code>aluA</code></p>
+<ul>
+<li>取 <code>valA</code> （<code>OPq</code>、<code>rrmovq</code>、<code>cmovXX</code>）</li>
+<li>取 <code>valC</code>（<code>mrmovq</code> 和 <code>rmmovq</code> 计算地址，<code>irmovq</code>）</li>
+<li>取 <code>-8</code>、<code>+8</code>（<code>call</code> 、 <code>ret</code> 、<code>popq</code> 、<code>pushq</code> 有栈操作）
+根据 <code>icode</code> 判断 <code>aluB</code></li>
+<li>取 <code>valB</code></li>
+<li>取 <code>0</code>（<code>irmovq</code> 象征性的加上 <code>0</code> 以使得 <code>valE</code> 和 <code>valC</code> 相等，统一设计。或是 <code>rrmovq</code> 和 <code>cmovXX</code> 使得 <code>valE</code> 和译码得到的 <code>valA</code> 相等）
+同时根据 <code>icode</code> 和 <code>ifun</code> 计算 <code>alu_fun</code>，表示要执行的操作
+还会根据 <code>icode</code> 计算 <code>setCC</code> 表示是否要更新条件码。状态码将会根据 <code>setCC</code> 和计算得到的 <code>valE</code> 设置。新的条件码将在下一个时钟周期更新
+然后我们还会计算 <code>cnd</code>，这个值综合 <code>ifun</code> 和条件码，决定是否进行条件传送和条件跳转。综合 <code>ifun</code> 的原因是我们会有 <code>rrmovq</code> 这样的无条件传送和 <code>jmp</code> 这样的直接跳转
+经过这一阶段后，我们可以获得运算后的结果 <code>valE</code></li>
+</ul>
+<h3 id="fang-cun-jie-duan" tabindex="-1">访存阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/6880a7646cc58.png" style="transform: scale(1)" width=803 height=874></div>
+首先可以根据 <code>icode</code> 来决定是读还是写内存
+然后根据 <code>icode</code> 选择内存地址：</p>
+<ul>
+<li>取 <code>valE</code>（<code>pushq</code> 和 <code>call</code> ，<code>valE</code> 为开栈后栈顶的地址。<code>rmmovq</code> 和 <code>mrmovq</code> 为计算得到的目标内存地址）</li>
+<li>取 <code>valA</code>（<code>popq</code> 和 <code>ret</code> 用到的 <code>%rsp</code> 的值）
+如果要写数据的话，选择写入的内容</li>
+<li>取 <code>valA</code> （<code>pushq</code> 和 <code>rmmovq</code> 用到的寄存器）</li>
+<li>取 <code>valP</code>（<code>call</code> 把下一条指令的地址压入）
+经过这个阶段，如果我们是读内存的话，就得到了 <code>valM</code> 的值
+此外，我们还将综合之前产生的异常信号 <code>imem_err</code> 、<code>instr_valid</code> 和 <code>dmem_err</code> 和 <code>icode</code> 设置处理器状态。综合 <code>icode</code> 是由于要实现 <code>hlt</code> 指令</li>
+</ul>
+<h3 id="geng-xin-pc-jie-duan" tabindex="-1">更新 PC 阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/23/6880aca57fd53.png" style="transform: scale(1)" width=718 height=362></div>
+用 HCL 描述：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="d29yZCUyMG5ld19wYyUyMCUzRCUyMCU1QiUwQSUyMCUyMCUyMCUyMCUyMyUyMENhbGwuJTIwVXNlJTIwaW5zdHJ1Y3Rpb24lMjBjb25zdGFudCUwQSUyMCUyMCUyMCUyMGljb2RlJTIwJTNEJTNEJTIwSUNBTEwlMjAlM0ElMjB2YWxDJTNCJTBBJTIwJTIwJTIwJTIwJTIzJTIwVGFrZW4lMjBicmFuY2guJTIwVXNlJTIwaW5zdHJ1Y3Rpb24lMjBjb25zdGFudCUwQSUyMCUyMCUyMCUyMGljb2RlJTIwJTNEJTNEJTIwSUpYWCUyMCUyNiUyNiUyMENuZCUzQSUyMHZhbEMlM0IlMEElMjAlMjAlMjAlMjAlMjMlMjBDb21wbGV0aW9uJTIwb2YlMjBSRVQlMjBpbnN0cnVjdGlvbi4lMjBVc2UlMjB2YWx1ZSUyMGZyb20lMjBzdGFjayUwQSUyMCUyMCUyMCUyMGljb2RlJTIwJTNEJTNEJTIwSVJFVCUyMCUzQSUyMHZhbE0lM0IlMEElMjAlMjAlMjAlMjAlMjMlMjBEZWZhdWx0JTNBJTIwVXNlJTIwaW5jcmVtZW50ZWQlMjBQQyUwQSUyMCUyMCUyMCUyMDElMjAlM0ElMjB2YWxQJTNCJTBBJTVEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code">word new_pc = [
+    # Call. Use instruction constant
+    icode == ICALL : valC;
+    # Taken branch. Use instruction constant
+    icode == IJXX &amp;&amp; Cnd: valC;
+    # Completion of RET instruction. Use value from stack
+    icode == IRET : valM;
+    # Default: Use incremented PC
+    1 : valP;
+];
+</div></code></pre>
+<p>根据 <code>icode</code> 值选用不同的值更新 PC</p>
+<ul>
+<li>对于 <code>call</code> 指令，直接取 <code>valC</code> 更新</li>
+<li>对于 <code>IJXX</code> 指令，如果可以进行跳转的话，也取 <code>valC</code></li>
+<li>对于 <code>IRET</code> 指令，选取 <code>valM</code> 更新</li>
+<li>对于其他情况，选取 <code>valP</code> 更新</li>
+</ul>
+<h2 id="pipeline" tabindex="-1">Pipeline</h2>
+<h3 id="liu-shui-xian-xiao-shuai" tabindex="-1">流水线效率</h3>
+<p>信号通过组合逻辑电路需要消耗一定的时间。我们假设上述 SEQ 的组合逻辑电路完成计算好耗时 300ps，同时寄存器的加载需要 20ps 的时间，那么总的延迟就是 320ps。我们定义吞吐量为每条指令发射间隔时间的倒数，即</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>吞吐量</mtext><mo>=</mo><mfrac><mtext>1 条指令</mtext><mrow><mo stretchy="false">(</mo><mn>300</mn><mo>+</mo><mn>20</mn><mo stretchy="false">)</mo><mi>p</mi><mi>s</mi></mrow></mfrac><mo>⋅</mo><mfrac><mrow><mn>1000</mn><mi>p</mi><mi>s</mi></mrow><mrow><mn>1</mn><mi>n</mi><mi>s</mi></mrow></mfrac><mo>≈</mo><mn>3.12</mn><mi>G</mi><mi>I</mi><mi>P</mi><mi>S</mi></mrow><annotation encoding="application/x-tex">\text{吞吐量} = \frac{\text{1 条指令}}{(300+20)ps}\cdot \frac{1000ps}{1ns}\approx 3.12GIPS
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord cjk_fallback">吞吐量</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.2963em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord">300</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">20</span><span class="mclose">)</span><span class="mord mathnormal">p</span><span class="mord mathnormal">s</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">1 </span><span class="mord cjk_fallback">条指令</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mord mathnormal">n</span><span class="mord mathnormal">s</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1000</span><span class="mord mathnormal">p</span><span class="mord mathnormal">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">3.12</span><span class="mord mathnormal">G</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mord mathnormal" style="margin-right:0.05764em;">PS</span></span></span></span></span></p>
+<p>其中延时意味着一条指令从发射到完全指令的耗时，吞吐量为每秒可以处理掉多少的指令。
+我们考虑一种优化，即我们把一个大的组合逻辑分成若干个小的组合逻辑，同时在中间加上寄存器。一个阶段执行完毕之后，就把计算出来的中间结果放入到寄存器中。在下一个时钟上升沿，上一阶段的结果作为下一段的输入数据，继续进行下一阶段的计算，而由于中间插入的寄存器可以把数据隔离开，上一阶段的电路可以继续处理下一条指令。这样就形成了一个类似流水线的东西，电路可以同时计算不同指令的不同部分，不存在电路是空闲的：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/27/68857ccf49dab.png" style="transform: scale(1)" width=1570 height=637></div>
+延迟稍有提高，但是</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>吞吐量</mtext><mo>=</mo><mfrac><mtext>1 条指令</mtext><mrow><mo stretchy="false">(</mo><mn>100</mn><mo>+</mo><mn>20</mn><mo stretchy="false">)</mo><mi>p</mi><mi>s</mi></mrow></mfrac><mo>⋅</mo><mfrac><mrow><mn>1000</mn><mi>p</mi><mi>s</mi></mrow><mrow><mn>1</mn><mi>n</mi><mi>s</mi></mrow></mfrac><mo>≈</mo><mn>8.33</mn><mi>G</mi><mi>I</mi><mi>P</mi><mi>S</mi></mrow><annotation encoding="application/x-tex">\text{吞吐量} = \frac{\text{1 条指令}}{(100+20)ps}\cdot \frac{1000ps}{1ns}\approx 8.33GIPS
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord cjk_fallback">吞吐量</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.2963em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">(</span><span class="mord">100</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">20</span><span class="mclose">)</span><span class="mord mathnormal">p</span><span class="mord mathnormal">s</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord">1 </span><span class="mord cjk_fallback">条指令</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mord mathnormal">n</span><span class="mord mathnormal">s</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1000</span><span class="mord mathnormal">p</span><span class="mord mathnormal">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">8.33</span><span class="mord mathnormal">G</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mord mathnormal" style="margin-right:0.05764em;">PS</span></span></span></span></span></p>
+<p>提高了不少
+不过像这样改进流水线还需要一些注意点。
+首先指令发射间隔时间需要取决于流水线中耗时最长的一部分，不能太短，不然会存在有的电路还没完成计算，就遇到下一个时钟上升沿，此时寄存器的数据就是错的。
+也因为如此，我们希望流水线的划分应当使得各个部分的耗时尽可能一致。比如同样是分成三阶段，下面的这个划分延迟更高，吞吐量更低：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/27/68857e1013231.png" style="transform: scale(1)" width=1541 height=768></div>
+其次，流水线也不建议划分过多阶段，使得流水线过深。尽管阶段越多吞吐量越高，但是吞吐量的增加随着划分阶段数的增加是一个先快后慢的关系，到后期会存在划分阶段很多，硬件成本很高，但是吞吐量提升不大的局面。</p>
+<h3 id="liu-shui-xian-gai-lan" tabindex="-1">流水线概览</h3>
+<p>直接在原有的 SEQ 上简单给各个阶段之间插入寄存器的话会出很多问题。
+其中一个问题是，根据流水线涉及，前一个指令取指阶段执行完毕进入译码阶段后，后一个指令立刻进入流水线进程取指。而取指阶段需要的 PC 需要等待上一条指令走到最后的更新 PC 阶段才可以得到。我们先不考虑原先的更新 PC 阶段，并把写回阶段拿出来作为流水线的最后阶段，于是我们流水线的阶段划分大致为：取值（F），译码（D），执行（E），访存（M），写回（W）五个阶段。在五个阶段之间插入寄存器，最终的结果大概如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/27/688585d725d4e.png" style="transform: scale(1)" width=844 height=1236></div>
+其中 F 阶段开始前插入的寄存器称为 F 寄存器，D 阶段之前插入的寄存器为 D 寄存器，以此类推，插入的这些寄存器称为流水线寄存器。然后为了方便，我们用大写字母开头表示某个流水线寄存器的值，用小写字母开头表示某个阶段的运算结果。比如 M_stat 是流水线寄存器 M 上的某个值，而 m_stat 表示 M 阶段中经过 stat 运算单元得到的信号。
+在新的流水线架构中，在 D 阶段，我们通过 <code>icode</code> 和 <code>rA</code> 、<code>rB</code> 得到 <code>dstE</code> 和 <code>dstM</code> 之后，并不是直接将该信号传给寄存器中，毕竟还没过 E 和 M 阶段拿到要写入的数据。我们在后面的阶段中也传递 <code>dstE</code> 和 <code>dstM</code>，其中 E 阶段直接计算出条件码之后，通过 D 阶段传递过来的 <code>dstE</code> 计算新的 <code>dstE</code>（是否进行分支传送）继续传到后续的 M 和 W 阶段。其中寄存器写入目标的信号来自于 W 阶段的 <code>dstE</code> 和 <code>dstM</code>。图中省略了相关线路。
+另一个小改动是，我们在 D 阶段通过 Select 单元将 valP 和 valA 合并成 valA。这样合并的依据是，只有 <code>call</code> 指令和跳转指令会用到 valP，而这两个指令同时又不使用 valA。</p>
+<h3 id="mao-xian" tabindex="-1">冒险</h3>
+<h4 id="kong-zhi-mao-xian" tabindex="-1">控制冒险</h4>
+<p>上面我们提到上一条指令刚过了 F 阶段进入 D 阶段后，下一条指令紧接着又需要取指了，所以上一条指令在 F 阶段也必须把下一条指令的 PC 算出来。对于一般的指令，我们都可以直接通过当前 PC 加上根据 <code>icode</code> 和 <code>ifun</code> 计算出来的当前指令长度，得到下一个 PC。但是有一些例外。<code>call</code> 和 <code>jmp</code> 指令，我们需要取 <code>valC</code> 为下一个 PC。
+对于 <code>jXX</code> （条件跳转）指令，我们就有点棘手，因为是否跳转取决于状态码，而状态码需要在 E 阶段才能被计算。我们这里需要进行分支预测。这里用到的分支预测是 AT （Always Taken）策略，有研究表明这种策略预测成功概率为 60%。相反，NT（Never Taken）策略成功概率为 40%。书中还提到有更复杂的预测策略，有一个名为反向选择正向不选择（BTFNT）的策略，如果要跳转的地址比不跳转时下一条地址低的话就预测进行分支跳转，反之不跳转，这种策略的预测成功概率有 65%。
+对于 <code>ret</code> 指令，由于指令随后跳转到的地址是根据 <code>%rsp</code> 的值在内存中进行获取，而前面的一些指令还没完成访存和写回阶段，无法直接获取，且根本不可能预测返回指令在哪里。因此，我们暂且先不处理这一点。不过我们考虑其实返回地址并非不可预测，因为 <code>call</code> 和 <code>ret</code> 指令应该是成对出现的，<code>ret</code> 指令大多时候都会跳转到其对应的 <code>call</code> 指令位置（除了我们上一章缓冲区溢出的情况）。因此，一些高性能处理器运用了这个性质，其在取值单元放入一个硬件栈，<code>call</code> 时将地址压入栈中，<code>ret</code> 时将地址从栈中取回，这样来进行预测。</p>
+<h4 id="shu-ju-mao-xian" tabindex="-1">数据冒险</h4>
+<p><strong>程序寄存器</strong>
+我们来看这样的一个例子
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/28/6886de97dcc6e.png" style="transform: scale(1)" width=1249 height=881></div>
+在 <code>addq</code> 指令到达译码阶段时，前两条对于 <code>%rdx</code> 和对于 <code>%rax</code> 进行修改的指令还未完成写回阶段，所以译码阶段无法获得正确的值。这就是一个数据冒险。
+一般有两种方法来解决数据冒险。
+第一种是暂停技术，感性地理解就是，对于上述的情况，我们让 <code>addq</code> 指令暂停在译码阶段，直到所依赖的寄存器完成了写回。
+第二种是转发技术。我们发现，对于 <code>irmovq</code> 、 <code>rrmovq</code> 、 <code>cmovXX</code> 和 <code>OPq</code> 指令，这些指令要把一个寄存器修改为的值，已经在执行阶段获得，后续的访存阶段什么也不干。那么，我们可以直接把 E 阶段已经计算但还没来的及写入的值，直接转发到 D 阶段。而对于 <code>mrmovq</code> 指令，我们需要在 M 阶段才能得到要修改为的值，所以还可以把 M 阶段已经从内存中读出来的数据转发到 D 阶段。
+对于转发技术，我们考虑如下的几个值作为转发目标</p>
+<ul>
+<li><code>e_valE</code> 和 <code>M_valE</code> ：这两个值看似是相同的，但其实是两个指令的 <code>valE</code>，都需要转发</li>
+<li><code>W_valE</code> 和 <code>W_valM</code>：虽然到了写回阶段，但是新的值仍然需要到达下一个时钟上升沿才会存到寄存器中。那么当前这个时钟周期内位于 D 阶段的指令仍然需要数据转发</li>
+<li><code>m_valM</code>
+上述两种操作的具体细节在后文解释。
+<strong>内存</strong>
+对于内存不会发生数据冒险，因为读写内存都在一个阶段进行，前面一条指令一定是经过了 M 阶段写入数据后，后面一条指令才在 M 阶段读出数据。
+不过还有种特殊情况，有可能前一条指令对内存进行修改，而修改的目标恰好是代码所在的内存，这种情况下，前一条指令还未到达 M 阶段应用修改，后一条指令就在 F 阶段完成取指，产生了数据冒险。对于这种情况，可能需要比较复杂的手段进行处理。但为了简便，我们假设这种情况不存在。
+<strong>条件码寄存器</strong>
+对于条件码寄存器也不会发生数据冒险。在新的架构下，E 阶段计算出条件码之后又立刻使用条件码计算新的 <code>dstE</code>，产生和使用都是在同一阶段中，因此不会有冒险。在 SEQ 中，更新 PC 寄存器也需要条件码，以实现条件跳转，但是在新的流水线架构下，我们预测分支，并不需要知道最新的条件码。（但是条件码依然对取指产生影响。我们可以后面根据条件码判断是否预测失败，如果预测失败采取一些手段撤销错误取出的指令， 这个后面会说）</li>
+</ul>
+<h4 id="yi-chang-chu-li" tabindex="-1">异常处理</h4>
+<p>关于状态寄存器的数据冒险，涉及到异常处理
+异常处理有如下几个细节问题：</p>
+<ul>
+<li>可能有多个指令都出现了异常</li>
+<li>取出一个指令，该指令导致了异常，但是后来又由于分支预测错误，撤销了这个指令
+对于上述两种情况，我们不让异常直接影响到处理器的当前状态，而是在每个阶段都存储当前指令所对应的状态信息，直到指令一直走到 W 阶段才将状态应用到当前处理器。这么做可以确保只考虑最先触发异常的指令，同时确保了如果指令被撤销，那么也不会产生影响</li>
+<li>有可能一个指令触发了异常，但是由于还没走到 W 阶段，所以后面的指令也正常执行，但修改了程序员可见状态（后面的指令本不应该执行，更不应该发生修改）
+对于这种情况，我们考虑，会修改程序员可见状态的阶段只有 E 阶段（修改条件码），M 阶段（写内存），W 阶段（写回寄存器）。如果前面有异常指令的话，那么后面的指令必然到不了 W 阶段。当后一条指令到达 E 或是 M 阶段时，前面那条发生异常的指令大概到了 M 和 W 阶段。所以我们需要判断，如果 M 和 W 阶段指令发生异常的话，应该禁止 E 和 M 阶段修改程序员可见状态</li>
+</ul>
+<h3 id="qu-zhi-jie-duan-1" tabindex="-1">取指阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/28/68877ac07472c.png" style="transform: scale(1)" width=1241 height=957></div>
+和 SEQ 不同，我们在取指阶段就根据指令本身的信息计算出下一个 PC 值，这其中也包括了根据 <code>icode</code> 判断是否是条件传送分支，然后进行预测。预测后的 PC 值放入 F 寄存器中来给下一个 F 阶段使用。
+在 Select PC 单元，我们还需要其他阶段的信息，来处理先前已经发射的 <code>ret</code> 指令和条件跳转预测失败的情况。对应的 HCL 如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/28/68877bf24191d.png" style="transform: scale(1)" width=880 height=304></div>
+其中第一个表示，先前发射的条件跳转语句（如今已经执行到 M 阶段）预测错误，先前预测应该是执行条件跳转，但其实应该不执行。所以我们需要立刻把当前 PC 更新为当时指令对应的 <code>valP</code>，即 <code>M_valA</code>（因为 <code>valA</code> 和 <code>valP</code> 已经在 D 阶段被合并）来进行纠正。（不过我们还是发射了一些本应不该发射的指令，这些指令后面会说怎么取消）
+第二个则表示，先前发射的 <code>ret</code> 语句如今已经完成 M 阶段，拿到了内存中的返回地址，执行到了 W 阶段。此时我们立刻将 PC 置为 <code>W_valM</code>
+对于 <code>F_predPC</code>，其 HCL 如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/28/68877e275fb5a.png" style="transform: scale(1)" width=789 height=148></div></p>
+<h3 id="yi-ma-he-xie-hui-jie-duan-1" tabindex="-1">译码和写回阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/28/68877e89e6c26.png" style="transform: scale(1)" width=1323 height=1018></div>
+<code>Sel</code> 为合并 <code>valA</code> 和 <code>valP</code>，已经在前文讲过
+<code>Fwd A</code> 和 <code>Fwd B</code> 两个单元负责选择是从寄存器中读数据还是选择转发过来的数据。转发数据时同时转发了数据对应的寄存器编号。转发的选择优先级比较重要：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/28/6887804d41886.png" style="transform: scale(1)" width=1159 height=336></div>
+我们要选择比较早的阶段转发来的数据。因为比较早阶段执行的指令后发射。
+对于写回阶段，我们之前已经说过大致流程。</p>
+<h3 id="zhi-hang-jie-duan-1" tabindex="-1">执行阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/28/6887864232475.png" style="transform: scale(1)" width=1161 height=626></div>
+和 SEQ 大致相同。数据转发和新的 <code>dstE</code> 计算已经在前文讲过。需要注意的是 <code>W_stat</code> 和 <code>m_stat</code> 是配合异常处理，来防止条件码写入</p>
+<h3 id="fang-cun-jie-duan-1" tabindex="-1">访存阶段</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/28/688786e8ccbc9.png" style="transform: scale(1)" width=1206 height=675></div>
+和 SEQ 的一个区别在于这里没有 Data 块。SEQ 中的 Data 块是用来选择 <code>valP</code> 和 <code>valA</code> 的。
+其中的 <code>M_valE</code> 和 <code>M_dstE</code> 、 <code>m_valM</code> 和 <code>M_dstM</code> 是用来转发的，<code>M_valA</code> 是用来纠正分支预测错误的
+这里没有像执行阶段那样，引一个其他状态的异常信号过来以禁止发生异常后对内存的写入。我们稍后会使用别的</p>
+<h3 id="liu-shui-xian-kong-zhi" tabindex="-1">流水线控制</h3>
+<p>我们着重考虑如下情况：</p>
+<ul>
+<li>加载/使用冒险：对于数据冒险，一般数据转发就足够了。但是会有这样一种情况，前一条指令是 <code>mrmovq</code> ，后一条指令使用到了前面指令操作的寄存器，此时转发就不奏效了，因为后一条指令在 D 阶段，前一条指令才到 E 阶段，而到 M 阶段才知道应该给到什么值。我们将这种情形称为加载/使用冒险</li>
+<li>处理 <code>ret</code>：对于 <code>ret</code> 指令，我们考虑当 <code>ret</code> 指令触发之后，流水线暂停，不再处理新的指令</li>
+<li>分支预测错误：根据前面设计，当我们意识到分支预测错误时，已经发射了几条错误指令了，我们需要考虑如何取消前面的这些指令</li>
+<li>异常处理：前面已经讲了异常处理大概的应对方法，这里再细化一下。当异常传播到访存阶段时，由于前一条指令已经开始执行 E 阶段，所以此时必须直接传一个信号过去禁止条件码改变。同时我们考虑往 M 阶段插一个气泡，这个气泡的意思表示，当下一条指令到 M 阶段后就变为 <code>nop</code> 指令向后传播，这也就达到了禁止写入内存的目的。当写回阶段有异常指令时，我们暂停整个流水线。
+这四个情况的判定条件如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/6888245895208.png" style="transform: scale(1)" width=1248 height=238></div>
+<code>ret</code> 指令到达 D 阶段时就应该立刻被发现。对于加载/使用冒险，如果发生，后面使用寄存器的指令到达 D 阶段时，前面那条 <code>mrmovq</code> 到达 E 阶段，此时应该让 D 阶段暂停一次。分支预测错误的条件看似和前面取指阶段的 HCL 不一样，但其实 <code>E_icode</code> 和 <code>M_icode</code> 相同，<code>e_Cnd</code> 和 <code>M_Cnd</code> 相同。对于异常情况，只需要判断 M 和 W 阶段发生的异常，我们这里主要是要考虑禁止发生异常后程序员可见状态被改变。
+对于流水线寄存器，我们改进一下，使得其能再接受两个信号：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/68882767e3a32.png" style="transform: scale(1)" width=988 height=989></div>
+(上图有一点印刷错误)
+如果给到一个暂停信号，那么下一个时钟上升沿之后，寄存器仍输出之前的数据而不输出新的数据。如果给到一个气泡信号，那么下一个时钟上升沿后，寄存器输出情况与 <code>nop</code> 指令相同。也就是说，暂停信号起到了重复状态的效果，气泡信号起到了撤销指令的结果。
+上面四种情况，需要的暂停/气泡情况如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/68882b84be4c1.png" style="transform: scale(1)" width=1289 height=340></div>
+对于异常，表中没写，应该是其他阶段正常，M 阶段插入气泡。气泡可以撤销当前指令，但整个流水线继续往前走。暂停+气泡可以使得流水线前面的部分待在原地一周期，前面的部分继续往前走，中间空出来的用气泡补充。
+注意图中设置了气泡/暂停状态后，下一个时钟上升沿才会产生对应效果
+其中处理 <code>ret</code> 对应的例子是：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/68882be7ccf36.png" style="transform: scale(1)" width=1256 height=655></div>
+加载/使用冒险对应的例子：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/68882cf308ff8.png" style="transform: scale(1)" width=1330 height=1123></div>
+分支预测错误对应的例子：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/68882d2b87374.png" style="transform: scale(1)" width=1168 height=585></div>
+然后我们考虑这些情况发生组合。对于异常，在异常处理部分已经讨论过一些细节。然后考虑剩下的情况组合。剩余情况需要满足的条件如图所示，一些条件是互斥的，不可能发生组合
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/68882e4357891.png" style="transform: scale(1)" width=1015 height=326></div>
+我们可以按照 暂停&gt;气泡&gt;正常 的优先级合并：
+组合 A
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/688832d73f5f8.png" style="transform: scale(1)" width=1260 height=245></div>
+组合 B
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/688832fccd0e4.png" style="transform: scale(1)" width=1255 height=283></div>
+由于组合 B，在写流水线寄存器 D 的气泡和暂停情况的 HCL 代码的时候需要特判一下组合 B 的情况，或者调整优先级
+然后我们把流水线控制模块加入流水线结构中：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/688837f865c1b.png" style="transform: scale(1)" width=1256 height=785></div></li>
+</ul>
+<h3 id="xing-neng-fen-xi" tabindex="-1">性能分析</h3>
+<p>我们使用 CPI （完成一条指令平均需要多少周期）来衡量处理器性能。一般来说 CPI 为 1，但是由于我们上面出现的 加载/使用冒险、<code>ret</code> 指令，分支预测错误等因素，导致插入了一些气泡，这些气泡会使得 CPI 上升。一般来说，我们有：</p>
+<p class="katex-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>C</mi><mi>P</mi><mi>I</mi><mo>=</mo><mn>1.0</mn><mo>+</mo><mi>l</mi><mi>p</mi><mo>+</mo><mi>m</mi><mi>p</mi><mo>+</mo><mi>r</mi><mi>p</mi></mrow><annotation encoding="application/x-tex">CPI=1.0+lp+mp+rp
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">CP</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1.0</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">lp</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">m</span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">p</span></span></span></span></span></p>
+<p>其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>p</mi></mrow><annotation encoding="application/x-tex">lp</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">lp</span></span></span></span> 为加载处罚（由于加载/使用冒险，插入气泡的平均数），<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mi>p</mi></mrow><annotation encoding="application/x-tex">mp</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">m</span><span class="mord mathnormal">p</span></span></span></span> 为分支预测错误处罚（由于分支预测错误，插入气泡的平均数），<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mi>p</mi></mrow><annotation encoding="application/x-tex">rp</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mord mathnormal">p</span></span></span></span> 为返回处罚（由于 <code>ret</code> 指令，插入气泡的平均数）
+根据统计，我们有：</p>
+<ul>
+<li>加载指令（<code>mrmovq</code> 和 <code>popq</code>）占所有执行指令的 25%，其中 20% 会导致加载/使用冒险</li>
+<li>条件分支指令占所有指令指令的 20%，其中 60% 会选择分支，有 40% 的概率是预测错误的</li>
+<li>返回指令占所有执行指令的 2%
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/29/68887dcdcb394.png" style="transform: scale(1)" width=1269 height=254></div>
+于是我们可以求得处罚总和为 0.27，于是 CPI 为 1.27。进一步的优化是尽可能增加预测的成功率。但传统的流水线处理器优化的尽头也就是完全没有气泡产生，CPI 到达 1。现代的处理器支持超标量，即同时并行执行多个指令，此时 CPI 有可能降到 1 以下，并将衡量处理器性能的标准从 1 转化为 CPI 的倒数，即 IPC ，每个周期执行的指令条数，越大越好。</li>
+</ul>
+<h2 id="arch-lab" tabindex="-1">ArchLab</h2>
+<h3 id="huan-jing" tabindex="-1">环境</h3>
+<h3 id="pei-zhi" tabindex="-1">配置</h3>
+<p>这个实验首先的难点就是环境配置，在配置环境中遇到这几个问题：
+首先是出现了 <code>lineno</code> 的重复定义的问题，导致编译不过去（不知道 CMU 大神怎么会犯这种错误）。在 stackoverflow 上得知可以修改 misc 目录下的 Makefile 文件：</p>
+<pre><div class="head"><div class="language">makefile</div><div class="copy" data="Q0ZMQUdTJTNELVdhbGwlMjAtTzElMjAtZyUyMC1mY29tbW9uJTBBTENGTEFHUyUzRC1PMSUyMC1mY29tbW9uJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">CFLAGS=-Wall -O1 -g -fcommon
+LCFLAGS=-O1 -fcommon
+</div></code></pre>
+<p>加上 <code>-fcommon</code> 参数
+然后 readme 上说本次实验用到的工具有 tty 版本和 gui 版本，gui 版本会更好用一些，于是我考虑编译 gui 版本的工具。我们需要安装 tcl 和 tk 这两个工具，然后我发现 wsl 上已经自带了，于是编译，发现编译不过去，编译的报错信息大概是 tcl 或者 tk 的库缺少了函数。盲猜是版本问题，因为 lab 里用的 tcl/tk 版本是 8.5 的而 wsl 自带的是 8.6 的。apt 上没有 8.5 版本，所以我们可能需要自行编译安装
+我选择了 cmu 这个课程开始之前的 tcl/tk 版本，5.8.17。源码的地址在 <a href="https://sourceforge.net/projects/tcl/files/Tcl/8.5.17/%EF%BC%8C%E6%88%91%E4%BB%AC%E4%B8%8B%E8%BD%BD">https://sourceforge.net/projects/tcl/files/Tcl/8.5.17/，我们下载</a> tcl8.5.17-src.tar.gz 和 tk8.5.17-src.tar.gz 这两个文件并解压</p>
+<pre><div class="head"><div class="language">bash</div><div class="copy" data="JTIzJTIwdGNsJTIwJUU3JTlBJTg0JUU1JUFFJTg5JUU4JUEzJTg1JTBBY2QlMjB0Y2w4LjUuMTclMkZ1bml4JTBBLiUyRmNvbmZpZ3VyZSUyMC0tcHJlZml4JTNEJTJGdXNyJTJGbG9jYWwlMEFtYWtlJTBBc3VkbyUyMG1ha2UlMjBpbnN0YWxsJTBBJTIzJTIwdGslMjAlRTclOUElODQlRTUlQUUlODklRTglQTMlODUlMEElMjMlMjAlRTUlOTAlOEMlRTclOTAlODYlRTclQkMlOTYlRTglQUYlOTElRTUlQUUlODklRTglQTMlODUlMjBUayUwQWNkJTIwLi4lMkYuLiUyRnRrOC41LjE3JTJGdW5peCUwQS4lMkZjb25maWd1cmUlMjAtLXByZWZpeCUzRCUyRnVzciUyRmxvY2FsJTIwLS13aXRoLXRjbCUzRCUyRnVzciUyRmxvY2FsJTJGbGliJTBBbWFrZSUwQXN1ZG8lMjBtYWtlJTIwaW5zdGFsbCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-comment"># tcl 的安装</span>
+<span class="hljs-built_in">cd</span> tcl8.5.17/unix
+./configure --prefix=/usr/local
+make
+<span class="hljs-built_in">sudo</span> make install
+<span class="hljs-comment"># tk 的安装</span>
+<span class="hljs-comment"># 同理编译安装 Tk</span>
+<span class="hljs-built_in">cd</span> ../../tk8.5.17/unix
+./configure --prefix=/usr/local --with-tcl=/usr/local/lib
+make
+<span class="hljs-built_in">sudo</span> make install
+</div></code></pre>
+<p>然后修改 lab 的最外层目录的 makefile 文件</p>
+<pre><div class="head"><div class="language">makefile</div><div class="copy" data="VEtMSUJTJTNELUwlMkZ1c3IlMkZsb2NhbCUyRmxpYiUyMC1sdGs4LjUlMjAtbHRjbDguNSUwQVRLSU5DJTNELWlzeXN0ZW0lMjAlMkZ1c3IlMkZsb2NhbCUyRmluY2x1ZGUlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">TKLIBS=-L/usr/local/lib -ltk8.5 -ltcl8.5
+TKINC=-isystem /usr/local/<span class="hljs-keyword">include</span>
+</div></code></pre>
+<p>然后再编译，发现又报错了，这次说是 matherr 这个函数没有定义。询问 ai 得知最新的 glibc 已经把这个函数移除了，为了让我们能通过编译的话，我们只能是自己定义一个</p>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="aW50JTIwbWF0aGVycihzdHJ1Y3QlMjBfX2V4Y2VwdGlvbiUyMCplKSUyMCU3QiUwQSUyMCUyMCUyMCUyMHJldHVybiUyMDAlM0IlMjAlMjAlMkYlMkYlMjAlRTUlQTclOEIlRTclQkIlODglRTglQkYlOTQlRTUlOUIlOUUlMjAwJUVGJUJDJThDJUU4JUExJUE4JUU3JUE0JUJBJUU5JTk0JTk5JUU4JUFGJUFGJUU2JTlDJUFBJUU1JUE0JTg0JUU3JTkwJTg2JTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-type">int</span> <span class="hljs-title function_">matherr</span><span class="hljs-params">(<span class="hljs-keyword">struct</span> __exception *e)</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;  <span class="hljs-comment">// 始终返回 0，表示错误未处理</span>
+}
+</div></code></pre>
+<p>把这个函数加到 seq/ssim.c 和 pipe/psim.c 中，然后终于通过编译</p>
+<h3 id="part-a" tabindex="-1">PartA</h3>
+<p>让用 y86-64 汇编写三个程序，非常简单，没什么可说的：
+sum.ys:</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwJTIwLnBvcyUyMDAlMEElMjAlMjAlMjAlMjBpcm1vdnElMjBzdGFjayUyQyUyNXJzcCUwQSUyMCUyMCUyMCUyMGlybW92cSUyMGVsZTElMkMlMjVyZGklMEElMjAlMjAlMjAlMjBjYWxsJTIwc3VtX2xpc3QlMEElMjAlMjAlMjAlMjBoYWx0JTBBJTIzJTIwU2FtcGxlJTIwbGlua2VkJTIwbGlzdCUwQSUyMCUyMCUyMCUyMC5hbGlnbiUyMDglMEFlbGUxJTNBJTBBJTIwJTIwJTIwJTIwLnF1YWQlMjAweDAwYSUwQSUyMCUyMCUyMCUyMC5xdWFkJTIwZWxlMiUwQWVsZTIlM0ElMEElMjAlMjAlMjAlMjAucXVhZCUyMDB4MGIwJTBBJTIwJTIwJTIwJTIwLnF1YWQlMjBlbGUzJTBBZWxlMyUzQSUwQSUyMCUyMCUyMCUyMC5xdWFkJTIwMHhjMDAlMEElMjAlMjAlMjAlMjAucXVhZCUyMDAlMEFzdW1fbGlzdCUzQSUwQSUyMCUyMCUyMCUyMHhvcnElMjAlMjVyYXglMkMlMjVyYXglMEElMjAlMjAlMjAlMjBqbXAlMjB0ZXN0JTBBbG9vcCUzQSUwQSUyMCUyMCUyMCUyMG1ybW92cSUyMCglMjVyZGkpJTJDJTI1cjglMEElMjAlMjAlMjAlMjBhZGRxJTIwJTI1cjglMkMlMjVyYXglMEElMjAlMjAlMjAlMjBtcm1vdnElMjA4KCUyNXJkaSklMkMlMjVyZGklMEElMjAlMjAlMjAlMjBqbXAlMjB0ZXN0JTBBdGVzdCUzQSUwQSUyMCUyMCUyMCUyMGFuZHElMjAlMjVyZGklMkMlMjVyZGklMEElMjAlMjAlMjAlMjBqbmUlMjBsb29wJTBBJTIwJTIwJTIwJTIwcmV0JTBBJTIwJTIwJTIwJTIwLnBvcyUyMDB4MjAwJTBBc3RhY2slM0ElMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div></div><div class="code">    .pos 0
+    irmovq stack,%rsp
+    irmovq ele1,%rdi
+    call sum_list
+    halt
+# Sample linked list
+    .align 8
+ele1:
+    .quad 0x00a
+    .quad ele2
+ele2:
+    .quad 0x0b0
+    .quad ele3
+ele3:
+    .quad 0xc00
+    .quad 0
+sum_list:
+    xorq %rax,%rax
+    jmp test
+loop:
+    mrmovq (%rdi),%r8
+    addq %r8,%rax
+    mrmovq 8(%rdi),%rdi
+    jmp test
+test:
+    andq %rdi,%rdi
+    jne loop
+    ret
+    .pos 0x200
+stack:
+</div></code></pre>
+<p>rsum.ys:</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwJTIwLnBvcyUyMDAlMEElMjAlMjAlMjAlMjBpcm1vdnElMjBzdGFjayUyQyUyNXJzcCUwQSUyMCUyMCUyMCUyMGlybW92cSUyMGVsZTElMkMlMjVyZGklMEElMjAlMjAlMjAlMjBjYWxsJTIwcnN1bV9saXN0JTBBJTIwJTIwJTIwJTIwaGFsdCUwQSUyMyUyMFNhbXBsZSUyMGxpbmtlZCUyMGxpc3QlMEElMjAlMjAlMjAlMjAuYWxpZ24lMjA4JTBBZWxlMSUzQSUwQSUyMCUyMCUyMCUyMC5xdWFkJTIwMHgwMGElMEElMjAlMjAlMjAlMjAucXVhZCUyMGVsZTIlMEFlbGUyJTNBJTBBJTIwJTIwJTIwJTIwLnF1YWQlMjAweDBiMCUwQSUyMCUyMCUyMCUyMC5xdWFkJTIwZWxlMyUwQWVsZTMlM0ElMEElMjAlMjAlMjAlMjAucXVhZCUyMDB4YzAwJTBBJTIwJTIwJTIwJTIwLnF1YWQlMjAwJTBBcnN1bV9saXN0JTNBJTBBJTIwJTIwJTIwJTIwYW5kcSUyMCUyNXJkaSUyQyUyNXJkaSUwQSUyMCUyMCUyMCUyMGplJTIwczElMEElMjAlMjAlMjAlMjBwdXNocSUyMCUyNXJkaSUwQSUyMCUyMCUyMCUyMG1ybW92cSUyMDgoJTI1cmRpKSUyQyUyNXJkaSUwQSUyMCUyMCUyMCUyMGNhbGwlMjByc3VtX2xpc3QlMEElMjAlMjAlMjAlMjBwb3BxJTIwJTI1cmRpJTBBJTIwJTIwJTIwJTIwbXJtb3ZxJTIwKCUyNXJkaSklMkMlMjVyOCUwQSUyMCUyMCUyMCUyMGFkZHElMjAlMjVyOCUyQyUyNXJheCUwQSUyMCUyMCUyMCUyMHJldCUwQXMxJTNBJTBBJTIwJTIwJTIwJTIwaXJtb3ZxJTIwJTI0MCUyQyUyNXJheCUwQSUyMCUyMCUyMCUyMHJldCUwQSUyMCUyMCUyMCUyMC5wb3MlMjAweDIwMCUwQXN0YWNrJTNBJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div></div><div class="code">    .pos 0
+    irmovq stack,%rsp
+    irmovq ele1,%rdi
+    call rsum_list
+    halt
+# Sample linked list
+    .align 8
+ele1:
+    .quad 0x00a
+    .quad ele2
+ele2:
+    .quad 0x0b0
+    .quad ele3
+ele3:
+    .quad 0xc00
+    .quad 0
+rsum_list:
+    andq %rdi,%rdi
+    je s1
+    pushq %rdi
+    mrmovq 8(%rdi),%rdi
+    call rsum_list
+    popq %rdi
+    mrmovq (%rdi),%r8
+    addq %r8,%rax
+    ret
+s1:
+    irmovq $0,%rax
+    ret
+    .pos 0x200
+stack:
+</div></code></pre>
+<h3 id="part-b" tabindex="-1">PartB</h3>
+<p>这一部分需要我们在 SEQ 实现上添加 <code>iaddq</code> 指令。指令的具体定义见书上的练习题4.3。<code>iaddq</code> 和 <code>irmovq</code> 的大致实现比较类似，所以我们仿照 <code>irmovq</code> 各个阶段的实现。取指和译码阶段类似，执行阶段将 <code>valC</code> 和 <code>valB</code> 相加得到 <code>valE</code>，访存阶段没有操作，最后是一样的写回阶段。修改 <code>seq-full.hcl</code> 如下：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="Ym9vbCUyMG5lZWRfcmVnaWRzJTIwJTNEJTBBJTA5aWNvZGUlMjBpbiUyMCU3QiUyMElSUk1PVlElMkMlMjBJT1BRJTJDJTIwSVBVU0hRJTJDJTIwSVBPUFElMkMlMEElMDklMDklMjAlMjAlMjAlMjAlMjBJSVJNT1ZRJTJDJTIwSVJNTU9WUSUyQyUyMElNUk1PVlElMkMlMjBJSUFERFElMjAlN0QlM0IlMEFib29sJTIwbmVlZF92YWxDJTIwJTNEJTBBJTA5aWNvZGUlMjBpbiUyMCU3QiUyMElJUk1PVlElMkMlMjBJUk1NT1ZRJTJDJTIwSU1STU9WUSUyQyUyMElKWFglMkMlMjBJQ0FMTCUyQyUyMElJQUREUSUyMCU3RCUzQiUwQXdvcmQlMjBzcmNCJTIwJTNEJTIwJTVCJTBBJTA5aWNvZGUlMjBpbiUyMCU3QiUyMElPUFElMkMlMjBJUk1NT1ZRJTJDJTIwSU1STU9WUSUyQyUyMElJQUREUSUyMCUyMCU3RCUyMCUzQSUyMHJCJTNCJTBBJTA5aWNvZGUlMjBpbiUyMCU3QiUyMElQVVNIUSUyQyUyMElQT1BRJTJDJTIwSUNBTEwlMkMlMjBJUkVUJTIwJTdEJTIwJTNBJTIwUlJTUCUzQiUwQSUwOTElMjAlM0ElMjBSTk9ORSUzQiUyMCUyMCUyMyUyMERvbid0JTIwbmVlZCUyMHJlZ2lzdGVyJTBBJTVEJTNCJTBBd29yZCUyMGRzdEUlMjAlM0QlMjAlNUIlMEElMDlpY29kZSUyMGluJTIwJTdCJTIwSVJSTU9WUSUyMCU3RCUyMCUyNiUyNiUyMENuZCUyMCUzQSUyMHJCJTNCJTBBJTA5aWNvZGUlMjBpbiUyMCU3QiUyMElJUk1PVlElMkMlMjBJT1BRJTJDJTIwSUlBRERRJTdEJTIwJTNBJTIwckIlM0IlMEElMDlpY29kZSUyMGluJTIwJTdCJTIwSVBVU0hRJTJDJTIwSVBPUFElMkMlMjBJQ0FMTCUyQyUyMElSRVQlMjAlN0QlMjAlM0ElMjBSUlNQJTNCJTBBJTA5MSUyMCUzQSUyMFJOT05FJTNCJTIwJTIwJTIzJTIwRG9uJ3QlMjB3cml0ZSUyMGFueSUyMHJlZ2lzdGVyJTBBJTVEJTNCJTBBd29yZCUyMGFsdUElMjAlM0QlMjAlNUIlMEElMDlpY29kZSUyMGluJTIwJTdCJTIwSVJSTU9WUSUyQyUyMElPUFElMjAlN0QlMjAlM0ElMjB2YWxBJTNCJTBBJTA5aWNvZGUlMjBpbiUyMCU3QiUyMElJUk1PVlElMkMlMjBJUk1NT1ZRJTJDJTIwSU1STU9WUSUyQyUyMElJQUREUSUyMCU3RCUyMCUzQSUyMHZhbEMlM0IlMEElMDlpY29kZSUyMGluJTIwJTdCJTIwSUNBTEwlMkMlMjBJUFVTSFElMjAlN0QlMjAlM0ElMjAtOCUzQiUwQSUwOWljb2RlJTIwaW4lMjAlN0IlMjBJUkVUJTJDJTIwSVBPUFElMjAlN0QlMjAlM0ElMjA4JTNCJTBBJTA5JTIzJTIwT3RoZXIlMjBpbnN0cnVjdGlvbnMlMjBkb24ndCUyMG5lZWQlMjBBTFUlMEElNUQlM0IlMEF3b3JkJTIwYWx1QiUyMCUzRCUyMCU1QiUwQSUwOWljb2RlJTIwaW4lMjAlN0IlMjBJUk1NT1ZRJTJDJTIwSU1STU9WUSUyQyUyMElPUFElMkMlMjBJQ0FMTCUyQyUwQSUwOSUwOSUyMCUyMCUyMCUyMCUyMCUyMElQVVNIUSUyQyUyMElSRVQlMkMlMjBJUE9QUSUyQyUyMElJQUREUSUyMCU3RCUyMCUzQSUyMHZhbEIlM0IlMEElMDlpY29kZSUyMGluJTIwJTdCJTIwSVJSTU9WUSUyQyUyMElJUk1PVlElMjAlN0QlMjAlM0ElMjAwJTNCJTBBJTA5JTIzJTIwT3RoZXIlMjBpbnN0cnVjdGlvbnMlMjBkb24ndCUyMG5lZWQlMjBBTFUlMEElNUQlM0IlMEFib29sJTIwc2V0X2NjJTIwJTNEJTIwaWNvZGUlMjBpbiUyMCU3QiUyMElPUFElMkMlMjBJSUFERFElMjAlN0QlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div></div><div class="code">bool need_regids =
+	icode in { IRRMOVQ, IOPQ, IPUSHQ, IPOPQ,
+		     IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ };
+bool need_valC =
+	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIADDQ };
+word srcB = [
+	icode in { IOPQ, IRMMOVQ, IMRMOVQ, IIADDQ  } : rB;
+	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
+	1 : RNONE;  # Don't need register
+];
+word dstE = [
+	icode in { IRRMOVQ } &amp;&amp; Cnd : rB;
+	icode in { IIRMOVQ, IOPQ, IIADDQ} : rB;
+	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
+	1 : RNONE;  # Don't write any register
+];
+word aluA = [
+	icode in { IRRMOVQ, IOPQ } : valA;
+	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ } : valC;
+	icode in { ICALL, IPUSHQ } : -8;
+	icode in { IRET, IPOPQ } : 8;
+	# Other instructions don't need ALU
+];
+word aluB = [
+	icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL,
+		      IPUSHQ, IRET, IPOPQ, IIADDQ } : valB;
+	icode in { IRRMOVQ, IIRMOVQ } : 0;
+	# Other instructions don't need ALU
+];
+bool set_cc = icode in { IOPQ, IIADDQ };
+</div></code></pre>
+<h3 id="part-c" tabindex="-1">PartC</h3>
+<p>这一部分需要我们优化处理器和一个复制数组的代码，使得 CPE 尽可能的小。在 pipe 目录下，执行 <code>make VERSION=full</code> 可以重新编译处理器和被评测的代码，然后 <code>../misc/yis sdriver.yo</code> 可以测试小样例，如果最后显示 <code>%rax</code> 为 <code>2</code> 则说明通过。<code>../misc/yis ldriver.yo</code> 可以测试大样例，如果最后显示 <code>%rax</code> 为 <code>0x1f</code> 则说明通过。然后我们通过 <code>./correctness.pl</code> 可以先测试被评测的代码 <code>ncopy.ys</code> 是否能正确执行。然后 <code>./benchmark.pl</code> 可以计算分数
+我首先考虑从 <code>ncopy.ys</code> 入手，首先对于 <code>if (val &gt; 0) count++;</code> 这一部分，原代码中这里使用的条件跳转实现的。我考虑使用条件转移，于是有：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlhbmRxJTIwJTI1cmR4JTJDJTI1cmR4JTA5JTA5JTIzJTIwbGVuJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWlybW92cSUyMCUyNDElMkMlMjVyOCUwQSUwOWpsZSUyMERvbmUlMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMERvbmUlM0ElMEFMb29wJTNBJTBBJTA5bXJtb3ZxJTIwKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5YWRkcSUyMCUyNXI4JTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOXN1YnElMjAlMjVyOCUyQyUyMCUyNXJkeCUwOSUwOSUyMyUyMGxlbi0tJTBBJTA5aXJtb3ZxJTIwJTI0OCUyQyUyMCUyNXIxMCUwQSUwOWFkZHElMjAlMjVyMTAlMkMlMjAlMjVyZGklMDklMDklMjMlMjBzcmMlMkIlMkIlMEElMDlhZGRxJTIwJTI1cjEwJTJDJTIwJTI1cnNpJTA5JTA5JTIzJTIwZHN0JTJCJTJCJTBBJTA5YW5kcSUyMCUyNXJkeCUyQyUyNXJkeCUwOSUwOSUyMyUyMGxlbiUyMCUzRSUyMDAlM0YlMEElMDlqZyUyMExvb3AlMDklMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMExvb3AlM0ElMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	andq %rdx,%rdx		# len &lt;= 0?
+	irmovq $1,%r8
+	jle Done		# if so, goto Done:
+Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rrmovq %rax,%r11
+	addq %r8,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	subq %r8, %rdx		# len--
+	irmovq $8, %r10
+	addq %r10, %rdi		# src++
+	addq %r10, %rsi		# dst++
+	andq %rdx,%rdx		# len &gt; 0?
+	jg Loop			# if so, goto Loop:
+</div></code></pre>
+<p>不过这个小优化似乎用处不大，跑一下发现 CPE 只是从 15.18 优化到 14.33
+刚才的思路其实算有点偏门的。更直接的，我们应该尽可能减少 Loop 内的指令数量。
+然后发现 <code>irmovq $8, %r10</code> 可以被优化掉：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlhbmRxJTIwJTI1cmR4JTJDJTI1cmR4JTA5JTA5JTIzJTIwbGVuJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWlybW92cSUyMCUyNDElMkMlMjVyOCUwQSUwOWlybW92cSUyMCUyNDglMkMlMjVyOSUwQSUwOWpsZSUyMERvbmUlMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMERvbmUlM0ElMEFMb29wJTNBJTBBJTA5bXJtb3ZxJTIwKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5YWRkcSUyMCUyNXI4JTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOXN1YnElMjAlMjVyOCUyQyUyMCUyNXJkeCUwOSUwOSUyMyUyMGxlbi0tJTBBJTA5YWRkcSUyMCUyNXI5JTJDJTIwJTI1cmRpJTA5JTA5JTIzJTIwc3JjJTJCJTJCJTBBJTA5YWRkcSUyMCUyNXI5JTJDJTIwJTI1cnNpJTA5JTA5JTIzJTIwZHN0JTJCJTJCJTBBJTA5YW5kcSUyMCUyNXJkeCUyQyUyNXJkeCUwOSUwOSUyMyUyMGxlbiUyMCUzRSUyMDAlM0YlMEElMDlqZyUyMExvb3AlMDklMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMExvb3AlM0ElMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	andq %rdx,%rdx		# len &lt;= 0?
+	irmovq $1,%r8
+	irmovq $8,%r9
+	jle Done		# if so, goto Done:
+Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rrmovq %rax,%r11
+	addq %r8,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	subq %r8, %rdx		# len--
+	addq %r9, %rdi		# src++
+	addq %r9, %rsi		# dst++
+	andq %rdx,%rdx		# len &gt; 0?
+	jg Loop			# if so, goto Loop:
+</div></code></pre>
+<p>测了一下从 14.33 优化到 13.41
+又发现如果把 <code>subq %r8, %rdx</code> 后移，那么 <code>andq %rdx,%rdx</code> 就没有必要：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="TG9vcCUzQSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOWFkZHElMjAlMjVyOCUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlhZGRxJTIwJTI1cjklMkMlMjAlMjVyZGklMDklMDklMjMlMjBzcmMlMkIlMkIlMEElMDlhZGRxJTIwJTI1cjklMkMlMjAlMjVyc2klMDklMDklMjMlMjBkc3QlMkIlMkIlMEElMDlzdWJxJTIwJTI1cjglMkMlMjAlMjVyZHglMDklMDklMjMlMjBsZW4tLSUwQSUwOWpnJTIwTG9vcCUwOSUwOSUwOSUyMyUyMGlmJTIwc28lMkMlMjBnb3RvJTIwTG9vcCUzQSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code">Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rrmovq %rax,%r11
+	addq %r8,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	addq %r9, %rdi		# src++
+	addq %r9, %rsi		# dst++
+	subq %r8, %rdx		# len--
+	jg Loop			# if so, goto Loop:
+</div></code></pre>
+<p>从 13.41 优化到 12.41
+然后我有考虑实现 <code>iaddq</code> 指令，具体实现方法和 PartB 类似，然后使用 <code>iaddq</code> 指令来减少代码指令数：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlhbmRxJTIwJTI1cmR4JTJDJTI1cmR4JTA5JTA5JTIzJTIwbGVuJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyMERvbmUlMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMERvbmUlM0ElMEFMb29wJTNBJTBBJTA5bXJtb3ZxJTIwKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOWlhZGRxJTIwJTI0OCUyQyUyMCUyNXJkaSUwOSUwOSUyMyUyMHNyYyUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0OCUyQyUyMCUyNXJzaSUwOSUwOSUyMyUyMGRzdCUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0LTElMkMlMjAlMjVyZHglMDklMDklMjMlMjBsZW4tLSUwQSUwOWpnJTIwTG9vcCUwOSUwOSUwOSUyMyUyMGlmJTIwc28lMkMlMjBnb3RvJTIwTG9vcCUzQSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	andq %rdx,%rdx		# len &lt;= 0?
+	jle Done		# if so, goto Done:
+Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rrmovq %rax,%r11
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $8, %rdi		# src++
+	iaddq $8, %rsi		# dst++
+	iaddq $-1, %rdx		# len--
+	jg Loop			# if so, goto Loop:
+</div></code></pre>
+<p>这样只能从 12.41 优化到 12.26
+然后我发现 <code>jle Done</code> 这个基本上开始时是预测失败的，所以改为：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIzJTIwWW91JTIwY2FuJTIwbW9kaWZ5JTIwdGhpcyUyMHBvcnRpb24lMEElMDklMjMlMjBMb29wJTIwaGVhZGVyJTBBJTA5eG9ycSUyMCUyNXJheCUyQyUyNXJheCUwOSUwOSUyMyUyMGNvdW50JTIwJTNEJTIwMCUzQiUwQSUwOWFuZHElMjAlMjVyZHglMkMlMjVyZHglMEElMDlqZyUyMExvb3AlMEElMDlyZXQlMEFMb29wJTNBJTBBJTA5bXJtb3ZxJTIwKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOWlhZGRxJTIwJTI0OCUyQyUyMCUyNXJkaSUwOSUwOSUyMyUyMHNyYyUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0OCUyQyUyMCUyNXJzaSUwOSUwOSUyMyUyMGRzdCUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0LTElMkMlMjAlMjVyZHglMDklMDklMjMlMjBsZW4tLSUwQSUwOWpnJTIwTG9vcCUwOSUwOSUwOSUyMyUyMGlmJTIwc28lMkMlMjBnb3RvJTIwTG9vcCUzQSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div></div><div class="code"># You can modify this portion
+	# Loop header
+	xorq %rax,%rax		# count = 0;
+	andq %rdx,%rdx
+	jg Loop
+	ret
+Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rrmovq %rax,%r11
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $8, %rdi		# src++
+	iaddq $8, %rsi		# dst++
+	iaddq $-1, %rdx		# len--
+	jg Loop			# if so, goto Loop:
+</div></code></pre>
+<p>但也只是从 12.26 优化到 12.11
+后面我又考虑一个优化，这是我看书的时候发现的一点。书中的取指阶段的 HCL 是这样的：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="d29yZCUyMGZfcGMlMjAlM0QlMjAlNUIlMEElMDklMjMlMjBNaXNwcmVkaWN0ZWQlMjBicmFuY2guJTIwJTIwRmV0Y2glMjBhdCUyMGluY3JlbWVudGVkJTIwUEMlMEElMDlNX2ljb2RlJTIwJTNEJTNEJTIwSUpYWCUyMCUyNiUyNiUyMCFNX0NuZCUyMCUzQSUyME1fdmFsQSUzQiUwQSUwOSUyMyUyMENvbXBsZXRpb24lMjBvZiUyMFJFVCUyMGluc3RydWN0aW9uJTBBJTA5V19pY29kZSUyMCUzRCUzRCUyMElSRVQlMjAlM0ElMjBXX3ZhbE0lM0IlMEElMDklMjMlMjBEZWZhdWx0JTNBJTIwVXNlJTIwcHJlZGljdGVkJTIwdmFsdWUlMjBvZiUyMFBDJTBBJTA5MSUyMCUzQSUyMEZfcHJlZFBDJTNCJTBBJTVEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">word f_pc = [
+	# Mispredicted branch.  Fetch at incremented PC
+	M_icode == IJXX &amp;&amp; !M_Cnd : M_valA;
+	# Completion of RET instruction
+	W_icode == IRET : W_valM;
+	# Default: Use predicted value of PC
+	1 : F_predPC;
+];
+</div></code></pre>
+<p>其中分支预测错误，需要等到分支跳转指令到达 M 阶段才能被发现。而我们考虑其实 E 阶段就可以计算出条件码，判断出分支预测失败了。于是我修改成：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="d29yZCUyMGZfcGMlMjAlM0QlMjAlNUIlMEElMDklMjMlMjBNaXNwcmVkaWN0ZWQlMjBicmFuY2guJTIwJTIwRmV0Y2glMjBhdCUyMGluY3JlbWVudGVkJTIwUEMlMEElMDlFX2ljb2RlJTIwJTNEJTNEJTIwSUpYWCUyMCUyNiUyNiUyMCFlX0NuZCUyMCUzQSUyMEVfdmFsQSUzQiUwQSUwOSUyMyUyMENvbXBsZXRpb24lMjBvZiUyMFJFVCUyMGluc3RydWN0aW9uJTBBJTA5V19pY29kZSUyMCUzRCUzRCUyMElSRVQlMjAlM0ElMjBXX3ZhbE0lM0IlMEElMDklMjMlMjBEZWZhdWx0JTNBJTIwVXNlJTIwcHJlZGljdGVkJTIwdmFsdWUlMjBvZiUyMFBDJTBBJTA5MSUyMCUzQSUyMEZfcHJlZFBDJTNCJTBBJTVEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">word f_pc = [
+	# Mispredicted branch.  Fetch at incremented PC
+	E_icode == IJXX &amp;&amp; !e_Cnd : E_valA;
+	# Completion of RET instruction
+	W_icode == IRET : W_valM;
+	# Default: Use predicted value of PC
+	1 : F_predPC;
+];
+</div></code></pre>
+<p>这样一来可以提前发现分支预测错误，那么就会少发射一个错误指令。此时 D 阶段的气泡就不需要了，给相应的逻辑注释掉：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="Ym9vbCUyMERfYnViYmxlJTIwJTNEJTBBJTA5JTIzJTIwTWlzcHJlZGljdGVkJTIwYnJhbmNoJTBBJTA5JTIzJTIwKEVfaWNvZGUlMjAlM0QlM0QlMjBJSlhYJTIwJTI2JTI2JTIwIWVfQ25kKSUyMCU3QyU3QyUwQSUwOSUyMyUyMFN0YWxsaW5nJTIwYXQlMjBmZXRjaCUyMHdoaWxlJTIwcmV0JTIwcGFzc2VzJTIwdGhyb3VnaCUyMHBpcGVsaW5lJTBBJTA5JTIzJTIwYnV0JTIwbm90JTIwY29uZGl0aW9uJTIwZm9yJTIwYSUyMGxvYWQlMkZ1c2UlMjBoYXphcmQlMEElMDkhKEVfaWNvZGUlMjBpbiUyMCU3QiUyMElNUk1PVlElMkMlMjBJUE9QUSUyMCU3RCUyMCUyNiUyNiUyMEVfZHN0TSUyMGluJTIwJTdCJTIwZF9zcmNBJTJDJTIwZF9zcmNCJTIwJTdEKSUyMCUyNiUyNiUwQSUwOSUyMCUyMElSRVQlMjBpbiUyMCU3QiUyMERfaWNvZGUlMkMlMjBFX2ljb2RlJTJDJTIwTV9pY29kZSUyMCU3RCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">bool D_bubble =
+	# Mispredicted branch
+	# (E_icode == IJXX &amp;&amp; !e_Cnd) ||
+	# Stalling at fetch while ret passes through pipeline
+	# but not condition for a load/use hazard
+	!(E_icode in { IMRMOVQ, IPOPQ } &amp;&amp; E_dstM in { d_srcA, d_srcB }) &amp;&amp;
+	  IRET in { D_icode, E_icode, M_icode };
+</div></code></pre>
+<p>结果发现模拟器并没有按照预期的去执行。我怀疑这是这个优化是非预期的，且这个实验的实现并没有完全模拟数字电路。
+到这里就进入瓶颈了，不知道该从哪里下手，能做的似乎都做完了。于是我让 AI 给我一个最小的提示，实验从而继续进行。
+AI 提示我要尽可能利用数据转发。于是我考虑到原来代码中从一段内存复制到另一段内存的时候， <code>mrmovq</code> 和 <code>rmmovq</code> 之间的间隔太小，使得出现了加载/使用冒险，导致处理器暂停了一下。我们在两者之间插入一条指令。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="TG9vcCUzQSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlpYWRkcSUyMCUyNDglMkMlMjAlMjVyZGklMDklMDklMjMlMjBzcmMlMkIlMkIlMEElMDlpYWRkcSUyMCUyNDglMkMlMjAlMjVyc2klMDklMDklMjMlMjBkc3QlMkIlMkIlMEElMDlpYWRkcSUyMCUyNC0xJTJDJTIwJTI1cmR4JTA5JTA5JTIzJTIwbGVuLS0lMEElMDlqZyUyMExvb3AlMDklMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMExvb3AlM0ElMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code">Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $8, %rdi		# src++
+	iaddq $8, %rsi		# dst++
+	iaddq $-1, %rdx		# len--
+	jg Loop			# if so, goto Loop:
+</div></code></pre>
+<p>CPE 从 12.11 优化到 11.11
+随后好像 AI 也给不出什么提示了。思考了很久，目前这个情形下，单纯地考虑减小指令数量基本做不到
+不过后来突然发现指导书上说，第五章的循环展开可能对本次实验很有帮助，于是我尝试了一下，先进行三次的循环展开：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlycm1vdnElMjAlMjVyZHglMkMlMjVyMTIlMEElMDlpYWRkcSUyMCUyNC0zJTJDJTI1cjEyJTBBJTA5amclMjBMb29wMyUwQSUwOWFuZHElMjAlMjVyZHglMkMlMjVyZHglMEElMDlqZyUyMExvb3AlMEElMDlyZXQlMEFMb29wMyUzQSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjA4KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDgoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjAxNiglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAxNiglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOWlhZGRxJTIwJTI0MjQlMkMlMjAlMjVyZGklMDklMDklMjMlMjBzcmMlMkIlMkIlMEElMDlpYWRkcSUyMCUyNDI0JTJDJTIwJTI1cnNpJTA5JTA5JTIzJTIwZHN0JTJCJTJCJTBBJTA5aWFkZHElMjAlMjQtMyUyQyUyMCUyNXJkeCUwOSUwOSUyMyUyMGxlbi0tJTBBJTA5aWFkZHElMjAlMjQtMyUyQyUyMCUyNXIxMiUwQSUwOWpnJTIwTG9vcDMlMDklMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMExvb3AlMEElMDlhbmRxJTIwJTI1cmR4JTJDJTI1cmR4JTBBJTA5amclMjBMb29wJTBBTG9vcCUzQSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlpYWRkcSUyMCUyNDglMkMlMjAlMjVyZGklMDklMDklMjMlMjBzcmMlMkIlMkIlMEElMDlpYWRkcSUyMCUyNDglMkMlMjAlMjVyc2klMDklMDklMjMlMjBkc3QlMkIlMkIlMEElMDlpYWRkcSUyMCUyNC0xJTJDJTIwJTI1cmR4JTA5JTA5JTIzJTIwbGVuLS0lMEElMDlqZyUyMExvb3AlMDklMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMExvb3AlM0ElMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	rrmovq %rdx,%r12
+	iaddq $-3,%r12
+	jg Loop3
+	andq %rdx,%rdx
+	jg Loop
+	ret
+Loop3:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 16(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $24, %rdi		# src++
+	iaddq $24, %rsi		# dst++
+	iaddq $-3, %rdx		# len--
+	iaddq $-3, %r12
+	jg Loop3			# if so, goto Loop
+	andq %rdx,%rdx
+	jg Loop
+Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $8, %rdi		# src++
+	iaddq $8, %rsi		# dst++
+	iaddq $-1, %rdx		# len--
+	jg Loop			# if so, goto Loop:
+</div></code></pre>
+<p>其中 Loop3 是三个三个地进行。Loop 是一个一个地进行
+CPE 从 11.11 降到了 9.46，效果非常显著，并获得了 20.7 分
+我们如法炮制，进行 5 次循环展开，CPE 到达了 9.05。进行 6 次循环展开，CPE 到达了 8.99。进行 7 次循环展开，CPE 到达了 8.97。似乎已经到头了
+然后我们发现，如果元素个数小于 7 的话，那么就会跑 Loop 部分。于是我考虑，用一个类似跳表的数据结构，根据最后的这个元素个数，把循环拆掉。但是 <code>jmp</code> 指令只能跳到常数地址处，跳表结构不好使。
+于是我又考虑分段，走个 7 次的循环展开，个数小于 7 了再走个 3 次的循环展开：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlycm1vdnElMjAlMjVyZHglMkMlMjVyMTIlMEElMDlpYWRkcSUyMCUyNC03JTJDJTI1cjEyJTBBJTA5amdlJTIwTG9vcDclMEElMDlhbmRxJTIwJTI1cmR4JTJDJTI1cmR4JTBBJTA5amclMjBMb29wJTBBJTA5cmV0JTBBTG9vcDMlM0ElMEElMDltcm1vdnElMjAoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwOCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA4KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwMTYoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMTYoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlpYWRkcSUyMCUyNDI0JTJDJTIwJTI1cmRpJTA5JTA5JTIzJTIwc3JjJTJCJTJCJTBBJTA5aWFkZHElMjAlMjQyNCUyQyUyMCUyNXJzaSUwOSUwOSUyMyUyMGRzdCUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0LTMlMkMlMjAlMjVyZHglMDklMDklMjMlMjBsZW4tLSUwQSUwOWlhZGRxJTIwJTI0LTMlMkMlMjAlMjVyMTIlMEElMDlqZyUyMExvb3AzJTA5JTA5JTA5JTIzJTIwaWYlMjBzbyUyQyUyMGdvdG8lMjBMb29wJTBBJTA5YW5kcSUyMCUyNXJkeCUyQyUyNXJkeCUwQSUwOWpnJTIwTG9vcCUwQSUwOXJldCUwQUxvb3A3JTNBJTBBJTA5bXJtb3ZxJTIwKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOW1ybW92cSUyMDgoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwOCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOW1ybW92cSUyMDE2KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDE2KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwMjQoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMjQoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjAzMiglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAzMiglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOW1ybW92cSUyMDQwKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDQwKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwNDgoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwNDgoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlpYWRkcSUyMCUyNDU2JTJDJTIwJTI1cmRpJTA5JTA5JTIzJTIwc3JjJTJCJTJCJTBBJTA5aWFkZHElMjAlMjQ1NiUyQyUyMCUyNXJzaSUwOSUwOSUyMyUyMGRzdCUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0LTclMkMlMjAlMjVyZHglMDklMDklMjMlMjBsZW4tLSUwQSUwOWlhZGRxJTIwJTI0LTclMkMlMjAlMjVyMTIlMEElMDlqZyUyMExvb3A3JTA5JTA5JTA5JTIzJTIwaWYlMjBzbyUyQyUyMGdvdG8lMjBMb29wJTBBJTA5cnJtb3ZxJTIwJTI1cmR4JTJDJTI1cjEyJTBBJTA5aWFkZHElMjAlMjQtMyUyQyUyNXIxMiUwQSUwOWpnZSUyMExvb3AzJTBBJTA5YW5kcSUyMCUyNXJkeCUyQyUyNXJkeCUwQSUwOWpnJTIwTG9vcCUwQSUwOXJldCUwQUxvb3AlM0ElMEElMDltcm1vdnElMjAoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5aWFkZHElMjAlMjQ4JTJDJTIwJTI1cmRpJTA5JTA5JTIzJTIwc3JjJTJCJTJCJTBBJTA5aWFkZHElMjAlMjQ4JTJDJTIwJTI1cnNpJTA5JTA5JTIzJTIwZHN0JTJCJTJCJTBBJTA5aWFkZHElMjAlMjQtMSUyQyUyMCUyNXJkeCUwOSUwOSUyMyUyMGxlbi0tJTBBJTA5amclMjBMb29wJTA5JTA5JTA5JTIzJTIwaWYlMjBzbyUyQyUyMGdvdG8lMjBMb29wJTNBJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div><div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div><div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div><div>97</div><div>98</div><div>99</div><div>100</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	rrmovq %rdx,%r12
+	iaddq $-7,%r12
+	jge Loop7
+	andq %rdx,%rdx
+	jg Loop
+	ret
+Loop3:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 16(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $24, %rdi		# src++
+	iaddq $24, %rsi		# dst++
+	iaddq $-3, %rdx		# len--
+	iaddq $-3, %r12
+	jg Loop3			# if so, goto Loop
+	andq %rdx,%rdx
+	jg Loop
+	ret
+Loop7:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 16(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 24(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 24(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 32(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 40(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 40(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 48(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 48(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $56, %rdi		# src++
+	iaddq $56, %rsi		# dst++
+	iaddq $-7, %rdx		# len--
+	iaddq $-7, %r12
+	jg Loop7			# if so, goto Loop
+	rrmovq %rdx,%r12
+	iaddq $-3,%r12
+	jge Loop3
+	andq %rdx,%rdx
+	jg Loop
+	ret
+Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $8, %rdi		# src++
+	iaddq $8, %rsi		# dst++
+	iaddq $-1, %rdx		# len--
+	jg Loop			# if so, goto Loop:
+</div></code></pre>
+<p>不过这么搞的话，CPE 只是从 8.99 到了 8.91。
+调成了10次循环展开+3次循环展开，只进步到了 8.89
+调成 12 次 + 3 次循环展开，反而退步了
+然后我又调成了 12 次 + 6次，依然是没 8.89 高的。然后考虑 6 次那个循环必然只会有一次，删掉了多余的跳转之后 CPE 只来到了 8.88
+又加了一层，变成 10 + 6 + 3，CPE 来到了 8.85
+随后我又参考了这篇文章的做法<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup> ，得到了一个优化方法：上面的 <code>r12</code> 寄存器是没必要的，我们可以直接在 <code>%rdx</code> 上减去 10，后面再加上 10。这样的维护方法应该是比多维护一个 <code>r12</code> 寄存器指令数要少的。
+上面 10+6+3 的循环展开的话，会使得代码编译出来的产物过大（本次实验有这个限制），因此我调整为 10+3 的循环展开：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlpYWRkcSUyMCUyNC0xMCUyQyUyNXJkeCUwQSUwOWpnZSUyMExvb3AxMCUwQSUwOWlhZGRxJTIwJTI0NyUyQyUyNXJkeCUwQSUwOWpnZSUyMExvb3AzJTBBJTA5aWFkZHElMjAlMjQzJTJDJTI1cmR4JTBBJTA5amclMjBMb29wJTBBJTA5cmV0JTBBTG9vcCUzQSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlpYWRkcSUyMCUyNDglMkMlMjAlMjVyZGklMDklMDklMjMlMjBzcmMlMkIlMkIlMEElMDlpYWRkcSUyMCUyNDglMkMlMjAlMjVyc2klMDklMDklMjMlMjBkc3QlMkIlMkIlMEElMDlpYWRkcSUyMCUyNC0xJTJDJTIwJTI1cmR4JTA5JTA5JTIzJTIwbGVuLS0lMEElMDlqZyUyMExvb3AlMDklMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMExvb3AlM0ElMEElMDlyZXQlMEFMb29wMyUzQSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjA4KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDgoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjAxNiglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAxNiglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOWlhZGRxJTIwJTI0MjQlMkMlMjAlMjVyZGklMDklMDklMjMlMjBzcmMlMkIlMkIlMEElMDlpYWRkcSUyMCUyNDI0JTJDJTIwJTI1cnNpJTA5JTA5JTIzJTIwZHN0JTJCJTJCJTBBJTA5aWFkZHElMjAlMjQtMyUyQyUyMCUyNXJkeCUwOSUwOSUyMyUyMGxlbi0tJTBBJTA5amclMjBMb29wMyUwOSUwOSUwOSUyMyUyMGlmJTIwc28lMkMlMjBnb3RvJTIwTG9vcCUwQSUwOWlhZGRxJTIwJTI0MyUyQyUyMCUyNXJkeCUwQSUwOWpnJTIwTG9vcCUwQSUwOXJldCUwQUxvb3AxMCUzQSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjA4KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDgoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjAxNiglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAxNiglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOW1ybW92cSUyMDI0KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDI0KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwMzIoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMzIoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjA0MCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA0MCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOW1ybW92cSUyMDQ4KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDQ4KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwNTYoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwNTYoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjA2NCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA2NCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOW1ybW92cSUyMDcyKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDcyKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5aWFkZHElMjAlMjQ4MCUyQyUyMCUyNXJkaSUwOSUwOSUyMyUyMHNyYyUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0ODAlMkMlMjAlMjVyc2klMDklMDklMjMlMjBkc3QlMkIlMkIlMEElMDlpYWRkcSUyMCUyNC0xMCUyQyUyMCUyNXJkeCUwOSUwOSUyMyUyMGxlbi0tJTBBJTA5amdlJTIwTG9vcDEwJTA5JTA5JTA5JTIzJTIwaWYlMjBzbyUyQyUyMGdvdG8lMjBMb29wJTBBJTA5aWFkZHElMjAlMjQ3JTJDJTI1cmR4JTBBJTA5amdlJTIwTG9vcDMlMEElMDlpYWRkcSUyMCUyNDMlMkMlMjVyZHglMEElMDlqZyUyMExvb3AlMEElMDlyZXQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div><div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div><div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div><div>97</div><div>98</div><div>99</div><div>100</div><div>101</div><div>102</div><div>103</div><div>104</div><div>105</div><div>106</div><div>107</div><div>108</div><div>109</div><div>110</div><div>111</div><div>112</div><div>113</div><div>114</div><div>115</div><div>116</div><div>117</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	iaddq $-10,%rdx
+	jge Loop10
+	iaddq $7,%rdx
+	jge Loop3
+	iaddq $3,%rdx
+	jg Loop
+	ret
+Loop:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $8, %rdi		# src++
+	iaddq $8, %rsi		# dst++
+	iaddq $-1, %rdx		# len--
+	jg Loop			# if so, goto Loop:
+	ret
+Loop3:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 16(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $24, %rdi		# src++
+	iaddq $24, %rsi		# dst++
+	iaddq $-3, %rdx		# len--
+	jg Loop3			# if so, goto Loop
+	iaddq $3, %rdx
+	jg Loop
+	ret
+Loop10:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 16(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 24(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 24(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 32(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 40(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 40(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 48(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 48(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 56(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 56(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 64(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 64(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 72(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 72(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $80, %rdi		# src++
+	iaddq $80, %rsi		# dst++
+	iaddq $-10, %rdx		# len--
+	jge Loop10			# if so, goto Loop
+	iaddq $7,%rdx
+	jge Loop3
+	iaddq $3,%rdx
+	jg Loop
+	ret
+</div></code></pre>
+<p>我们的 CPE 从 8.85 进步到了 8.62
+后续仍然毫无头绪了。于是我参考了这篇文章<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup> 。这篇文章指出，当前主要的瓶颈就是，循环展开后，剩余的散的元素的处理比较耗时。其实我们上面进行了两三次的循环展开都是为了处理这个情况。
+对于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> 阶循环展开，我们最后剩余的元素数量一定是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>∼</mo><mi>k</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\sim k-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 的。一个想法就是，我想把更新 <code>dst</code> 、 <code>src</code>、<code>%rdx</code> 的指令去掉，做法就是根据剩余元素的数量，把循环拆开，之前我们已经考虑过，但当时考虑的是跳表，无法实现。这篇文章作者提出其实可以使用 <code>push</code> + <code>ret</code> 的手段来实现跳转到动态的地址处。不过这种方法的话可能反而增加了 CPE。
+于是这篇文章的作者提出，可以使用三叉搜索树来解决。不用二叉搜索树的原因是导致指令数增加。三叉搜索树每个父节点有三个子节点，分别对应于小于父节点，等于父节点，大于父节点。
+现在考虑 9 阶循环展开（10 阶循环展开的话代码长度会超出限制），那么我们相当于是将一个数字在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>∼</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">0\sim 8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8</span></span></span></span> 这些数字里面搜索。建立如下的三叉搜索树：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/30/688a138b5808b.png" style="transform: scale(1)" width=1100 height=520></div>
+每个节点的高度意味着需要几次询问，或者说是几次跳转才能到达。由于分支预测错误的惩罚不小，所以我们肯定是希望询问次数尽可能小。考虑测试的时候，给出的数组的长度是从 0 开始连续往上增的，因此我们把数字小的高度调低点，这样应该是尽可能优的。
+于是就有了如下的代码。注意我们用到了点优化代码长度的小技巧，比如跳到 6？的时候，说明当前数字最小也是 4，所以我们可以直接进行四次操作，而不必把非要搜到叶子节点才进行这四个操作。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlpYWRkcSUyMCUyNC05JTJDJTI1cmR4JTBBJTA5amdlJTIwTG9vcDklMEElMDlpYWRkcSUyMCUyNDYlMkMlMjVyZHglMEFSb290JTNBJTBBJTA5amwlMjBRMSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjA4KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDgoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjAxNiglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAxNiglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOWFuZHElMjAlMjVyZHglMkMlMjVyZHglMEElMDlqZyUyMFEyJTBBJTA5cmV0JTBBUTElM0ElMEElMDlpYWRkcSUyMCUyNDIlMkMlMjVyZHglMEElMDlqbCUyMERvbmUlMEElMDltcm1vdnElMjAoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5YW5kcSUyMCUyNXJkeCUyQyUyNXJkeCUwQSUwOWplJTIwRG9uZSUwQSUwOW1ybW92cSUyMDgoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwOCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOXJldCUwQVEyJTNBJTBBJTA5bXJtb3ZxJTIwMjQoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMjQoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlpYWRkcSUyMCUyNC0zJTJDJTI1cmR4JTBBJTA5amwlMjBRMyUwQSUwOW1ybW92cSUyMDMyKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDMyKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwNDAoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwNDAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlhbmRxJTIwJTI1cmR4JTJDJTI1cmR4JTBBJTA5amclMjBRNCUwQSUwOXJldCUwQVEzJTNBJTBBJTA5aWFkZHElMjAlMjQyJTJDJTI1cmR4JTBBJTA5amUlMjBEb25lJTBBJTA5bXJtb3ZxJTIwMzIoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMzIoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlyZXQlMEFRNCUzQSUwQSUwOW1ybW92cSUyMDQ4KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDQ4KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5aWFkZHElMjAlMjQtMSUyQyUyNXJkeCUwQSUwOWplJTIwRG9uZSUwQSUwOW1ybW92cSUyMDU2KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDU2KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5cmV0JTBBTG9vcDklM0ElMEElMDltcm1vdnElMjAoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwOCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA4KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwMTYoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMTYoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjAyNCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAyNCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOW1ybW92cSUyMDMyKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDMyKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwNDAoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwNDAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDltcm1vdnElMjA0OCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA0OCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOW1ybW92cSUyMDU2KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDU2KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5bXJtb3ZxJTIwNjQoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwNjQoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlpYWRkcSUyMCUyNDcyJTJDJTIwJTI1cmRpJTA5JTA5JTIzJTIwc3JjJTJCJTJCJTBBJTA5aWFkZHElMjAlMjQ3MiUyQyUyMCUyNXJzaSUwOSUwOSUyMyUyMGRzdCUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0LTklMkMlMjAlMjVyZHglMDklMDklMjMlMjBsZW4tLSUwQSUwOWpnZSUyMExvb3A5JTA5JTA5JTA5JTIzJTIwaWYlMjBzbyUyQyUyMGdvdG8lMjBMb29wJTBBJTA5aWFkZHElMjAlMjQ2JTJDJTI1cmR4JTBBJTA5am1wJTIwUm9vdCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div><div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div><div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div><div>97</div><div>98</div><div>99</div><div>100</div><div>101</div><div>102</div><div>103</div><div>104</div><div>105</div><div>106</div><div>107</div><div>108</div><div>109</div><div>110</div><div>111</div><div>112</div><div>113</div><div>114</div><div>115</div><div>116</div><div>117</div><div>118</div><div>119</div><div>120</div><div>121</div><div>122</div><div>123</div><div>124</div><div>125</div><div>126</div><div>127</div><div>128</div><div>129</div><div>130</div><div>131</div><div>132</div><div>133</div><div>134</div><div>135</div><div>136</div><div>137</div><div>138</div><div>139</div><div>140</div><div>141</div><div>142</div><div>143</div><div>144</div><div>145</div><div>146</div><div>147</div><div>148</div><div>149</div><div>150</div><div>151</div><div>152</div><div>153</div><div>154</div><div>155</div><div>156</div><div>157</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	iaddq $-9,%rdx
+	jge Loop9
+	iaddq $6,%rdx
+Root:
+	jl Q1
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 16(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	andq %rdx,%rdx
+	jg Q2
+	ret
+Q1:
+	iaddq $2,%rdx
+	jl Done
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	andq %rdx,%rdx
+	je Done
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	ret
+Q2:
+	mrmovq 24(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 24(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $-3,%rdx
+	jl Q3
+	mrmovq 32(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 40(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 40(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	andq %rdx,%rdx
+	jg Q4
+	ret
+Q3:
+	iaddq $2,%rdx
+	je Done
+	mrmovq 32(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	ret
+Q4:
+	mrmovq 48(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 48(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $-1,%rdx
+	je Done
+	mrmovq 56(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 56(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	ret
+Loop9:
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 16(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 24(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 24(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 32(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 40(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 40(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 48(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 48(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 56(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 56(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	mrmovq 64(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 64(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $72, %rdi		# src++
+	iaddq $72, %rsi		# dst++
+	iaddq $-9, %rdx		# len--
+	jge Loop9			# if so, goto Loop
+	iaddq $6,%rdx
+	jmp Root
+</div></code></pre>
+<p>CPE 从 8.62 进步到了 8.22，虽然也是不小的进步，但是相比上面文章作者将近 7.5 的 CPE 还是差了很多。我观察到上面参考的两篇文章都直接使用条件跳转而没有使用条件传送。按理说使用条件传送应该更优。不过我又考虑，使用条件传送的话，消耗的指令就都是一样的。但是使用条件分支，如果预测成功的话，那么就能减少指令数量，预测失败的话会带来惩罚，但其实也就两个指令的惩罚，均摊下来可能还是比条件传送好一点。所以我又把代码改用条件分支。不过改的时候有一个注意点，你还是需要避免 加载/使用 冒险。我这里打算让两个位置的数组拷贝交叉进行，但是如果数量是单数，还是会出现一个 加载/使用冒险，但是加载/使用冒险不去除的话，条件传送改成条件跳转收益就不大了，所以仍保留条件传送：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlpYWRkcSUyMCUyNC05JTJDJTI1cmR4JTBBJTA5amdlJTIwTG9vcDklMEElMDlpYWRkcSUyMCUyNDYlMkMlMjVyZHglMEFSb290JTNBJTBBJTA5amwlMjBRMSUwQSUwOW1ybW92cSUyMCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDltcm1vdnElMjA4KCUyNXJkaSklMkMlMjAlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOXJtbW92cSUyMCUyNXIxMSUyQyUyMDgoJTI1cnNpKSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjVyMTAlMEElMDlqbGUlMjBOZXh0MDElMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFOZXh0MDElM0ElMEElMDlhbmRxJTIwJTI1cjExJTJDJTIwJTI1cjExJTBBJTA5amxlJTIwTmV4dDAyJTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBTmV4dDAyJTNBJTBBJTA5bXJtb3ZxJTIwMTYoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5cnJtb3ZxJTIwJTI1cmF4JTJDJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMTYoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlhbmRxJTIwJTI1cmR4JTJDJTI1cmR4JTBBJTA5amclMjBRMiUwQSUwOXJldCUwQVExJTNBJTBBJTA5aWFkZHElMjAlMjQyJTJDJTI1cmR4JTBBJTA5amwlMjBEb25lJTBBJTA5bXJtb3ZxJTIwKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOWFuZHElMjAlMjVyZHglMkMlMjVyZHglMEElMDlqZSUyMERvbmUlMEElMDltcm1vdnElMjA4KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDgoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXIxMSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5Y21vdmclMjAlMjVyMTElMkMlMjVyYXglMEElMDlyZXQlMEFRMiUzQSUwQSUwOW1ybW92cSUyMDI0KCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDI0KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5aWFkZHElMjAlMjQtMyUyQyUyNXJkeCUwQSUwOWpsJTIwUTMlMEElMDltcm1vdnElMjAzMiglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDltcm1vdnElMjA0MCglMjVyZGkpJTJDJTIwJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMzIoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOXJtbW92cSUyMCUyNXIxMSUyQyUyMDQwKCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyME5leHQyMSUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQU5leHQyMSUzQSUwQSUwOWFuZHElMjAlMjVyMTElMkMlMjAlMjVyMTElMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5amxlJTIwTmV4dDIyJTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBTmV4dDIyJTNBJTBBJTA5YW5kcSUyMCUyNXJkeCUyQyUyNXJkeCUwQSUwOWpnJTIwUTQlMEElMDlyZXQlMEFRMyUzQSUwQSUwOWlhZGRxJTIwJTI0MiUyQyUyNXJkeCUwQSUwOWplJTIwRG9uZSUwQSUwOW1ybW92cSUyMDMyKCUyNXJkaSklMkMlMjAlMjVyMTAlMDklMjMlMjByZWFkJTIwdmFsJTIwZnJvbSUyMHNyYy4uLiUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDMyKCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5cmV0JTBBUTQlM0ElMEElMDltcm1vdnElMjA0OCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA0OCglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOWlhZGRxJTIwJTI0LTElMkMlMjVyZHglMEElMDlqZSUyMERvbmUlMEElMDltcm1vdnElMjA1NiglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDlycm1vdnElMjAlMjVyYXglMkMlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA1NiglMjVyc2kpJTA5JTIzJTIwLi4uYW5kJTIwc3RvcmUlMjBpdCUyMHRvJTIwZHN0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cjExJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDljbW92ZyUyMCUyNXIxMSUyQyUyNXJheCUwQSUwOXJldCUwQUxvb3A5JTNBJTBBJTA5bXJtb3ZxJTIwKCUyNXJkaSklMkMlMjAlMjVyMTAlMEElMDltcm1vdnElMjA4KCUyNXJkaSklMkMlMjAlMjVyMTElMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwQSUwOXJtbW92cSUyMCUyNXIxMSUyQyUyMDgoJTI1cnNpKSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMEElMDlqbGUlMjBOZXh0OTElMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFOZXh0OTElM0ElMEElMDlhbmRxJTIwJTI1cjExJTJDJTIwJTI1cjExJTBBJTA5amxlJTIwTmV4dDkyJTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBTmV4dDkyJTNBJTBBJTA5bXJtb3ZxJTIwMTYoJTI1cmRpKSUyQyUyMCUyNXIxMCUwOSUyMyUyMHJlYWQlMjB2YWwlMjBmcm9tJTIwc3JjLi4uJTBBJTA5bXJtb3ZxJTIwMjQoJTI1cmRpKSUyQyUyMCUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDE2KCUyNXJzaSklMDklMjMlMjAuLi5hbmQlMjBzdG9yZSUyMGl0JTIwdG8lMjBkc3QlMEElMDlybW1vdnElMjAlMjVyMTElMkMlMjAyNCglMjVyc2kpJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwQSUwOWpsZSUyME5leHQ5MyUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQU5leHQ5MyUzQSUwQSUwOWFuZHElMjAlMjVyMTElMkMlMjAlMjVyMTElMEElMDlqbGUlMjBOZXh0OTQlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFOZXh0OTQlM0ElMEElMDltcm1vdnElMjAzMiglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDltcm1vdnElMjA0MCglMjVyZGkpJTJDJTIwJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMzIoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOXJtbW92cSUyMCUyNXIxMSUyQyUyMDQwKCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyME5leHQ5NSUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQU5leHQ5NSUzQSUwQSUwOWFkZHElMjAlMjVyMTElMkMlMjVyMTElMEElMDlqbGUlMjBOZXh0OTYlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFOZXh0OTYlM0ElMEElMDltcm1vdnElMjA0OCglMjVyZGkpJTJDJTIwJTI1cjEwJTA5JTIzJTIwcmVhZCUyMHZhbCUyMGZyb20lMjBzcmMuLi4lMEElMDltcm1vdnElMjA1NiglMjVyZGkpJTJDJTIwJTI1cjExJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwNDgoJTI1cnNpKSUwOSUyMyUyMC4uLmFuZCUyMHN0b3JlJTIwaXQlMjB0byUyMGRzdCUwQSUwOXJtbW92cSUyMCUyNXIxMSUyQyUyMDU2KCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyME5leHQ5NyUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQU5leHQ5NyUzQSUwQSUwOWFuZHElMjAlMjVyMTElMkMlMjAlMjVyMTElMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5amxlJTIwTmV4dDk4JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBTmV4dDk4JTNBJTBBJTA5bXJtb3ZxJTIwNjQoJTI1cmRpKSUyQyUyMCUyNXIxMCUwQSUwOXJybW92cSUyMCUyNXJheCUyQyUyNXIxMSUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDY0KCUyNXJzaSklMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyMTElMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWNtb3ZnJTIwJTI1cjExJTJDJTI1cmF4JTBBJTA5aWFkZHElMjAlMjQ3MiUyQyUyMCUyNXJkaSUwOSUwOSUyMyUyMHNyYyUyQiUyQiUwQSUwOWlhZGRxJTIwJTI0NzIlMkMlMjAlMjVyc2klMDklMDklMjMlMjBkc3QlMkIlMkIlMEElMDlpYWRkcSUyMCUyNC05JTJDJTIwJTI1cmR4JTA5JTA5JTIzJTIwbGVuLS0lMEElMDlqZ2UlMjBMb29wOSUwOSUwOSUwOSUyMyUyMGlmJTIwc28lMkMlMjBnb3RvJTIwTG9vcCUwQSUwOWlhZGRxJTIwJTI0NiUyQyUyNXJkeCUwQSUwOWptcCUyMFJvb3QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div><div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div><div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div><div>97</div><div>98</div><div>99</div><div>100</div><div>101</div><div>102</div><div>103</div><div>104</div><div>105</div><div>106</div><div>107</div><div>108</div><div>109</div><div>110</div><div>111</div><div>112</div><div>113</div><div>114</div><div>115</div><div>116</div><div>117</div><div>118</div><div>119</div><div>120</div><div>121</div><div>122</div><div>123</div><div>124</div><div>125</div><div>126</div><div>127</div><div>128</div><div>129</div><div>130</div><div>131</div><div>132</div><div>133</div><div>134</div><div>135</div><div>136</div><div>137</div><div>138</div><div>139</div><div>140</div><div>141</div><div>142</div><div>143</div><div>144</div><div>145</div><div>146</div><div>147</div><div>148</div><div>149</div><div>150</div><div>151</div><div>152</div><div>153</div><div>154</div><div>155</div><div>156</div><div>157</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	iaddq $-9,%rdx
+	jge Loop9
+	iaddq $6,%rdx
+Root:
+	jl Q1
+	mrmovq (%rdi), %r10	# read val from src...
+	mrmovq 8(%rdi), %r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rmmovq %r11, 8(%rsi)
+	andq %r10,%r10
+	jle Next01
+	iaddq $1,%rax
+Next01:
+	andq %r11, %r11
+	jle Next02
+	iaddq $1,%rax
+Next02:
+	mrmovq 16(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	andq %rdx,%rdx
+	jg Q2
+	ret
+Q1:
+	iaddq $2,%rdx
+	jl Done
+	mrmovq (%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	andq %rdx,%rdx
+	je Done
+	mrmovq 8(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	ret
+Q2:
+	mrmovq 24(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 24(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $-3,%rdx
+	jl Q3
+	mrmovq 32(%rdi), %r10	# read val from src...
+	mrmovq 40(%rdi), %r11
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	rmmovq %r11, 40(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle Next21
+	iaddq $1,%rax
+Next21:
+	andq %r11, %r11		# val &lt;= 0?
+	jle Next22
+	iaddq $1,%rax
+Next22:
+	andq %rdx,%rdx
+	jg Q4
+	ret
+Q3:
+	iaddq $2,%rdx
+	je Done
+	mrmovq 32(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	ret
+Q4:
+	mrmovq 48(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 48(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $-1,%rdx
+	je Done
+	mrmovq 56(%rdi), %r10	# read val from src...
+	rrmovq %rax,%r11
+	rmmovq %r10, 56(%rsi)	# ...and store it to dst
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	ret
+Loop9:
+	mrmovq (%rdi), %r10
+	mrmovq 8(%rdi), %r11
+	rmmovq %r10, (%rsi)
+	rmmovq %r11, 8(%rsi)
+	andq %r10, %r10
+	jle Next91
+	iaddq $1,%rax
+Next91:
+	andq %r11, %r11
+	jle Next92
+	iaddq $1,%rax
+Next92:
+	mrmovq 16(%rdi), %r10	# read val from src...
+	mrmovq 24(%rdi), %r11
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	rmmovq %r11, 24(%rsi)
+	andq %r10, %r10
+	jle Next93
+	iaddq $1,%rax
+Next93:
+	andq %r11, %r11
+	jle Next94
+	iaddq $1,%rax
+Next94:
+	mrmovq 32(%rdi), %r10	# read val from src...
+	mrmovq 40(%rdi), %r11
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	rmmovq %r11, 40(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle Next95
+	iaddq $1,%rax
+Next95:
+	addq %r11,%r11
+	jle Next96
+	iaddq $1,%rax
+Next96:
+	mrmovq 48(%rdi), %r10	# read val from src...
+	mrmovq 56(%rdi), %r11
+	rmmovq %r10, 48(%rsi)	# ...and store it to dst
+	rmmovq %r11, 56(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle Next97
+	iaddq $1,%rax
+Next97:
+	andq %r11, %r11		# val &lt;= 0?
+	jle Next98
+	iaddq $1,%rax
+Next98:
+	mrmovq 64(%rdi), %r10
+	rrmovq %rax,%r11
+	rmmovq %r10, 64(%rsi)
+	iaddq $1,%r11
+	andq %r10, %r10		# val &lt;= 0?
+	cmovg %r11,%rax
+	iaddq $72, %rdi		# src++
+	iaddq $72, %rsi		# dst++
+	iaddq $-9, %rdx		# len--
+	jge Loop9			# if so, goto Loop
+	iaddq $6,%rdx
+	jmp Root
+</div></code></pre>
+<p>CPE 从 8.22 优化到 7.83。距离满分还差一步
+我们观察到上述代码中，剩余的条件传送还是比较多。后来发现上面文章中评论区网友的提示说，可以根据书上的练习题 4.57 进行优化。
+书上的 练习题4.57 指出了这样的一个优化方法，对于 加载/使用冒险，如果后一条指令需要的寄存器的数据仅仅是为了再写入内存，例如 <code>rmmovq</code> 和 <code>pushq</code> ，那么我们可以有一个加载转发技术。
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/31/688ae7416ceda.png" style="transform: scale(1)" width=1313 height=1010></div>
+前一个指令在访存阶段取出数据后，后一个指令可以直接将其转发到 <code>M_valA</code> 上以替代原来的 <code>valA</code>
+注意的是，并非所有的加载/使用冒险都可以使用加载转发技术优化。如果一条指令获取寄存器的数据是为了将其进行运算，那么就不能使用。所以我们发现只有 <code>rmmovq</code> 和 <code>pushq</code> 两个指令是可以的。
+然后我们仍然注意，<code>rmmovq</code> 的 <code>rB</code> 是用来计算内存地址的，<code>pushq</code> 虽然没有 <code>rB</code>，但是在译码阶段计算出的 <code>srcB</code> 是 <code>%rsp</code>，也是要参与执行阶段的运算。所以我们只能将加载转发作用在这两个的 <code>rA</code> 上。
+所以我们得到了加载转发的条件：<code>E_icode in { IPUSHQ, IRMMOVQ } &amp;&amp; E_srcA == M_dstM &amp;&amp; E_srcB != M_dstM</code>
+修改 HCL：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="d29yZCUyMGVfdmFsQSUyMCUzRCUyMCU1QiUwQSUwOSUyMyUyMCVFNSU4OCVBNCVFNSVBRSU5QSVFNiU5OCVBRiVFNSU5MCVBNiVFNSU4RiVBRiVFNCVCQiVBNSVFOCVCRiU5QiVFOCVBMSU4QyVFNSU4QSVBMCVFOCVCRCVCRCVFOCVCRCVBQyVFNSU4RiU5MSUwQSUwOUVfaWNvZGUlMjBpbiUyMCU3QiUyMElQVVNIUSUyQyUyMElSTU1PVlElMjAlN0QlMjAlMjYlMjYlMjBFX3NyY0ElMjAlM0QlM0QlMjBNX2RzdE0lMjAlMjYlMjYlMjBFX3NyY0IlMjAhJTNEJTIwTV9kc3RNJTNBJTIwbV92YWxNJTNCJTBBJTA5MSUyMCUzQSUyMEVfdmFsQSUzQiUyMCUyMCUyMyUyMFVzZSUyMHZhbEElMjBmcm9tJTIwc3RhZ2UlMjBwaXBlJTIwcmVnaXN0ZXIlMEElNUQlM0IlMEFib29sJTIwRl9zdGFsbCUyMCUzRCUwQSUwOSUyMyUyMENvbmRpdGlvbnMlMjBmb3IlMjBhJTIwbG9hZCUyRnVzZSUyMGhhemFyZCUwQSUwOUVfaWNvZGUlMjBpbiUyMCU3QiUyMElNUk1PVlElMkMlMjBJUE9QUSUyMCU3RCUyMCUyNiUyNiUwQSUwOSUyMEVfZHN0TSUyMGluJTIwJTdCJTIwZF9zcmNBJTJDJTIwZF9zcmNCJTIwJTdEJTIwJTI2JTI2JTBBJTA5JTIwIShEX2ljb2RlJTIwaW4lMjAlN0IlMjBJUFVTSFElMkMlMjBJUk1NT1ZRJTIwJTdEJTIwJTI2JTI2JTIwZF9zcmNBJTIwJTNEJTNEJTIwRV9kc3RNJTIwJTI2JTI2JTIwZF9zcmNCJTIwISUzRCUyMEVfZHN0TSklMjAlN0MlN0MlMEElMDklMjMlMjBTdGFsbGluZyUyMGF0JTIwZmV0Y2glMjB3aGlsZSUyMHJldCUyMHBhc3NlcyUyMHRocm91Z2glMjBwaXBlbGluZSUwQSUwOUlSRVQlMjBpbiUyMCU3QiUyMERfaWNvZGUlMkMlMjBFX2ljb2RlJTJDJTIwTV9pY29kZSUyMCU3RCUzQiUwQSUyMyUyMFNob3VsZCUyMEklMjBzdGFsbCUyMG9yJTIwaW5qZWN0JTIwYSUyMGJ1YmJsZSUyMGludG8lMjBQaXBlbGluZSUyMFJlZ2lzdGVyJTIwRCUzRiUwQSUyMyUyMEF0JTIwbW9zdCUyMG9uZSUyMG9mJTIwdGhlc2UlMjBjYW4lMjBiZSUyMHRydWUuJTBBYm9vbCUyMERfc3RhbGwlMjAlM0QlMEElMDklMjMlMjBDb25kaXRpb25zJTIwZm9yJTIwYSUyMGxvYWQlMkZ1c2UlMjBoYXphcmQlMEElMDlFX2ljb2RlJTIwaW4lMjAlN0IlMjBJTVJNT1ZRJTJDJTIwSVBPUFElMjAlN0QlMjAlMjYlMjYlMEElMDklMjBFX2RzdE0lMjBpbiUyMCU3QiUyMGRfc3JjQSUyQyUyMGRfc3JjQiUyMCU3RCUyMCUyNiUyNiUwQSUwOSUyMCEoRF9pY29kZSUyMGluJTIwJTdCJTIwSVBVU0hRJTJDJTIwSVJNTU9WUSUyMCU3RCUyMCUyNiUyNiUyMGRfc3JjQSUyMCUzRCUzRCUyMEVfZHN0TSUyMCUyNiUyNiUyMGRfc3JjQiUyMCElM0QlMjBFX2RzdE0pJTNCJTBBJTIzJTIwU2hvdWxkJTIwSSUyMHN0YWxsJTIwb3IlMjBpbmplY3QlMjBhJTIwYnViYmxlJTIwaW50byUyMFBpcGVsaW5lJTIwUmVnaXN0ZXIlMjBFJTNGJTBBJTIzJTIwQXQlMjBtb3N0JTIwb25lJTIwb2YlMjB0aGVzZSUyMGNhbiUyMGJlJTIwdHJ1ZS4lMEFib29sJTIwRV9zdGFsbCUyMCUzRCUyMDAlM0IlMEFib29sJTIwRV9idWJibGUlMjAlM0QlMEElMDklMjMlMjBNaXNwcmVkaWN0ZWQlMjBicmFuY2glMEElMDkoRV9pY29kZSUyMCUzRCUzRCUyMElKWFglMjAlMjYlMjYlMjAhZV9DbmQpJTIwJTdDJTdDJTBBJTA5JTIzJTIwQ29uZGl0aW9ucyUyMGZvciUyMGElMjBsb2FkJTJGdXNlJTIwaGF6YXJkJTBBJTA5RV9pY29kZSUyMGluJTIwJTdCJTIwSU1STU9WUSUyQyUyMElQT1BRJTIwJTdEJTIwJTI2JTI2JTBBJTA5JTIwRV9kc3RNJTIwaW4lMjAlN0IlMjBkX3NyY0ElMkMlMjBkX3NyY0IlMjAlN0QlMjAlMjYlMjYlMEElMDklMjAhKERfaWNvZGUlMjBpbiUyMCU3QiUyMElQVVNIUSUyQyUyMElSTU1PVlElMjAlN0QlMjAlMjYlMjYlMjBkX3NyY0ElMjAlM0QlM0QlMjBFX2RzdE0lMjAlMjYlMjYlMjBkX3NyY0IlMjAhJTNEJTIwRV9kc3RNKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div></div><div class="code">word e_valA = [
+	# 判定是否可以进行加载转发
+	E_icode in { IPUSHQ, IRMMOVQ } &amp;&amp; E_srcA == M_dstM &amp;&amp; E_srcB != M_dstM: m_valM;
+	1 : E_valA;  # Use valA from stage pipe register
+];
+bool F_stall =
+	# Conditions for a load/use hazard
+	E_icode in { IMRMOVQ, IPOPQ } &amp;&amp;
+	 E_dstM in { d_srcA, d_srcB } &amp;&amp;
+	 !(D_icode in { IPUSHQ, IRMMOVQ } &amp;&amp; d_srcA == E_dstM &amp;&amp; d_srcB != E_dstM) ||
+	# Stalling at fetch while ret passes through pipeline
+	IRET in { D_icode, E_icode, M_icode };
+# Should I stall or inject a bubble into Pipeline Register D?
+# At most one of these can be true.
+bool D_stall =
+	# Conditions for a load/use hazard
+	E_icode in { IMRMOVQ, IPOPQ } &amp;&amp;
+	 E_dstM in { d_srcA, d_srcB } &amp;&amp;
+	 !(D_icode in { IPUSHQ, IRMMOVQ } &amp;&amp; d_srcA == E_dstM &amp;&amp; d_srcB != E_dstM);
+# Should I stall or inject a bubble into Pipeline Register E?
+# At most one of these can be true.
+bool E_stall = 0;
+bool E_bubble =
+	# Mispredicted branch
+	(E_icode == IJXX &amp;&amp; !e_Cnd) ||
+	# Conditions for a load/use hazard
+	E_icode in { IMRMOVQ, IPOPQ } &amp;&amp;
+	 E_dstM in { d_srcA, d_srcB } &amp;&amp;
+	 !(D_icode in { IPUSHQ, IRMMOVQ } &amp;&amp; d_srcA == E_dstM &amp;&amp; d_srcB != E_dstM);
+</div></code></pre>
+<p>然后我们就能把代码中所有的条件传送删掉了
+不过随后又发现代码大小又超出限制了。于是又在这里卡了一会...后面我参考这篇文章<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>，发现其用到了一个代码优化技巧。我们可以把最后处理余数的部分的代码串起来，在三叉搜索树搜索到的时候直接跳到对应位置</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5JTIzJTIwTG9vcCUyMGhlYWRlciUwQSUwOXhvcnElMjAlMjVyYXglMkMlMjVyYXglMDklMDklMjMlMjBjb3VudCUyMCUzRCUyMDAlM0IlMEElMDlpYWRkcSUyMCUyNC05JTJDJTI1cmR4JTBBJTA5amdlJTIwUDklMEFSb290JTNBJTBBJTA5aWFkZHElMjAlMjQ2JTJDJTI1cmR4JTBBJTA5amwlMjBRMSUwQSUwOWpnJTIwUTIlMEElMDlqbXAlMjBSMyUwQVExJTNBJTBBJTA5aWFkZHElMjAlMjQyJTJDJTI1cmR4JTBBJTA5amUlMjBSMSUwQSUwOWpnJTIwUjIlMEElMDlyZXQlMEFRMiUzQSUwQSUwOWlhZGRxJTIwJTI0LTMlMkMlMjVyZHglMEElMDlqbCUyMFEzJTBBJTA5amclMjBRNCUwQSUwOWptcCUyMFI2JTBBUTMlM0ElMEElMDlpYWRkcSUyMCUyNDIlMkMlMjVyZHglMEElMDlqZSUyMFI0JTBBJTA5am1wJTIwUjUlMEFRNCUzQSUwQSUwOWlhZGRxJTIwJTI0LTElMkMlMjVyZHglMEElMDlqZSUyMFI3JTBBJTA5am1wJTIwUjglMEFQOSUzQSUwQSUwOW1ybW92cSUyMDY0KCUyNXJkaSklMkMlMjAlMjVyMTAlMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA2NCglMjVyc2kpJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDlqbGUlMjBQOCUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQVA4JTNBJTBBJTA5bXJtb3ZxJTIwNTYoJTI1cmRpKSUyQyUyMCUyNXIxMCUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDU2KCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyMFA3JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBUDclM0ElMEElMDltcm1vdnElMjA0OCglMjVyZGkpJTJDJTIwJTI1cjEwJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwNDgoJTI1cnNpKSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5amxlJTIwUDYlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFQNiUzQSUwQSUwOW1ybW92cSUyMDQwKCUyNXJkaSklMkMlMjAlMjVyMTAlMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA0MCglMjVyc2kpJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDlqbGUlMjBQNSUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQVA1JTNBJTBBJTA5bXJtb3ZxJTIwMzIoJTI1cmRpKSUyQyUyMCUyNXIxMCUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDMyKCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyMFA0JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBUDQlM0ElMEElMDltcm1vdnElMjAyNCglMjVyZGkpJTJDJTIwJTI1cjEwJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMjQoJTI1cnNpKSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5amxlJTIwUDMlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFQMyUzQSUwQSUwOW1ybW92cSUyMDE2KCUyNXJkaSklMkMlMjAlMjVyMTAlMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAxNiglMjVyc2kpJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDlqbGUlMjBQMiUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQVAyJTNBJTBBJTA5bXJtb3ZxJTIwOCglMjVyZGkpJTJDJTIwJTI1cjEwJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwOCglMjVyc2kpJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDlqbGUlMjBQMSUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQVAxJTNBJTBBJTA5bXJtb3ZxJTIwKCUyNXJkaSklMkMlMjAlMjVyMTAlMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAoJTI1cnNpKSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5amxlJTIwUDAlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFQMCUzQSUwQSUwOWlhZGRxJTIwJTI0NzIlMkMlMjAlMjVyZGklMDklMDklMjMlMjBzcmMlMkIlMkIlMEElMDlpYWRkcSUyMCUyNDcyJTJDJTIwJTI1cnNpJTA5JTA5JTIzJTIwZHN0JTJCJTJCJTBBJTA5aWFkZHElMjAlMjQtOSUyQyUyMCUyNXJkeCUwOSUwOSUyMyUyMGxlbi0tJTBBJTA5amdlJTIwUDklMDklMDklMDklMjMlMjBpZiUyMHNvJTJDJTIwZ290byUyMExvb3AlMEElMDlqbXAlMjBSb290JTBBJTIzLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSUwQVI5JTNBJTBBJTA5bXJtb3ZxJTIwNjQoJTI1cmRpKSUyQyUyMCUyNXIxMCUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDY0KCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyMFI4JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBUjglM0ElMEElMDltcm1vdnElMjA1NiglMjVyZGkpJTJDJTIwJTI1cjEwJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwNTYoJTI1cnNpKSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5amxlJTIwUjclMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFSNyUzQSUwQSUwOW1ybW92cSUyMDQ4KCUyNXJkaSklMkMlMjAlMjVyMTAlMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA0OCglMjVyc2kpJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDlqbGUlMjBSNiUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQVI2JTNBJTBBJTA5bXJtb3ZxJTIwNDAoJTI1cmRpKSUyQyUyMCUyNXIxMCUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDQwKCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyMFI1JTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBUjUlM0ElMEElMDltcm1vdnElMjAzMiglMjVyZGkpJTJDJTIwJTI1cjEwJTBBJTA5cm1tb3ZxJTIwJTI1cjEwJTJDJTIwMzIoJTI1cnNpKSUwQSUwOWFuZHElMjAlMjVyMTAlMkMlMjAlMjVyMTAlMDklMDklMjMlMjB2YWwlMjAlM0MlM0QlMjAwJTNGJTBBJTA5amxlJTIwUjQlMEElMDlpYWRkcSUyMCUyNDElMkMlMjVyYXglMEFSNCUzQSUwQSUwOW1ybW92cSUyMDI0KCUyNXJkaSklMkMlMjAlMjVyMTAlMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjAyNCglMjVyc2kpJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDlqbGUlMjBSMyUwQSUwOWlhZGRxJTIwJTI0MSUyQyUyNXJheCUwQVIzJTNBJTBBJTA5bXJtb3ZxJTIwMTYoJTI1cmRpKSUyQyUyMCUyNXIxMCUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMDE2KCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyMFIyJTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBUjIlM0ElMEElMDltcm1vdnElMjA4KCUyNXJkaSklMkMlMjAlMjVyMTAlMEElMDlybW1vdnElMjAlMjVyMTAlMkMlMjA4KCUyNXJzaSklMEElMDlhbmRxJTIwJTI1cjEwJTJDJTIwJTI1cjEwJTA5JTA5JTIzJTIwdmFsJTIwJTNDJTNEJTIwMCUzRiUwQSUwOWpsZSUyMFIxJTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBBUjElM0ElMEElMDltcm1vdnElMjAoJTI1cmRpKSUyQyUyMCUyNXIxMCUwQSUwOXJtbW92cSUyMCUyNXIxMCUyQyUyMCglMjVyc2kpJTBBJTA5YW5kcSUyMCUyNXIxMCUyQyUyMCUyNXIxMCUwOSUwOSUyMyUyMHZhbCUyMCUzQyUzRCUyMDAlM0YlMEElMDlqbGUlMjBEb25lJTBBJTA5aWFkZHElMjAlMjQxJTJDJTI1cmF4JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div><div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div><div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div><div>97</div><div>98</div><div>99</div><div>100</div><div>101</div><div>102</div><div>103</div><div>104</div><div>105</div><div>106</div><div>107</div><div>108</div><div>109</div><div>110</div><div>111</div><div>112</div><div>113</div><div>114</div><div>115</div><div>116</div><div>117</div><div>118</div><div>119</div><div>120</div><div>121</div><div>122</div><div>123</div><div>124</div><div>125</div><div>126</div><div>127</div><div>128</div><div>129</div><div>130</div><div>131</div><div>132</div><div>133</div><div>134</div><div>135</div><div>136</div><div>137</div><div>138</div><div>139</div><div>140</div><div>141</div><div>142</div></div><div class="code">	# Loop header
+	xorq %rax,%rax		# count = 0;
+	iaddq $-9,%rdx
+	jge P9
+Root:
+	iaddq $6,%rdx
+	jl Q1
+	jg Q2
+	jmp R3
+Q1:
+	iaddq $2,%rdx
+	je R1
+	jg R2
+	ret
+Q2:
+	iaddq $-3,%rdx
+	jl Q3
+	jg Q4
+	jmp R6
+Q3:
+	iaddq $2,%rdx
+	je R4
+	jmp R5
+Q4:
+	iaddq $-1,%rdx
+	je R7
+	jmp R8
+P9:
+	mrmovq 64(%rdi), %r10
+	rmmovq %r10, 64(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P8
+	iaddq $1,%rax
+P8:
+	mrmovq 56(%rdi), %r10
+	rmmovq %r10, 56(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P7
+	iaddq $1,%rax
+P7:
+	mrmovq 48(%rdi), %r10
+	rmmovq %r10, 48(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P6
+	iaddq $1,%rax
+P6:
+	mrmovq 40(%rdi), %r10
+	rmmovq %r10, 40(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P5
+	iaddq $1,%rax
+P5:
+	mrmovq 32(%rdi), %r10
+	rmmovq %r10, 32(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P4
+	iaddq $1,%rax
+P4:
+	mrmovq 24(%rdi), %r10
+	rmmovq %r10, 24(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P3
+	iaddq $1,%rax
+P3:
+	mrmovq 16(%rdi), %r10
+	rmmovq %r10, 16(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P2
+	iaddq $1,%rax
+P2:
+	mrmovq 8(%rdi), %r10
+	rmmovq %r10, 8(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P1
+	iaddq $1,%rax
+P1:
+	mrmovq (%rdi), %r10
+	rmmovq %r10, (%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle P0
+	iaddq $1,%rax
+P0:
+	iaddq $72, %rdi		# src++
+	iaddq $72, %rsi		# dst++
+	iaddq $-9, %rdx		# len--
+	jge P9			# if so, goto Loop
+	jmp Root
+#----------------------------------------------
+R9:
+	mrmovq 64(%rdi), %r10
+	rmmovq %r10, 64(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle R8
+	iaddq $1,%rax
+R8:
+	mrmovq 56(%rdi), %r10
+	rmmovq %r10, 56(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle R7
+	iaddq $1,%rax
+R7:
+	mrmovq 48(%rdi), %r10
+	rmmovq %r10, 48(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle R6
+	iaddq $1,%rax
+R6:
+	mrmovq 40(%rdi), %r10
+	rmmovq %r10, 40(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle R5
+	iaddq $1,%rax
+R5:
+	mrmovq 32(%rdi), %r10
+	rmmovq %r10, 32(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle R4
+	iaddq $1,%rax
+R4:
+	mrmovq 24(%rdi), %r10
+	rmmovq %r10, 24(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle R3
+	iaddq $1,%rax
+R3:
+	mrmovq 16(%rdi), %r10
+	rmmovq %r10, 16(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle R2
+	iaddq $1,%rax
+R2:
+	mrmovq 8(%rdi), %r10
+	rmmovq %r10, 8(%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle R1
+	iaddq $1,%rax
+R1:
+	mrmovq (%rdi), %r10
+	rmmovq %r10, (%rsi)
+	andq %r10, %r10		# val &lt;= 0?
+	jle Done
+	iaddq $1,%rax
+</div></code></pre>
+<p>注意我们没有选择去复用前面循环展开的代码，因为这么做的话会使得每次处理完余数之后都要再跑一遍 <code>P0</code> 那个位置的代码。这样的话反而会让 CPE 升到 8 以上。
+这么做之后 CPE 从 7.83 优化到了 7.54，距离满分仍然还有一段距离。
+后面我又在网上搜索了很多讲解本实验的文章，还可用的手段基本是：在 HCL 中添加对于 <code>ret</code> 指令和对分支预测失败时的优化（后者我们上面就提到过。不过由于本章模拟器有点问题，这么做不可行，除非修改模拟器的代码，但实验其实不允许这么做），使用十阶循环展开（目前我的代码光是添加十阶循环展开的代码就已经超出限制了，而且我并没有发现当前代码还有哪里可以继续优化。我怀疑这种做法是假的）。
+后来我发现很多人把开头的 <code>xorq %rax,%rax</code> 删除了。一开始我认为这种优化是不行的，因为这样做的话 ncopy 这个函数其实就是错的，而且我感觉这个小优化应该作用不大。但我试了一下，没想到 CPE 直接从 7.54 优化到 7.47，获得满分。虽然我个人不太认可这样做，但也没什么别的好办法了，本次实验就告一段落....</p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://littlecsd.net/2019/01/18/csapp-Archlab/">csapp-Archlab | Little csd's blog</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://zhuanlan.zhihu.com/p/33751460">csapp archlab Part C - 知乎</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="https://zhuanlan.zhihu.com/p/77072339">csapp archlab 60分解答 - 知乎</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>

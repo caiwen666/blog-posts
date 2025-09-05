@@ -1,0 +1,202 @@
+<h2 id="bei-bao-dp" tabindex="-1">背包dp</h2>
+<h3 id="01-bei-bao" tabindex="-1">01背包</h3>
+<p>（1）枚举物品 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>
+（2）倒叙枚举体积 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05724em;">j</span></span></span></span>
+（3）<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>j</mi><mo stretchy="false">]</mo><mo>=</mo><mi>m</mi><mi>a</mi><mi>x</mi><mo stretchy="false">(</mo><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>j</mi><mo stretchy="false">]</mo><mo separator="true">,</mo><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>i</mi><mo>−</mo><mi>v</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo stretchy="false">]</mo><mo>+</mo><mi>w</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">dp[j]=max(dp[j],dp[i-v[i]]+w[i])</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.05724em;">j</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ma</span><span class="mord mathnormal">x</span><span class="mopen">(</span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.05724em;">j</span><span class="mclose">]</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">])</span></span></span></span></p>
+<h3 id="wan-quan-bei-bao" tabindex="-1">完全背包</h3>
+<p>同上，倒叙枚举变为正序枚举</p>
+<h3 id="duo-zhong-bei-bao" tabindex="-1">多重背包</h3>
+<p>二进制拆分
+将一个数拆分成 1、2、4、8...，这样的拆分满足拆分出来的数相互加可以加出从1到n之间的所有数的性质</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="JTA5Zm9yKGludCUyMGklM0QxJTNCaSUzQyUzRG4lM0JpJTJCJTJCKSU3QiUwQSUwOSUwOWludCUyMHZpJTJDd2klMkNzaSUzQiUwQSUwOSUwOWNpbiUzRSUzRXZpJTNFJTNFd2klM0UlM0VzaSUzQiUwQSUwOSUwOWZvcihpbnQlMjBqJTNEMSUzQmolM0MlM0RzaSUzQmolM0MlM0MlM0QxKSU3QiUwQSUwOSUwOSUwOXNpLSUzRGolM0IlMEElMDklMDklMDlpbnQlMjBuX3ZpJTNEaip2aSUyQ25fd2klM0RqKndpJTNCJTBBJTA5JTA5JTA5Zm9yKGludCUyMGslM0R2JTNCayUzRSUzRG5fdmklM0JrLS0pJTdCJTBBJTA5JTA5JTA5JTA5ZHAlNUJrJTVEJTNEbWF4KGRwJTVCayU1RCUyQ2RwJTVCay1uX3ZpJTVEJTJCbl93aSklM0IlMEElMDklMDklMDklN0QlMEElMDklMDklN0QlMEElMDklMDlpZihzaSklN0IlMEElMDklMDklMDlpbnQlMjBuX3ZpJTNEc2kqdmklMkNuX3dpJTNEc2kqd2klM0IlMEElMDklMDklMDlmb3IoaW50JTIwayUzRHYlM0JrJTNFJTNEbl92aSUzQmstLSklN0IlMEElMDklMDklMDklMDlkcCU1QmslNUQlM0RtYXgoZHAlNUJrJTVEJTJDZHAlNUJrLW5fdmklNUQlMkJuX3dpKSUzQiUwQSUwOSUwOSUwOSU3RCUwQSUwOSUwOSU3RCUwQSUwOSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div></div><div class="code">	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		<span class="hljs-type">int</span> vi,wi,si;
+		cin&gt;&gt;vi&gt;&gt;wi&gt;&gt;si;
+		<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> j=<span class="hljs-number">1</span>;j&lt;=si;j&lt;&lt;=<span class="hljs-number">1</span>){
+			si-=j;
+			<span class="hljs-type">int</span> n_vi=j*vi,n_wi=j*wi;
+			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> k=v;k&gt;=n_vi;k--){
+				dp[k]=<span class="hljs-built_in">max</span>(dp[k],dp[k-n_vi]+n_wi);
+			}
+		}
+		<span class="hljs-keyword">if</span>(si){
+			<span class="hljs-type">int</span> n_vi=si*vi,n_wi=si*wi;
+			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> k=v;k&gt;=n_vi;k--){
+				dp[k]=<span class="hljs-built_in">max</span>(dp[k],dp[k-n_vi]+n_wi);
+			}
+		}
+	}
+</div></code></pre>
+<h3 id="hun-he-bei-bao" tabindex="-1">混合背包</h3>
+<p>在枚举物品之后，根据物品类型进行相应的转移即可</p>
+<h3 id="er-wei-fei-yong-bei-bao" tabindex="-1">二维费用背包</h3>
+<p>多循环一层即可</p>
+<h3 id="fen-zu-bei-bao" tabindex="-1">分组背包</h3>
+<p>先枚举组别，再枚举体积，再枚举物品</p>
+<h3 id="shu-xing-bei-bao" tabindex="-1">树形背包</h3>
+<p>物品之间的关系用森林表示，就需要用树形背包
+首先可以建立一个超级源点，将森林转化为一个树
+状态 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>x</mi><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mi>k</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[x][k]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">x</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mclose">]</span></span></span></span> 表示以x为根的子树，选择了k个点（包括根节点）的最大价值
+对于每个点，初始化 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>x</mi><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mn>0</mn><mo stretchy="false">]</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">dp[x][0]=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">x</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord">0</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>，对于其他状态，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>x</mi><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo>=</mo><mtext>负无穷</mtext></mrow><annotation encoding="application/x-tex">dp[x][i]=负无穷</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">x</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">负无穷</span></span></span></span><br>
+首先枚遍历子节点，对于每个子节点，倒序枚举当前节点的容量，然后再枚举这个子节点选了多少个点</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="ZHAlNUJ4JTVEJTVCMCU1RCUzRDAlM0IlMEFmb3IoaW50JTIwaSUzRDAlM0JpJTNDdmUlNUJ4JTVELnNpemUoKSUzQmklMkIlMkIpJTdCJTBBJTA5aW50JTIwdG8lM0R2ZSU1QnglNUQlNUJpJTVEJTNCJTBBJTA5ZGZzKHRvKSUzQiUwQSUwOWZvcihpbnQlMjBqJTNEbiUzQmolM0UlM0QwJTNCai0tKSU3QiUwQSUwOSUwOWZvcihpbnQlMjBrJTNEMCUzQmslM0MlM0RqJTNCayUyQiUyQiklN0IlMEElMDklMDklMDlkcCU1QnglNUQlNUJqJTVEJTNEbWF4KGRwJTVCeCU1RCU1QmolNUQlMkNkcCU1QnglNUQlNUJqLWslNUQlMkJkcCU1QnRvJTVEJTVCayU1RCklM0IlMEElMDklMDklN0QlMEElMDklN0QlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code">dp[x][<span class="hljs-number">0</span>]=<span class="hljs-number">0</span>;
+<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>;i&lt;ve[x].<span class="hljs-built_in">size</span>();i++){
+	<span class="hljs-type">int</span> to=ve[x][i];
+	<span class="hljs-built_in">dfs</span>(to);
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> j=n;j&gt;=<span class="hljs-number">0</span>;j--){
+		<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> k=<span class="hljs-number">0</span>;k&lt;=j;k++){
+			dp[x][j]=<span class="hljs-built_in">max</span>(dp[x][j],dp[x][j-k]+dp[to][k]);
+		}
+	}
+}
+</div></code></pre>
+<p>遍历子节点时，就相当于枚举了一个物品，然后倒序枚举体积，就相当于一个01背包。而子节点的价值会随着分配给节点的体积改变而改变，相当于泛化物品。<strong>在最内层枚举这个分配给这个子节点分配的容量</strong>
+值得注意的是，根节点本身也算一个物品，而上述代码并没有考虑这一点，所以我们需要修正</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aWYoeCElM0QwKSU3QiUwQSUwOWZvcihpbnQlMjBpJTNEbiUzQmklM0UlM0QwJTNCaS0tKSU3QiUwQSUwOSUwOWRwJTVCeCU1RCU1QmklNUQlM0RkcCU1QnglNUQlNUJpLTElNUQlMkJ3JTVCeCU1RCUzQiUwQSUwOSU3RCUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">if</span>(x!=<span class="hljs-number">0</span>){
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=n;i&gt;=<span class="hljs-number">0</span>;i--){
+		dp[x][i]=dp[x][i<span class="hljs-number">-1</span>]+w[x];
+	}
+}
+</div></code></pre>
+<h2 id="huan-gen-dp" tabindex="-1">换根dp</h2>
+<p>先选择第一个点进行dp。然后再进行一个dfs，进行换根
+换根的时候，需要用父节点的答案去推得子节点的答案。具体的：对于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>−</mo><mo>&gt;</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">u-&gt;v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">u</span><span class="mord">−</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span></span></span></span> ，首先在u节点答案的基础上，减去v节点对其的贡献，然后考虑u节点剩余答案如何贡献v节点的答案
+示例</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="dm9pZCUyMGRmczIoaW50JTIweCUyQ2ludCUyMGZhKSU3QiUwQSUwOWZvcihpbnQlMjBpJTNEaGVhZCU1QnglNUQlM0JpJTNCaSUzRGVkZ2UlNUJpJTVELm5leHQpJTdCJTBBJTA5JTA5aW50JTIwdG8lM0RlZGdlJTVCaSU1RC50byUzQiUwQSUwOSUwOWlmKHRvJTNEJTNEZmEpJTIwY29udGludWUlM0IlMEElMDklMDlpbnQlMjB1JTNEZHAlNUJ4JTVEJTJDdiUzRGRwJTVCdG8lNUQlM0IlMEElMDklMDlpZih2JTNFMCklMjB1LSUzRHYlM0IlMkYlMkYlRTYlQjYlODglRTklOTklQTR2JUU1JUFGJUI5dSVFNyU5QSU4NCVFOCVCNCVBMSVFNyU4QyVBRSUwQSUwOSUwOWlmKHUlM0UwKSUyMHYlMkIlM0R1JTNCJTJGJTJGJUU4JTgwJTgzJUU4JTk5JTkxJUU1JTg5JUE5JUU0JUJEJTk5dSVFNSVBRiVCOXYlRTclOUElODQlRTglQjQlQTElRTclOEMlQUUlMEElMDklMDlkcCU1QnRvJTVEJTNEYW5zJTVCdG8lNUQlM0R2JTNCJTBBJTA5JTA5ZGZzMih0byUyQ3gpJTNCJTBBJTA5JTdEJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">dfs2</span><span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> fa)</span></span>{
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=head[x];i;i=edge[i].next){
+		<span class="hljs-type">int</span> to=edge[i].to;
+		<span class="hljs-keyword">if</span>(to==fa) <span class="hljs-keyword">continue</span>;
+		<span class="hljs-type">int</span> u=dp[x],v=dp[to];
+		<span class="hljs-keyword">if</span>(v&gt;<span class="hljs-number">0</span>) u-=v;<span class="hljs-comment">//消除v对u的贡献</span>
+		<span class="hljs-keyword">if</span>(u&gt;<span class="hljs-number">0</span>) v+=u;<span class="hljs-comment">//考虑剩余u对v的贡献</span>
+		dp[to]=ans[to]=v;
+		<span class="hljs-built_in">dfs2</span>(to,x);
+	}
+}
+</div></code></pre>
+<h2 id="shu-wei-dp" tabindex="-1">数位dp</h2>
+<p>状态一般为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mi>p</mi><mi>o</mi><mi>s</mi><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mtext>其他需要记录的</mtext><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mi>l</mi><mi>i</mi><mi>m</mi><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mi>z</mi><mi>e</mi><mi>r</mi><mi>o</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[pos][其他需要记录的][lim][zero]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord mathnormal">p</span><span class="mord mathnormal">os</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord cjk_fallback">其他需要记录的</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">im</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord mathnormal">zero</span><span class="mclose">]</span></span></span></span>
+求指定区间内满足某一条件的数的个数，采用前缀和思想</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="d29yayhiKS13b3JrKGEtMSklMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-built_in">work</span>(b)-<span class="hljs-built_in">work</span>(a<span class="hljs-number">-1</span>)
+</div></code></pre>
+<p>首先需要把数字按位拆开</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwd29yayhpbnQlMjB4JTJDaW50JTIwZCklN0IlMEElMDltZW1zZXQoZHAlMkMtMSUyQ3NpemVvZihkcCkpJTNCJTBBJTA5aW50JTIwbGVuJTNEMCUzQiUwQSUwOWRvJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTJGJTJGJUU1JTgwJUJDJUU1JUJFJTk3JUU2JUIzJUE4JUU2JTg0JThGJUU3JTlBJTg0JUU2JTk4JUFGJUVGJUJDJThDJUU1JUE2JTgyJUU2JTlFJTlDJUU2JTk4JUFGJUU1JTg1JUI2JUU0JUJCJTk2JUU4JUJGJTlCJUU1JTg4JUI2JUU0JUI4JThCJUU3JTlBJTg0JUU2JTk1JUIwJUU0JUJEJThEZHAlRUYlQkMlOEMlRTQlQjglOEIlRTklOUQlQTIlRTclOUElODQxMCVFOSU5QyU4MCVFOCVBNiU4MSVFNiU5NCVCOSVFNiU4OCU5MCVFNyU5QiVCOCVFNSVCQSU5NCVFNyU5QSU4NCVFOCVCRiU5QiVFNSU4OCVCNiUwQSUwOSUwOW51bSU1QiUyQiUyQmxlbiU1RCUzRHglMjUxMCUzQiUwQSUwOSUwOXglMkYlM0QxMCUzQiUwQSUwOSU3RHdoaWxlKHgpJTNCJTBBJTIwJTIwJTJGJTJGJUU0JUJCJThFJUU2JTlDJTgwJUU5JUFCJTk4JUU0JUJEJThEJUU2JTlFJTlBJUU0JUI4JUJFJUVGJUJDJThDJUU0JUI4JTgwJUU1JUJDJTgwJUU1JUE3JThCJUU1JUIwJUIxJUU2JTlDJTg5bGltJUU5JTk5JTkwJUU1JTg4JUI2JTBBJTA5aW50JTIwYW5zJTNEZGZzKGxlbiUyQzAlMkN0cnVlJTJDdHJ1ZSklM0IlMEElMDlmb3IoaW50JTIwaSUzRGxlbi0xJTNCaSUzRSUzRDElM0JpLS0pJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTJGJTJGJUU5JUFCJTk4JUU0JUJEJThEJUU0JUI4JThBJUU5JTlEJUEyJUU4JUExJUE1MCVFRiVCQyU4QyVFNSVCMCVCMSVFNiVCMiVBMSVFNiU5QyU4OWxpbSVFOSU5OSU5MCVFNSU4OCVCNiVFNCVCQSU4NiUwQSUwOSUwOWFucyUyQiUzRGRmcyhpJTJDMCUyQ2ZhbHNlJTJDdHJ1ZSklM0IlMEElMDklN0QlMEElMjAlMjAlMkYlMkYlRTklODMlQkQlRTYlOUMlODl6ZXJvJUU5JTk5JTkwJUU1JTg4JUI2JTBBJTA5cmV0dXJuJTIwYW5zJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div></div><div class="code"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">work</span><span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> d)</span></span>{
+	<span class="hljs-built_in">memset</span>(dp,<span class="hljs-number">-1</span>,<span class="hljs-built_in">sizeof</span>(dp));
+	<span class="hljs-type">int</span> len=<span class="hljs-number">0</span>;
+	<span class="hljs-keyword">do</span>{
+      <span class="hljs-comment">//值得注意的是，如果是其他进制下的数位dp，下面的10需要改成相应的进制</span>
+		num[++len]=x%<span class="hljs-number">10</span>;
+		x/=<span class="hljs-number">10</span>;
+	}<span class="hljs-keyword">while</span>(x);
+  <span class="hljs-comment">//从最高位枚举，一开始就有lim限制</span>
+	<span class="hljs-type">int</span> ans=<span class="hljs-built_in">dfs</span>(len,<span class="hljs-number">0</span>,<span class="hljs-literal">true</span>,<span class="hljs-literal">true</span>);
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=len<span class="hljs-number">-1</span>;i&gt;=<span class="hljs-number">1</span>;i--){
+      <span class="hljs-comment">//高位上面补0，就没有lim限制了</span>
+		ans+=<span class="hljs-built_in">dfs</span>(i,<span class="hljs-number">0</span>,<span class="hljs-literal">false</span>,<span class="hljs-literal">true</span>);
+	}
+  <span class="hljs-comment">//都有zero限制</span>
+	<span class="hljs-keyword">return</span> ans;
+}
+</div></code></pre>
+<p>记忆化搜索的过程大致如下</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwZGZzKGludCUyMHBvcyUyQ2ludCUyMGNudCUyQ2Jvb2wlMjBsaW0lMkNib29sJTIwemVybyklN0IlMEElMDlpbnQlMjAlMjZ0bXAlM0RkcCU1QnBvcyU1RCU1QmNudCU1RCU1QmxpbSU1RCU1Qnplcm8lNUQlM0IlMEElMDlpZih0bXAhJTNELTEpJTIwcmV0dXJuJTIwdG1wJTNCJTBBJTA5aWYocG9zJTNEJTNEMCklMjByZXR1cm4lMjB0bXAlM0RjbnQlM0IlMEElMDl0bXAlM0QwJTNCJTBBJTA5aW50JTIwbWF4biUzRGxpbSUzRiUyMG51bSU1QnBvcyU1RCUzQTklM0IlMEElMDlpbnQlMjBtaW5uJTNEemVybyUzRiUyMDElM0EwJTNCJTBBJTA5Zm9yKGludCUyMGklM0RtaW5uJTNCaSUzQyUzRG1heG4lM0JpJTJCJTJCKSU3QiUwQSUwOSUwOXRtcCUyQiUzRGRmcyhwb3MtMSUyQ2NudCUyQihpJTNEJTNEZCklMkNsaW0lMjYlMjYoaSUzRCUzRG1heG4pJTJDZmFsc2UpJTNCJTBBJTA5JTdEJTBBJTA5cmV0dXJuJTIwdG1wJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div></div><div class="code"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">dfs</span><span class="hljs-params">(<span class="hljs-type">int</span> pos,<span class="hljs-type">int</span> cnt,<span class="hljs-type">bool</span> lim,<span class="hljs-type">bool</span> zero)</span></span>{
+	<span class="hljs-type">int</span> &amp;tmp=dp[pos][cnt][lim][zero];
+	<span class="hljs-keyword">if</span>(tmp!=<span class="hljs-number">-1</span>) <span class="hljs-keyword">return</span> tmp;
+	<span class="hljs-keyword">if</span>(pos==<span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> tmp=cnt;
+	tmp=<span class="hljs-number">0</span>;
+	<span class="hljs-type">int</span> maxn=lim? num[pos]:<span class="hljs-number">9</span>;
+	<span class="hljs-type">int</span> minn=zero? <span class="hljs-number">1</span>:<span class="hljs-number">0</span>;
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=minn;i&lt;=maxn;i++){
+		tmp+=<span class="hljs-built_in">dfs</span>(pos<span class="hljs-number">-1</span>,cnt+(i==d),lim&amp;&amp;(i==maxn),<span class="hljs-literal">false</span>);
+	}
+	<span class="hljs-keyword">return</span> tmp;
+}
+</div></code></pre>
+<h2 id="gai-shuai-dp" tabindex="-1">概率dp</h2>
+<p>先找到概率为1的状态u，然后据此考虑转移方程
+HDU4576 通过取模来解决环状的问题。看似转移循序无序，实际上可以根据指令的先后顺序作为dp的转移顺序。使用0/1滚动数组来优化
+POJ3744 有很多概率为1的状态，转移并不是很顺利，所以可以考虑分段，在使用乘法法则求出最终概率</p>
+<h2 id="qi-wang-dp" tabindex="-1">期望dp</h2>
+<p>通过dp、排列组合等计算概率，然后概率乘转移产生贡献（天数+1等）来计算出期望
+转移顺序经常是倒推的，因为我们往往知道dp终点的期望而要求dp起点的期望
+POJ2096</p>
+<h3 id="zhuang-tai-zhuan-yi-shi-de-yi-lai" tabindex="-1">状态转移时的依赖</h3>
+<h4 id="dui-dan-ge-zhuang-tai-de-yi-lai" tabindex="-1">对单个状态的依赖</h4>
+<p>ZOJ3329 在状态转移时发现所有的状态的转移都需要依赖 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[0]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord">0</span><span class="mclose">]</span></span></span></span> 这个状态。而 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[0]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal">p</span><span class="mopen">[</span><span class="mord">0</span><span class="mclose">]</span></span></span></span> 恰好又是我们想求的。对于这种依赖单个状态，可以将依赖的状态视为未知数，转移时只看系数，最后再解方程
+HDU4035 树上的依赖，一个点转移时，依赖于父节点和子节点和根节点（题目要求），而父节点和子节点转移时也会依赖自己，根节点也会依赖于这些点。对此，先从叶子节点下手，叶子节点仅依赖与父节点和根节点。通过方程的代入化简可以使得非叶子节点也仅对父节点和根节点形成依赖。实际上，这就是上面那个题目的有两个未知数的版本。转移时只需考虑系数即可，最终在根节点上解方程</p>
+<h4 id="xun-huan-yi-lai" tabindex="-1">循环依赖</h4>
+<p>HDU4089 状态转移时，后一个状态依赖于前一个状态，而第一个状态又依赖于最后的状态，循环依赖。对此，可以通过累加、代入的方法将中间的状态全部消掉，最后得到之后一个状态的方程，把第一个或最后一个状态的值解出来，这样循环就被打破</p>
+<h4 id="gao-si-xiao-yuan" tabindex="-1">高斯消元</h4>
+<p>未完待续...</p>
+<h2 id="ji-huan-shu" tabindex="-1">基环树</h2>
+<p>基环树的处理方法有暴力去掉环上一边然后dfs，还有基环树dp<br>
+基环树的每个联通块中有且仅有一个环
+首先先进行一个拓扑排序</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="dm9pZCUyMHRvcG8oKSU3QiUwQSUwOXF1ZXVlJTNDaW50JTNFJTIwcSUzQiUwQSUwOWZvcihpbnQlMjBpJTNEMSUzQmklM0MlM0RuJTNCaSUyQiUyQiklN0IlMEElMDklMDlpZihpbiU1QmklNUQlM0QlM0QxKSUyMHEucHVzaChpKSUzQiUwQSUwOSU3RCUwQSUwOXdoaWxlKCFxLmVtcHR5KCkpJTdCJTBBJTA5JTA5aW50JTIwbm93JTNEcS5mcm9udCgpJTNCcS5wb3AoKSUzQiUwQSUwOSUwOWZvcihpbnQlMjBpJTNEaGVhZCU1Qm5vdyU1RCUzQmklM0JpJTNEZWRnZSU1QmklNUQubmV4dCklN0IlMEElMDklMDklMDlpbnQlMjB0byUzRGVkZ2UlNUJpJTVELnRvJTNCJTBBJTA5JTA5JTA5aWYoaW4lNUJ0byU1RCUzRTEpJTdCJTBBJTA5JTA5JTA5JTA5aW4lNUJ0byU1RC0tJTNCJTBBJTA5JTA5JTA5JTA5aWYoaW4lNUJ0byU1RCUzRCUzRDEpJTIwcS5wdXNoKHRvKSUzQiUwQSUwOSUwOSUwOSU3RCUwQSUwOSUwOSU3RCUwQSUwOSU3RCUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div></div><div class="code"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">topo</span><span class="hljs-params">()</span></span>{
+	queue&lt;<span class="hljs-type">int</span>&gt; q;
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		<span class="hljs-keyword">if</span>(in[i]==<span class="hljs-number">1</span>) q.<span class="hljs-built_in">push</span>(i);
+	}
+	<span class="hljs-keyword">while</span>(!q.<span class="hljs-built_in">empty</span>()){
+		<span class="hljs-type">int</span> now=q.<span class="hljs-built_in">front</span>();q.<span class="hljs-built_in">pop</span>();
+		<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=head[now];i;i=edge[i].next){
+			<span class="hljs-type">int</span> to=edge[i].to;
+			<span class="hljs-keyword">if</span>(in[to]&gt;<span class="hljs-number">1</span>){
+				in[to]--;
+				<span class="hljs-keyword">if</span>(in[to]==<span class="hljs-number">1</span>) q.<span class="hljs-built_in">push</span>(to);
+			}
+		}
+	}
+}
+</div></code></pre>
+<p>然后找环上的点，找到了环上的一点就可以顺着把环上的所有的点都找出来。</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="Zm9yKGludCUyMGklM0QxJTNCaSUzQyUzRG4lM0JpJTJCJTJCKSU3QiUwQSUyMCUyMCUyMCUyMGlmKGluJTVCaSU1RCUzQzIlN0MlN0N2aXMlNUJpJTVEKSUyMGNvbnRpbnVlJTNCJTBBJTIwJTIwJTIwJTIwbWVtc2V0KGxvb3AlMkMwJTJDc2l6ZW9mKGxvb3ApKSUzQiUwQSUwOW1lbXNldChnJTJDMCUyQ3NpemVvZihnKSklM0IlMEElMjAlMjAlMjAlMjBjbnQlM0QwJTNCJTBBJTA5ZmluZChpKSUzQiUwQSUyMCUyMCUyMCUyMC4uLiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+    <span class="hljs-keyword">if</span>(in[i]&lt;<span class="hljs-number">2</span>||vis[i]) <span class="hljs-keyword">continue</span>;
+    <span class="hljs-built_in">memset</span>(loop,<span class="hljs-number">0</span>,<span class="hljs-built_in">sizeof</span>(loop));
+	<span class="hljs-built_in">memset</span>(g,<span class="hljs-number">0</span>,<span class="hljs-built_in">sizeof</span>(g));
+    cnt=<span class="hljs-number">0</span>;
+	<span class="hljs-built_in">find</span>(i);
+    ...
+}
+</div></code></pre>
+<p>find</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="dm9pZCUyMGZpbmQoaW50JTIweCklN0IlMEElMDl2aXMlNUJ4JTVEJTNEdHJ1ZSUzQiUwQSUwOWxvb3AlNUIlMkIlMkJjbnQlNUQlM0R4JTNCJTBBJTA5Zm9yKGludCUyMGklM0RoZWFkJTVCeCU1RCUzQmklM0JpJTNEZWRnZSU1QmklNUQubmV4dCklN0IlMEElMDklMDlpbnQlMjB0byUzRGVkZ2UlNUJpJTVELnRvJTNCJTBBJTA5JTA5aWYoaW4lNUJ0byU1RCUzQzIlN0MlN0N2aXMlNUJ0byU1RCklMjBjb250aW51ZSUzQiUwQSUwOSUwOWZpbmQodG8pJTNCJTBBJTA5JTdEJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">find</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span></span>{
+	vis[x]=<span class="hljs-literal">true</span>;
+	loop[++cnt]=x;
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=head[x];i;i=edge[i].next){
+		<span class="hljs-type">int</span> to=edge[i].to;
+		<span class="hljs-keyword">if</span>(in[to]&lt;<span class="hljs-number">2</span>||vis[to]) <span class="hljs-keyword">continue</span>;
+		<span class="hljs-built_in">find</span>(to);
+	}
+}
+</div></code></pre>
+<p>然后先把环上节点的子树进行dp</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="Zm9yKGludCUyMGolM0QxJTNCaiUzQyUzRGNudCUzQmolMkIlMkIpJTdCJTBBJTA5ZHAobG9vcCU1QmolNUQpJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> j=<span class="hljs-number">1</span>;j&lt;=cnt;j++){
+	<span class="hljs-built_in">dp</span>(loop[j]);
+}
+</div></code></pre>
+<p>设 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">[</mo><mi>x</mi><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mn>0</mn><mi mathvariant="normal">/</mi><mn>1</mn><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mn>0</mn><mi mathvariant="normal">/</mi><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">g[x][0/1][0/1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mopen">[</span><span class="mord mathnormal">x</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord">0/1</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord">0/1</span><span class="mclose">]</span></span></span></span> 表示dp到了第x个节点，第x个节点选/不选，第1个节点选/不选
+首先分两类：第一个节点选/不选</p>
+<ol>
+<li>第一个节点不选，那么初始化第二个节点的信息</li>
+</ol>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="ZyU1QjIlNUQlNUIxJTVEJTVCMCU1RCUzRGYlNUJsb29wJTVCMSU1RCU1RCU1QjAlNUQlMkJmJTVCbG9vcCU1QjIlNUQlNUQlNUIxJTVEJTNCJTBBZyU1QjIlNUQlNUIwJTVEJTVCMCU1RCUzRGYlNUJsb29wJTVCMSU1RCU1RCU1QjAlNUQlMkJmJTVCbG9vcCU1QjIlNUQlNUQlNUIwJTVEJTNCJTBBZm9yKGludCUyMGklM0QzJTNCaSUzQyUzRGNudCUzQmklMkIlMkIpJTdCJTBBJTA5ZyU1QmklNUQlNUIwJTVEJTVCMCU1RCUzRG1heChnJTVCaS0xJTVEJTVCMSU1RCU1QjAlNUQlMkNnJTVCaS0xJTVEJTVCMCU1RCU1QjAlNUQpJTJCZiU1Qmxvb3AlNUJpJTVEJTVEJTVCMCU1RCUzQiUwQSUwOWclNUJpJTVEJTVCMSU1RCU1QjAlNUQlM0RnJTVCaS0xJTVEJTVCMCU1RCU1QjAlNUQlMkJmJTVCbG9vcCU1QmklNUQlNUQlNUIxJTVEJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code">g[<span class="hljs-number">2</span>][<span class="hljs-number">1</span>][<span class="hljs-number">0</span>]=f[loop[<span class="hljs-number">1</span>]][<span class="hljs-number">0</span>]+f[loop[<span class="hljs-number">2</span>]][<span class="hljs-number">1</span>];
+g[<span class="hljs-number">2</span>][<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]=f[loop[<span class="hljs-number">1</span>]][<span class="hljs-number">0</span>]+f[loop[<span class="hljs-number">2</span>]][<span class="hljs-number">0</span>];
+<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">3</span>;i&lt;=cnt;i++){
+	g[i][<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]=<span class="hljs-built_in">max</span>(g[i<span class="hljs-number">-1</span>][<span class="hljs-number">1</span>][<span class="hljs-number">0</span>],g[i<span class="hljs-number">-1</span>][<span class="hljs-number">0</span>][<span class="hljs-number">0</span>])+f[loop[i]][<span class="hljs-number">0</span>];
+	g[i][<span class="hljs-number">1</span>][<span class="hljs-number">0</span>]=g[i<span class="hljs-number">-1</span>][<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]+f[loop[i]][<span class="hljs-number">1</span>];
+}
+</div></code></pre>
+<ol start="2">
+<li>第一个节点选，那么初始化第二个和第三个节点的信息。第二个节点肯定不选。</li>
+</ol>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="ZyU1QjIlNUQlNUIwJTVEJTVCMSU1RCUzRGYlNUJsb29wJTVCMSU1RCU1RCU1QjElNUQlMkJmJTVCbG9vcCU1QjIlNUQlNUQlNUIwJTVEJTNCJTBBZyU1QjMlNUQlNUIwJTVEJTVCMSU1RCUzRGYlNUJsb29wJTVCMSU1RCU1RCU1QjElNUQlMkJmJTVCbG9vcCU1QjIlNUQlNUQlNUIwJTVEJTJCZiU1Qmxvb3AlNUIzJTVEJTVEJTVCMCU1RCUzQiUwQWclNUIzJTVEJTVCMSU1RCU1QjElNUQlM0RmJTVCbG9vcCU1QjElNUQlNUQlNUIxJTVEJTJCZiU1Qmxvb3AlNUIyJTVEJTVEJTVCMCU1RCUyQmYlNUJsb29wJTVCMyU1RCU1RCU1QjElNUQlM0IlMEFmb3IoaW50JTIwaSUzRDQlM0JpJTNDJTNEY250JTNCaSUyQiUyQiklN0IlMEElMDlnJTVCaSU1RCU1QjAlNUQlNUIxJTVEJTNEbWF4KGclNUJpLTElNUQlNUIxJTVEJTVCMSU1RCUyQ2clNUJpLTElNUQlNUIwJTVEJTVCMSU1RCklMkJmJTVCbG9vcCU1QmklNUQlNUQlNUIwJTVEJTNCJTBBJTA5ZyU1QmklNUQlNUIxJTVEJTVCMSU1RCUzRGclNUJpLTElNUQlNUIwJTVEJTVCMSU1RCUyQmYlNUJsb29wJTVCaSU1RCU1RCU1QjElNUQlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">g[<span class="hljs-number">2</span>][<span class="hljs-number">0</span>][<span class="hljs-number">1</span>]=f[loop[<span class="hljs-number">1</span>]][<span class="hljs-number">1</span>]+f[loop[<span class="hljs-number">2</span>]][<span class="hljs-number">0</span>];
+g[<span class="hljs-number">3</span>][<span class="hljs-number">0</span>][<span class="hljs-number">1</span>]=f[loop[<span class="hljs-number">1</span>]][<span class="hljs-number">1</span>]+f[loop[<span class="hljs-number">2</span>]][<span class="hljs-number">0</span>]+f[loop[<span class="hljs-number">3</span>]][<span class="hljs-number">0</span>];
+g[<span class="hljs-number">3</span>][<span class="hljs-number">1</span>][<span class="hljs-number">1</span>]=f[loop[<span class="hljs-number">1</span>]][<span class="hljs-number">1</span>]+f[loop[<span class="hljs-number">2</span>]][<span class="hljs-number">0</span>]+f[loop[<span class="hljs-number">3</span>]][<span class="hljs-number">1</span>];
+<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">4</span>;i&lt;=cnt;i++){
+	g[i][<span class="hljs-number">0</span>][<span class="hljs-number">1</span>]=<span class="hljs-built_in">max</span>(g[i<span class="hljs-number">-1</span>][<span class="hljs-number">1</span>][<span class="hljs-number">1</span>],g[i<span class="hljs-number">-1</span>][<span class="hljs-number">0</span>][<span class="hljs-number">1</span>])+f[loop[i]][<span class="hljs-number">0</span>];
+	g[i][<span class="hljs-number">1</span>][<span class="hljs-number">1</span>]=g[i<span class="hljs-number">-1</span>][<span class="hljs-number">0</span>][<span class="hljs-number">1</span>]+f[loop[i]][<span class="hljs-number">1</span>];
+}
+</div></code></pre>
+<p>最后总结答案</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="YW5zJTJCJTNEbWF4KG1heChnJTVCY250JTVEJTVCMSU1RCU1QjAlNUQlMkNnJTVCY250JTVEJTVCMCU1RCU1QjAlNUQpJTJDZyU1QmNudCU1RCU1QjAlNUQlNUIxJTVEKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">ans+=<span class="hljs-built_in">max</span>(<span class="hljs-built_in">max</span>(g[cnt][<span class="hljs-number">1</span>][<span class="hljs-number">0</span>],g[cnt][<span class="hljs-number">0</span>][<span class="hljs-number">0</span>]),g[cnt][<span class="hljs-number">0</span>][<span class="hljs-number">1</span>]);
+</div></code></pre>

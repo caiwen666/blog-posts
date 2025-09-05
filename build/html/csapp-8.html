@@ -1,0 +1,294 @@
+<h2 id="yi-chang" tabindex="-1">异常</h2>
+<p>系统启动时，操作系统将会分配和初始化一个异常表，将异常表的首地址放到 CPU 的异常表基址寄存器中。处理器触发异常时，会根据异常编号，从异常表上获取到处理程序的地址，并跳转到对应的处理程序：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689aea78e0ced.png" style="transform: scale(1)" width=612 height=479></div>
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689aea513b91f.png" style="transform: scale(1)" width=992 height=236></div>
+异常类似于过程调用，但是有如下区别：</p>
+<ul>
+<li>跳转到处理程序之前，CPU 会将返回地址压入栈中。不过，CPU 会根据异常类型，选择返回地址为当前指令或者是下一条指令。</li>
+<li>处理器会把一些额外的处理器状态压入栈中，方便处理程序返回时状态的恢复。</li>
+<li>异常处理程序运行在内核模式下。
+异常有如下类型：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689aebd6627c1.png" style="transform: scale(1)" width=1105 height=306></div>
+异常号在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>∼</mo><mn>31</mn></mrow><annotation encoding="application/x-tex">0\sim 31</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">31</span></span></span></span> 是 CPU 架构师定义的异常，对于任何的操作系统都是一样的。<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn><mo>∼</mo><mn>255</mn></mrow><annotation encoding="application/x-tex">32\sim 255</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">32</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">255</span></span></span></span> 是操作系统自己定义的中断或是陷阱等。</li>
+</ul>
+<h3 id="zhong-duan" tabindex="-1">中断</h3>
+<p>中断来自于外部 IO 设备。外部 IO 设备将异常号放到系统总线上，然后向处理器芯片上的一个引脚发送信号，来触发中断。
+CPU 执行完当前指令后，如果发现中断引脚电压升高，则从系统总线上读取异常号，并调用对应的处理程序。</p>
+<h3 id="xian-jing-xi-tong-tiao-yong" tabindex="-1">陷阱/系统调用</h3>
+<p>处理器提供了一个特殊的 <code>syscall</code> 指令，调用后处理器将跳到处理陷阱的处理程序中。
+在 Linux 系统中会维护一个跳转表（和异常表不同，跳转表专门用于处理系统调用），根据寄存器中存储的系统调用编号，再跳转到对应的系统调用。
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689aef2387832.png" style="transform: scale(1)" width=1262 height=389></div>
+Linux 系统的系统调用的参数一律使用寄存器传递（不通过栈传递）。其中 <code>%rax</code> 寄存器要存储系统调用号，寄存器 <code>%rdi</code>、<code>%rsi</code>、<code>%rdx</code>、<code>%r10</code>、<code>%r8</code>、<code>%r9</code> 包含最多 6 个参数，参数一到参数六依次存储在这些寄存器（注意这和正常函数调用的约定不同）。从函数调用返回时，<code>%rax</code> 中存储返回值。一般来说返回值为负数的话说明发生了异常，异常编号会存储在一个全局整数变量 <code>errno</code> 中，这个变量定义在 <code>errno.h</code> 中。
+<code>strerrno</code> 函数可以获取与某个 <code>errno</code> 相关联的错误。我们可以封装一个错误报告函数：</p>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="dm9pZCUyMHVuaXhfZXJyb3IoY2hhciUyMCptc2cpJTdCJTBBJTIwJTIwJTIwJTIwZnByaW50ZihzdGRlcnIlMkMlMjAlMjIlMjVzJTNBJTIwJTI1cyU1Q24lMjIlMkMlMjBtc2clMkMlMjBzdHJlcnJvcihlcnJubykpJTNCJTBBJTIwJTIwJTIwJTIwZXhpdCgwKSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-type">void</span> <span class="hljs-title function_">unix_error</span><span class="hljs-params">(<span class="hljs-type">char</span> *msg)</span>{
+    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;%s: %s\n&quot;</span>, msg, strerror(errno));
+    <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);
+}
+</div></code></pre>
+<p>我们最好给每个系统调用函数都包装一个错误处理形式，比如：</p>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="cGlkX3QlMjBGb3JrKCklN0IlMEElMjAlMjAlMjAlMjBwaWRfdCUyMHBpZCUzQiUwQSUyMCUyMCUyMCUyMGlmKChwaWQlMjAlM0QlMjBmb3JrKCkpJTIwJTNDJTIwMCklMjB1bml4X2Vycm9yKCUyMkZvcmslMjBlcnJvciUyMiklM0IlMEElMjAlMjAlMjAlMjByZXR1cm4lMjBwaWQlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-type">pid_t</span> <span class="hljs-title function_">Fork</span><span class="hljs-params">()</span>{
+    <span class="hljs-type">pid_t</span> pid;
+    <span class="hljs-keyword">if</span>((pid = fork()) &lt; <span class="hljs-number">0</span>) unix_error(<span class="hljs-string">&quot;Fork error&quot;</span>);
+    <span class="hljs-keyword">return</span> pid;
+}
+</div></code></pre>
+<h3 id="gu-zhang" tabindex="-1">故障</h3>
+<p>一些可能能被处理程序修正的错误，被称为故障。如果处理程序能够修正这个错误则可以返回到引起故障的指令，并重新执行。否则，处理程序则调用内核的 <code>abort</code> 程序，终止引起故障的程序。常见的故障如下：</p>
+<ul>
+<li>除法错误（异常号：0）：程序试图除以一个 0，或者是除法指令结果对于目标操作数来说太大了，就会触发。尽管 CPU 允许操作系统恢复这种错误，但 Linux 系统不会这么做，而是选择终止程序，并把这种错误报告为 Floating Exception</li>
+<li>一般保护故障（异常号：13）：引起这个故障会有许多原因。比较常见的是引用了未定义的虚拟内存区域，或是尝试写一个只读的虚拟内存。Linux 也不会恢复这种错误，并报告为 Segmentation Fault</li>
+<li>缺页（异常号：14）</li>
+</ul>
+<h3 id="zhong-zhi" tabindex="-1">终止</h3>
+<p>一些错误是不可恢复的致命错误，通常是一些硬件错误，比如 DRAM 或是 SRAM 存储的数据被损坏，奇偶校验错误。CPU 不希望处理程序返回到原来的程序中，因此对应的处理程序被触发后应该立刻终止程序。通常触发异常号为 18，描述为“机器检查”的异常。</p>
+<h2 id="jin-cheng" tabindex="-1">进程</h2>
+<h3 id="huo-qu-jin-cheng-pid" tabindex="-1">获取进程 pid</h3>
+<p><code>pid_t getpid(void);</code></p>
+<ul>
+<li>定义在 <code>unistd.h</code> 中，其中 <code>pid_t</code> 在 <code>sys/types.h</code> 中，其实是 <code>int</code> 类型。</li>
+<li>返回当前进程的 pid。
+<code>pid_t getppid(void);</code></li>
+<li>定义在 <code>unistd.h</code> 中。</li>
+<li>返回当前进程的父进程的 pid。</li>
+</ul>
+<h3 id="chuang-jian-jin-cheng" tabindex="-1">创建进程</h3>
+<p><code>pid_t fork(void);</code></p>
+<ul>
+<li>定义在 <code>unistd.h</code> 中。</li>
+<li>子进程返回 0，父进程返回子进程的 pid。如果出错，则返回 -1。
+<code>int execve(const char *filename, const char *argv[], const char *envp[]);</code></li>
+<li>定义在 <code>unistd.h</code> 中。</li>
+<li>在当前进程的上下文中加载并运行一个程序。注意，加载后当前进程的文件描述符，信号阻塞状态等仍然和之前一样。</li>
+<li><code>argv</code> 指向一个指针数组，这个数组里每个元素都指向一个参数的字符串。数组的末尾要以空指针结尾。按照管理，<code>argv[0]</code> 指向的字符串应该和 <code>filename</code> 一致。</li>
+<li><code>envp</code> 和 <code>argv</code> 类似，不同的是指向的字符串应该是形如 <code>name=value</code> 形式的键值对，作为环境变量。</li>
+<li><code>argv</code> 和 <code>envp</code> 对应于 <code>main</code> 函数的完整原型： <code>int main(int argc, char *argv[], char *envp[]);</code></li>
+<li>如果成功则不返回了。返回了说明发生错误，返回 -1。</li>
+</ul>
+<h3 id="tui-chu-hui-shou-jin-cheng" tabindex="-1">退出 / 回收进程</h3>
+<p><code>void exit(int status);</code></p>
+<ul>
+<li>定义在 <code>stdlib.h</code> 中。</li>
+<li>以 <code>status</code> 为退出状态来终止进程。
+<code>pid_t waitpid(pid_t pid, int *statusp, int options);</code></li>
+<li>当进程终止时，内核并不会立刻将其从系统中清除。进程会回收大部分资源，但还有一部分资源没被回收，等待其父进程回收。如果父进程终止了，其子进程会称为 init 进程的子进程。init 进程是系统启动的时候创建的，不会被终止，是所有进程的祖先。</li>
+<li>定义在 <code>sys/wait.h</code> 中。</li>
+<li>默认情况下（<code>options</code> 为 0 时），<code>waitpid</code> 挂起当前进程，直到它的等待集合中的一个进程被终止，则返回。此时这个终止的进程的资源就被当前进程完全回收了。</li>
+<li><code>pid</code> 来确定等待集合：
+<ul>
+<li><code>pid</code> &gt; 0 ，那么等待集合就是一个单独的 pid 为 <code>pid</code> 的子进程。</li>
+<li><code>pid</code> = -1，那么等待集合就是全部的子进程。</li>
+</ul>
+</li>
+<li><code>options</code> 可选如下参数：
+<ul>
+<li><code>WNOHANG</code>：如果等待集合中任何子进程都没被终止，不挂起，立即返回。</li>
+<li><code>WUNTRACED</code>：不仅检查进程是否被终止，如果子进程被停止，也返回。</li>
+<li><code>WCONTINUED</code>：不仅检查进程是否被终止，如果一个被停止的进程因为受到 <code>SIGCONT</code> 信号重新开始执行，也返回。</li>
+</ul>
+</li>
+<li><code>waitpid</code> 会在 <code>statusp</code> 指向的地址上存放子进程的状态。有如下的宏用来解释状态的信息：
+<ul>
+<li><code>WIFEXITED(status)</code>：如果子进程是由于 <code>exit</code> 或者 <code>main</code> 函数返回而正常终止的，则返回真。</li>
+<li><code>WEXITSTATUS(status)</code>：获取正常终止的子进程的退出状态。<code>WIFEXITED(status)</code> 为真时才可以获取。</li>
+<li><code>WIFSIGNALED(status)</code>：如果子进程是因为一个未被捕获的信号终止的，那么就返回真。</li>
+<li><code>WTERMSIG(status)</code>：返回导致子进程终止的信号的编号。<code>WIFSIGNALED(status)</code> 为真时才可以获取。</li>
+<li><code>WIFSTOPPED(status)</code>：如果子进程是停止而导致 <code>waitpid</code> 返回的，则返回真。</li>
+<li><code>WSTOPSIG(status)</code>：返回引起子进程停止的信号的编号。<code>WIFSTOPPED(status)</code> 为真时才可以获取。</li>
+<li><code>WIFCONTINUED(status)</code>：如果子进程是收到 <code>SIGCONT</code> 信号重新启动而导致 <code>waitpid</code> 返回的，则返回真。</li>
+</ul>
+</li>
+<li>如果成功，则返回引起返回的子进程的 pid。如果设置了 <code>WNOHANG</code> 且没有引发返回的子进程，则返回 0。如果是其他错误，则返回 -1，并设置 <code>errno</code>。</li>
+<li>会设置的 <code>errno</code> 如下：
+<ul>
+<li><code>ECHILD</code>：当前进程没有子进程。准确来说这不算什么严重错误，应该特判一下。</li>
+<li><code>EINTR</code>：当前进程由于 <code>waitpid</code> 被挂起的过程中，又被一个信号中断了。
+<code>pid_t wait(int *statusp);</code></li>
+</ul>
+</li>
+<li>定义在 <code>sys/wait.h</code> 中。</li>
+<li>调用 <code>wait(&amp;status)</code> 等价于调用 <code>waitpid(-1, &amp;status, 0)</code></li>
+</ul>
+<h3 id="jin-cheng-xiu-mian" tabindex="-1">进程休眠</h3>
+<p><code>unsigned int sleep(unsigned int secs);</code></p>
+<ul>
+<li>定义在 <code>unistd.h</code> 中。</li>
+<li>将一个进程挂起一段指定时间。</li>
+<li>函数返回还要休眠的秒数。
+<ul>
+<li>如果等待的时间已经到了，那么函数就返回 0。</li>
+<li>如果 <code>sleep</code> 函数被一个信号中断而过早返回，那么就返回非 0 的值。
+<code>int pause(void);</code></li>
+</ul>
+</li>
+<li>定义在 <code>unistd.h</code> 中。</li>
+<li>让函数休眠，直到当前进程受到一个信号（任何没有被阻塞且没有被忽略的信号都可以）</li>
+<li>总是返回 -1</li>
+</ul>
+<h3 id="huan-jing-bian-liang" tabindex="-1">环境变量</h3>
+<p><code>char *getenv(const char *name);</code></p>
+<ul>
+<li>定义在 <code>stdlib.h</code> 中。</li>
+<li>在当前的环境变量数组 <code>envp</code> 中寻找 <code>name=value</code> 形式的字符串。如果找到了则返回对应的 <code>value</code>，反之返回空指针。
+<code>int setenv(const char *name, const char *newvalue, int overwrite);</code></li>
+<li>定义在 <code>stdlib.h</code> 中。</li>
+<li>将 <code>name=newvalue</code> 添加到当前进程的 <code>envp</code> 数组中。</li>
+<li>如果 <code>name</code> 已经存在了，那么就看 <code>override</code> 值，<code>overwrite</code> 值非零的话那么就覆盖，反之则不进行任何操作。</li>
+<li>成功返回 0，失败返回 -1
+<code>void unsetenv(const char *name);</code></li>
+<li>定义在 <code>stdlib.h</code> 中。</li>
+<li>将 <code>name</code> 从当前的 <code>envp</code> 数组中删去。如果不存在的话就什么也不干。</li>
+</ul>
+<h3 id="jin-cheng-zu" tabindex="-1">进程组</h3>
+<p><code>pid_t getpgrp(void);</code></p>
+<ul>
+<li>定义在 <code>unistd.h</code> 中。</li>
+<li>获取当前进程的进程组 ID。
+<code>int setpgid(pid_t pid, pid_t pgid);</code></li>
+<li>定义在 <code>unistd.h</code> 中。</li>
+<li>将进程 <code>pid</code> 的进程组改为 <code>pgid</code> 。</li>
+<li><code>pid</code> 为 0 时，那么就使用当前进程的 PID，如果 <code>pgid</code> 时是 0 ，那么就用 <code>pid</code> 指定的进程 PID 作为进程组 ID。</li>
+<li>成功则返回 0，错误则返回 -1。</li>
+</ul>
+<h2 id="xin-hao" tabindex="-1">信号</h2>
+<p>Linux 系统支持如下 30 种不同的信号：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b1c1fc60ed.png" style="transform: scale(1)" width=1106 height=1128></div></p>
+<h3 id="fa-song-xin-hao" tabindex="-1">发送信号</h3>
+<p><strong>使用 /bin/kill 程序</strong></p>
+<pre><div class="head"><div class="language">bash</div><div class="copy" data="JTJGYmluJTJGa2lsbCUyMC05JTIwMTUyMTMlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">/bin/kill -9 15213
+</div></code></pre>
+<p>则可以向 PID 为 15213 的进程发送信号 9（SIGKILL）。</p>
+<pre><div class="head"><div class="language">bash</div><div class="copy" data="JTJGYmluJTJGa2lsbCUyMC05JTIwLTE1MjEzJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">/bin/kill -9 -15213
+</div></code></pre>
+<p>负数则表示一个进程组，将会向进程组中的每个进程发送信号。
+这里要用完整的路径 <code>/bin/kill</code> ，因为有些 Shell 有自己内置的 <code>kill</code> 指令。
+<strong>使用键盘</strong>
+Shell 在任何时刻都有至多一个前台进程组和若干个后台进程组。比如输入</p>
+<pre><div class="head"><div class="language">bash</div><div class="copy" data="bHMlMjAlN0MlMjBzb3J0JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-built_in">ls</span> | <span class="hljs-built_in">sort</span>
+</div></code></pre>
+<p>Shell 则会创建一个 <code>ls</code> 进程，一个 <code>sort</code> 进程，这两个进程属于同一个进程组，然后这个进程组是前台进程组。
+在键盘上输入 Ctrl + C 会使内核发送 SIGINT 信号到前台进程组中的每个进程组。输入 Ctrl + Z 会发送一个 SIGTSTP 信号到前台进程组中的每个进程组。
+<strong>使用 kill 函数</strong>
+<code>int kill(pid_t pid, int sig);</code></p>
+<ul>
+<li>定义在 <code>signal.h</code> 中。</li>
+<li>如果 <code>pid</code> 大于 0，那么发送信号 <code>sig</code> 到进程 <code>pid</code>。如果 <code>pid</code> 为 0，那么信号发送到调用进程所在进程组中的每个进程，包括调用进程自己。如果 <code>pid</code> 小于 0 ，那么信号发送到进程组 ID 为 <code>pid</code> 绝对值的进程组中的每个进程。</li>
+<li>成功返回 0，错误返回 -1。
+<strong>使用 alarm 函数</strong>
+<code>unsigned int alarm(unsigned int secs);</code></li>
+<li>定义在 <code>unistd.h</code> 中。</li>
+<li>调用后会设置一个时钟，该时钟在 <code>secs</code> 秒后发送一个 SIGALRM 信号给当前进程。如果 <code>secs</code> 为 0，那么不会发送信号。</li>
+<li>如果调用 <code>alarm</code> 前存在待处理的时钟，那么将会取消之前的那个，并返回之前的时钟剩余的秒数。如果调用前不存在待处理的时钟，则返回 0。</li>
+</ul>
+<h3 id="jie-shou-xin-hao" tabindex="-1">接收信号</h3>
+<p>内核准备调度一个进程时，会检查该进程的待处理信号集合。如果这个集合为空，那么继续执行这个进程的指令。否则，内核会选择待处理信号集合中的某个信号（通常是编号最小的信号）并进行处理。注意，进程每次被调度时都只处理一个信号，但可能处理一个信号时被内核切出去了，调度回来时又处理另一个信号（信号可以嵌套处理）。每个信号只会被加入到待处理集合中一个，也就是即使接收到多个同一信号，待处理集合里只会有一个。
+处理信号时，每个信号都会有一个默认行为：</p>
+<ul>
+<li>终止进程。</li>
+<li>终止进程并转储内存。</li>
+<li>停止进程，直到接收到 SIGCONT 信号。</li>
+<li>忽略该信号
+进程可以通过如下函数设置信号处理程序：
+<code>sighandler_t signal(int signum, sighandler_t handler);</code></li>
+<li>定义在 <code>signal.h</code> 中。</li>
+<li>设置信号 <code>signum</code> 的处理函数为 <code>handler</code>。不能设置 SIGSTOP 和 SIGKILL 的处理函数。</li>
+<li>其中 <code>sighandler_t</code> 的定义为 <code>typedef void (*sighandler_t)(int);</code> ，即传递的函数应该接收一个 int 参数且无返回值。调用处理函数时，会将触发处理函数的信号编号以参数传递。这样可以允许一个函数作为多个信号的处理函数。
+<ul>
+<li>如果 <code>handler</code> 为 <code>SIG_IGN</code>，那么进程忽略该信号。</li>
+<li>如果 <code>handler</code> 为 <code>SIG_DFL</code>，那么恢复该信号的默认行为。
+信号处理完毕，处理函数返回之后，一般情况下会回到进程之前被打断的地方继续执行。但是一些函数比较特殊，如果函数执行到一半，被信号打断的话，则会立刻返回，并返回一个错误。</li>
+</ul>
+</li>
+</ul>
+<h3 id="zu-sai-xin-hao" tabindex="-1">阻塞信号</h3>
+<p>Linux 可以阻塞信号。当内核检查待处理信号集合的时候，会忽略掉其中也处于阻塞集合中的信号。但是注意，信号被阻塞，也仍然可以处于待处理集合中。可能出现某个信号被阻塞时受到了这个信号，先不处理，取消阻塞时又处理该信号。
+Linux 中有一个隐式阻塞机制，即内核默认阻塞当前正在处理的信号。
+我们可以使用如下的函数阻塞信号：
+<code>int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);</code></p>
+<ul>
+<li>定义在 <code>signal.h</code> 中。</li>
+<li><code>how</code> 值可以选择如下的值，表示函数进行的操作：
+<ul>
+<li><code>SIG_BLOCK</code>：把 <code>set</code> 中的信号添加到阻塞集合中。</li>
+<li><code>SIG_UNBLOCK</code>：从 <code>block</code> 中删除 <code>set</code> 中的信号。</li>
+<li><code>SIG_SETMASK</code>：直接设置当前阻塞集合为 <code>set</code>。</li>
+</ul>
+</li>
+<li>如果 <code>oldset</code> 非空，那么会将操作之前的阻塞集合放入 <code>oldset</code> 中</li>
+<li>成功返回 0，错误返回 -1。
+有如下的函数可以用来处理信号集合：
+<code>int sigempty(sigset_t *set);</code></li>
+<li>定义在 <code>signal.h</code> 中。</li>
+<li>将 <code>set</code> 清空。</li>
+<li>成功返回 0，错误返回 -1。
+<code>int sigfillset(sigset_t *set);</code></li>
+<li>定义在 <code>signal.h</code> 中。</li>
+<li>把所有的信号都加入到 <code>set</code> 中。</li>
+<li>成功返回 0，错误返回 -1。
+<code>int sigaddset(sigset_t *set, int signum);</code></li>
+<li>定义在 <code>signal.h</code> 中。</li>
+<li>将 <code>signum</code> 加入到 <code>set</code> 中。</li>
+<li>成功返回 0，错误返回 -1。
+<code>int sigismember(sigset_t *set, int signum);</code></li>
+<li>定义在 <code>signal.h</code> 中。</li>
+<li>如果 <code>signum</code> 位于 <code>set</code> 中则返回 1，否则返回 0，错误返回 -1。
+一般按如下的方法来临时阻塞某个信号：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b3a946dcbc.png" style="transform: scale(1)" width=1017 height=513></div></li>
+</ul>
+<h3 id="xin-hao-chu-li" tabindex="-1">信号处理</h3>
+<h4 id="ji-ben-yuan-ze" tabindex="-1">基本原则</h4>
+<p>编写信号处理程序需要遵循如下的原则：</p>
+<ul>
+<li>处理程序应尽可能的简单，比如只简单地设置一个全局标志并立即返回，主要的处理逻辑在主程序里执行，周期性地检查并重置这个标志。</li>
+<li>处理程序里面只能调用异步信号安全的函数，这种函数能够被信号处理程序安全地调用。原因有二：要么他们是可重入的，要么不能被信号处理程序中断。如下的函数都是异步信号安全函数。值得注意的是，很多常用的函数，如 <code>printf</code>、<code>sprintf</code> 、<code>malloc</code>、<code>exit</code> 都不在此列，因此在处理程序里面产生输出的唯一安全的方法是使用 <code>write</code> 函数，并且退出程序要用 <code>exit</code> 的异步信号安全的变种 <code>_exit</code>。
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b3c5945c02.png" style="transform: scale(1)" width=1113 height=1300></div></li>
+<li>许多异步信号安全的函数都可能在出错返回时设置 <code>errno</code>，但这样会干扰主程序中依赖于 <code>errno</code> 的部分。所以我们最好在处理程序的开头保存当前的 <code>errno</code>，并在返回时还原 <code>errno</code>。</li>
+<li>如果主程序和处理程序共享一个全局的数据结构，那么有必要在修改这个数据结构之前先屏蔽所有信号，无论是在主程序还是处理程序，防止修改到一半被打断。</li>
+<li>使用 <code>volatile</code> 修饰会被主程序和处理程序共享的变量。如果处理程序更新全局变量，主程序里周期性读取这个全局变量，那么编译器可能会认为反复的周期性读取这个变量是无意义的，因为它看起来没发生变化，所以编译器会将其缓存到寄存器中，导致主程序无法看到这个共享变量的变动。使用 <code>volatile</code> 修饰之后，会强制编译器每次访问这个变量的时候都是从内存中读取的。</li>
+<li>用 <code>sig_atomic_t</code> 声明标志。<code>sig_atomic_t</code> 是一个整数类型，能够保证对这个类型进行的读写都是原子的。比较完整的是 <code>volatile sig_atomic_t flag;</code> 。</li>
+</ul>
+<h4 id="bu-yao-yong-xin-hao-lai-dui-shi-jian-ji-shu" tabindex="-1">不要用信号来对事件计数</h4>
+<p>Shell 的一个需求是，子进程终止或是停止时，Shell 需要更新自己维护的 Jobs 集合。
+一个实现是，在 SIGCHLD 信号的处理程序中使用 <code>waitpid</code>：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b468818eb4.png" style="transform: scale(1)" width=889 height=362></div>
+但是这样可能会出问题，因为我们之前提到即使发来了多个同种的信号，也只会出现在待处理集合中一次，只会被处理一次。所以我们不要用信号来对事件计数，信号触发时说明至少有一次信号触发，可能有多次。所以对于上面的需求，我们要使用 while 循环：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b4777a8177.png" style="transform: scale(1)" width=1105 height=594></div></p>
+<h4 id="tong-bu-liu" tabindex="-1">同步流</h4>
+<p>Shell 的另一个需求是，创建子进程之后，新增一个 job，收到 SIGCHLD 信号之后又将 job 删除。
+一个简单的实现如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b4a2e88005.png" style="transform: scale(1)" width=974 height=1154></div>
+但是这样还有问题，因为有可能 fork 之后，内核优先调度子进程，子进程又立刻退出，发送了一个 SIGCHLD 信号给 Shell，Shell 被内核调度时，由于收到了信号，转到了处理程序，处理程序删除对应的 job。但是 Shell 还没开始把 job 添加到 job 列表中，这就出现了错误。
+所以应该要在 fork 之前就屏蔽 SIGCHLD 信号，使得主程序不会被打断。但也要注意要在子进程中解除屏蔽：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b4b37f3187.png" style="transform: scale(1)" width=1513 height=453></div></p>
+<h4 id="xian-shi-deng-dai-xin-hao" tabindex="-1">显式等待信号</h4>
+<p>Shell 的又一个需求是，创建前台进程之后，Shell 一直等待前台进程结束。一个实现如下：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b4c23bc78e.png" style="transform: scale(1)" width=956 height=1224></div>
+这里使用了一个忙等待，来等待前台进程的结束。这样的代码运行正确，但是循环会很浪费处理器资源。
+又一个选择是在循环中加入 <code>pause</code>，这样只有接收到信号才会被唤醒。不过这样又会带来竞争问题：有可能在 while 测试通过之后，<code>pause</code> 执行之前受到 SIGCHLD 信号，这样的话 <code>pause</code> 就不再会收到 SIGCHLD 信号了，<code>pause</code> 永远休眠。
+又一个选择是用 <code>sleep</code> 代替 <code>pause</code>。但是这样 <code>sleep</code> 的时间又难以选择，时间小循环又会比较浪费，时间大程序又会太慢。
+最合适的做法是使用 <code>sigsuspend</code>
+<code>int sigsuspend(const sigset_t *mask);</code></p>
+<ul>
+<li>定义在 <code>signal.h</code> 中。</li>
+<li>该函数会暂时用 <code>mask</code> 替换当前的阻塞集合，然后挂起当前进程，直到收到一个信号，信号处理函数处理完毕之后，还原当前的阻塞集合，然后返回。</li>
+<li>一般我们会先阻塞某个信号，然后把没阻塞之前的阻塞集合作为 <code>mask</code> 参数。这样的话调用 <code>sigsuspend</code> 会先解除对信号的阻塞，收到信号后又立刻还原阻塞状态。</li>
+<li>返回 -1。
+于是上述代码修改为：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b4f57c2f44.png" style="transform: scale(1)" width=1341 height=1123></div></li>
+</ul>
+<h2 id="fei-ben-di-tiao-zhuan" tabindex="-1">非本地跳转</h2>
+<p>C 语言提供了一个用户级的异常控制流。我们有如下函数：
+<code>int setjmp(jmp_buf env);</code></p>
+<ul>
+<li>定义在 <code>setjmp.h</code> 中。</li>
+<li>函数会在 <code>env</code> 缓冲区中保存当前调用环境，如程序计数器、栈指针、通用寄存器等。</li>
+<li>正常情况下返回 0，如果是通过 <code>longjmp</code> 函数返回到这里，会返回非 0。由于某种原因，<code>setjmp</code> 函数的返回值不能赋值给变量，但是可以使用 if 和 switch 语句对返回值进行测试。
+<code>void longjmp(jmp_buf env, int retval);</code></li>
+<li>定义在 <code>setjmp.h</code> 中。</li>
+<li>函数从 <code>env</code> 缓冲区中恢复调用环境，然后从最近一次设置 <code>setjmp</code> 函数的地方返回，并带有非零的返回值 <code>retval</code>。
+非本地跳转的一个重要应用是，如果从一个深层嵌套的函数调用中发现了一个错误情况，我们可以直接返回到一个普通的错误处理程序，而不必费力解开调用栈。
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b519b3de73.png" style="transform: scale(1)" width=1123 height=1260></div>
+非本地跳转的又一个重要应用是使一个信号处理程序分支到特殊的代码位置，而不是返回到被信号中断了的指令的位置。此时需要 <code>sigsetjmp</code> 和 <code>siglongjmp</code> 函数，这两个函数是 <code>setjmp</code> 和 <code>longjmp</code> 函数的可以被信号处理程序使用的版本。
+比如：
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689b52d9e8089.png" style="transform: scale(1)" width=1078 height=981></div>
+这样可以实现，每次按下 Ctrl + C 之后，程序进行热重启。</li>
+</ul>

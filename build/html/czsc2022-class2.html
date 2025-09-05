@@ -1,0 +1,78 @@
+<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 说明</div><p>本文为面对CZOI2022队员的第二次直播的课程大纲</p>
+</div></div>
+<h2 id="zhi-zhen" tabindex="-1">指针</h2>
+<ol>
+<li>&amp; <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∗</mo></mrow><annotation encoding="application/x-tex">\ast</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4653em;"></span><span class="mord">∗</span></span></span></span> （2.cpp）</li>
+<li>指针与数组（3.cpp）</li>
+<li>指针与参数 （4.cpp）</li>
+</ol>
+<h2 id="stl" tabindex="-1">STL</h2>
+<h3 id="yi-xie-han-shu-5-cpp" tabindex="-1">一些函数 （5.cpp）</h3>
+<ol>
+<li>sort</li>
+<li>swap</li>
+<li>lower/upper_bound</li>
+<li>next_permutation</li>
+<li>random_shuffle</li>
+</ol>
+<h3 id="shu-ju-jie-gou" tabindex="-1">数据结构</h3>
+<p>size/empty/clear</p>
+<ol>
+<li>vector（6.cpp）<br>
+(1) begin/end<br>
+(2) push/pop_back<br>
+(3) erase<br>
+(4) 迭代器<br>
+(5) vector&lt;bool&gt;<br>
+(6) 三种遍历方式</li>
+<li>queue<br>
+(1) push/pop<br>
+(2) front</li>
+<li>stack<br>
+(1) push/pop<br>
+(2) top</li>
+<li>deque<br>
+(1) push/pop_front/back<br>
+(2) front/back</li>
+<li>map/unordered_map（7.cpp）<br>
+(1) count<br>
+(2) erase<br>
+(3) 二者区别</li>
+<li>multiset （8.cpp）<br>
+(1) insert<br>
+(2) count<br>
+(3) erase<br>
+(4) lower/upper_bound</li>
+<li>priority_queue （9.cpp）<br>
+(1) push/top<br>
+(2) 运算符重载</li>
+</ol>
+<h2 id="tu-lun-xiang-guan-gai-nian" tabindex="-1">图论相关概念</h2>
+<ol>
+<li>点</li>
+<li>有向边/无向边</li>
+<li>自环/重边</li>
+<li>度</li>
+<li>连通</li>
+<li>树</li>
+</ol>
+<h2 id="san-zhong-cun-tu-fang-shi" tabindex="-1">三种存图方式</h2>
+<ol>
+<li>邻接矩阵</li>
+<li>vector</li>
+<li>链式前向星</li>
+</ol>
+<h2 id="zui-duan-lu-suan-fa" tabindex="-1">最短路算法</h2>
+<h3 id="dan-yuan-zui-duan-lu" tabindex="-1">单源最短路</h3>
+<ol>
+<li>spfa<br>
+最好 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mclose">)</span></span></span></span>-&gt;<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span><br>
+最差 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>V</mi><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(VE)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mclose">)</span></span></span></span>-&gt;<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span><br>
+判断负环</li>
+<li>dijkstra<br>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mo stretchy="false">(</mo><mi>E</mi><mo>+</mo><mi>V</mi><mo stretchy="false">)</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>V</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O((E+V)logV)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">((</span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mclose">)</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mclose">)</span></span></span></span>-&gt;<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(nlogn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></li>
+</ol>
+<h3 id="duo-yuan-zui-duan-lu" tabindex="-1">多源最短路</h3>
+<ol>
+<li>floyd</li>
+</ol>

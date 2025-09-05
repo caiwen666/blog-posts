@@ -1,0 +1,217 @@
+<h2 id="qian-yan" tabindex="-1">前言</h2>
+<p>由于信息学竞赛的特殊性：黑箱评测，只用有限的一些数据来判断选手的程序是否正确。再加上 CCF（Coin Collect Foundation） 用脚造数据，所以在 NOIp/CSP 中，如果事先了解一些骗分技巧，往往可以得到非常高的分数。
+在 OI 界已经有过名为《骗分导论》的论文，但作者个人认为该论文的骗分技巧不多，而且论文产生于若干年前，有点过时。因此本人想再写一篇类似《骗分导论》的文章，分享一些骗分技巧。
+由于作者个人水平有限，所以如果各位有其他的骗分技巧，也欢迎分享出来。你可以在评论区里回复你的技巧，我会把你分享的内容加入本文章中。本文章将持续更新。</p>
+<h2 id="ka-shi" tabindex="-1">卡时</h2>
+<p>在随机化算法中，如果我们不断地随机，那么得到的结果会越来越接近最后的正确答案。但过多地随机，就会使程序tle。我们可以在程序中对当前已经运行的时间进行判断，如果已经超时就不再进行随机。
+卡时往往与随机化算法结合会得到非常好的效果，我们在后面讲解一些随机化的做法时再细讲。
+下面给出一个卡时的例子。
+<strong>例1: CSP-S 2022 T3 星战</strong><br>
+如果我们发现如果所有据点可以“连续穿梭”，则一定可以“实现反击”，那么本题的暴力就可以非常简单实现：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="JTIzaW5jbHVkZSUzQ2JpdHMlMkZzdGRjJTJCJTJCLmglM0UlMEElMjNkZWZpbmUlMjBfJTIwNTAwMDA1JTBBJTIzZGVmaW5lJTIwaW50JTIwbG9uZyUyMGxvbmclMEElMjNkZWZpbmUlMjB1bGwlMjB1bnNpZ25lZCUyMGxvbmclMjBsb25nJTBBdXNpbmclMjBuYW1lc3BhY2UlMjBzdGQlM0IlMEFjb25zdCUyMGludCUyMG1vZCUzRDAlM0IlMEFpbmxpbmUlMjBpbnQlMjByZWFkKCklN0IlMEElMDlpbnQlMjByZXMlM0QwJTJDY2glM0RnZXRjaGFyKCklMkNmJTNEMSUzQiUwQSUwOXdoaWxlKCFpc2RpZ2l0KGNoKSUyMGFuZCUyMGNoISUzREVPRiklN0IlMEElMDklMDlpZihjaCUzRCUzRCctJyklMjBmJTNELTElM0IlMEElMDklMDljaCUzRGdldGNoYXIoKSUzQiUwQSUwOSU3RCUwQSUwOXdoaWxlKGlzZGlnaXQoY2gpKSU3QiUwQSUwOSUwOXJlcyUzRChyZXMlM0MlM0MzKSUyQihyZXMlM0MlM0MxKSUyQihjaC0nMCcpJTNCJTBBJTA5JTA5Y2glM0RnZXRjaGFyKCklM0IlMEElMDklN0QlMEElMDlyZXR1cm4lMjByZXMqZiUzQiUwQSU3RCUwQXN0cnVjdCUyMEVkZ2UlN0JpbnQlMjBuZXh0JTJDdG8lM0IlN0QlMjBlZGdlJTVCXyU1RCUzQiUwQWludCUyMG91dCU1Ql8lNUQlMkNoZWFkJTVCXyU1RCUyQ3NpemUlMkNhbnMlM0IlMEFpbmxpbmUlMjB2b2lkJTIwYWRkZShpbnQlMjB1JTJDaW50JTIwdiklN0JlZGdlJTVCJTJCJTJCc2l6ZSU1RC50byUzRHYlMkNlZGdlJTVCc2l6ZSU1RC5uZXh0JTNEaGVhZCU1QnUlNUQlMkNoZWFkJTVCdSU1RCUzRHNpemUlM0IlN0QlMEFzZXQlM0NpbnQlM0UlMjB0YWclNUJfJTVEJTNCJTBBaW5saW5lJTIwdm9pZCUyMGRlbChpbnQlMjB1JTJDaW50JTIwdiklN0IlMEElMDlpZih0YWclNUJ2JTVELmNvdW50KHUpKSUyMHJldHVybiUzQiUwQSUwOXRhZyU1QnYlNUQuaW5zZXJ0KHUpJTNCJTBBJTA5aW50JTIwZmxhZzElM0RvdXQlNUJ1JTVEJTNCJTBBJTA5b3V0JTVCdSU1RC0tJTNCJTBBJTA5aW50JTIwZmxhZzIlM0RvdXQlNUJ1JTVEJTNCJTBBJTA5aWYoZmxhZzElM0QlM0QxJTI2JTI2ZmxhZzIhJTNEMSklMjBhbnMtLSUzQiUwQSUwOWlmKGZsYWcxISUzRDElMjYlMjZmbGFnMiUzRCUzRDEpJTIwYW5zJTJCJTJCJTNCJTBBJTdEJTBBaW5saW5lJTIwdm9pZCUyMGFkZChpbnQlMjB1JTJDaW50JTIwdiklN0IlMEElMDlpZih0YWclNUJ2JTVELmNvdW50KHUpJTNEJTNEMCklMjByZXR1cm4lM0IlMEElMDl0YWclNUJ2JTVELmVyYXNlKHUpJTNCJTBBJTA5aW50JTIwZmxhZzElM0RvdXQlNUJ1JTVEJTNCJTBBJTA5b3V0JTVCdSU1RCUyQiUyQiUzQiUwQSUwOWludCUyMGZsYWcyJTNEb3V0JTVCdSU1RCUzQiUwQSUwOWlmKGZsYWcxJTNEJTNEMSUyNiUyNmZsYWcyISUzRDEpJTIwYW5zLS0lM0IlMEElMDlpZihmbGFnMSElM0QxJTI2JTI2ZmxhZzIlM0QlM0QxKSUyMGFucyUyQiUyQiUzQiUwQSU3RCUwQXNpZ25lZCUyMG1haW4oKSU3QiUwQSUwOWZyZW9wZW4oJTIyZ2FsYXh5LmluJTIyJTJDJTIyciUyMiUyQ3N0ZGluKSUzQiUwQSUwOWZyZW9wZW4oJTIyZ2FsYXh5Lm91dCUyMiUyQyUyMnclMjIlMkNzdGRvdXQpJTNCJTBBJTA5aW50JTIwbiUzRHJlYWQoKSUyQ20lM0RyZWFkKCklM0IlMEElMDlmb3IoaW50JTIwaSUzRDElM0JpJTNDJTNEbSUzQmklMkIlMkIpJTdCJTBBJTA5JTA5aW50JTIwdSUzRHJlYWQoKSUyQ3YlM0RyZWFkKCklM0IlMEElMDklMDlvdXQlNUJ1JTVEJTJCJTJCJTNCJTBBJTA5JTA5YWRkZSh2JTJDdSklM0IlMEElMDklN0QlMEElMDlmb3IoaW50JTIwaSUzRDElM0JpJTNDJTNEbiUzQmklMkIlMkIpJTIwaWYob3V0JTVCaSU1RCUzRCUzRDEpJTIwYW5zJTJCJTJCJTNCJTBBJTA5aW50JTIwcSUzRHJlYWQoKSUzQiUwQSUwOXdoaWxlKHEtLSklN0IlMEElMDklMDlpbnQlMjB0JTNEcmVhZCgpJTJDdSUyQ3YlM0IlMEElMDklMDlpZih0JTNEJTNEMSU3QyU3Q3QlM0QlM0QzKSUyMHUlM0RyZWFkKCklMkN2JTNEcmVhZCgpJTNCJTBBJTA5JTA5aWYodCUzRCUzRDIlN0MlN0N0JTNEJTNENCklMjB1JTNEcmVhZCgpJTNCJTBBJTA5JTA5aWYodCUzRCUzRDEpJTdCJTBBJTA5JTA5JTA5ZGVsKHUlMkN2KSUzQiUwQSUwOSUwOSU3RGVsc2UlMjBpZih0JTNEJTNEMiklN0IlMEElMDklMDklMDlmb3IoaW50JTIwaSUzRGhlYWQlNUJ1JTVEJTNCaSUzQmklM0RlZGdlJTVCaSU1RC5uZXh0KSU3QiUwQSUwOSUwOSUwOSUwOWRlbChlZGdlJTVCaSU1RC50byUyQ3UpJTNCJTBBJTA5JTA5JTA5JTdEJTBBJTA5JTA5JTdEZWxzZSUyMGlmKHQlM0QlM0QzKSU3QiUwQSUwOSUwOSUwOWFkZCh1JTJDdiklM0IlMEElMDklMDklN0RlbHNlJTdCJTBBJTA5JTA5JTA5Zm9yKGludCUyMGklM0RoZWFkJTVCdSU1RCUzQmklM0JpJTNEZWRnZSU1QmklNUQubmV4dCklN0IlMEElMDklMDklMDklMDlhZGQoZWRnZSU1QmklNUQudG8lMkN1KSUzQiUwQSUwOSUwOSUwOSU3RCUwQSUwOSUwOSU3RCUwQSUwOSUwOWlmKGFucyUzRCUzRG4pJTIwY291dCUzQyUzQyUyMllFUyUyMiUzQyUzQ2VuZGwlM0IlMEElMDklMDllbHNlJTIwY291dCUzQyUzQyUyMk5PJTIyJTNDJTNDZW5kbCUzQiUwQSUwOSU3RCUwQSUwOXJldHVybiUyMDAlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div></div><div class="code"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;bits/stdc++.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> _ 500005</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> int long long</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> ull unsigned long long</span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+<span class="hljs-type">const</span> <span class="hljs-type">int</span> mod=<span class="hljs-number">0</span>;
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">int</span> <span class="hljs-title">read</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-type">int</span> res=<span class="hljs-number">0</span>,ch=<span class="hljs-built_in">getchar</span>(),f=<span class="hljs-number">1</span>;
+	<span class="hljs-keyword">while</span>(!<span class="hljs-built_in">isdigit</span>(ch) <span class="hljs-keyword">and</span> ch!=EOF){
+		<span class="hljs-keyword">if</span>(ch==<span class="hljs-string">&#x27;-&#x27;</span>) f=<span class="hljs-number">-1</span>;
+		ch=<span class="hljs-built_in">getchar</span>();
+	}
+	<span class="hljs-keyword">while</span>(<span class="hljs-built_in">isdigit</span>(ch)){
+		res=(res&lt;&lt;<span class="hljs-number">3</span>)+(res&lt;&lt;<span class="hljs-number">1</span>)+(ch-<span class="hljs-string">&#x27;0&#x27;</span>);
+		ch=<span class="hljs-built_in">getchar</span>();
+	}
+	<span class="hljs-keyword">return</span> res*f;
+}
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Edge</span>{<span class="hljs-type">int</span> next,to;} edge[_];
+<span class="hljs-type">int</span> out[_],head[_],size,ans;
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">void</span> <span class="hljs-title">adde</span><span class="hljs-params">(<span class="hljs-type">int</span> u,<span class="hljs-type">int</span> v)</span></span>{edge[++size].to=v,edge[size].next=head[u],head[u]=size;}
+set&lt;<span class="hljs-type">int</span>&gt; tag[_];
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">void</span> <span class="hljs-title">del</span><span class="hljs-params">(<span class="hljs-type">int</span> u,<span class="hljs-type">int</span> v)</span></span>{
+	<span class="hljs-keyword">if</span>(tag[v].<span class="hljs-built_in">count</span>(u)) <span class="hljs-keyword">return</span>;
+	tag[v].<span class="hljs-built_in">insert</span>(u);
+	<span class="hljs-type">int</span> flag1=out[u];
+	out[u]--;
+	<span class="hljs-type">int</span> flag2=out[u];
+	<span class="hljs-keyword">if</span>(flag1==<span class="hljs-number">1</span>&amp;&amp;flag2!=<span class="hljs-number">1</span>) ans--;
+	<span class="hljs-keyword">if</span>(flag1!=<span class="hljs-number">1</span>&amp;&amp;flag2==<span class="hljs-number">1</span>) ans++;
+}
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">void</span> <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-type">int</span> u,<span class="hljs-type">int</span> v)</span></span>{
+	<span class="hljs-keyword">if</span>(tag[v].<span class="hljs-built_in">count</span>(u)==<span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>;
+	tag[v].<span class="hljs-built_in">erase</span>(u);
+	<span class="hljs-type">int</span> flag1=out[u];
+	out[u]++;
+	<span class="hljs-type">int</span> flag2=out[u];
+	<span class="hljs-keyword">if</span>(flag1==<span class="hljs-number">1</span>&amp;&amp;flag2!=<span class="hljs-number">1</span>) ans--;
+	<span class="hljs-keyword">if</span>(flag1!=<span class="hljs-number">1</span>&amp;&amp;flag2==<span class="hljs-number">1</span>) ans++;
+}
+<span class="hljs-function"><span class="hljs-type">signed</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-built_in">freopen</span>(<span class="hljs-string">&quot;galaxy.in&quot;</span>,<span class="hljs-string">&quot;r&quot;</span>,stdin);
+	<span class="hljs-built_in">freopen</span>(<span class="hljs-string">&quot;galaxy.out&quot;</span>,<span class="hljs-string">&quot;w&quot;</span>,stdout);
+	<span class="hljs-type">int</span> n=<span class="hljs-built_in">read</span>(),m=<span class="hljs-built_in">read</span>();
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=m;i++){
+		<span class="hljs-type">int</span> u=<span class="hljs-built_in">read</span>(),v=<span class="hljs-built_in">read</span>();
+		out[u]++;
+		<span class="hljs-built_in">adde</span>(v,u);
+	}
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++) <span class="hljs-keyword">if</span>(out[i]==<span class="hljs-number">1</span>) ans++;
+	<span class="hljs-type">int</span> q=<span class="hljs-built_in">read</span>();
+	<span class="hljs-keyword">while</span>(q--){
+		<span class="hljs-type">int</span> t=<span class="hljs-built_in">read</span>(),u,v;
+		<span class="hljs-keyword">if</span>(t==<span class="hljs-number">1</span>||t==<span class="hljs-number">3</span>) u=<span class="hljs-built_in">read</span>(),v=<span class="hljs-built_in">read</span>();
+		<span class="hljs-keyword">if</span>(t==<span class="hljs-number">2</span>||t==<span class="hljs-number">4</span>) u=<span class="hljs-built_in">read</span>();
+		<span class="hljs-keyword">if</span>(t==<span class="hljs-number">1</span>){
+			<span class="hljs-built_in">del</span>(u,v);
+		}<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(t==<span class="hljs-number">2</span>){
+			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=head[u];i;i=edge[i].next){
+				<span class="hljs-built_in">del</span>(edge[i].to,u);
+			}
+		}<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(t==<span class="hljs-number">3</span>){
+			<span class="hljs-built_in">add</span>(u,v);
+		}<span class="hljs-keyword">else</span>{
+			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=head[u];i;i=edge[i].next){
+				<span class="hljs-built_in">add</span>(edge[i].to,u);
+			}
+		}
+		<span class="hljs-keyword">if</span>(ans==n) cout&lt;&lt;<span class="hljs-string">&quot;YES&quot;</span>&lt;&lt;endl;
+		<span class="hljs-keyword">else</span> cout&lt;&lt;<span class="hljs-string">&quot;NO&quot;</span>&lt;&lt;endl;
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</div></code></pre>
+<p>可以得到 60 pts
+我们继续观察大样例，发现最终结果大部分都是 NO。对于最后几个数据规模较大，暴力肯定超时的点，我们与其tle，不如直接全输出NO。
+为了更好地发挥暴力算法的作用，我们可以这样做：执行暴力算法，程序卡时，快要超时就在后面全输出NO。</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="JTA5d2hpbGUocS0tKSU3QiUwQSUwOSUwOWlmKChkb3VibGUpY2xvY2soKSUyRkNMT0NLU19QRVJfU0VDJTNFMS44KSU3QiUwQSUwOSUwOSUwOXByaW50ZiglMjJOTyU1Q24lMjIpJTNCJTBBJTA5JTA5JTA5Y29udGludWUlM0IlMEElMDklMDklN0QlMEElMDkuLi4lMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">	<span class="hljs-keyword">while</span>(q--){
+		<span class="hljs-keyword">if</span>((<span class="hljs-type">double</span>)<span class="hljs-built_in">clock</span>()/CLOCKS_PER_SEC&gt;<span class="hljs-number">1.8</span>){
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;NO\n&quot;</span>);
+			<span class="hljs-keyword">continue</span>;
+		}
+	...
+}
+</div></code></pre>
+<p>在CCF的数据下可以得到80分。
+在这里值得一提的是，由于操作次数过多，所以会导致卡时不准。比如上述代码，卡时1.8s，实际测试点最大的运行时间达到了1.9s。如果直接卡1.9s，很可能与暴力同分。我们可以把最后全输出NO的情况单独拿出来写，具体如下</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="JTIzaW5jbHVkZSUzQ2JpdHMlMkZzdGRjJTJCJTJCLmglM0UlMEElMjNkZWZpbmUlMjBfJTIwNTAwMDA1JTBBJTIzZGVmaW5lJTIwaW50JTIwbG9uZyUyMGxvbmclMEElMjNkZWZpbmUlMjB1bGwlMjB1bnNpZ25lZCUyMGxvbmclMjBsb25nJTBBdXNpbmclMjBuYW1lc3BhY2UlMjBzdGQlM0IlMEFjb25zdCUyMGludCUyMG1vZCUzRDAlM0IlMEFpbmxpbmUlMjBpbnQlMjByZWFkKCklN0IlMEElMDlpbnQlMjByZXMlM0QwJTJDY2glM0RnZXRjaGFyKCklMkNmJTNEMSUzQiUwQSUwOXdoaWxlKCFpc2RpZ2l0KGNoKSUyMGFuZCUyMGNoISUzREVPRiklN0IlMEElMDklMDlpZihjaCUzRCUzRCctJyklMjBmJTNELTElM0IlMEElMDklMDljaCUzRGdldGNoYXIoKSUzQiUwQSUwOSU3RCUwQSUwOXdoaWxlKGlzZGlnaXQoY2gpKSU3QiUwQSUwOSUwOXJlcyUzRChyZXMlM0MlM0MzKSUyQihyZXMlM0MlM0MxKSUyQihjaC0nMCcpJTNCJTBBJTA5JTA5Y2glM0RnZXRjaGFyKCklM0IlMEElMDklN0QlMEElMDlyZXR1cm4lMjByZXMqZiUzQiUwQSU3RCUwQXN0cnVjdCUyMEVkZ2UlN0JpbnQlMjBuZXh0JTJDdG8lM0IlN0QlMjBlZGdlJTVCXyU1RCUzQiUwQWludCUyMG91dCU1Ql8lNUQlMkNoZWFkJTVCXyU1RCUyQ3NpemUlMkNhbnMlM0IlMEFpbmxpbmUlMjB2b2lkJTIwYWRkZShpbnQlMjB1JTJDaW50JTIwdiklN0JlZGdlJTVCJTJCJTJCc2l6ZSU1RC50byUzRHYlMkNlZGdlJTVCc2l6ZSU1RC5uZXh0JTNEaGVhZCU1QnUlNUQlMkNoZWFkJTVCdSU1RCUzRHNpemUlM0IlN0QlMEFzZXQlM0NpbnQlM0UlMjB0YWclNUJfJTVEJTNCJTBBaW5saW5lJTIwdm9pZCUyMGRlbChpbnQlMjB1JTJDaW50JTIwdiklN0IlMEElMDlpZih0YWclNUJ2JTVELmNvdW50KHUpKSUyMHJldHVybiUzQiUwQSUwOXRhZyU1QnYlNUQuaW5zZXJ0KHUpJTNCJTBBJTA5aW50JTIwZmxhZzElM0RvdXQlNUJ1JTVEJTNCJTBBJTA5b3V0JTVCdSU1RC0tJTNCJTBBJTA5aW50JTIwZmxhZzIlM0RvdXQlNUJ1JTVEJTNCJTBBJTA5aWYoZmxhZzElM0QlM0QxJTI2JTI2ZmxhZzIhJTNEMSklMjBhbnMtLSUzQiUwQSUwOWlmKGZsYWcxISUzRDElMjYlMjZmbGFnMiUzRCUzRDEpJTIwYW5zJTJCJTJCJTNCJTBBJTdEJTBBaW5saW5lJTIwdm9pZCUyMGFkZChpbnQlMjB1JTJDaW50JTIwdiklN0IlMEElMDlpZih0YWclNUJ2JTVELmNvdW50KHUpJTNEJTNEMCklMjByZXR1cm4lM0IlMEElMDl0YWclNUJ2JTVELmVyYXNlKHUpJTNCJTBBJTA5aW50JTIwZmxhZzElM0RvdXQlNUJ1JTVEJTNCJTBBJTA5b3V0JTVCdSU1RCUyQiUyQiUzQiUwQSUwOWludCUyMGZsYWcyJTNEb3V0JTVCdSU1RCUzQiUwQSUwOWlmKGZsYWcxJTNEJTNEMSUyNiUyNmZsYWcyISUzRDEpJTIwYW5zLS0lM0IlMEElMDlpZihmbGFnMSElM0QxJTI2JTI2ZmxhZzIlM0QlM0QxKSUyMGFucyUyQiUyQiUzQiUwQSU3RCUwQXNpZ25lZCUyMG1haW4oKSU3QiUwQSUwOWZyZW9wZW4oJTIyZ2FsYXh5LmluJTIyJTJDJTIyciUyMiUyQ3N0ZGluKSUzQiUwQSUwOWZyZW9wZW4oJTIyZ2FsYXh5Lm91dCUyMiUyQyUyMnclMjIlMkNzdGRvdXQpJTNCJTBBJTA5aW50JTIwbiUzRHJlYWQoKSUyQ20lM0RyZWFkKCklM0IlMEElMDlmb3IoaW50JTIwaSUzRDElM0JpJTNDJTNEbSUzQmklMkIlMkIpJTdCJTBBJTA5JTA5aW50JTIwdSUzRHJlYWQoKSUyQ3YlM0RyZWFkKCklM0IlMEElMDklMDlvdXQlNUJ1JTVEJTJCJTJCJTNCJTBBJTA5JTA5YWRkZSh2JTJDdSklM0IlMEElMDklN0QlMEElMDlmb3IoaW50JTIwaSUzRDElM0JpJTNDJTNEbiUzQmklMkIlMkIpJTIwaWYob3V0JTVCaSU1RCUzRCUzRDEpJTIwYW5zJTJCJTJCJTNCJTBBJTA5aW50JTIwcSUzRHJlYWQoKSUzQiUwQSUwOXdoaWxlKHEtLSklN0IlMEElMDklMDlpZigoZG91YmxlKWNsb2NrKCklMkZDTE9DS1NfUEVSX1NFQyUzRTEuOSklN0IlMEElMDklMDklMDlwcmludGYoJTIyTk8lNUNuJTIyKSUzQiUwQSUwOSUwOSUwOWJyZWFrJTNCJTBBJTA5JTA5JTdEJTBBJTA5JTA5aW50JTIwdCUzRHJlYWQoKSUyQ3UlMkN2JTNCJTBBJTA5JTA5aWYodCUzRCUzRDElN0MlN0N0JTNEJTNEMyklMjB1JTNEcmVhZCgpJTJDdiUzRHJlYWQoKSUzQiUwQSUwOSUwOWlmKHQlM0QlM0QyJTdDJTdDdCUzRCUzRDQpJTIwdSUzRHJlYWQoKSUzQiUwQSUwOSUwOWlmKHQlM0QlM0QxKSU3QiUwQSUwOSUwOSUwOWRlbCh1JTJDdiklM0IlMEElMDklMDklN0RlbHNlJTIwaWYodCUzRCUzRDIpJTdCJTBBJTA5JTA5JTA5Zm9yKGludCUyMGklM0RoZWFkJTVCdSU1RCUzQmklM0JpJTNEZWRnZSU1QmklNUQubmV4dCklN0IlMEElMDklMDklMDklMDlkZWwoZWRnZSU1QmklNUQudG8lMkN1KSUzQiUwQSUwOSUwOSUwOSU3RCUwQSUwOSUwOSU3RGVsc2UlMjBpZih0JTNEJTNEMyklN0IlMEElMDklMDklMDlhZGQodSUyQ3YpJTNCJTBBJTA5JTA5JTdEZWxzZSU3QiUwQSUwOSUwOSUwOWZvcihpbnQlMjBpJTNEaGVhZCU1QnUlNUQlM0JpJTNCaSUzRGVkZ2UlNUJpJTVELm5leHQpJTdCJTBBJTA5JTA5JTA5JTA5YWRkKGVkZ2UlNUJpJTVELnRvJTJDdSklM0IlMEElMDklMDklMDklN0QlMEElMDklMDklN0QlMEElMDklMDlpZihhbnMlM0QlM0RuKSUyMGNvdXQlM0MlM0MlMjJZRVMlMjIlM0MlM0NlbmRsJTNCJTBBJTA5JTA5ZWxzZSUyMGNvdXQlM0MlM0MlMjJOTyUyMiUzQyUzQ2VuZGwlM0IlMEElMDklN0QlMEElMDklMkYlMkYlRTYlQjMlQTglRTYlODQlOEYlRTglQkYlOTklRTklODclOEMlMEElMDl3aGlsZShxJTNFMCklN0IlMEElMDklMDlwcmludGYoJTIyTk8lNUNuJTIyKSUzQiUwQSUwOSUwOXEtLSUzQiUwQSUwOSU3RCUwQSUwOXJldHVybiUyMDAlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div></div><div class="code"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;bits/stdc++.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> _ 500005</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> int long long</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> ull unsigned long long</span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+<span class="hljs-type">const</span> <span class="hljs-type">int</span> mod=<span class="hljs-number">0</span>;
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">int</span> <span class="hljs-title">read</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-type">int</span> res=<span class="hljs-number">0</span>,ch=<span class="hljs-built_in">getchar</span>(),f=<span class="hljs-number">1</span>;
+	<span class="hljs-keyword">while</span>(!<span class="hljs-built_in">isdigit</span>(ch) <span class="hljs-keyword">and</span> ch!=EOF){
+		<span class="hljs-keyword">if</span>(ch==<span class="hljs-string">&#x27;-&#x27;</span>) f=<span class="hljs-number">-1</span>;
+		ch=<span class="hljs-built_in">getchar</span>();
+	}
+	<span class="hljs-keyword">while</span>(<span class="hljs-built_in">isdigit</span>(ch)){
+		res=(res&lt;&lt;<span class="hljs-number">3</span>)+(res&lt;&lt;<span class="hljs-number">1</span>)+(ch-<span class="hljs-string">&#x27;0&#x27;</span>);
+		ch=<span class="hljs-built_in">getchar</span>();
+	}
+	<span class="hljs-keyword">return</span> res*f;
+}
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Edge</span>{<span class="hljs-type">int</span> next,to;} edge[_];
+<span class="hljs-type">int</span> out[_],head[_],size,ans;
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">void</span> <span class="hljs-title">adde</span><span class="hljs-params">(<span class="hljs-type">int</span> u,<span class="hljs-type">int</span> v)</span></span>{edge[++size].to=v,edge[size].next=head[u],head[u]=size;}
+set&lt;<span class="hljs-type">int</span>&gt; tag[_];
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">void</span> <span class="hljs-title">del</span><span class="hljs-params">(<span class="hljs-type">int</span> u,<span class="hljs-type">int</span> v)</span></span>{
+	<span class="hljs-keyword">if</span>(tag[v].<span class="hljs-built_in">count</span>(u)) <span class="hljs-keyword">return</span>;
+	tag[v].<span class="hljs-built_in">insert</span>(u);
+	<span class="hljs-type">int</span> flag1=out[u];
+	out[u]--;
+	<span class="hljs-type">int</span> flag2=out[u];
+	<span class="hljs-keyword">if</span>(flag1==<span class="hljs-number">1</span>&amp;&amp;flag2!=<span class="hljs-number">1</span>) ans--;
+	<span class="hljs-keyword">if</span>(flag1!=<span class="hljs-number">1</span>&amp;&amp;flag2==<span class="hljs-number">1</span>) ans++;
+}
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">void</span> <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-type">int</span> u,<span class="hljs-type">int</span> v)</span></span>{
+	<span class="hljs-keyword">if</span>(tag[v].<span class="hljs-built_in">count</span>(u)==<span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>;
+	tag[v].<span class="hljs-built_in">erase</span>(u);
+	<span class="hljs-type">int</span> flag1=out[u];
+	out[u]++;
+	<span class="hljs-type">int</span> flag2=out[u];
+	<span class="hljs-keyword">if</span>(flag1==<span class="hljs-number">1</span>&amp;&amp;flag2!=<span class="hljs-number">1</span>) ans--;
+	<span class="hljs-keyword">if</span>(flag1!=<span class="hljs-number">1</span>&amp;&amp;flag2==<span class="hljs-number">1</span>) ans++;
+}
+<span class="hljs-function"><span class="hljs-type">signed</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-built_in">freopen</span>(<span class="hljs-string">&quot;galaxy.in&quot;</span>,<span class="hljs-string">&quot;r&quot;</span>,stdin);
+	<span class="hljs-built_in">freopen</span>(<span class="hljs-string">&quot;galaxy.out&quot;</span>,<span class="hljs-string">&quot;w&quot;</span>,stdout);
+	<span class="hljs-type">int</span> n=<span class="hljs-built_in">read</span>(),m=<span class="hljs-built_in">read</span>();
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=m;i++){
+		<span class="hljs-type">int</span> u=<span class="hljs-built_in">read</span>(),v=<span class="hljs-built_in">read</span>();
+		out[u]++;
+		<span class="hljs-built_in">adde</span>(v,u);
+	}
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++) <span class="hljs-keyword">if</span>(out[i]==<span class="hljs-number">1</span>) ans++;
+	<span class="hljs-type">int</span> q=<span class="hljs-built_in">read</span>();
+	<span class="hljs-keyword">while</span>(q--){
+		<span class="hljs-keyword">if</span>((<span class="hljs-type">double</span>)<span class="hljs-built_in">clock</span>()/CLOCKS_PER_SEC&gt;<span class="hljs-number">1.9</span>){
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;NO\n&quot;</span>);
+			<span class="hljs-keyword">break</span>;
+		}
+		<span class="hljs-type">int</span> t=<span class="hljs-built_in">read</span>(),u,v;
+		<span class="hljs-keyword">if</span>(t==<span class="hljs-number">1</span>||t==<span class="hljs-number">3</span>) u=<span class="hljs-built_in">read</span>(),v=<span class="hljs-built_in">read</span>();
+		<span class="hljs-keyword">if</span>(t==<span class="hljs-number">2</span>||t==<span class="hljs-number">4</span>) u=<span class="hljs-built_in">read</span>();
+		<span class="hljs-keyword">if</span>(t==<span class="hljs-number">1</span>){
+			<span class="hljs-built_in">del</span>(u,v);
+		}<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(t==<span class="hljs-number">2</span>){
+			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=head[u];i;i=edge[i].next){
+				<span class="hljs-built_in">del</span>(edge[i].to,u);
+			}
+		}<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(t==<span class="hljs-number">3</span>){
+			<span class="hljs-built_in">add</span>(u,v);
+		}<span class="hljs-keyword">else</span>{
+			<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=head[u];i;i=edge[i].next){
+				<span class="hljs-built_in">add</span>(edge[i].to,u);
+			}
+		}
+		<span class="hljs-keyword">if</span>(ans==n) cout&lt;&lt;<span class="hljs-string">&quot;YES&quot;</span>&lt;&lt;endl;
+		<span class="hljs-keyword">else</span> cout&lt;&lt;<span class="hljs-string">&quot;NO&quot;</span>&lt;&lt;endl;
+	}
+	<span class="hljs-comment">//注意这里</span>
+	<span class="hljs-keyword">while</span>(q&gt;<span class="hljs-number">0</span>){
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;NO\n&quot;</span>);
+		q--;
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</div></code></pre>
+<h2 id="tan-xin" tabindex="-1">贪心</h2>
+<p>我们这里并不用贪心算法去想正解，而是灵活运用贪心的思想来骗分
+<strong>例1: [USACO18OPEN] Talent Show G</strong>
+首先我们考虑一个贪心，可能不一定正确。我们把每个牛的才艺与重量的比值从大到小进行排序。一个直观的想法是选择性价比高的牛可能会更好一些。然后我们dfs爆搜。<br>
+这里有个做法，就是当遍历到第i个牛时，不去立即选择第i+1个牛，而是向后枚举接下来要选择的牛。</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="JTIzaW5jbHVkZSUzQ2JpdHMlMkZzdGRjJTJCJTJCLmglM0UlMEElMjNkZWZpbmUlMjBfJTIwNTAwJTBBdXNpbmclMjBuYW1lc3BhY2UlMjBzdGQlM0IlMEFpbnQlMjBuJTJDdyUzQiUwQXR5cGVkZWYlMjBwYWlyJTNDaW50JTJDaW50JTNFJTIwcGlpJTNCJTBBcGlpJTIwZSU1Ql8lNUQlM0IlMEFpbnQlMjBhbnMlMkNjbnQlM0QwJTNCJTBBdm9pZCUyMGRmcyhpbnQlMjB4JTJDaW50JTIwbm93dCUyQ2ludCUyMG5vd3cpJTdCJTBBJTA5Y250JTJCJTJCJTNCJTBBJTA5aWYoY250JTNFMTAwMDAwMDAwKSUyMHJldHVybiUzQiUwQSUwOWlmKG5vd3clM0UlM0R3KSUyMGFucyUzRG1heChhbnMlMkNub3d0KjEwMDAlMkZub3d3KSUzQiUwQSUwOWZvcihpbnQlMjBpJTNEeCUyQjElM0JpJTNDJTNEbiUzQmklMkIlMkIpJTIwZGZzKGklMkNub3d0JTJCZSU1QmklNUQuZmlyc3QlMkNub3d3JTJCZSU1QmklNUQuc2Vjb25kKSUzQiUwQSU3RCUwQWludCUyMG1haW4oKSU3QiUwQSUwOWlvcyUzQSUzQXN5bmNfd2l0aF9zdGRpbyhmYWxzZSklM0IlMEElMDljaW4lM0UlM0VuJTNFJTNFdyUzQiUwQSUwOWZvcihpbnQlMjBpJTNEMSUzQmklM0MlM0RuJTNCaSUyQiUyQiklMjBjaW4lM0UlM0VlJTVCaSU1RC5zZWNvbmQlM0UlM0VlJTVCaSU1RC5maXJzdCUzQiUwQSUwOXNvcnQoZSUyQjElMkNlJTJCbiUyQjElMkMlNUIlNUQocGlpJTIweCUyQ3BpaSUyMHkpJTdCcmV0dXJuJTIweC5maXJzdCp5LnNlY29uZCUzRXkuZmlyc3QqeC5zZWNvbmQlM0IlN0QpJTNCJTBBJTA5Zm9yKGludCUyMGklM0QxJTNCaSUzQyUzRG4lM0JpJTJCJTJCKSUyMGRmcyhpJTJDZSU1QmklNUQuZmlyc3QlMkNlJTVCaSU1RC5zZWNvbmQpJTNCJTBBJTA5Y291dCUzQyUzQ2FucyUzQiUwQSUwOXJldHVybiUyMDAlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div></div><div class="code"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;bits/stdc++.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> _ 500</span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+<span class="hljs-type">int</span> n,w;
+<span class="hljs-keyword">typedef</span> pair&lt;<span class="hljs-type">int</span>,<span class="hljs-type">int</span>&gt; pii;
+pii e[_];
+<span class="hljs-type">int</span> ans,cnt=<span class="hljs-number">0</span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">dfs</span><span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> nowt,<span class="hljs-type">int</span> noww)</span></span>{
+	cnt++;
+	<span class="hljs-keyword">if</span>(cnt&gt;<span class="hljs-number">100000000</span>) <span class="hljs-keyword">return</span>;
+	<span class="hljs-keyword">if</span>(noww&gt;=w) ans=<span class="hljs-built_in">max</span>(ans,nowt*<span class="hljs-number">1000</span>/noww);
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=x<span class="hljs-number">+1</span>;i&lt;=n;i++) <span class="hljs-built_in">dfs</span>(i,nowt+e[i].first,noww+e[i].second);
+}
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+	ios::<span class="hljs-built_in">sync_with_stdio</span>(<span class="hljs-literal">false</span>);
+	cin&gt;&gt;n&gt;&gt;w;
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++) cin&gt;&gt;e[i].second&gt;&gt;e[i].first;
+	<span class="hljs-built_in">sort</span>(e<span class="hljs-number">+1</span>,e+n<span class="hljs-number">+1</span>,[](pii x,pii y){<span class="hljs-keyword">return</span> x.first*y.second&gt;y.first*x.second;});
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++) <span class="hljs-built_in">dfs</span>(i,e[i].first,e[i].second);
+	cout&lt;&lt;ans;
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</div></code></pre>
+<p>结合卡时，上述的代码就可以得到50 pts。
+然后我们接下来考虑，因为我们是按照性价比从高到低的顺序选择，如果选择的牛的重量已经满足要求，接下来再去选择，大概率是不会让答案更优的，所以我们将上述代码中的</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aWYobm93dyUzRSUzRHcpJTIwYW5zJTNEbWF4KGFucyUyQ25vd3QqMTAwMCUyRm5vd3cpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">if</span>(noww&gt;=w) ans=<span class="hljs-built_in">max</span>(ans,nowt*<span class="hljs-number">1000</span>/noww);
+</div></code></pre>
+<p>改为</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aWYobm93dyUzRSUzRHcpJTIwcmV0dXJuJTIwYW5zJTNEbWF4KGFucyUyQ25vd3QqMTAwMCUyRm5vd3cpJTJDdm9pZCgpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">if</span>(noww&gt;=w) <span class="hljs-keyword">return</span> ans=<span class="hljs-built_in">max</span>(ans,nowt*<span class="hljs-number">1000</span>/noww),<span class="hljs-built_in">void</span>();
+</div></code></pre>
+<p>就可以直接ac
+当然这一步风险还是有的</p>

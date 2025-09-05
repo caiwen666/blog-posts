@@ -1,0 +1,9 @@
+### 工厂方法
+
+
+
+
+
+## 参考
+
+1. https://refactoringguru.cn/design-patterns

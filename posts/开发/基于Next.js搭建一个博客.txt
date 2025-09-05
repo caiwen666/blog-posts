@@ -1,0 +1,71 @@
+之前的博客用的是 wordpress。用 wp 是因为上面有一个叫 mdx 的主题我非常喜欢，但该主题还是有几个地方设计的不太好。同时，现在写文章已经习惯了使用 markdown ，而 wordpress 对 markdown 的支持非常的不好，特别是对 latex 的支持，几乎是残废的状态，即使之前我已经研究过如何得到更好的体验[^1]。在最近我得知了 Next.js 和 React ，打算利用 Next.js 自己手搓一个博客。中间踩了不少坑，在这里记录一下。
+
+[^1]:在这篇文章中我尝试让wordpress支持markdown和latex，但还是不尽如人意。https://www.caiwen.work/post/wordpress-markdown-latex
+
+## Material UI 和 TailwindCSS 的冲突
+
+我个人非常喜欢 Material Design，因此只要是做前端项目就搞这个设计语言。但我不太喜欢定义 css 来写样式，总感觉麻烦，喜欢直接写 style，不过听说这不是一个好习惯。后来听说了 tailwindcss ，我这次写项目就尝试用上这个。但使用的时候发现了一些问题：
+
+如果直接把两者都安装上使用的话，tailwindcss 有时不起作用。搜索得知是因为两者有冲突，但并没有找到很好的解决方案。在 Material UI的官网上找到了这个：
+
+> If you are using a styling solution other than Emotion to customize Material UI components, set enableCssLayer: true in the options prop:[^2]
+
+[^2]: https://mui.com/material-ui/integrations/nextjs/
+
+然后这么做之后，我发现两者能够一起使用了，但 Material UI 的一些样式丢失了，比如 Chip 组件的边框颜色显示不出来，然后 IconButton 组件也显示异常。
+
+后来我找到了这么一个解决方案，在 `tailwind.config.ts` 中加入如下的配置项：
+
+```js
+.....
+export default {
+	important: true, ///++++++
+.....
+```
+
+这个配置会让 tailwindcss 生成的样式自动加上 `!important` 标记。因为现在是 tailwindcss 和 Material UI 的样式冲突，我直接让 tailwindcss 的优先级最大，就解决了。考虑到我们的习惯，我们一般是对 Material UI 的默认样式不满意才会去使用 tailwindcss 微调样式，所以这个配置并不会给我们的编码产生很多麻烦。
+
+## Markdown 编辑器的实现
+
+我希望我博客的文章可以使用 markdown 来编写，因此这个博客的核心应该是 markdown 的渲染。而我为了方便测试，打算先实现一个 markdown 编辑器[^3]。
+
+[^3]:你可以进入 https://www.caiwen.work/editor 来看到我写的编辑器。
+
+* 考虑到扩展性，我选择使用 markdown-it 这个包来渲染 markdown。
+
+* 对于 markdown 的样式，我找了一圈，发现 Mkdocs 的主题是最满意的，然后我直接翻出他的 css 文件，给搬了过来[^4]。
+
+* 在 textarea 中直接按下 tab 键可能不会插入一个缩进，而是选中了页面上的某个按钮。为了解决这一问题，你可能要写点 js，监听按下 Tab 键的事件，组织默认行为，然后自己手动插入一个缩进符。设置标签的 onKeyDown，指向下面的函数：
+
+```js
+	function handleKeydown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+		if (e.key === "Tab") {
+			e.preventDefault();
+			const target = e.target as HTMLTextAreaElement;
+			const start = target.selectionStart;
+			const end = target.selectionEnd;
+			setText((prevText) => {
+				return prevText.slice(0, start) + "\t" + prevText.slice(end);
+			});
+			setTimeout(() => {
+				target.selectionStart = target.selectionEnd = start + 1;
+			}, 0);
+		}
+	}
+```
+
+添加一些扩展：
+
+* MarkdownItFootnote：可以实现 footnote，感觉还是比较有用。注意的是，你可能需要设置类似下面的样式，来使返回箭头不要变成 emoji。以及如果你的网站的顶部有一个固定的导航条的话，可能需要给 `.footnotes-list li` 和 `.footnote-ref a` 设置 `scroll-margin` 
+
+```css
+.footnote-backref {
+    font-family: sans-serif;
+    unicode-bidi: bidi-override;
+    direction: rtl;
+}
+```	
+
+[^4]:你可以在本项目的 config/markdown.css 中找到相关样式。https://github.com/caiwen666/Blog-of-Caiwen
+
+* MarkdownItContainer：个人感觉这个插件本身直接使用的话没啥用，

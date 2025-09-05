@@ -1,0 +1,415 @@
+<h2 id="9-5-ce-shi" tabindex="-1">9-5测试</h2>
+<p>t1：ac
+t2：ac
+t3：后缀数组，不会
+t4：暴力也要尽可能优化。多过一个点也能超过很多人</p>
+<h2 id="9-7-ce-shi" tabindex="-1">9-7测试</h2>
+<p>t1：要注意，使用滚动数组后，最后要注意调用最后的滚动数组需要<code>arr[now]</code>，而不是<code>arr[1-now]</code>
+t2：ac
+t3：网络流，不会</p>
+<h2 id="51nod-di-yi-chang" tabindex="-1">51nod第一场</h2>
+<p>t1：交代码的时候要最后测试一下，确保调试输出都删除干净了
+t2：状压dp由于<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>∗</mo><msup><mn>2</mn><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">n*2^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4653em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span></span></span></span>的极限复杂度，在枚举状态的大循环里面要避免大常数操作。比如可以预处理的数据要预处理，尽量不要通篇longlong
+<strong>t3：错误的算法却ac，未修改</strong>
+t4：树上使用并查集</p>
+<h2 id="51nod-di-er-chang" tabindex="-1">51nod第二场</h2>
+<p>t1：和上面不同，如果时间复杂度足够，一定要开longlong！
+t2：树上倍增
+<strong>t3：好像是一种经典的树上dp，zhx讲过类似的。未修改</strong>
+<strong>t4：莫队+根号分治，未修改</strong></p>
+<h2 id="19-qing-bei-xue-tang-mo-ni-1" tabindex="-1">19清北学堂模拟-1</h2>
+<p>t0：一定要再三确定快读没有打错，不然全爆零！！！！注意时间分配，优先拿到暴力分，暴力打的好分数也不少了
+t1：ac
+t2：要注意留出时间认真审题（最后草草审题写暴力大概率爆零）。即使有正解，对于暴力分也要尽量打暴力，确保暴力分是稳拿的。或者造符合暴力测试点的测试数据，确保正解可以通过具有特殊性质的测试点
+t3：题解没看懂，不改了</p>
+<h2 id="19-qing-bei-xue-tang-mo-ni-2" tabindex="-1">19清北学堂模拟-2</h2>
+<p>t0：再次体现了上面所说的策略，三道题都没有想到正解。
+t1使用noip2012年的题目的一个结论进行玄学优化，暴力期望20pts，但另外20pts的暴力通过玄学优化也得到了（一开始其实是30pts，如果按照上面的策略，暴力越暴力越好，确保暴力分稳拿的话，就是40pts）；
+t2如果打表过程的时间占用不大，但是数据大的话，可以将打表程序合在主程序里，相当于预处理到数组中；
+t3即使是暴力分的测试点也要看好数据范围。换句话说，即使选择拿暴力分，数组范围也要尽量按正解的数据范围开</p>
+<h2 id="51nod-di-san-chang" tabindex="-1">51nod第三场</h2>
+<p>t1: ac。dp时，如果一个下标可以通过另一个下标推导过来，那么这个下标可以被消掉，达到优化空间的效果。考虑进一步优化时，可以考虑滚动数组。使用滚动数组可以将dp的一维提出来，在最外层循环，但记录的时候只记录当前和上一个。这样虽然时间复杂度没变，但空间复杂度大大降低。
+t2：ac。如果题目数据比较容易生成，暴力容易写，那么最好使用对拍。对拍没出现错误则大概率ac。
+t3：构造题，太难了，看题解证明了几个小时才把题目完全理解明白。值得学习的是，由于犯懒，对于<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>&gt;</mo><mo>=</mo><mn>1000</mn></mrow><annotation encoding="application/x-tex">n&gt;=1000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1000</span></span></span></span>的数据直接选择输出无解。实际上仍然需要拼一把，使用dfs继续暴力，据说dfs写得好可以80pts。<br>
+另外还有一种大根堆和小根堆的写法</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="Y2xhc3MlMjBtYXh4JTdCJTBBJTA5cHVibGljJTNBJTBBJTA5JTA5aW5saW5lJTIwYm9vbCUyMG9wZXJhdG9yKCkoaW50JTIweCUyQ2ludCUyMHkpJTdCJTBBJTA5JTA5JTA5cmV0dXJuJTIwZCU1QnglNUQlM0NkJTVCeSU1RCUzQiUwQSUwOSUwOSU3RCUwQSU3RCUzQiUwQWNsYXNzJTIwbWlubiU3QiUwQSUwOXB1YmxpYyUzQSUwQSUwOSUwOWlubGluZSUyMGJvb2wlMjBvcGVyYXRvcigpKGludCUyMHglMkNpbnQlMjB5KSU3QiUwQSUwOSUwOSUwOXJldHVybiUyMGQlNUJ4JTVEJTNFZCU1QnklNUQlM0IlMEElMDklMDklN0QlMEElN0QlM0IlMEFwcmlvcml0eV9xdWV1ZSUzQ2ludCUyQ3ZlY3RvciUzQ2ludCUzRSUyQ21pbm4lM0UlMjBxbWluJTNCJTBBcHJpb3JpdHlfcXVldWUlM0NpbnQlMkN2ZWN0b3IlM0NpbnQlM0UlMkNtYXh4JTNFJTIwcW1heCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div></div><div class="code"><span class="hljs-keyword">class</span> <span class="hljs-title class_">maxx</span>{
+	<span class="hljs-keyword">public</span>:
+		<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">bool</span> <span class="hljs-title">operator</span><span class="hljs-params">()</span><span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> y)</span></span>{
+			<span class="hljs-keyword">return</span> d[x]&lt;d[y];
+		}
+};
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">minn</span>{
+	<span class="hljs-keyword">public</span>:
+		<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">bool</span> <span class="hljs-title">operator</span><span class="hljs-params">()</span><span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> y)</span></span>{
+			<span class="hljs-keyword">return</span> d[x]&gt;d[y];
+		}
+};
+priority_queue&lt;<span class="hljs-type">int</span>,vector&lt;<span class="hljs-type">int</span>&gt;,minn&gt; qmin;
+priority_queue&lt;<span class="hljs-type">int</span>,vector&lt;<span class="hljs-type">int</span>&gt;,maxx&gt; qmax;
+</div></code></pre>
+<p>（qmax大根堆，qmin小根堆，大根堆重载用小于号，小根堆重载用大于号）
+t4：涉及到线段树上构成区间的点在一条链上。如果是区间<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mi>l</mi><mo separator="true">,</mo><mi>r</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[l,r]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mclose">]</span></span></span></span>，那么这条链就是<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>l</mi><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mi>r</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(l-1,r+1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>。除此之外，还需要特判 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">l=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 且 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">r=n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>时 ，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">l=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>和<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">r=n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>。在对链进行维护时，使用树链剖分，注意从轻链跳到重链的时候要暴力修改，注意跳过一个链条时要去掉一头，在一个链条上时要去掉两头。由于每个链条的端点都需要建立线段树，所以线段树数量很多，因此开线段树时，sum和lazy数组要用vector，根据链条的长度来调节线段树的大小。</p>
+<h2 id="qing-bei-xue-tang-day3" tabindex="-1">清北学堂Day3</h2>
+<p>t1:之前在51nod上做过，ac
+t2:一开始想到了一个一个大根堆一个小根堆的做法。中间是用对拍，成功发现了代码存在错误，修改后对拍了几千数据没有发现错误，再次体现了对拍的重要性。但是被卡了，70pts，tle。看题解才知道是一个线段树上二分的题目。
+使用离散化+二次离散化（即先把大数离散化为小数，然后相同的数之间再离散化成不同的数，相当于每个数都对应一个独一无二的id，相同的数之间的id不同。但是如果<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub><mo>&lt;</mo><msub><mi>a</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">a_i&lt;a_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6891em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>则必有<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub><mo>&lt;</mo><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">id_i&lt;id_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord mathnormal">i</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord mathnormal">i</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>）
+二次离散化之后，根据id建立一个类似于值域线段树。这样以来，我们可以利用线段树上的各种特性，如区间求和。其次，在插入和删除一个数之后，这些数在线段树上其实还是排序过的，这就无形之间排序了
+一开始看到线段树二分，就想了一个<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">nlognlogn</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span></span></span></span>的做法，但tle+wa了。实际上，线段树作为一个完全二叉树，本身就可以二分的，只需要<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">nlogn</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span></span></span></span>
+值得一提的是，中间开了1e6个stl的queue，发现程序刚运行，还未输入数据的时候运行奇慢。而且运行过程中查看任务管理器发现mle，这提醒我们对拍生成大数据测试时要打开任务管理器确保不会mle。
+前几次写出来之后对拍，使用中等规模数据对拍，发现都可以通过，但提交之后只有30pts，还不如自己一开始写的。而使用小规模数据，或者特殊数据（比如序列只有1和2），不仅对拍速度快，快速得到hack数据，wa之后也能轻松分析数据，修改程序。
+t3:一开始想了个dijkstra的做法，但其实dijkstra算法要求无后效性，但是原题是有后效性的。但感觉这个算法应该可以骗到一定的分数，就对规模较大的数据应用了这个错误算法。为了保险，在dijkstra算出一个答案之后，选择使用dfs进行优化答案。但是dfs会超时，就加入卡时的技巧。最后骗到70pts（貌似dfs优化答案+卡时并没有发挥效果）
+看题解后了解到，对于最小化两个<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∑</mo></mrow><annotation encoding="application/x-tex">\sum</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span></span></span></span>相乘这种类型，可以将每个决策点看做二维平面上的一个点。先根据<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>a</mi></msub></mrow><annotation encoding="application/x-tex">w_a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">a</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，求出一个最短路（一个决策点A），再根据<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>b</mi></msub></mrow><annotation encoding="application/x-tex">w_b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.0269em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，求出一个决策点B，则更优的决策点一定在这两个点连线的下方。使用向量叉乘，得到和两个点围成面积最大的另一个点C，然后再<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>o</mi><mi>l</mi><mi>v</mi><mi>e</mi><mo stretchy="false">(</mo><mi>A</mi><mo separator="true">,</mo><mi>C</mi><mo stretchy="false">)</mo><mtext>，</mtext><mi>s</mi><mi>o</mi><mi>l</mi><mi>v</mi><mi>e</mi><mo stretchy="false">(</mo><mi>C</mi><mo separator="true">,</mo><mi>B</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">solve(A,C)，solve(C,B)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">so</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal">e</span><span class="mopen">(</span><span class="mord mathnormal">A</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mclose">)</span><span class="mord cjk_fallback">，</span><span class="mord mathnormal">so</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal">e</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mclose">)</span></span></span></span>进行分治。
+t4:遇到了和之前类似的，有关字典序的问题，但依然不会。草草写了个暴力，10pts。
+对于之前那道题，我们实际上是求某个状态下，第i位增加1，对整个序列的排名产生的贡献，既是求第i+1位到最后一位，在某个状态下有多少种情况。而求这个贡献，我们是使用组合数学的方法
+对于这道题，我们很难用数学方法直接算出来。我们考虑dp。其中，位置i之前在s序列中选择了多少个数，对于位置i+1到n的情况数存在影响，我们将其作为dp的一维。注意，在dp的时候，由于我们考虑的是位置i+1到n，因此需要倒序dp
+对于这两道题，得到每一位对排名的贡献之后，就可以按位枚举，得到需要的序列
+对于之前那道题，我们是直接生成为某个排名的序列，我们从第一位开始枚举
+对于这道题，我们要求比某个序列排名大指定排名的序列。我们在原始序列的基础上，倒着枚举。</p>
+<h3 id="t2-er-ci-li-san-hua-xian-duan-shu-er-fen" tabindex="-1">T2：二次离散化+线段树二分</h3>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="JTIzaW5jbHVkZSUzQ2lvc3RyZWFtJTNFJTBBJTIzaW5jbHVkZSUzQ2NzdGRpbyUzRSUwQSUyM2luY2x1ZGUlM0Njc3RyaW5nJTNFJTBBJTIzaW5jbHVkZSUzQ2FsZ29yaXRobSUzRSUwQSUyM2luY2x1ZGUlM0NxdWV1ZSUzRSUwQSUyM2RlZmluZSUyMGxzKGspJTIwKGspJTNDJTNDMSUwQSUyM2RlZmluZSUyMHJzKGspJTIwKGspJTNDJTNDMSU3QzElMEF1c2luZyUyMG5hbWVzcGFjZSUyMHN0ZCUzQiUwQWludCUyMHN1bTElMkNjbnQxJTJDc3VtMiUyQ2NudDIlM0IlMEFpbmxpbmUlMjBpbnQlMjByZWFkKCklN0IlMEElMDlpbnQlMjByZXMlM0QwJTJDY2glM0RnZXRjaGFyKCklMkNmJTNEMSUzQiUwQSUwOXdoaWxlKCFpc2RpZ2l0KGNoKSUyMGFuZCUyMGNoISUzREVPRiklN0IlMEElMDklMDlpZihjaCUzRCUzRCctJyklMjBmJTNELTElM0IlMEElMDklMDljaCUzRGdldGNoYXIoKSUzQiUwQSUwOSU3RCUwQSUwOXdoaWxlKGlzZGlnaXQoY2gpKSU3QiUwQSUwOSUwOXJlcyUzRChyZXMlM0MlM0MzKSUyQihyZXMlM0MlM0MxKSUyQihjaC0nMCcpJTNCJTBBJTA5JTA5Y2glM0RnZXRjaGFyKCklM0IlMEElMDklN0QlMEElMDlyZXR1cm4lMjByZXMqZiUzQiUwQSU3RCUwQWludCUyMGluJTVCMTAwMDAwNiU1RCUyQ3VuaSU1QjEwMDAwMDYlNUQlMkN0b3QlM0IlMEFpbnQlMjBuJTNCJTBBaW50JTIwaWQlNUIxMDAwMDA2JTVEJTNCJTBBaW50JTIwcHJlJTVCMTAwMDAwNiU1RCUzQiUwQWludCUyMHRvX3VuaSU1QjEwMDAwMDYlNUQlM0IlMEF2ZWN0b3IlM0NpbnQlM0UlMjB0bXAlM0IlMEFzdHJ1Y3QlMjBFbnRyeSU3QiUwQSUwOWludCUyMGluZGV4JTJDdmFsdWUlMkNpZCUyQ29wdCUzQiUwQSU3RCUyMGZpbiU1QjEwMDAwMDYlNUQlM0IlMEFpbnQlMjBzdW0lNUIxMDAwMDA2JTNDJTNDNCU1RCUzQiUwQWludCUyMHclNUIxMDAwMDA2JTNDJTNDNCU1RCUzQiUwQXZvaWQlMjB1cGRhdGUoaW50JTIwayUyQ2ludCUyMGwlMkNpbnQlMjByJTJDaW50JTIweCUyQ2ludCUyMGQpJTdCJTBBJTA5aWYobCUzRCUzRHIpJTdCJTBBJTA5JTA5c3VtJTVCayU1RCUyQiUzRHRvX3VuaSU1QmwlNUQqZCUzQiUwQSUwOSUwOXclNUJrJTVEJTJCJTNEZCUzQiUwQSUwOSUwOXJldHVybiUzQiUwQSUwOSU3RCUwQSUwOWludCUyMG1pZCUzRChsJTJCciklM0UlM0UxJTNCJTBBJTA5aWYoeCUzQyUzRG1pZCklN0IlMEElMDklMDl1cGRhdGUobHMoayklMkNsJTJDbWlkJTJDeCUyQ2QpJTNCJTBBJTA5JTdEZWxzZSU3QiUwQSUwOSUwOXVwZGF0ZShycyhrKSUyQ21pZCUyQjElMkNyJTJDeCUyQ2QpJTNCJTBBJTA5JTdEJTBBJTA5c3VtJTVCayU1RCUzRHN1bSU1QmxzKGspJTVEJTJCc3VtJTVCcnMoayklNUQlM0IlMEElMDl3JTVCayU1RCUzRHclNUJscyhrKSU1RCUyQnclNUJycyhrKSU1RCUzQiUwQSU3RCUwQSUyRiUyRiVFNyVCQSVCRiVFNiVBRSVCNSVFNiVBMCU5MSVFNCVCQSU4QyVFNSU4OCU4NiUwQWludCUyMHRvdGElM0QwJTNCJTBBdm9pZCUyMGNvbGxlY3QxKGludCUyMGslMkNpbnQlMjBsJTJDaW50JTIwciklN0IlMEElMDlpZihsJTNEJTNEciklN0IlMEElMDklMDlpZihzdW0lNUJrJTVEJTI2JTI2KChzdW0xJTJCc3VtJTVCayU1RCklM0MlM0MxKSUzQyUzRHRvdGEpJTIwY250MSUyQiUyQiUyQ3N1bTElMkIlM0RzdW0lNUJrJTVEJTNCJTBBJTA5JTA5cmV0dXJuJTNCJTBBJTA5JTdEJTBBJTA5aW50JTIwbWlkJTNEKGwlMkJyKSUzRSUzRTElM0IlMEElMDlpZigoKHN1bTElMkJzdW0lNUJscyhrKSU1RCklM0MlM0MxKSUzQyUzRHRvdGEpJTdCJTBBJTA5JTA5Y250MSUyQiUzRHclNUJscyhrKSU1RCUzQiUwQSUwOSUwOXN1bTElMkIlM0RzdW0lNUJscyhrKSU1RCUzQiUwQSUwOSUwOWNvbGxlY3QxKHJzKGspJTJDbWlkJTJCMSUyQ3IpJTNCJTBBJTA5JTdEZWxzZSU3QiUwQSUwOSUwOWNvbGxlY3QxKGxzKGspJTJDbCUyQ21pZCklM0IlMEElMDklN0QlMEElN0QlMEF2b2lkJTIwY29sbGVjdDIoaW50JTIwayUyQ2ludCUyMGwlMkNpbnQlMjByKSU3QiUwQSUwOWlmKGwlM0QlM0RyKSU3QiUwQSUwOSUwOWlmKHN1bSU1QmslNUQlMjYlMjYoKHN1bTIlMkJzdW0lNUJrJTVEKSUzQyUzQzEpJTNDJTNEdG90YSklMjBjbnQyJTJCJTJCJTJDc3VtMiUyQiUzRHN1bSU1QmslNUQlM0IlMEElMDklMDlyZXR1cm4lM0IlMEElMDklN0QlMEElMDlpbnQlMjBtaWQlM0QobCUyQnIpJTNFJTNFMSUzQiUwQSUwOWlmKCgoc3VtMiUyQnN1bSU1QnJzKGspJTVEKSUzQyUzQzEpJTNDJTNEdG90YSklN0IlMEElMDklMDljbnQyJTJCJTNEdyU1QnJzKGspJTVEJTNCJTBBJTA5JTA5c3VtMiUyQiUzRHN1bSU1QnJzKGspJTVEJTNCJTBBJTA5JTA5Y29sbGVjdDIobHMoayklMkNsJTJDbWlkKSUzQiUwQSUwOSU3RGVsc2UlN0IlMEElMDklMDljb2xsZWN0MihycyhrKSUyQ21pZCUyQjElMkNyKSUzQiUwQSUwOSU3RCUwQSU3RCUwQWJvb2wlMjBjbXAxKEVudHJ5JTIwYSUyQ0VudHJ5JTIwYiklN0IlMEElMDlpZihhLnZhbHVlJTNEJTNEYi52YWx1ZSklMjByZXR1cm4lMjBhLmluZGV4JTNDYi5pbmRleCUzQiUwQSUwOXJldHVybiUyMGEudmFsdWUlM0NiLnZhbHVlJTNCJTBBJTdEJTBBYm9vbCUyMGNtcDIoRW50cnklMjBhJTJDRW50cnklMjBiKSU3QiUwQSUwOXJldHVybiUyMGEuaW5kZXglM0NiLmluZGV4JTNCJTBBJTdEJTBBaW50JTIwbm93JTNEMCUzQiUwQXNpZ25lZCUyMG1haW4oKSU3QiUwQSUwOSUyRiUyRmNvdXQlM0MlM0NzaXplb2YoaWQpJTJGMTAyNCUyRjEwMjQlM0MlM0NlbmRsJTNCJTBBJTA5JTJGJTJGJUU3JUFDJUFDJUU0JUI4JTgwJUU2JUFDJUExJUU3JUE2JUJCJUU2JTk1JUEzJUU1JThDJTk2JTBBJTA5biUzRHJlYWQoKSUzQiUwQSUwOWZvcihpbnQlMjBpJTNEMSUzQmklM0MlM0RuJTNCaSUyQiUyQiklN0IlMEElMDklMDlpbiU1QmklNUQlM0RyZWFkKCklM0IlMEElMDklMDlpZihpbiU1QmklNUQlM0UwKSU3QiUwQSUwOSUwOSUwOXVuaSU1QiUyQiUyQnRvdCU1RCUzRGluJTVCaSU1RCUzQiUwQSUwOSUwOSU3RCUwQSUwOSU3RCUwQSUwOXNvcnQodW5pJTJCMSUyQ3VuaSUyQjElMkJ0b3QpJTNCJTBBJTA5dG90JTNEdW5pcXVlKHVuaSUyQjElMkN1bmklMkIxJTJCdG90KS11bmktMSUzQiUwQSUwOWZvcihpbnQlMjBpJTNEMSUzQmklM0MlM0RuJTNCaSUyQiUyQiklN0IlMEElMDklMDlpZihpbiU1QmklNUQlM0UwKSU3QiUwQSUwOSUwOSUwOWluJTVCaSU1RCUzRGxvd2VyX2JvdW5kKHVuaSUyQjElMkN1bmklMkJ0b3QlMkIxJTJDaW4lNUJpJTVEKS11bmklM0IlMEElMDklMDklN0RlbHNlJTdCJTBBJTA5JTA5JTA5aW4lNUJpJTVEJTNEbG93ZXJfYm91bmQodW5pJTJCMSUyQ3VuaSUyQnRvdCUyQjElMkMtaW4lNUJpJTVEKS11bmklM0IlMEElMDklMDklMDlpbiU1QmklNUQlM0QtaW4lNUJpJTVEJTNCJTBBJTA5JTA5JTdEJTBBJTA5JTdEJTBBJTA5JTJGJTJGJUU3JUFDJUFDJUU0JUJBJThDJUU2JUFDJUExJUU3JUE2JUJCJUU2JTk1JUEzJUU1JThDJTk2JUVGJUJDJThDJUU1JTg1JTg4JUU1JTg4JTg2JUU1JUE1JUJEJUU2JTkzJThEJUU0JUJEJTlDJTBBJTA5Zm9yKGludCUyMGklM0QxJTNCaSUzQyUzRG4lM0JpJTJCJTJCKSU3QiUwQSUwOSUwOWZpbiU1QmklNUQuaW5kZXglM0RpJTNCJTBBJTA5JTA5aWYoaW4lNUJpJTVEJTNFMCklN0IlMEElMDklMDklMDlmaW4lNUJpJTVELnZhbHVlJTNEaW4lNUJpJTVEJTNCJTBBJTA5JTA5JTA5ZmluJTVCaSU1RC5vcHQlM0QxJTNCJTBBJTA5JTA5JTdEZWxzZSU3QiUwQSUwOSUwOSUwOWZpbiU1QmklNUQudmFsdWUlM0QtaW4lNUJpJTVEJTNCJTBBJTA5JTA5JTA5ZmluJTVCaSU1RC5vcHQlM0QyJTNCJTBBJTA5JTA5JTdEJTBBJTA5JTdEJTBBJTA5JTJGJTJGJUU2JThFJTkyJUU1JUJBJThGJUVGJUJDJThDJUU1JTg4JTg2JUU5JTg1JThEaWQlMEElMDlzb3J0KGZpbiUyQjElMkNmaW4lMkJuJTJCMSUyQ2NtcDEpJTNCJTBBJTA5Zm9yKGludCUyMGklM0QxJTNCaSUzQyUzRG4lM0JpJTJCJTJCKSU3QiUwQSUwOSUwOWlmKGZpbiU1QmklNUQub3B0JTNEJTNEMSklN0IlMEElMDklMDklMDlmaW4lNUJpJTVELmlkJTNEaSUzQiUwQSUwOSUwOSUwOXRvX3VuaSU1QmklNUQlM0R1bmklNUJmaW4lNUJpJTVELnZhbHVlJTVEJTNCJTBBJTA5JTA5JTdEJTBBJTA5JTdEJTBBJTA5JTJGJTJGJUU2JThFJTkyJUU1JUJBJThGJUVGJUJDJThDJUU2JTgxJUEyJUU1JUE0JThEJUU1JThFJTlGJUU2JTlEJUE1JUU2JThFJTkyJUU1JUJBJThGJTBBJTA5c29ydChmaW4lMkIxJTJDZmluJTJCbiUyQjElMkNjbXAyKSUzQiUwQSUwOSUyRiUyRiVFNyVCQiU5OSVFNSU4OCVBMCVFOSU5OSVBNCVFNiU5MyU4RCVFNCVCRCU5QyVFNSU4OCU4NiVFOSU4NSU4RGlkJTBBJTA5Zm9yKGludCUyMGklM0QxJTNCaSUzQyUzRG4lM0JpJTJCJTJCKSU3QiUwQSUwOSUwOWlmKGZpbiU1QmklNUQub3B0JTNEJTNEMSklN0IlMEElMDklMDklMDlwcmUlNUJmaW4lNUJpJTVELmlkJTVEJTNEaWQlNUJmaW4lNUJpJTVELnZhbHVlJTVEJTNCJTBBJTA5JTA5JTA5aWQlNUJmaW4lNUJpJTVELnZhbHVlJTVEJTNEZmluJTVCaSU1RC5pZCUzQiUwQSUwOSUwOSU3RGVsc2UlN0IlMEElMDklMDklMDlmaW4lNUJpJTVELmlkJTNEaWQlNUJmaW4lNUJpJTVELnZhbHVlJTVEJTNCJTBBJTA5JTA5JTA5JTJGJTJGY291dCUzQyUzQyUyMiUzQyUzQyUyMiUzQyUzQ2ZpbiU1QmklNUQuaWQlM0MlM0NlbmRsJTNCJTBBJTA5JTA5JTA5aWQlNUJmaW4lNUJpJTVELnZhbHVlJTVEJTNEcHJlJTVCaWQlNUJmaW4lNUJpJTVELnZhbHVlJTVEJTVEJTNCJTBBJTA5JTA5JTdEJTBBJTA5JTdEJTBBJTA5Zm9yKGludCUyMGklM0QxJTNCaSUzQyUzRG4lM0JpJTJCJTJCKSU3QiUwQSUwOSUwOWlmKGZpbiU1QmklNUQub3B0JTNEJTNEMSklN0IlMEElMDklMDklMDl1cGRhdGUoMSUyQzElMkNuJTJDZmluJTVCaSU1RC5pZCUyQzEpJTNCJTBBJTA5JTA5JTA5dG90YSUyQiUzRHVuaSU1QmZpbiU1QmklNUQudmFsdWUlNUQlM0IlMEElMDklMDklMDlub3clMkIlMkIlM0IlMEElMDklMDklN0RlbHNlJTdCJTBBJTA5JTA5JTA5dXBkYXRlKDElMkMxJTJDbiUyQ2ZpbiU1QmklNUQuaWQlMkMtMSklM0IlMEElMDklMDklMDl0b3RhLSUzRHVuaSU1QmZpbiU1QmklNUQudmFsdWUlNUQlM0IlMEElMDklMDklMDlub3ctLSUzQiUwQSUwOSUwOSU3RCUwQSUwOSUwOXN1bTElM0RzdW0yJTNEY250MSUzRGNudDIlM0QwJTNCJTBBJTA5JTA5Y29sbGVjdDEoMSUyQzElMkNuKSUzQiUwQSUwOSUwOWNvbGxlY3QyKDElMkMxJTJDbiklM0IlMEElMDklMDlpZihhYnMoc3VtMS0odG90YS1zdW0xKSklM0NhYnMoc3VtMi0odG90YS1zdW0yKSkpJTdCJTBBJTA5JTA5JTA5Y291dCUzQyUzQ25vdy1jbnQxJTNDJTNDJyUyMCclM0IlMEElMDklMDklN0QlMEElMDklMDlpZihhYnMoc3VtMS0odG90YS1zdW0xKSklM0VhYnMoc3VtMi0odG90YS1zdW0yKSkpJTdCJTBBJTA5JTA5JTA5Y291dCUzQyUzQ2NudDIlM0MlM0MnJTIwJyUzQiUwQSUwOSUwOSU3RCUwQSUwOSUwOWlmKGFicyhzdW0xLSh0b3RhLXN1bTEpKSUzRCUzRGFicyhzdW0yLSh0b3RhLXN1bTIpKSklN0IlMEElMDklMDklMDljb3V0JTNDJTNDbWluKG5vdy1jbnQxJTJDY250MiklM0MlM0MnJTIwJyUzQiUwQSUwOSUwOSU3RCUwQSUwOSU3RCUwQSUwOXJldHVybiUyMDAlM0IlMEElN0QlMEElMkYqJTBBOCUwQTMlMjA0JTIwNSUyMDMlMjAzJTIwLTMlMjAtMyUyMDQlMEEqJTJGJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div><div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div><div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div><div>97</div><div>98</div><div>99</div><div>100</div><div>101</div><div>102</div><div>103</div><div>104</div><div>105</div><div>106</div><div>107</div><div>108</div><div>109</div><div>110</div><div>111</div><div>112</div><div>113</div><div>114</div><div>115</div><div>116</div><div>117</div><div>118</div><div>119</div><div>120</div><div>121</div><div>122</div><div>123</div><div>124</div><div>125</div><div>126</div><div>127</div><div>128</div><div>129</div><div>130</div><div>131</div><div>132</div><div>133</div><div>134</div><div>135</div><div>136</div><div>137</div><div>138</div><div>139</div><div>140</div><div>141</div><div>142</div><div>143</div><div>144</div><div>145</div><div>146</div><div>147</div><div>148</div><div>149</div><div>150</div><div>151</div><div>152</div><div>153</div><div>154</div><div>155</div><div>156</div><div>157</div><div>158</div><div>159</div><div>160</div><div>161</div><div>162</div><div>163</div><div>164</div><div>165</div><div>166</div></div><div class="code"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;cstdio&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;cstring&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;queue&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> ls(k) (k)&lt;&lt;1</span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> rs(k) (k)&lt;&lt;1|1</span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+<span class="hljs-type">int</span> sum1,cnt1,sum2,cnt2;
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">int</span> <span class="hljs-title">read</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-type">int</span> res=<span class="hljs-number">0</span>,ch=<span class="hljs-built_in">getchar</span>(),f=<span class="hljs-number">1</span>;
+	<span class="hljs-keyword">while</span>(!<span class="hljs-built_in">isdigit</span>(ch) <span class="hljs-keyword">and</span> ch!=EOF){
+		<span class="hljs-keyword">if</span>(ch==<span class="hljs-string">&#x27;-&#x27;</span>) f=<span class="hljs-number">-1</span>;
+		ch=<span class="hljs-built_in">getchar</span>();
+	}
+	<span class="hljs-keyword">while</span>(<span class="hljs-built_in">isdigit</span>(ch)){
+		res=(res&lt;&lt;<span class="hljs-number">3</span>)+(res&lt;&lt;<span class="hljs-number">1</span>)+(ch-<span class="hljs-string">&#x27;0&#x27;</span>);
+		ch=<span class="hljs-built_in">getchar</span>();
+	}
+	<span class="hljs-keyword">return</span> res*f;
+}
+<span class="hljs-type">int</span> in[<span class="hljs-number">1000006</span>],uni[<span class="hljs-number">1000006</span>],tot;
+<span class="hljs-type">int</span> n;
+<span class="hljs-type">int</span> id[<span class="hljs-number">1000006</span>];
+<span class="hljs-type">int</span> pre[<span class="hljs-number">1000006</span>];
+<span class="hljs-type">int</span> to_uni[<span class="hljs-number">1000006</span>];
+vector&lt;<span class="hljs-type">int</span>&gt; tmp;
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Entry</span>{
+	<span class="hljs-type">int</span> index,value,id,opt;
+} fin[<span class="hljs-number">1000006</span>];
+<span class="hljs-type">int</span> sum[<span class="hljs-number">1000006</span>&lt;&lt;<span class="hljs-number">4</span>];
+<span class="hljs-type">int</span> w[<span class="hljs-number">1000006</span>&lt;&lt;<span class="hljs-number">4</span>];
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">update</span><span class="hljs-params">(<span class="hljs-type">int</span> k,<span class="hljs-type">int</span> l,<span class="hljs-type">int</span> r,<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> d)</span></span>{
+	<span class="hljs-keyword">if</span>(l==r){
+		sum[k]+=to_uni[l]*d;
+		w[k]+=d;
+		<span class="hljs-keyword">return</span>;
+	}
+	<span class="hljs-type">int</span> mid=(l+r)&gt;&gt;<span class="hljs-number">1</span>;
+	<span class="hljs-keyword">if</span>(x&lt;=mid){
+		<span class="hljs-built_in">update</span>(<span class="hljs-built_in">ls</span>(k),l,mid,x,d);
+	}<span class="hljs-keyword">else</span>{
+		<span class="hljs-built_in">update</span>(<span class="hljs-built_in">rs</span>(k),mid<span class="hljs-number">+1</span>,r,x,d);
+	}
+	sum[k]=sum[<span class="hljs-built_in">ls</span>(k)]+sum[<span class="hljs-built_in">rs</span>(k)];
+	w[k]=w[<span class="hljs-built_in">ls</span>(k)]+w[<span class="hljs-built_in">rs</span>(k)];
+}
+<span class="hljs-comment">//线段树二分</span>
+<span class="hljs-type">int</span> tota=<span class="hljs-number">0</span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">collect1</span><span class="hljs-params">(<span class="hljs-type">int</span> k,<span class="hljs-type">int</span> l,<span class="hljs-type">int</span> r)</span></span>{
+	<span class="hljs-keyword">if</span>(l==r){
+		<span class="hljs-keyword">if</span>(sum[k]&amp;&amp;((sum1+sum[k])&lt;&lt;<span class="hljs-number">1</span>)&lt;=tota) cnt1++,sum1+=sum[k];
+		<span class="hljs-keyword">return</span>;
+	}
+	<span class="hljs-type">int</span> mid=(l+r)&gt;&gt;<span class="hljs-number">1</span>;
+	<span class="hljs-keyword">if</span>(((sum1+sum[<span class="hljs-built_in">ls</span>(k)])&lt;&lt;<span class="hljs-number">1</span>)&lt;=tota){
+		cnt1+=w[<span class="hljs-built_in">ls</span>(k)];
+		sum1+=sum[<span class="hljs-built_in">ls</span>(k)];
+		<span class="hljs-built_in">collect1</span>(<span class="hljs-built_in">rs</span>(k),mid<span class="hljs-number">+1</span>,r);
+	}<span class="hljs-keyword">else</span>{
+		<span class="hljs-built_in">collect1</span>(<span class="hljs-built_in">ls</span>(k),l,mid);
+	}
+}
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">collect2</span><span class="hljs-params">(<span class="hljs-type">int</span> k,<span class="hljs-type">int</span> l,<span class="hljs-type">int</span> r)</span></span>{
+	<span class="hljs-keyword">if</span>(l==r){
+		<span class="hljs-keyword">if</span>(sum[k]&amp;&amp;((sum2+sum[k])&lt;&lt;<span class="hljs-number">1</span>)&lt;=tota) cnt2++,sum2+=sum[k];
+		<span class="hljs-keyword">return</span>;
+	}
+	<span class="hljs-type">int</span> mid=(l+r)&gt;&gt;<span class="hljs-number">1</span>;
+	<span class="hljs-keyword">if</span>(((sum2+sum[<span class="hljs-built_in">rs</span>(k)])&lt;&lt;<span class="hljs-number">1</span>)&lt;=tota){
+		cnt2+=w[<span class="hljs-built_in">rs</span>(k)];
+		sum2+=sum[<span class="hljs-built_in">rs</span>(k)];
+		<span class="hljs-built_in">collect2</span>(<span class="hljs-built_in">ls</span>(k),l,mid);
+	}<span class="hljs-keyword">else</span>{
+		<span class="hljs-built_in">collect2</span>(<span class="hljs-built_in">rs</span>(k),mid<span class="hljs-number">+1</span>,r);
+	}
+}
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">cmp1</span><span class="hljs-params">(Entry a,Entry b)</span></span>{
+	<span class="hljs-keyword">if</span>(a.value==b.value) <span class="hljs-keyword">return</span> a.index&lt;b.index;
+	<span class="hljs-keyword">return</span> a.value&lt;b.value;
+}
+<span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">cmp2</span><span class="hljs-params">(Entry a,Entry b)</span></span>{
+	<span class="hljs-keyword">return</span> a.index&lt;b.index;
+}
+<span class="hljs-type">int</span> now=<span class="hljs-number">0</span>;
+<span class="hljs-function"><span class="hljs-type">signed</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-comment">//cout&lt;&lt;sizeof(id)/1024/1024&lt;&lt;endl;</span>
+	<span class="hljs-comment">//第一次离散化</span>
+	n=<span class="hljs-built_in">read</span>();
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		in[i]=<span class="hljs-built_in">read</span>();
+		<span class="hljs-keyword">if</span>(in[i]&gt;<span class="hljs-number">0</span>){
+			uni[++tot]=in[i];
+		}
+	}
+	<span class="hljs-built_in">sort</span>(uni<span class="hljs-number">+1</span>,uni<span class="hljs-number">+1</span>+tot);
+	tot=<span class="hljs-built_in">unique</span>(uni<span class="hljs-number">+1</span>,uni<span class="hljs-number">+1</span>+tot)-uni<span class="hljs-number">-1</span>;
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		<span class="hljs-keyword">if</span>(in[i]&gt;<span class="hljs-number">0</span>){
+			in[i]=<span class="hljs-built_in">lower_bound</span>(uni<span class="hljs-number">+1</span>,uni+tot<span class="hljs-number">+1</span>,in[i])-uni;
+		}<span class="hljs-keyword">else</span>{
+			in[i]=<span class="hljs-built_in">lower_bound</span>(uni<span class="hljs-number">+1</span>,uni+tot<span class="hljs-number">+1</span>,-in[i])-uni;
+			in[i]=-in[i];
+		}
+	}
+	<span class="hljs-comment">//第二次离散化，先分好操作</span>
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		fin[i].index=i;
+		<span class="hljs-keyword">if</span>(in[i]&gt;<span class="hljs-number">0</span>){
+			fin[i].value=in[i];
+			fin[i].opt=<span class="hljs-number">1</span>;
+		}<span class="hljs-keyword">else</span>{
+			fin[i].value=-in[i];
+			fin[i].opt=<span class="hljs-number">2</span>;
+		}
+	}
+	<span class="hljs-comment">//排序，分配id</span>
+	<span class="hljs-built_in">sort</span>(fin<span class="hljs-number">+1</span>,fin+n<span class="hljs-number">+1</span>,cmp1);
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		<span class="hljs-keyword">if</span>(fin[i].opt==<span class="hljs-number">1</span>){
+			fin[i].id=i;
+			to_uni[i]=uni[fin[i].value];
+		}
+	}
+	<span class="hljs-comment">//排序，恢复原来排序</span>
+	<span class="hljs-built_in">sort</span>(fin<span class="hljs-number">+1</span>,fin+n<span class="hljs-number">+1</span>,cmp2);
+	<span class="hljs-comment">//给删除操作分配id</span>
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		<span class="hljs-keyword">if</span>(fin[i].opt==<span class="hljs-number">1</span>){
+			pre[fin[i].id]=id[fin[i].value];
+			id[fin[i].value]=fin[i].id;
+		}<span class="hljs-keyword">else</span>{
+			fin[i].id=id[fin[i].value];
+			<span class="hljs-comment">//cout&lt;&lt;&quot;&lt;&lt;&quot;&lt;&lt;fin[i].id&lt;&lt;endl;</span>
+			id[fin[i].value]=pre[id[fin[i].value]];
+		}
+	}
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		<span class="hljs-keyword">if</span>(fin[i].opt==<span class="hljs-number">1</span>){
+			<span class="hljs-built_in">update</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,n,fin[i].id,<span class="hljs-number">1</span>);
+			tota+=uni[fin[i].value];
+			now++;
+		}<span class="hljs-keyword">else</span>{
+			<span class="hljs-built_in">update</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,n,fin[i].id,<span class="hljs-number">-1</span>);
+			tota-=uni[fin[i].value];
+			now--;
+		}
+		sum1=sum2=cnt1=cnt2=<span class="hljs-number">0</span>;
+		<span class="hljs-built_in">collect1</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,n);
+		<span class="hljs-built_in">collect2</span>(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,n);
+		<span class="hljs-keyword">if</span>(<span class="hljs-built_in">abs</span>(sum1-(tota-sum1))&lt;<span class="hljs-built_in">abs</span>(sum2-(tota-sum2))){
+			cout&lt;&lt;now-cnt1&lt;&lt;<span class="hljs-string">&#x27; &#x27;</span>;
+		}
+		<span class="hljs-keyword">if</span>(<span class="hljs-built_in">abs</span>(sum1-(tota-sum1))&gt;<span class="hljs-built_in">abs</span>(sum2-(tota-sum2))){
+			cout&lt;&lt;cnt2&lt;&lt;<span class="hljs-string">&#x27; &#x27;</span>;
+		}
+		<span class="hljs-keyword">if</span>(<span class="hljs-built_in">abs</span>(sum1-(tota-sum1))==<span class="hljs-built_in">abs</span>(sum2-(tota-sum2))){
+			cout&lt;&lt;<span class="hljs-built_in">min</span>(now-cnt1,cnt2)&lt;&lt;<span class="hljs-string">&#x27; &#x27;</span>;
+		}
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+<span class="hljs-comment">/*
+8
+3 4 5 3 3 -3 -3 4
+*/</span>
+</div></code></pre>
+<h3 id="t3-zui-xiao-hua-cheng-ji" tabindex="-1">T3:最小化乘积</h3>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="JTIzaW5jbHVkZSUzQ2lvc3RyZWFtJTNFJTBBJTIzaW5jbHVkZSUzQ2NzdGRpbyUzRSUwQSUyM2luY2x1ZGUlM0Njc3RyaW5nJTNFJTBBJTIzaW5jbHVkZSUzQ2FsZ29yaXRobSUzRSUwQSUyM2luY2x1ZGUlM0NxdWV1ZSUzRSUwQSUyM2RlZmluZSUyMGludCUyMGxvbmclMjBsb25nJTBBdXNpbmclMjBuYW1lc3BhY2UlMjBzdGQlM0IlMEFpbmxpbmUlMjBpbnQlMjByZWFkKCklN0IlMEElMDlpbnQlMjByZXMlM0QwJTJDY2glM0RnZXRjaGFyKCklMkNmJTNEMSUzQiUwQSUwOXdoaWxlKCFpc2RpZ2l0KGNoKSUyMGFuZCUyMGNoISUzREVPRiklN0IlMEElMDklMDlpZihjaCUzRCUzRCctJyklMjBmJTNELTElM0IlMEElMDklMDljaCUzRGdldGNoYXIoKSUzQiUwQSUwOSU3RCUwQSUwOXdoaWxlKGlzZGlnaXQoY2gpKSU3QiUwQSUwOSUwOXJlcyUzRChyZXMlM0MlM0MzKSUyQihyZXMlM0MlM0MxKSUyQihjaC0nMCcpJTNCJTBBJTA5JTA5Y2glM0RnZXRjaGFyKCklM0IlMEElMDklN0QlMEElMDlyZXR1cm4lMjByZXMqZiUzQiUwQSU3RCUwQXN0cnVjdCUyMFBvaW50JTdCJTBBJTA5aW50JTIweCUyQ3klM0IlMEElMDlQb2ludChpbnQlMjBfeCUyQ2ludCUyMF95KSU3QiUwQSUwOSUwOXglM0RfeCUzQnklM0RfeSUzQiUwQSUwOSU3RCUwQSU3RCUzQiUwQWlubGluZSUyMFBvaW50JTIwZ2V0bWluKFBvaW50JTIwYSUyQ1BvaW50JTIwYiklN0IlMEElMDlpbnQlMjBzYSUzRGEueCphLnklM0IlMEElMDlpbnQlMjBzYiUzRGIueCpiLnklM0IlMEElMDlpZihzYSUzQ3NiKSUyMHJldHVybiUyMGElM0IlMEElMDlyZXR1cm4lMjBiJTNCJTBBJTdEJTBBc3RydWN0JTIwRWRnZSU3QiUwQSUwOWludCUyMHRvJTJDbmV4dCUyQ3dhJTJDd2IlM0IlMEElN0QlMjBlZGdlJTVCNDAwMDQlNUQlM0IlMEFpbnQlMjBoZWFkJTVCMTAwMDQlNUQlMkNzaXplJTNCJTBBaW5saW5lJTIwdm9pZCUyMGFkZChpbnQlMjB1JTJDaW50JTIwdiUyQ2ludCUyMHdhJTJDaW50JTIwd2IpJTdCJTBBJTA5c2l6ZSUyQiUyQiUzQiUwQSUwOWVkZ2UlNUJzaXplJTVELnRvJTNEdiUzQiUwQSUwOWVkZ2UlNUJzaXplJTVELndhJTNEd2ElM0IlMEElMDllZGdlJTVCc2l6ZSU1RC53YiUzRHdiJTNCJTBBJTA5ZWRnZSU1QnNpemUlNUQubmV4dCUzRGhlYWQlNUJ1JTVEJTNCJTBBJTA5aGVhZCU1QnUlNUQlM0RzaXplJTNCJTBBJTdEJTBBaW50JTIwZGlzJTVCMTAwMDQlNUQlMkN2aXMlNUIxMDAwNCU1RCUzQiUwQWludCUyMHN1bWElNUIxMDAwNCU1RCUyQ3N1bWIlNUIxMDAwNCU1RCUzQiUwQWludCUyMHMlMkN0JTNCJTBBUG9pbnQlMjBkaWprc3RyYShQb2ludCUyMEElMkNQb2ludCUyMEIpJTdCJTBBJTA5bWVtc2V0KGRpcyUyQzB4M2YlMkNzaXplb2YoZGlzKSklM0IlMEElMDltZW1zZXQodmlzJTJDMCUyQ3NpemVvZih2aXMpKSUzQiUwQSUwOW1lbXNldChzdW1hJTJDMCUyQ3NpemVvZihzdW1hKSklM0IlMEElMDltZW1zZXQoc3VtYiUyQzAlMkNzaXplb2Yoc3VtYikpJTNCJTBBJTA5cXVldWUlM0NpbnQlM0UlMjBxJTNCJTBBJTA5ZGlzJTVCcyU1RCUzRDAlM0IlMEElMDlxLnB1c2gocyklM0IlMEElMDl3aGlsZSghcS5lbXB0eSgpKSU3QiUwQSUwOSUwOWludCUyMG5vdyUzRHEuZnJvbnQoKSUzQnEucG9wKCklM0IlMEElMDklMDl2aXMlNUJub3clNUQlM0RmYWxzZSUzQiUwQSUwOSUwOWZvcihpbnQlMjBpJTNEaGVhZCU1Qm5vdyU1RCUzQmklM0JpJTNEZWRnZSU1QmklNUQubmV4dCklN0IlMEElMDklMDklMDlpbnQlMjB0byUzRGVkZ2UlNUJpJTVELnRvJTNCJTBBJTA5JTA5JTA5aW50JTIwdyUzRChCLngtQS54KSplZGdlJTVCaSU1RC53YiUyQihBLnktQi55KSplZGdlJTVCaSU1RC53YSUzQiUwQSUwOSUwOSUwOWlmKGRpcyU1Qm5vdyU1RCUyQnclM0NkaXMlNUJ0byU1RCklN0IlMEElMDklMDklMDklMDlkaXMlNUJ0byU1RCUzRGRpcyU1Qm5vdyU1RCUyQnclM0IlMEElMDklMDklMDklMDlzdW1hJTVCdG8lNUQlM0RzdW1hJTVCbm93JTVEJTJCZWRnZSU1QmklNUQud2ElM0IlMEElMDklMDklMDklMDlzdW1iJTVCdG8lNUQlM0RzdW1iJTVCbm93JTVEJTJCZWRnZSU1QmklNUQud2IlM0IlMEElMDklMDklMDklMDlpZighdmlzJTVCdG8lNUQpJTdCJTBBJTA5JTA5JTA5JTA5JTA5dmlzJTVCdG8lNUQlM0R0cnVlJTNCJTBBJTA5JTA5JTA5JTA5JTA5cS5wdXNoKHRvKSUzQiUwQSUwOSUwOSUwOSUwOSU3RCUwQSUwOSUwOSUwOSU3RCUwQSUwOSUwOSU3RCUwQSUwOSU3RCUwQSUwOXJldHVybiUyMFBvaW50KHN1bWElNUJ0JTVEJTJDc3VtYiU1QnQlNUQpJTNCJTBBJTdEJTBBUG9pbnQlMjBhbnMoMHgzZjNmM2YzZiUyQzB4M2YzZjNmM2YpJTNCJTBBdm9pZCUyMHNvbHZlKFBvaW50JTIwYSUyQ1BvaW50JTIwYiklN0IlMEElMDlQb2ludCUyMGMlM0RkaWprc3RyYShhJTJDYiklM0IlMEElMDlhbnMlM0RnZXRtaW4oYW5zJTJDYyklM0IlMEElMDlpbnQlMjB0eCUzRGIueC1hLnglM0IlMEElMDlpbnQlMjB0eSUzRGIueS1hLnklM0IlMEElMDlpbnQlMjBmeCUzRGMueC1hLnglM0IlMEElMDlpbnQlMjBmeSUzRGMueS1hLnklM0IlMEElMDlpZih0eCpmeS10eSpmeCUzRSUzRDApJTIwcmV0dXJuJTNCJTBBJTA5c29sdmUoYSUyQ2MpJTNCJTBBJTA5c29sdmUoYyUyQ2IpJTNCJTBBJTdEJTBBaW50JTIwbiUyQ20lM0IlMEFzaWduZWQlMjBtYWluKCklN0IlMEElMDluJTNEcmVhZCgpJTJDbSUzRHJlYWQoKSUyQ3MlM0RyZWFkKCklMkN0JTNEcmVhZCgpJTNCJTBBJTA5Zm9yKGludCUyMGklM0QxJTNCaSUzQyUzRG0lM0JpJTJCJTJCKSU3QiUwQSUwOSUwOWludCUyMHUlM0RyZWFkKCklMkN2JTNEcmVhZCgpJTJDYSUzRHJlYWQoKSUyQ2IlM0RyZWFkKCklM0IlMEElMDklMDlhZGQodSUyQ3YlMkNhJTJDYiklM0IlMEElMDklMDlhZGQodiUyQ3UlMkNhJTJDYiklM0IlMEElMDklN0QlMEElMDlQb2ludCUyMGElM0RkaWprc3RyYShQb2ludCgwJTJDMSklMkNQb2ludCgwJTJDMCkpJTNCJTBBJTA5UG9pbnQlMjBiJTNEZGlqa3N0cmEoUG9pbnQoMCUyQzApJTJDUG9pbnQoMSUyQzApKSUzQiUwQSUwOWFucyUzRGdldG1pbihhJTJDYiklM0IlMEElMDlzb2x2ZShhJTJDYiklM0IlMEElMDljb3V0JTNDJTNDYW5zLngqYW5zLnklM0IlMEElMDlyZXR1cm4lMjAwJTNCJTBBJTdEJTBBJTJGKiUwQTQlMjA1JTIwMSUyMDQlMEExJTIwMiUyMDIlMjAzJTBBMSUyMDMlMjAzJTIwMyUwQTElMjA0JTIwNSUyMDUlMEEyJTIwNCUyMDMlMjAxJTBBMyUyMDQlMjAxJTIwMyUwQSolMkYlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div><div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div><div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div><div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div><div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div><div>97</div><div>98</div><div>99</div><div>100</div><div>101</div><div>102</div><div>103</div><div>104</div><div>105</div><div>106</div><div>107</div><div>108</div></div><div class="code"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;cstdio&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;cstring&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;queue&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> int long long</span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">int</span> <span class="hljs-title">read</span><span class="hljs-params">()</span></span>{
+	<span class="hljs-type">int</span> res=<span class="hljs-number">0</span>,ch=<span class="hljs-built_in">getchar</span>(),f=<span class="hljs-number">1</span>;
+	<span class="hljs-keyword">while</span>(!<span class="hljs-built_in">isdigit</span>(ch) <span class="hljs-keyword">and</span> ch!=EOF){
+		<span class="hljs-keyword">if</span>(ch==<span class="hljs-string">&#x27;-&#x27;</span>) f=<span class="hljs-number">-1</span>;
+		ch=<span class="hljs-built_in">getchar</span>();
+	}
+	<span class="hljs-keyword">while</span>(<span class="hljs-built_in">isdigit</span>(ch)){
+		res=(res&lt;&lt;<span class="hljs-number">3</span>)+(res&lt;&lt;<span class="hljs-number">1</span>)+(ch-<span class="hljs-string">&#x27;0&#x27;</span>);
+		ch=<span class="hljs-built_in">getchar</span>();
+	}
+	<span class="hljs-keyword">return</span> res*f;
+}
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Point</span>{
+	<span class="hljs-type">int</span> x,y;
+	<span class="hljs-built_in">Point</span>(<span class="hljs-type">int</span> _x,<span class="hljs-type">int</span> _y){
+		x=_x;y=_y;
+	}
+};
+<span class="hljs-function"><span class="hljs-keyword">inline</span> Point <span class="hljs-title">getmin</span><span class="hljs-params">(Point a,Point b)</span></span>{
+	<span class="hljs-type">int</span> sa=a.x*a.y;
+	<span class="hljs-type">int</span> sb=b.x*b.y;
+	<span class="hljs-keyword">if</span>(sa&lt;sb) <span class="hljs-keyword">return</span> a;
+	<span class="hljs-keyword">return</span> b;
+}
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Edge</span>{
+	<span class="hljs-type">int</span> to,next,wa,wb;
+} edge[<span class="hljs-number">40004</span>];
+<span class="hljs-type">int</span> head[<span class="hljs-number">10004</span>],size;
+<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">void</span> <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-type">int</span> u,<span class="hljs-type">int</span> v,<span class="hljs-type">int</span> wa,<span class="hljs-type">int</span> wb)</span></span>{
+	size++;
+	edge[size].to=v;
+	edge[size].wa=wa;
+	edge[size].wb=wb;
+	edge[size].next=head[u];
+	head[u]=size;
+}
+<span class="hljs-type">int</span> dis[<span class="hljs-number">10004</span>],vis[<span class="hljs-number">10004</span>];
+<span class="hljs-type">int</span> suma[<span class="hljs-number">10004</span>],sumb[<span class="hljs-number">10004</span>];
+<span class="hljs-type">int</span> s,t;
+<span class="hljs-function">Point <span class="hljs-title">dijkstra</span><span class="hljs-params">(Point A,Point B)</span></span>{
+	<span class="hljs-built_in">memset</span>(dis,<span class="hljs-number">0x3f</span>,<span class="hljs-built_in">sizeof</span>(dis));
+	<span class="hljs-built_in">memset</span>(vis,<span class="hljs-number">0</span>,<span class="hljs-built_in">sizeof</span>(vis));
+	<span class="hljs-built_in">memset</span>(suma,<span class="hljs-number">0</span>,<span class="hljs-built_in">sizeof</span>(suma));
+	<span class="hljs-built_in">memset</span>(sumb,<span class="hljs-number">0</span>,<span class="hljs-built_in">sizeof</span>(sumb));
+	queue&lt;<span class="hljs-type">int</span>&gt; q;
+	dis[s]=<span class="hljs-number">0</span>;
+	q.<span class="hljs-built_in">push</span>(s);
+	<span class="hljs-keyword">while</span>(!q.<span class="hljs-built_in">empty</span>()){
+		<span class="hljs-type">int</span> now=q.<span class="hljs-built_in">front</span>();q.<span class="hljs-built_in">pop</span>();
+		vis[now]=<span class="hljs-literal">false</span>;
+		<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=head[now];i;i=edge[i].next){
+			<span class="hljs-type">int</span> to=edge[i].to;
+			<span class="hljs-type">int</span> w=(B.x-A.x)*edge[i].wb+(A.y-B.y)*edge[i].wa;
+			<span class="hljs-keyword">if</span>(dis[now]+w&lt;dis[to]){
+				dis[to]=dis[now]+w;
+				suma[to]=suma[now]+edge[i].wa;
+				sumb[to]=sumb[now]+edge[i].wb;
+				<span class="hljs-keyword">if</span>(!vis[to]){
+					vis[to]=<span class="hljs-literal">true</span>;
+					q.<span class="hljs-built_in">push</span>(to);
+				}
+			}
+		}
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-built_in">Point</span>(suma[t],sumb[t]);
+}
+<span class="hljs-function">Point <span class="hljs-title">ans</span><span class="hljs-params">(<span class="hljs-number">0x3f3f3f3f</span>,<span class="hljs-number">0x3f3f3f3f</span>)</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">solve</span><span class="hljs-params">(Point a,Point b)</span></span>{
+	Point c=<span class="hljs-built_in">dijkstra</span>(a,b);
+	ans=<span class="hljs-built_in">getmin</span>(ans,c);
+	<span class="hljs-type">int</span> tx=b.x-a.x;
+	<span class="hljs-type">int</span> ty=b.y-a.y;
+	<span class="hljs-type">int</span> fx=c.x-a.x;
+	<span class="hljs-type">int</span> fy=c.y-a.y;
+	<span class="hljs-keyword">if</span>(tx*fy-ty*fx&gt;=<span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>;
+	<span class="hljs-built_in">solve</span>(a,c);
+	<span class="hljs-built_in">solve</span>(c,b);
+}
+<span class="hljs-type">int</span> n,m;
+<span class="hljs-function"><span class="hljs-type">signed</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+	n=<span class="hljs-built_in">read</span>(),m=<span class="hljs-built_in">read</span>(),s=<span class="hljs-built_in">read</span>(),t=<span class="hljs-built_in">read</span>();
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=m;i++){
+		<span class="hljs-type">int</span> u=<span class="hljs-built_in">read</span>(),v=<span class="hljs-built_in">read</span>(),a=<span class="hljs-built_in">read</span>(),b=<span class="hljs-built_in">read</span>();
+		<span class="hljs-built_in">add</span>(u,v,a,b);
+		<span class="hljs-built_in">add</span>(v,u,a,b);
+	}
+	Point a=<span class="hljs-built_in">dijkstra</span>(<span class="hljs-built_in">Point</span>(<span class="hljs-number">0</span>,<span class="hljs-number">1</span>),<span class="hljs-built_in">Point</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>));
+	Point b=<span class="hljs-built_in">dijkstra</span>(<span class="hljs-built_in">Point</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>),<span class="hljs-built_in">Point</span>(<span class="hljs-number">1</span>,<span class="hljs-number">0</span>));
+	ans=<span class="hljs-built_in">getmin</span>(a,b);
+	<span class="hljs-built_in">solve</span>(a,b);
+	cout&lt;&lt;ans.x*ans.y;
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+<span class="hljs-comment">/*
+4 5 1 4
+1 2 2 3
+1 3 3 3
+1 4 5 5
+2 4 3 1
+3 4 1 3
+*/</span>
+</div></code></pre>
+<h3 id="t4-zi-dian-xu-pai-ming" tabindex="-1">T4:字典序排名</h3>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="JTIzaW5jbHVkZSUzQ2lvc3RyZWFtJTNFJTBBJTIzaW5jbHVkZSUzQ2NzdGRpbyUzRSUwQSUyM2luY2x1ZGUlM0NhbGdvcml0aG0lM0UlMEElMjNpbmNsdWRlJTNDY3N0ZGxpYiUzRSUwQSUyM2luY2x1ZGUlM0Njc3RyaW5nJTNFJTBBJTIzaW5jbHVkZSUzQ2NtYXRoJTNFJTBBJTIzZGVmaW5lJTIwZnJlKHopJTIwZnJlb3Blbih6JTIyLmluJTIyJTJDJTIyciUyMiUyQ3N0ZGluKSUyQ2ZyZW9wZW4oeiUyMi5vdXQlMjIlMkMlMjJ3JTIyJTJDc3Rkb3V0KSUwQXVzaW5nJTIwbmFtZXNwYWNlJTIwc3RkJTNCJTBBY29uc3QlMjBpbnQlMjBOJTNEMzAxMCUzQiUwQWxvbmclMjBsb25nJTIwZiU1Qk4lNUQlNUJOJTVEJTNCJTBBJTJGJTJGZiU1QmklNUQlNUJqJTVEJTBBJTJGJTJGJUU0JUJCJThFaiVFNCVCRCU4RCVFNyVCRCVBRSVFNSVCQyU4MCVFNSVBNyU4QiVFRiVCQyU4QyVFNSU4QyU4NSVFNiU4QiVBQ2olRTQlQkQlOEQlRTclQkQlQUUlRUYlQkMlOEMlRTUlODYlOEQlRTQlQjglODAlRTclOUIlQjQlRTUlODglQjAlRTYlOUMlODAlRTUlOTAlOEUlRUYlQkMlOEMlRTYlODAlQkIlRTUlODUlQjElRTUlQTQlOUElRTUlQjAlOTElRTclQTclOEQlRTYlODMlODUlRTUlODYlQjUlRUYlQkMlODglRTUlQUYlQjklRTUlQkElOEYlRTUlODglOTclRTYlOEUlOTIlRTUlOTAlOEQlRTglQjQlQTElRTclOEMlQUUlRUYlQkMlODklMEElMkYlMkZpJUU4JUExJUE4JUU3JUE0JUJBJUU1JUI3JUIyJUU3JUJCJThGJUU1JThDJUI5JUU5JTg1JThEJUU0JUJBJTg2JUU1JUE0JTlBJUU1JUIwJTkxJUU0JUI4JUFBJUU1JUFEJTkwJUU1JUJBJThGJUU1JTg4JTk3JUVGJUJDJThDJUU1JTlCJUEwJUU0JUI4JUJBJUU4JUJGJTk5JUU0JUI4JTgwJUU3JUJCJUI0JUU2JTlDJTg5JUU1JTkwJThFJUU2JTk1JTg4JUU2JTgwJUE3JTBBaW50JTIwYSU1Qk4lNUQlMkNiJTVCTiU1RCUyQ3ByZSU1Qk4lNUQlM0IlMEFpbnQlMjBtYWluKCklMjAlN0IlMEElMDlpbnQlMjBpJTJDbiUyQ20lMkNqJTJDayUyQ3AlM0JjaGFyJTIwYyUzQmxvbmclMjBsb25nJTIwUSUzQiUwQSUwOXdoaWxlJTIwKChjJTNEZ2V0Y2hhcigpKSUzQycxJyU3QyU3Qyc5JyUzQ2MpJTNCJTBBJTA5YSU1Qm4lM0QxJTVEJTNEYy0nMCclM0IlMEElMDl3aGlsZSUyMCgnMSclM0MlM0QoYyUzRGdldGNoYXIoKSklMjYlMjZjJTNDJTNEJzknKSUyMGElNUIlMkIlMkJuJTVEJTNEYy0nMCclM0IlMEElMDl3aGlsZSUyMCgoYyUzRGdldGNoYXIoKSklM0MnMSclN0MlN0MnOSclM0NjKSUzQiUwQSUwOWIlNUJtJTNEMSU1RCUzRGMtJzAnJTNCJTBBJTA5d2hpbGUlMjAoJzEnJTNDJTNEKGMlM0RnZXRjaGFyKCkpJTI2JTI2YyUzQyUzRCc5JyklMjBiJTVCJTJCJTJCbSU1RCUzRGMtJzAnJTNCJTBBJTA5ZiU1Qm4lMkIxJTVEJTVCbSUyQjElNUQlM0QxJTNCJTBBJTA5Y2luJTNFJTNFUSUzQiUwQSUwOSUyRiUyRiVFNSVBRiVCOWYlRTglQkYlOUIlRTglQTElOEMlRTYlOUMlODAlRTUlQTQlQTclRTUlODAlQkMlRTklOTklOTAlRTUlODglQjYlRUYlQkMlOUFRJTJCMSUwQSUwOSUyRiUyRiVFNSU5QiVBMCVFNCVCOCVCQSVFNiU4OCU5MSVFNCVCQiVBQyVFNCVCOCU4RCVFNSVCOCU4QyVFNiU5QyU5QiVFNCVCQiU4RSVFNSVBNCVCNCVFNSVCQyU4MCVFNSVBNyU4QiVFNiU5RSU5QSVFNCVCOCVCRSVFNSVCRSU5NyVFNSU4OCVCMGFucyVFRiVCQyU4QyVFOCVCRiU5OSVFNiVBMCVCNyVFNyU5QSU4NCVFOCVBRiU5RCVFNiU4OCU5MSVFNCVCQiVBQyVFOCVCRiU5OCVFOSU5QyU4MCVFOCVBNiU4MSVFNiVCMSU4MiVFNSU4NyVCQXQlRTUlQkElOEYlRTUlODglOTclRTclOUElODQlRTYlOEUlOTIlRTUlOTAlOEQlMEElMDklMkYlMkYlRTYlOUMlODAlRTUlOTAlOEUlRTYlQjElODJhbnMlRTclOUElODQlRTYlOTclQjYlRTUlODAlOTklRTYlOTglQUYlRTQlQkIlOEV0JUU3JTlBJTg0JUU1JTlGJUJBJUU3JUExJTgwJUU0JUI4JThBJUU2JTlFJTlBJUU0JUI4JUJFJTBBJTA5JTJGJTJGJUU1JUFFJTlFJUU5JTk5JTg1JUU0JUI4JThBJUVGJUJDJThDJUU2JTlDJTg5JUU0JUJBJTg2JUU2JTlDJTgwJUU1JUE0JUE3JUU1JTgwJUJDJUU5JTk5JTkwJUU1JTg4JUI2JUVGJUJDJThDJUU0JUJGJTlEJUU4JUFGJTgxJUU2JTk1JUI0JUU0JUI4JUFBJUU4JUFFJUExJUU3JUFFJTk3JUU0JUI4JThEJUU0JUJDJTlBJUU3JTg4JTg2bG9uZyUyMGxvbmclRTMlODAlODIlMEElMDklMkYlMkYlRTYlOUUlOUElRTQlQjglQkUlRTYlOTclQjYlRUYlQkMlOEMlRTUlQTYlODIlRTYlOUUlOUNRJUU1JUE0JUE3JUU0JUJBJThFJUU4JUI0JUExJUU3JThDJUFFJUU1JTgwJUJDJUVGJUJDJThDJUU1JUIwJUIxJUU1JTg3JThGJUU1JThFJUJCJUVGJUJDJThDJUU2JTlDJTgwJUU1JUE0JUE3JUU1JTgwJUJDJUU5JTk5JTkwJUU1JTg4JUI2JUU4JUJGJTk5JUU0JUI4JUFBJUU4JUExJThDJUU0JUI4JUJBJUU2JUIyJUExJUU2JTlDJTg5JUU0JUJBJUE3JUU3JTk0JTlGJUU1JUJEJUIxJUU1JTkzJThEJTBBJTA5JTJGJTJGJTA5JTA5JTIwJTIwJUU1JUE2JTgyJUU2JTlFJTlDUSVFNSVCMCU4RiVFNCVCQSU4RSVFRiVCQyU4QyVFOSU4MiVBMyVFNCVCOSU4OCVFNSVCRCU5MyVFNSU4OSU4RCVFNiU5RSU5QSVFNCVCOCVCRSVFNyU5QSU4NCVFNiU5NSVCMCVFNSVCMCVCMSVFNiU5RSU5QSVFNCVCOCVCRSVFNSVBRiVCOSVFNCVCQSU4NiVFRiVCQyU4QyVFNSVCMCVCMSVFOCVCRiU5QiVFNCVCOCU4MCVFNiVBRCVBNSVFNyVCQiU4NiVFNSU4QyU5NmFucyVFNSVCQSU4RiVFNSU4OCU5NyVFRiVCQyU4QyVFNiU5QyU4MCVFNSVBNCVBNyVFNSU4MCVCQyVFOSU5OSU5MCVFNSU4OCVCNiVFNCVCOSU5RiVFNiVCMiVBMSVFNiU5QyU4OSVFNCVCQSVBNyVFNyU5NCU5RiVFNSVCRCVCMSVFNSU5MyU4RCUwQSUwOSUyRiUyRiVFNyU5NCVCMSVFNCVCQSU4RWklRTQlQjglOEIlRTYlQTAlODclRTQlQkIlOEUxJUU1JUJDJTgwJUU1JUE3JThCJUU2JTlFJTlBJUU0JUI4JUJFJUVGJUJDJThDJUU1JUFFJTlFJUU5JTk5JTg1JUU0JUI4JThBJUU3JUFDJUFDJUU0JUI4JTgwJUU0JUI4JUFBJUU0JUJEJThEJUU3JUJEJUFFJUVGJUJDJThDJUU0JUI4JThEJUU1JThDJTg1JUU2JThCJUFDJUU3JUFDJUFDJUU0JUI4JTgwJUU0JUI4JUFBJUU0JUJEJThEJUU3JUJEJUFFJUVGJUJDJThDJUU0JUI5JThCJUU1JTg5JThEJUVGJUJDJThDJUU2JTk4JUFGJUU2JTlDJTg5MCVFNCVCOCVBQSVFNiU5NSVCMCVFNSU5QyVBOHMlRTUlQkElOEYlRTUlODglOTclRTQlQjglQUQlRTglQTIlQUIlRTklODAlODklRTYlOEIlQTklMEElMDklMkYlMkYlRTYlODklODAlRTQlQkIlQTVpJUU3JTlBJTg0JUU1JUFFJTlFJUU5JTk5JTg1JUU2JTg0JThGJUU0JUI5JTg5JUU2JTk4JUFGJUU1JTg5JThEJUU5JTlEJUEyJUU5JTgwJTg5JUU2JThCJUE5JUU0JUJBJTg2eCUyQjElRTQlQjglQUElRTYlOTUlQjAlRUYlQkMlOEMlRTklOUMlODAlRTglQTYlODElRTYlOEElOEFpJUU0JUI4JThCJUU2JUEwJTg3LTElRTYlODklOEQlRTYlOTglQUYlRTUlQUUlOUUlRTklOTklODUlRTYlODQlOEYlRTQlQjklODklMEElMDlmb3IlMjAoaiUzRG0lM0JqJTNCai0tKSUyMGYlNUJuJTJCMSU1RCU1QmolNUQlM0RtaW4oZiU1Qm4lMkIxJTVEJTVCaiUyQjElNUQqOSUyQ1ElMkIxKSUzQiUwQSUwOSUyRiUyRnMlRTUlQkElOEYlRTUlODglOTclRTUlODklOEQlRTklOUQlQTIlRTYlOUUlOUElRTQlQjglQkUlRTUlQUUlOEMlRTQlQkElODYlRUYlQkMlOEMlRTUlODYlOEQlRTUlQkUlODAlRTUlOTAlOEUlRTklOUQlQTIlRTYlQUYlOEYlRTQlQjglODAlRTQlQkQlOEQlRTklODMlQkQqOSVFNSU4RCVCMyVFNSU4RiVBRiVFRiVCQyU4QyVFNiVCMiVBMSVFNiU5QyU4OXMlRTUlQkElOEYlRTUlODglOTclRTclOUElODQlRTklOTklOTAlRTUlODglQjYlRTUlQjglQTYlRTYlOUQlQTUlRTclOUElODQlRTklQkElQkIlRTclODMlQTYlRTQlQkElODYlMEElMDlmb3IlMjAoaSUzRG4lM0JpJTNCaS0tKSUwQSUwOSUwOWZvciUyMChqJTNEbSUzQmolM0JqLS0pJTBBJTA5JTA5JTA5ZiU1QmklNUQlNUJqJTVEJTNEbWluKGYlNUJpJTVEJTVCaiUyQjElNUQqOCUyQmYlNUJpJTJCMSU1RCU1QmolMkIxJTVEJTJDUSUyQjEpJTNCJTBBJTA5JTJGJTJGaSVFNiU5OCVBRmolRTQlQkQlOEQlRTclQkQlQUUlRTQlQjklOEIlRTUlODklOEQlRUYlQkMlOEMlRTQlQjglOEQlRTUlOEMlODUlRTYlOEIlQUNqJUU0JUJEJThEJUU3JUJEJUFFJUVGJUJDJThDJUU5JTgwJTg5JUU0JUJBJTg2JUU1JUE0JTlBJUU1JUIwJTkxJUU0JUI4JUFBcyVFNSVCQSU4RiVFNSU4OCU5NyUwQSUwOSUyRiUyRmolRTglQkYlOTklRTQlQjglQUElRTQlQkQlOEQlRTclQkQlQUUlRTklODAlODklRTUlODUlQjYlRTQlQkQlOTk4JUU0JUI4JUFBJUU2JTk1JUIwJUVGJUJDJThDOCVFNyVBNyU4RCVFNiU4MyU4NSVFNSU4NiVCNSVFRiVCQyU4QyVFNCVCOCU5NGklRTQlQjglOEQlRTUlOEElQTAxJTBBJTA5JTJGJTJGaiVFOCVCRiU5OSVFNCVCOCVBQSVFNCVCRCU4RCVFNyVCRCVBRSVFNSU4RiU4OCVFNSVCRSU4MCVFNSU5MCU4RSVFOSU4MCU4OSVFNCVCQSU4NiVFNCVCOCVBQSVFNSU5QyVBOHMlRTUlQkElOEYlRTUlODglOTclRTklODclOEMlRTclOUElODQlRTYlOTUlQjAlRUYlQkMlOEMlRTQlQjglODAlRTclQTclOEQlRTYlODMlODUlRTUlODYlQjUlRUYlQkMlOENpJTJCMSUwQSUwOWZvcihpbnQlMjBpJTNEMSUzQmklM0MlM0RuJTNCaSUyQiUyQiklN0IlMEElMDklMDlmb3IoaW50JTIwaiUzRDElM0JqJTNDJTNEbSUzQmolMkIlMkIpJTdCJTBBJTA5JTA5JTA5Y291dCUzQyUzQ2YlNUJpJTVEJTVCaiU1RCUzQyUzQyclMjAnJTNCJTBBJTA5JTA5JTdEJTBBJTA5JTA5Y291dCUzQyUzQ2VuZGwlM0IlMEElMDklN0QlMEElMDlmb3IlMjAoaSUzRDElM0JpJTNDJTNEbSUzQmklMkIlMkIpJTIwcHJlJTVCaSU1RCUzRHByZSU1QmktMSU1RCUyQihiJTVCaSU1RCUzRCUzRGElNUJwcmUlNUJpLTElNUQlMkIxJTVEKSUzQiUwQSUwOWZvciUyMChqJTNEbSUzQmolM0JqLS0pJTIwJTdCJTBBJTA5JTA5Zm9yJTIwKGslM0RiJTVCaiU1RCUyQjElM0JrJTNDJTNEOSUzQmslMkIlMkIpJTdCJTJGJTJGJUU3JUExJUFFJUU0JUJGJTlEJUU2JThFJTkyJUU1JTkwJThEJUU2JUFGJTk0dCVFNSVCQSU4RiVFNSU4OCU5NyVFNSVBNCVBNyUwQSUwOSUwOSUwOSUyRiUyRmNvdXQlM0MlM0MlMjIlNUIlMjIlM0MlM0NqJTNDJTNDJTIyJTVELSUzRSUyMiUzQyUzQ2slM0MlM0MlMjIlMkNwJTNBJTIyJTNDJTNDcHJlJTVCai0xJTVEJTJCKGslM0QlM0RhJTVCcHJlJTVCai0xJTVEJTJCMSU1RCklMkIxJTNDJTNDJTIyJTJDcSUyMiUzQyUzQ1ElM0MlM0NlbmRsJTNCJTBBJTA5JTA5JTA5JTJGJTJGJUU2JTlDJTgwJUU1JTkwJThFJUU3JTlBJTg0JTJCMSVFNiU5OCVBRiVFNSVBRSU5RSVFOSU5OSU4NSVFNiU4MyU4NSVFNSU4NiVCNSVFOCVCRCVBQyVFNiU4RCVBMiVFNCVCOCVCQSVFNyVCQSVBNiVFNSVBRSU5QSVFNiU4MyU4NSVFNSU4NiVCNSUwQSUwOSUwOSUwOWlmJTIwKFElM0MlM0RmJTVCcHJlJTVCai0xJTVEJTJCKGslM0QlM0RhJTVCcHJlJTVCai0xJTVEJTJCMSU1RCklMkIxJTVEJTVCaiUyQjElNUQpJTIwJTdCJTBBJTA5JTA5JTA5JTA5JTJGJTJGJUU2JTlFJTlBJUU0JUI4JUJFJUU0JUJEJThEJUU3JUJEJUFFJUU0JUI5JThCJUU1JTg5JThEJUU3JTlBJTg0JUU2JTk1JUIwJUU5JTgzJUJEJUU1JThFJTlGJUU1JUIwJTgxJUU0JUI4JThEJUU1JThBJUE4JTBBJTA5JTA5JTA5JTA5Zm9yJTIwKGklM0QxJTNCaSUzQ2olM0JpJTJCJTJCKSUyMHByaW50ZiglMjIlMjVkJTIyJTJDYiU1QmklNUQpJTNCcHJpbnRmKCUyMiUyNWQlMjIlMkNrKSUzQiUwQSUwOSUwOSUwOSUwOXAlM0RwcmUlNUJqLTElNUQlMkIoayUzRCUzRGElNUJwcmUlNUJqLTElNUQlMkIxJTVEKSUzQiUwQSUwOSUwOSUwOSUwOWZvciUyMCglMkIlMkJqJTNCaiUzQyUzRG0lM0JqJTJCJTJCJTJDcCUyQiUzRGslM0QlM0RhJTVCcCUyQjElNUQpJTBBJTA5JTA5JTA5JTA5JTA5Zm9yJTIwKGslM0QxJTNCayUzQyUzRDklM0JrJTJCJTJCKSUwQSUwOSUwOSUwOSUwOSUwOSUwOWlmJTIwKFElM0MlM0RmJTVCcCUyQihrJTNEJTNEYSU1QnAlMkIxJTVEKSUyQjElNUQlNUJqJTJCMSU1RCklMjAlN0IlMEElMDklMDklMDklMDklMDklMDklMDlwcmludGYoJTIyJTI1ZCUyMiUyQ2spJTNCJTBBJTA5JTA5JTA5JTA5JTA5JTA5JTA5YnJlYWslM0IlMEElMDklMDklMDklMDklMDklMDklN0QlMEElMDklMDklMDklMDklMDklMDllbHNlJTIwUS0lM0RmJTVCcCUyQihrJTNEJTNEYSU1QnAlMkIxJTVEKSUyQjElNUQlNUJqJTJCMSU1RCUzQiUwQSUwOSUwOSUwOSUwOXJldHVybiUyMDAlM0IlMEElMDklMDklMDklN0QlMEElMDklMDklMDllbHNlJTIwUS0lM0RmJTVCcHJlJTVCai0xJTVEJTJCKGslM0QlM0RhJTVCcHJlJTVCai0xJTVEJTJCMSU1RCklMkIxJTVEJTVCaiUyQjElNUQlM0IlMEElMDklMDklN0QlMEElMDklN0QlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div><div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div><div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div><div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div><div>67</div><div>68</div></div><div class="code"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;cstdio&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;cstdlib&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;cstring&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;cmath&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> fre(z) freopen(z<span class="hljs-string">&quot;.in&quot;</span>,<span class="hljs-string">&quot;r&quot;</span>,stdin),freopen(z<span class="hljs-string">&quot;.out&quot;</span>,<span class="hljs-string">&quot;w&quot;</span>,stdout)</span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;
+<span class="hljs-type">const</span> <span class="hljs-type">int</span> N=<span class="hljs-number">3010</span>;
+<span class="hljs-type">long</span> <span class="hljs-type">long</span> f[N][N];
+<span class="hljs-comment">//f[i][j]</span>
+<span class="hljs-comment">//从j位置开始，包括j位置，再一直到最后，总共多少种情况（对序列排名贡献）</span>
+<span class="hljs-comment">//i表示已经匹配了多少个子序列，因为这一维有后效性</span>
+<span class="hljs-type">int</span> a[N],b[N],pre[N];
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+	<span class="hljs-type">int</span> i,n,m,j,k,p;<span class="hljs-type">char</span> c;<span class="hljs-type">long</span> <span class="hljs-type">long</span> Q;
+	<span class="hljs-keyword">while</span> ((c=<span class="hljs-built_in">getchar</span>())&lt;<span class="hljs-string">&#x27;1&#x27;</span>||<span class="hljs-string">&#x27;9&#x27;</span>&lt;c);
+	a[n=<span class="hljs-number">1</span>]=c-<span class="hljs-string">&#x27;0&#x27;</span>;
+	<span class="hljs-keyword">while</span> (<span class="hljs-string">&#x27;1&#x27;</span>&lt;=(c=<span class="hljs-built_in">getchar</span>())&amp;&amp;c&lt;=<span class="hljs-string">&#x27;9&#x27;</span>) a[++n]=c-<span class="hljs-string">&#x27;0&#x27;</span>;
+	<span class="hljs-keyword">while</span> ((c=<span class="hljs-built_in">getchar</span>())&lt;<span class="hljs-string">&#x27;1&#x27;</span>||<span class="hljs-string">&#x27;9&#x27;</span>&lt;c);
+	b[m=<span class="hljs-number">1</span>]=c-<span class="hljs-string">&#x27;0&#x27;</span>;
+	<span class="hljs-keyword">while</span> (<span class="hljs-string">&#x27;1&#x27;</span>&lt;=(c=<span class="hljs-built_in">getchar</span>())&amp;&amp;c&lt;=<span class="hljs-string">&#x27;9&#x27;</span>) b[++m]=c-<span class="hljs-string">&#x27;0&#x27;</span>;
+	f[n<span class="hljs-number">+1</span>][m<span class="hljs-number">+1</span>]=<span class="hljs-number">1</span>;
+	cin&gt;&gt;Q;
+	<span class="hljs-comment">//对f进行最大值限制：Q+1</span>
+	<span class="hljs-comment">//因为我们不希望从头开始枚举得到ans，这样的话我们还需要求出t序列的排名</span>
+	<span class="hljs-comment">//最后求ans的时候是从t的基础上枚举</span>
+	<span class="hljs-comment">//实际上，有了最大值限制，保证整个计算不会爆long long。</span>
+	<span class="hljs-comment">//枚举时，如果Q大于贡献值，就减去，最大值限制这个行为没有产生影响</span>
+	<span class="hljs-comment">//		  如果Q小于，那么当前枚举的数就枚举对了，就进一步细化ans序列，最大值限制也没有产生影响</span>
+	<span class="hljs-comment">//由于i下标从1开始枚举，实际上第一个位置，不包括第一个位置，之前，是有0个数在s序列中被选择</span>
+	<span class="hljs-comment">//所以i的实际意义是前面选择了x+1个数，需要把i下标-1才是实际意义</span>
+	<span class="hljs-keyword">for</span> (j=m;j;j--) f[n<span class="hljs-number">+1</span>][j]=<span class="hljs-built_in">min</span>(f[n<span class="hljs-number">+1</span>][j<span class="hljs-number">+1</span>]*<span class="hljs-number">9</span>,Q<span class="hljs-number">+1</span>);
+	<span class="hljs-comment">//s序列前面枚举完了，再往后面每一位都*9即可，没有s序列的限制带来的麻烦了</span>
+	<span class="hljs-keyword">for</span> (i=n;i;i--)
+		<span class="hljs-keyword">for</span> (j=m;j;j--)
+			f[i][j]=<span class="hljs-built_in">min</span>(f[i][j<span class="hljs-number">+1</span>]*<span class="hljs-number">8</span>+f[i<span class="hljs-number">+1</span>][j<span class="hljs-number">+1</span>],Q<span class="hljs-number">+1</span>);
+	<span class="hljs-comment">//i是j位置之前，不包括j位置，选了多少个s序列</span>
+	<span class="hljs-comment">//j这个位置选其余8个数，8种情况，且i不加1</span>
+	<span class="hljs-comment">//j这个位置又往后选了个在s序列里的数，一种情况，i+1</span>
+	<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">1</span>;i&lt;=n;i++){
+		<span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> j=<span class="hljs-number">1</span>;j&lt;=m;j++){
+			cout&lt;&lt;f[i][j]&lt;&lt;<span class="hljs-string">&#x27; &#x27;</span>;
+		}
+		cout&lt;&lt;endl;
+	}
+	<span class="hljs-keyword">for</span> (i=<span class="hljs-number">1</span>;i&lt;=m;i++) pre[i]=pre[i<span class="hljs-number">-1</span>]+(b[i]==a[pre[i<span class="hljs-number">-1</span>]<span class="hljs-number">+1</span>]);
+	<span class="hljs-keyword">for</span> (j=m;j;j--) {
+		<span class="hljs-keyword">for</span> (k=b[j]<span class="hljs-number">+1</span>;k&lt;=<span class="hljs-number">9</span>;k++){<span class="hljs-comment">//确保排名比t序列大</span>
+			<span class="hljs-comment">//cout&lt;&lt;&quot;[&quot;&lt;&lt;j&lt;&lt;&quot;]-&gt;&quot;&lt;&lt;k&lt;&lt;&quot;,p:&quot;&lt;&lt;pre[j-1]+(k==a[pre[j-1]+1])+1&lt;&lt;&quot;,q&quot;&lt;&lt;Q&lt;&lt;endl;</span>
+			<span class="hljs-comment">//最后的+1是实际情况转换为约定情况</span>
+			<span class="hljs-keyword">if</span> (Q&lt;=f[pre[j<span class="hljs-number">-1</span>]+(k==a[pre[j<span class="hljs-number">-1</span>]<span class="hljs-number">+1</span>])<span class="hljs-number">+1</span>][j<span class="hljs-number">+1</span>]) {
+				<span class="hljs-comment">//枚举位置之前的数都原封不动</span>
+				<span class="hljs-keyword">for</span> (i=<span class="hljs-number">1</span>;i&lt;j;i++) <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d&quot;</span>,b[i]);<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d&quot;</span>,k);
+				p=pre[j<span class="hljs-number">-1</span>]+(k==a[pre[j<span class="hljs-number">-1</span>]<span class="hljs-number">+1</span>]);
+				<span class="hljs-keyword">for</span> (++j;j&lt;=m;j++,p+=k==a[p<span class="hljs-number">+1</span>])
+					<span class="hljs-keyword">for</span> (k=<span class="hljs-number">1</span>;k&lt;=<span class="hljs-number">9</span>;k++)
+						<span class="hljs-keyword">if</span> (Q&lt;=f[p+(k==a[p<span class="hljs-number">+1</span>])<span class="hljs-number">+1</span>][j<span class="hljs-number">+1</span>]) {
+							<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d&quot;</span>,k);
+							<span class="hljs-keyword">break</span>;
+						}
+						<span class="hljs-keyword">else</span> Q-=f[p+(k==a[p<span class="hljs-number">+1</span>])<span class="hljs-number">+1</span>][j<span class="hljs-number">+1</span>];
+				<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+			}
+			<span class="hljs-keyword">else</span> Q-=f[pre[j<span class="hljs-number">-1</span>]+(k==a[pre[j<span class="hljs-number">-1</span>]<span class="hljs-number">+1</span>])<span class="hljs-number">+1</span>][j<span class="hljs-number">+1</span>];
+		}
+	}
+}
+</div></code></pre>

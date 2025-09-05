@@ -1,0 +1,26 @@
+<p>由于胡**跑路，先前的博客网站从4月中旬开始无法访问。不过我已经猜到了这一点，所以提前使用UpdraftPlus插件进行了定期的备份，因此并没有造成太大的损失。今天心血来潮决定将博客重建，从下午五点一直搞到晚上九点，中间遇到不少问题，因此水一篇文章来记录。</p>
+<h2 id="fu-wu-qi-xuan-ze" tabindex="-1">服务器选择</h2>
+<p>之前在百度上搜索并尝试过很多免费php空间。但这些php空间都有一个共同点：如果要绑定自己的域名，就必须将自己域名的ns服务器设置为他们的。然而我的域名是在cloudflare上买的，更改ns服务器需要购买cf的企业版服务，所以就放弃了。在今天偶然看到一个叫”青云互联“的idc出售低价vps，19元/月，感觉还可以，就下单购买。
+不过中间遇到了很多问题。一开始想选择windows server 2008系统，然而安装宝塔很慢，并且又想到好像使用宝塔面板的都是linux系统，因此就又决定使用ubuntu。刚安装好ubuntu，可以通过ssh连接，在服务器后台将密码修改成自己的，就连接不了了，提示 “<code>connection refused</code>”，只好使用后台的VNC进行宝塔面板的安装，之后的终端操作都借助宝塔面板上的终端来进行。不过奇怪的是宝塔面板安装好后又可以通过ssh连接了。</p>
+<h2 id="zu-jian-de-an-zhuang" tabindex="-1">组件的安装</h2>
+<p>在安装好宝塔面板后，宝塔面板会弹出提示，可以选择一键安装nginx，php，mysql，然后我就选择了一键安装，并等了一段时间。在全部安装完毕后创建站点，发现无法新建mysql数据库，原因是没有安装mysql。考虑到可能是宝塔面板安装mysql失败，所以决定自己手动安装。安装完毕后又因为莫名其妙的错误导致mysql服务启动失败，在网上大量寻找解决办法，未果。无奈只好重新使用宝塔安装mysql，竟然安装成功。
+然后又打算新建站点，点击确定后弹出下面的提示
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/1.png" style="transform: scale(1)" width=436 height=178></div>
+考虑到可能宝塔面板也没有安装好nginx，所以就手动在软件商店里安装了一下，很顺利地解决了
+再次新建站点，发现没有安装php，按照上述方法又手动安装了一下php5.6（可见宝塔第一次一键安装并没有安装上）。就在认为成功了，发现php启动失败，提示</p>
+<blockquote>
+<p>php: error while loading shared libraries: libcares.so.2: cannot open shared object file: No such file or directory
+看样子是少了一个库。使用”<code>apt-get install libcares2</code>“进行安装，没有找到libcares2，只好又手动安装
+在opensuse上下载二进制软件包[^1]，上传到服务器上。因为软件包是rpm格式的，而ubuntu支持deb格式，所以还需要转换。
+[^1]: 下载链接：<a href="https://software.opensuse.org/download/package?package=libcares2&amp;project=openSUSE%3AFactory">https://software.opensuse.org/download/package?package=libcares2&amp;project=openSUSE%3AFactory</a>
+输入”<code>apt-get install alien</code>“，然后”<code>alien libcares2.rpm</code>“，将其转换为deb格式，再“<code>dpkg -i libcares2.deb</code>&quot;进行安装。安装完毕后仍不能正常启动php，是缺少了链接。”<code>echo &quot;/usr/lib64&quot; &gt;&gt; /etc/ld.so.conf</code>”，然后“<code>ldconfig</code>”重新链接，回到宝塔面板，就可以成功重新启动php了</p>
+</blockquote>
+<h2 id="bei-fen-huan-yuan" tabindex="-1">备份还原</h2>
+<p>在安装好wordpress后，安装UpcraftPlus插件。在安装时又遇到问题：提示需要连接ftp
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/2.png" style="transform: scale(1)" width=732 height=369></div>
+百度一番才知道，这可能是网站的wwwroot目录权限不足，导致wordpress无法写入文件，所以在后台更改了一下权限
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/3.png" style="transform: scale(1)" width=471 height=309></div>
+然后再wp-config.php中加入“<code>define('FS_METHOD','direct');</code>”强制wordpress不使用ftp写文件。这样就成功的装上了插件。
+之后将之前的备份数据使用这个插件还原。在之前使用UpcraftPlus插件定时备份，将其备份数据发送到邮箱中，这样就可以稳定获取到定时备份。
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/4.png" style="transform: scale(1)" width=858 height=158></div>
+备份还原后整个网站又和之前一模一样了</p>

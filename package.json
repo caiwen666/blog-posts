@@ -1,0 +1,53 @@
+{
+	"name": "builder",
+	"version": "1.0.0",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"lint": "prettier --check ./src/**/*.{ts,tsx,js,jsx,json,md,css} && tsc --noEmit && eslint --no-ignore ./src",
+		"fmt": "prettier --write ./src/**/*.{ts,tsx,js,jsx,json,md,css}",
+		"submit": "node ./dist/index.js ./ all"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"devDependencies": {
+		"@types/deasync": "^0.1.5",
+		"@types/line-reader": "^0.0.37",
+		"@types/markdown-it-container": "^2.0.10",
+		"@types/markdown-it-footnote": "^3.0.4",
+		"@types/pinyin": "^2.10.2",
+		"@types/request": "^2.48.12",
+		"@types/tmp": "^0.2.6",
+		"@typescript-eslint/eslint-plugin": "^8.21.0",
+		"@typescript-eslint/parser": "^8.21.0",
+		"eslint": "^9.18.0",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-prettier": "^5.2.3",
+		"globals": "^16.3.0",
+		"prettier": "^3.4.2",
+		"typescript": "^5.7.3"
+	},
+	"dependencies": {
+		"@sindresorhus/slugify": "^2.2.1",
+		"@vscode/markdown-it-katex": "^1.1.1",
+		"axios": "^1.7.9",
+		"deasync": "^0.1.30",
+		"dotenv": "^17.2.0",
+		"highlight.js": "^11.11.1",
+		"line-reader": "^0.4.0",
+		"markdown-it": "^14.1.0",
+		"markdown-it-anchor": "^9.2.0",
+		"markdown-it-container": "^4.0.0",
+		"markdown-it-footnote": "^4.0.0",
+		"openai": "^5.10.1",
+		"pinyin": "^4.0.0-alpha.2",
+		"request": "^2.88.2",
+		"sharp": "^0.33.5",
+		"tmp": "^0.2.3",
+		"ts-node": "^10.9.2",
+		"typescript-eslint": "^8.21.0"
+	}
+}

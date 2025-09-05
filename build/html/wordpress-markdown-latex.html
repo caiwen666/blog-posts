@@ -1,0 +1,44 @@
+<p>wordpress自带的文章编辑器操作比较繁琐，用来随手记笔记的话比较麻烦，还不能插入公式之类的东西。而如果使用markdown记笔记的话，无论是排版还是插入公式都非常轻松。本文就记录一下如何在wordpress中使用markdown，并且支持latex公式，以及中间遇到的问题</p>
+<h2 id="cha-jian-an-zhuang" tabindex="-1">插件安装</h2>
+<p>在wordpress后台安装 MathJax-LaTeX 和 WP Githuber MD 这两个插件，并启用
+按如下配置MathJax-LaTeX插件
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/12-1-1024x461.png" style="transform: scale(1)" width=1024 height=461></div>
+其中<code>Custom MathJax location?</code>中填入 <code>https://cdn.bootcss.com/mathjax/2.7.0/MathJax.js</code> 这样我们就可以比较快速的加载mathjax的js文件</p>
+<h2 id="la-tex-wu-fa-xian-shi" tabindex="-1">LaTex无法显示</h2>
+<p>在后台写文章时会发现WP Githuber MD的编辑器并不支持显示LaTex，文章保存后在文章界面中MathJax-LaTeX也没有对LaTex进行解析。为此，我们需要进行如下操作
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/02/w1.png" style="transform: scale(1)" width=416 height=229></div>
+在后台，点击“外观”，选择“主题文件编辑器”，在右侧选择“header.php”
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/13.png" style="transform: scale(1)" width=316 height=108></div>
+在右侧加入如下代码
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/14.png" style="transform: scale(1)" width=529 height=238></div></p>
+<pre><div class="head"><div class="language">js</div><div class="copy" data="TWF0aEpheC5IdWIuQ29uZmlnKCU3QiUwQSUwOXRleDJqYXglM0ElMjAlN0IlMEElMDklMDlpbmxpbmVNYXRoJTNBJTIwJTVCJTBBJTA5JTA5JTA5JTVCJTIyJTI0JTIyJTJDJTIwJTIyJTI0JTIyJTVEJTJDJTBBJTA5JTA5JTA5JTVCJTIyJTVDJTVDKCUyMiUyQyUyMCUyMiU1QyU1QyklMjIlNUQlMkMlMEElMDklMDklNUQlMkMlMEElMDklMDlwcm9jZXNzRXNjYXBlcyUzQSUyMHRydWUlMkMlMEElMDklN0QlMkMlMEElN0QpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-title class_">MathJax</span>.<span class="hljs-property">Hub</span>.<span class="hljs-title class_">Config</span>({
+	<span class="hljs-attr">tex2jax</span>: {
+		<span class="hljs-attr">inlineMath</span>: [
+			[<span class="hljs-string">&quot;$&quot;</span>, <span class="hljs-string">&quot;$&quot;</span>],
+			[<span class="hljs-string">&quot;\\(&quot;</span>, <span class="hljs-string">&quot;\\)&quot;</span>],
+		],
+		<span class="hljs-attr">processEscapes</span>: <span class="hljs-literal">true</span>,
+	},
+});
+</div></code></pre>
+<p>然后点击“更新文件”
+然而这时候我遇到了一个问题
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/6.png" style="transform: scale(1)" width=912 height=98></div>
+我们按照以下方法解决，进入网站管理面板，进入“wp-admin/includes”目录，找到“file.php”文件进行编辑
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/7.png" style="transform: scale(1)" width=830 height=478></div>
+使用搜索功能，查找 <code>is_active</code>，然后将 <code>if ( $is_active &amp;&amp; .......}</code> 这一部分代码删除
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/8.png" style="transform: scale(1)" width=687 height=311></div>
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/9.png" style="transform: scale(1)" width=430 height=138><div class="img-title">删除后</div></div>
+然后保存，在回到wordpress后台，点击“更新文件”就可以了
+再回到文章界面，LaTex可以正常显示
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/5.png" style="transform: scale(1)" width=871 height=104><div class="img-title">修改前</div></div>
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/11.png" style="transform: scale(1)" width=773 height=108><div class="img-title">修改后</div></div></p>
+<h2 id="geng-hao-de-markdown-ti-yan" tabindex="-1">更好的Markdown体验</h2>
+<p>但这样一来仍然无法在编辑文章时在旁边的预览看到LaTex公式。为了拥有在洛谷上一样的markdown体验，我将洛谷的markdown编辑器源码下载下来，并加了个自动保存的功能，作为自己的markdown编辑器
+<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/07/15.png" style="transform: scale(1)" width=1280 height=433></div>
+编辑好后直接把markdown文本复制到wordpress即可。
+编辑器网址：<a href="https://www.caiwen.work/tools/markdown">https://www.caiwen.work/tools/markdown</a></p>
+<div class="alert alert-error"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"></path></svg></div><div class="message"><div class="title"> 警告</div><p>由于博客已经经过多次搬迁和改动，上述链接已经不可用。</p>
+</div></div>
+<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 更好的方案？</div><p>事实上用WP editor.md这个插件就不用那么麻烦了</p>
+</div></div>

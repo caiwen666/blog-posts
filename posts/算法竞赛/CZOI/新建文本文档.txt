@@ -1,0 +1,200 @@
+## T2 签到  
+
+题目也是非常简短。  
+
+关键点一：首先需要看懂数据是怎么读入的，题面上说得很清楚。值得注意的是，最后的标准算法与这个数据生成的代码无关，希望没有人把注意力放到这上面。  
+关键点二：题目要求是 $f_i$ 和 $g_i$ 位置之间，而不是区间 $[f_i,g_i]$。出题人比较良心，没有写成 $l_i$ 和 $r_i$。  
+关键点三：“十年oi一场空，不开long long见祖宗”  
+有了上面的三个关键点，可以得到算法一。  
+### 算法一  
+暴力修改。对于所有 $k=1$ 的情况，最后扫描一下序列，找到最大值。
+```cpp
+#include<iostream>
+using namespace std;
+
+int n,m,k;
+int A,B,C,P;
+inline int rnd(){return A=(A*B+C)%P;}; 
+inline int get(){return rnd()%n+1;};
+
+int a[10000007];
+int main(){
+	cin>>n>>m>>k;
+	cin>>A>>B>>C>>P;
+	for(int i=1;i<=n;i++) a[i]=get();
+	int ans=0;
+	for(int i=1;i<=m;i++){
+		int f=get(),g=get(),t=get();
+		if(f>g) swap(f,g);
+		for(int j=f;j<=g;j++){
+			a[j]+=t; 
+		}
+	}
+	for(int i=1;i<=n;i++){
+		ans=max(ans,a[i]);
+	}
+	cout<<ans;
+	return 0;
+}
+```
+时间复杂度 $O(nm)$  
+期望得分12pts，由于测试点#7过水，实际得分15pts  
+### 算法二  
+我们学习过排序算法。对于其他k的情况，可以通过排序解决
+```cpp
+#include<iostream>
+#include<algorithm>
+#define int long long
+using namespace std;
+
+int n,m,k;
+int A,B,C,P;
+inline int rnd(){return A=(A*B+C)%P;}; 
+inline int get(){return rnd()%n+1;};
+
+int a[10000007];
+signed main(){
+	cin>>n>>m>>k;
+	cin>>A>>B>>C>>P;
+	for(int i=1;i<=n;i++) a[i]=get();
+	for(int i=1;i<=m;i++){
+		int f=get(),g=get(),t=get();
+		if(f>g) swap(f,g);
+		for(int j=f;j<=g;j++){
+			a[j]+=t; 
+		}
+	}
+	sort(a+1,a+n+1,[](int a,int b){
+		return a>b;
+	});
+	cout<<a[k];
+	return 0;
+}
+```
+时间复杂度 $O(mn+nlogn)$  
+期望得分23pts
+实际上，对于测试点#10，我们并不需要再去排序了，直接扫描一遍序列就可以取出最大值了。期望得分28pts  
+### 算法四  
+发现k非常小，取值范围只有1,2,3。我们可以设三个变量，遇到一个数，先尝试更新最大值。比最大值小尝试更新第二大的值。比第二大的值小尝试更新第三大的值。  
+```cpp
+#include<iostream>
+#include<algorithm>
+#define int long long
+using namespace std;
+
+int n,m,k;
+int A,B,C,P;
+inline int rnd(){return A=(A*B+C)%P;}; 
+inline int get(){return rnd()%n+1;};
+
+int a[10000007];
+signed main(){
+	cin>>n>>m>>k;
+	cin>>A>>B>>C>>P;
+	for(int i=1;i<=n;i++) a[i]=get();
+	for(int i=1;i<=m;i++){
+		int f=get(),g=get(),t=get();
+		if(f>g) swap(f,g);
+		for(int j=f;j<=Q	g;j++){
+			a[j]+=t; 
+		}
+	}
+	
+	int m1=0,m2=0,m3=0;
+	for(int i=1;i<=n;i++){
+		if(a[i]>=m1){
+			m3=m2;
+			m2=m1;
+			m1=a[i];
+		}else if(a[i]>=m2){
+			m3=m2;
+			m2=a[i];
+		}else if(a[i]>=m3){
+			m3=a[i];
+		}
+	}
+	if(k==1) cout<<m1;
+	if(k==2) cout<<m2;
+	if(k==3) cout<<m3;
+	return 0;
+}
+```
+时间复杂度 $O(mn+n)$  
+期望得分55pts
+### 算法五  
+我们已经把最后找第k大的数的过程的时间复杂度降到最低，但还是无法通过，主要是区间修改操作耗费了大量时间，我们需要优化  
+观察到，最后求第k大的数，是在所有操作之后进行的，这是一个特殊的地方。数据范围为 $1e7$ 启示我们用 $O(1)$ 的修改算法  
+这就需要差分了  
+设差分数组 $d[i]=a[i]-a[i-1]$  
+对于给区间 $[l,r]$ 加上 $d$，可变为修改差分数组：$d[l]+=d,d[r+1]-=d$  
+对差分数组求前缀和就可以得到对应位置修改操作之后的值  
+```cpp
+#include<iostream>
+#include<cstdio>
+#define int long long
+using namespace std;
+
+inline int read(){
+	int res=0,ch=getchar(),f=1;
+	while(!isdigit(ch) and ch!=EOF){
+		if(ch=='-') f=-1;
+		ch=getchar();
+	}
+	while(isdigit(ch)){
+		res=(res<<3)+(res<<1)+(ch-'0');
+		ch=getchar();
+	}
+	return res*f;
+}
+
+int A,B,C,P;
+int n,m,k;
+inline int rnd(){return A=(A*B+C)%P;}; 
+inline int get(){return rnd()%n+1;};
+
+int a[10000007];
+int d[10000007];
+
+signed main(){
+	//freopen("a.in","r",stdin);
+	//freopen("a.out","w",stdout);
+	n=read(),m=read(),k=read(); 
+	A=read(),B=read(),C=read(),P=read();
+	for(int i=1;i<=n;i++){
+		a[i]=get();
+		d[i]=a[i]-a[i-1];
+	}
+	for(int i=1;i<=m;i++){
+		int l=get(),r=get(),t=get();
+		if(l>r) swap(l,r);
+		d[l]+=t;
+		d[r+1]-=t;
+	}
+	int sum=0;
+	for(int i=1;i<=n;i++){
+		sum+=d[i];
+		a[i]=sum;
+	}
+	
+	int m1=0,m2=0,m3=0;
+	for(int i=1;i<=n;i++){
+		if(a[i]>=m1){
+			m3=m2;
+			m2=m1;
+			m1=a[i];
+		}else if(a[i]>=m2){
+			m3=m2;
+			m2=a[i];
+		}else if(a[i]>=m3){
+			m3=a[i];
+		}
+	}
+	
+	if(k==1) cout<<m1;
+	if(k==2) cout<<m2;
+	if(k==3) cout<<m3;
+	return 0;
+}
+```
+时间复杂度 $O(m+n)$  
+期望得分100pts  
