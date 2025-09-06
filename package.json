@@ -7,7 +7,7 @@
 		"build": "tsc",
 		"lint": "prettier --check ./src/**/*.{ts,tsx,js,jsx,json,md,css} && tsc --noEmit && eslint --no-ignore ./src",
 		"fmt": "prettier --write ./src/**/*.{ts,tsx,js,jsx,json,md,css}",
-		"submit": "node ./dist/index.js ./ all"
+		"submit": "node ./dist/index.js ./ all && git add . && git commit -m 'update' && git push"
 	},
 	"keywords": [],
 	"author": "",

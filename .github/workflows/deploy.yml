@@ -1,0 +1,32 @@
+name: Publish the Articles
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Pack up
+        run: zip -r build.zip build/
+      - name: Setup SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          known_hosts: unnecessary
+      - name: Deploy
+        run: |
+          scp -o StrictHostKeyChecking=no build.zip ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_DIR }}/data
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          docker-compose stop
+          cd ${{ secrets.APP_DIR }}/data
+          rm -rf build
+          unzip build.zip
+          rm build.zip
+          docker-compose start
+          EOF
