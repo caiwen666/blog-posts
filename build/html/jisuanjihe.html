@@ -136,9 +136,9 @@ y&#x27;=x \sin \theta + y \cos \theta
 }
 </div></code></pre>
 <h4 id="liang-xian-duan-wei-zhi-guan-xi" tabindex="-1">两线段位置关系</h4>
-<p>返回值如下：
-0. 不相交</p>
-<ol>
+<p>返回值如下：</p>
+<ol start="0">
+<li>不相交</li>
 <li>非规范相交：交点在端点上</li>
 <li>规范相交：交点在线段内部</li>
 </ol>
@@ -150,12 +150,20 @@ y&#x27;=x \sin \theta + y \cos \theta
 }
 </div></code></pre>
 <h4 id="xian-duan-he-zhi-xian-guan-xi" tabindex="-1">线段和直线关系</h4>
-<p>返回值：
-0. 不相交</p>
-<ol>
-<li>非规范相交</li>
-<li>规范相交</li>
-<li>重合</li>
+<p>返回值：</p>
+<ol start="0">
+<li>
+<p>不相交</p>
+</li>
+<li>
+<p>非规范相交</p>
+</li>
+<li>
+<p>规范相交</p>
+</li>
+<li>
+<p>重合</p>
+</li>
 </ol>
 <pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW5saW5lJTIwaW50JTIwc2xyKExpbmUlMjBzJTJDTGluZSUyMGwpJTdCJTJGJTJGMCUzQSVFNCVCOCU4RCVFNyU5QiVCOCVFNCVCQSVBNCUyMDElM0ElRTklOUQlOUUlRTglQTclODQlRTglOEMlODMlRTclOUIlQjglRTQlQkElQTQlMjAyJTNBJUU4JUE3JTg0JUU4JThDJTgzJUU3JTlCJUI4JUU0JUJBJUE0JTIwMyUzQSVFOSU4NyU4RCVFNSU5MCU4OCUwQSUyMCUyMCUyMCUyMGludCUyMGQxJTNEcGxyKHMucyUyQ2wpJTJDZDIlM0RwbHIocy50JTJDbCklM0IlMEElMjAlMjAlMjAlMjBpZihkMSUzRCUzRDAlMjYlMjZkMiUzRCUzRDApJTIwcmV0dXJuJTIwMyUzQiUwQSUyMCUyMCUyMCUyMGlmKGQxKmQyJTNEJTNEMCklMjByZXR1cm4lMjAxJTNCJTBBJTIwJTIwJTIwJTIwaWYoZDEqZDIlM0MwKSUyMHJldHVybiUyMDIlM0IlMEElMjAlMjAlMjAlMjByZXR1cm4lMjAwJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">int</span> <span class="hljs-title">slr</span><span class="hljs-params">(Line s,Line l)</span></span>{<span class="hljs-comment">//0:不相交 1:非规范相交 2:规范相交 3:重合</span>
     <span class="hljs-type">int</span> d1=<span class="hljs-built_in">plr</span>(s.s,l),d2=<span class="hljs-built_in">plr</span>(s.t,l);
@@ -275,8 +283,8 @@ y&#x27;=x \sin \theta + y \cos \theta
 }
 </div></code></pre>
 <h3 id="ji-jiao-xu" tabindex="-1">极角序</h3>
-<p>三四象限的点极角序最小，排序后是从三四象限的点（如果有）逆时针排序
-代码是以原点为基点求的极角序，如果要以其他的点为基点，则需要把所有的点都减去那个基点</p>
+<p>三四象限的点极角序最小，排序后是从三四象限的点（如果有）逆时针排序</p>
+<p>代码是以原点为基点求的极角序，如果要以其他的点为基点，则需要把所有的点都减去那个基点</p>
 <pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW5saW5lJTIwYm9vbCUyMHBjbXAoUG9pbnQlMjBhJTJDUG9pbnQlMjBiKSU3QiUwQSUyMCUyMCUyMCUyMGF1dG8lMjBmJTNEJTVCJTVEKFBvaW50JTIwcCklN0JyZXR1cm4lMjBwLnklM0UwJTdDJTdDKHAueSUzRCUzRDAlMjYlMjZwLnglM0MwKSUzQiU3RCUzQiUwQSUyMCUyMCUyMCUyMGlmKGYoYSkhJTNEZihiKSklMjByZXR1cm4lMjBmKGEpJTNDZihiKSUzQiUwQSUyMCUyMCUyMCUyMGVsc2UlMjBpZigoYSU1RWIpJTNEJTNEMCklMjByZXR1cm4lMjBhLnglM0NiLnglM0IlMEElMjAlMjAlMjAlMjBlbHNlJTIwcmV0dXJuJTIwKGElNUViKSUzRTAlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">bool</span> <span class="hljs-title">pcmp</span><span class="hljs-params">(Point a,Point b)</span></span>{
     <span class="hljs-keyword">auto</span> f=[](Point p){<span class="hljs-keyword">return</span> p.y&gt;<span class="hljs-number">0</span>||(p.y==<span class="hljs-number">0</span>&amp;&amp;p.x&lt;<span class="hljs-number">0</span>);};
     <span class="hljs-keyword">if</span>(<span class="hljs-built_in">f</span>(a)!=<span class="hljs-built_in">f</span>(b)) <span class="hljs-keyword">return</span> <span class="hljs-built_in">f</span>(a)&lt;<span class="hljs-built_in">f</span>(b);
@@ -307,8 +315,8 @@ y&#x27;=x \sin \theta + y \cos \theta
 </div></code></pre>
 <h3 id="dian-zai-duo-bian-xing-nei" tabindex="-1">点在多边形内</h3>
 <h4 id="she-xian-fa" tabindex="-1">射线法</h4>
-<p>适用于任意多边形。具体原理是从要判断的点水平作射线，穿过了奇数条边则说明在多边形内部，反之则在多边形外部
-但有几个特殊情况：如果遇到一个水平的边，则应视为没有穿过边；穿过了两条边交界处，应视为穿过了一个边；穿过了两条边构成的一个角的顶点，则应视为没有穿过边。其中前一种可以特判，后一种可以采取把线段看成上闭下开的形式来解决</p>
+<p>适用于任意多边形。具体原理是从要判断的点水平作射线，穿过了奇数条边则说明在多边形内部，反之则在多边形外部</p>
+<p>但有几个特殊情况：如果遇到一个水平的边，则应视为没有穿过边；穿过了两条边交界处，应视为穿过了一个边；穿过了两条边构成的一个角的顶点，则应视为没有穿过边。其中前一种可以特判，后一种可以采取把线段看成上闭下开的形式来解决</p>
 <pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW5saW5lJTIwYm9vbCUyMGluX3BvbHlnb24oUG9pbnQlMjBwJTJDUG9pbnQlMjAqcGclMkNpbnQlMjBuKSU3QiUyRiUyRiUyMHBnJUU0JUI4JThCJUU2JUEwJTg3JUU0JUJCJThFMCVFNSVCQyU4MCVFNSVBNyU4QiVFRiVCQyU4QyVFNSU5QyVBOCVFOCVCRSVCOSVFNCVCOCU4QSVFNCVCOSU5RiVFNyVBRSU5NyUwQSUyMCUyMCUyMCUyMGludCUyMGFucyUzRDAlM0IlMEElMjAlMjAlMjAlMjBQb2ludCUyMHAxJTJDcDIlM0IlMEElMjAlMjAlMjAlMjBwMSUzRHBnJTVCMCU1RCUzQiUwQSUyMCUyMCUyMCUyMGZvcihpbnQlMjBpJTNEMSUzQmklM0MlM0RuJTNCaSUyQiUyQiklN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBwMiUzRHBnJTVCaSUyNW4lNUQlM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpZihvbl9zZWcocCUyQ0xpbmUocDElMkNwMikpKSUyMHJldHVybiUyMHRydWUlM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpZihwMS55JTNEJTNEcDIueSklN0IlMkYlMkYlMjAlRTYlQjAlQjQlRTUlQjklQjMlRTglQkUlQjklRTQlQjglOEQlRTglODAlODMlRTglOTklOTElMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBwMSUzRHAyJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwY29udGludWUlM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBpZihwLnklM0VtaW4ocDEueSUyQ3AyLnkpJTIwJTI2JTI2JTIwcC55JTNDJTNEbWF4KHAxLnklMkNwMi55KSUyMCUyNiUyNiUyMHAueCUzQyUzRG1heChwMS54JTJDcDIueCkpJTdCJTJGJTJGJUU0JUI4JThBJUU1JThGJTk2JUU0JUI4JThCJUU0JUI4JThEJUU1JThGJTk2JTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWYocDEueCUzRCUzRHAyLngpJTIwYW5zJTJCJTJCJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZWxzZSU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGRvdWJsZSUyMHglM0RwMS54JTJCKHAueS1wMS55KSUyRnNsb3BlKHAxJTJDcDIpJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWYocC54JTNDJTNEeCklMjBhbnMlMkIlMkIlM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBwMSUzRHAyJTNCJTBBJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwcmV0dXJuJTIwYW5zJTI2MSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div></div><div class="code"><span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">bool</span> <span class="hljs-title">in_polygon</span><span class="hljs-params">(Point p,Point *pg,<span class="hljs-type">int</span> n)</span></span>{<span class="hljs-comment">// pg下标从0开始，在边上也算</span>
     <span class="hljs-type">int</span> ans=<span class="hljs-number">0</span>;
     Point p1,p2;
@@ -334,18 +342,18 @@ y&#x27;=x \sin \theta + y \cos \theta
 </div></code></pre>
 <p>时间复杂度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></p>
 <h4 id="cha-cheng-pan-duan" tabindex="-1">叉乘判断</h4>
-<p>只适用于判断点是否在凸包内
-逐个计算点到凸包顶点构成的向量之间的叉乘是否是同号，即判断这些向量是否都往一个方向转，是的话就说明点在该凸包内
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/02/18/67b46f833d5ba.png" style="transform: scale(1)" width=389 height=262></div>
-时间复杂度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></p>
+<p>只适用于判断点是否在凸包内</p>
+<p>逐个计算点到凸包顶点构成的向量之间的叉乘是否是同号，即判断这些向量是否都往一个方向转，是的话就说明点在该凸包内</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/02/18/67b46f833d5ba.png" style="transform: scale(1)" width=389 height=262></div></p>
+<p>时间复杂度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></p>
 <h4 id="er-fen-fa" tabindex="-1">二分法</h4>
-<p>只适用于凸包
-首先把多边形划分为多个区域
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/02/18/67b4701ee315a.png" style="transform: scale(1)" width=536 height=528></div>
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/02/18/67b470cc6b966.png" style="transform: scale(1)" width=950 height=615></div>
-如果要判断一个点是否在该凸包内，则先找到这个点在哪个区域内。如果不在这几个区域中，则必不在凸包内，否则我们只需要判断这个点和凸包的边的关系即可
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/02/18/67b470e7ee9a7.png" style="transform: scale(1)" width=516 height=569></div>
-时间复杂度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></p>
+<p>只适用于凸包</p>
+<p>首先把多边形划分为多个区域</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/02/18/67b4701ee315a.png" style="transform: scale(1)" width=536 height=528></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/02/18/67b470cc6b966.png" style="transform: scale(1)" width=950 height=615></div></p>
+<p>如果要判断一个点是否在该凸包内，则先找到这个点在哪个区域内。如果不在这几个区域中，则必不在凸包内，否则我们只需要判断这个点和凸包的边的关系即可</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/02/18/67b470e7ee9a7.png" style="transform: scale(1)" width=516 height=569></div></p>
+<p>时间复杂度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></p>
 <pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwbiUyQ20lMkNrJTJDb2slM0QwJTJDY250JTNEMSUzQmNpbiUzRSUzRW4lM0UlM0VtJTNFJTNFayUzQiUwQWZvcihpbnQlMjBpJTNEMCUzQmklM0NuJTNCaSUyQiUyQiklMjBjaW4lM0UlM0VwJTVCaSU1RC54JTNFJTNFcCU1QmklNUQueSUzQiUwQW4lM0Rjb252ZXhfaHVsbChwJTJDbiUyQ2NoKSUzQiUwQVBvaW50JTIwYmFzZSUzRHAlNUIwJTVEJTNCJTBBZm9yKGludCUyMGklM0QwJTNCaSUzQ24lM0JpJTJCJTJCKSUyMGNoJTVCaSU1RCUzRGNoJTVCaSU1RC1iYXNlJTNCJTBBd2hpbGUobS0tKSU3QiUwQSUyMCUyMCUyMCUyMFBvaW50JTIwbm93JTNCY2luJTNFJTNFbm93LnglM0UlM0Vub3cueSUzQiUwQSUyMCUyMCUyMCUyMG5vdyUzRG5vdy1iYXNlJTNCJTBBJTIwJTIwJTIwJTIwaWYocGxyKG5vdyUyQ0xpbmUoY2glNUIwJTVEJTJDY2glNUIxJTVEKSklM0QlM0QwJTdDJTdDcGxyKG5vdyUyQ0xpbmUoY2glNUIwJTVEJTJDY2glNUJuLTElNUQpKSUzRCUzRDApJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWYob25fc2VnKG5vdyUyQ0xpbmUoY2glNUIwJTVEJTJDY2glNUIxJTVEKSklN0MlN0Nvbl9zZWcobm93JTJDTGluZShjaCU1QjAlNUQlMkNjaCU1Qm4tMSU1RCkpKSUyMG9rJTJCJTJCJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwY29udGludWUlM0IlMEElMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjBpZighKHBscihub3clMkNMaW5lKGNoJTVCMCU1RCUyQ2NoJTVCMSU1RCkpJTNEJTNELTElMjYlMjZwbHIobm93JTJDTGluZShjaCU1QjAlNUQlMkNjaCU1Qm4tMSU1RCkpJTNEJTNEMSkpJTIwY29udGludWUlM0IlMEElMjAlMjAlMjAlMjBpbnQlMjBsJTNEMSUyQ3IlM0RuLTElMkNhbnMlM0QtMSUzQiUwQSUyMCUyMCUyMCUyMHdoaWxlKGwlM0MlM0RyKSU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGludCUyMG1pZCUzRChsJTJCciklM0UlM0UxJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWYoKGNoJTVCbWlkJTVEJTVFbm93KSUzRSUzRDApJTIwYW5zJTNEbWlkJTJDbCUzRG1pZCUyQjElM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBlbHNlJTIwciUzRG1pZC0xJTNCJTBBJTIwJTIwJTIwJTIwJTdEJTBBJTIwJTIwJTIwJTIwaWYoYW5zJTNEJTNELTElN0MlN0NhbnMlM0QlM0RuLTEpJTIwY29udGludWUlM0IlMEElMjAlMjAlMjAlMjBpZihwbHIobm93JTJDTGluZShjaCU1QmFucyU1RCUyQ2NoJTVCYW5zJTJCMSU1RCkpISUzRDEpJTIwb2slMkIlMkIlM0IlMEElN0QlMEFpZihvayUzRSUzRGspJTIwY291dCUzQyUzQyUyMllFUyUyMiUzQyUzQ2VuZGwlM0IlMEFlbHNlJTIwY291dCUzQyUzQyUyMk5PJTIyJTNDJTNDZW5kbCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div></div><div class="code"><span class="hljs-type">int</span> n,m,k,ok=<span class="hljs-number">0</span>,cnt=<span class="hljs-number">1</span>;cin&gt;&gt;n&gt;&gt;m&gt;&gt;k;
 <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>;i&lt;n;i++) cin&gt;&gt;p[i].x&gt;&gt;p[i].y;
 n=<span class="hljs-built_in">convex_hull</span>(p,n,ch);

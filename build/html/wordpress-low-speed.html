@@ -1,14 +1,14 @@
 <p>使用wordpress搭建博客。发现打开网站，尤其是进入网站后台进行管理时浏览器的标签页上一直在转圈，网页加载速度非常慢。而服务器本身网速并不慢。</p>
 <h2 id="yuan-yin" tabindex="-1">原因</h2>
-<p>进入浏览器-F12-network，发现网页一直在等待一个来自gravatar.com的文件加载完毕。等待数十秒后加载失败，整个网页瞬间完成加载。
-经过搜索得知，wordpress上的所有头像都来自gravatar.com这个网站。gravatar.com可以根据邮箱来获取到相应的头像（比如你留下的是qq邮箱，就会直接使用你的qq的头像）。而这个网站应该是被墙了，无法正常打开。也是因为此从而拖慢了整个网页加载的速度。</p>
+<p>进入浏览器-F12-network，发现网页一直在等待一个来自gravatar.com的文件加载完毕。等待数十秒后加载失败，整个网页瞬间完成加载。</p>
+<p>经过搜索得知，wordpress上的所有头像都来自gravatar.com这个网站。gravatar.com可以根据邮箱来获取到相应的头像（比如你留下的是qq邮箱，就会直接使用你的qq的头像）。而这个网站应该是被墙了，无法正常打开。也是因为此从而拖慢了整个网页加载的速度。</p>
 <h2 id="jie-jue-fang-fa" tabindex="-1">解决方法</h2>
-<p>在wordpress后台，点击“外观”-&gt;“主题文件编辑器”
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/02/w1.png" style="transform: scale(1)" width=416 height=229></div>
-在“主题文件”一栏中点击“模板函数”
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/02/w2.png" style="transform: scale(1)" width=539 height=293></div>
-在最下面加上如下的代码
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/02/w3.png" style="transform: scale(1)" width=798 height=228></div></p>
+<p>在wordpress后台，点击“外观”-&gt;“主题文件编辑器”</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/02/w1.png" style="transform: scale(1)" width=416 height=229></div></p>
+<p>在“主题文件”一栏中点击“模板函数”</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/02/w2.png" style="transform: scale(1)" width=539 height=293></div></p>
+<p>在最下面加上如下的代码</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2022/02/w3.png" style="transform: scale(1)" width=798 height=228></div></p>
 <pre><div class="head"><div class="language">php</div><div class="copy" data="JTJGJTJGJTIwJUU2JTlCJUJGJUU2JThEJUEyJTIwV29yZFByZXNzJTIwR3JhdmF0YXIlMjAlRTQlQjglQkElRTUlOUIlQkQlRTUlODYlODUlRTUlQTQlQjQlRTUlODMlOEYlRTYlQkElOTAlMEFmdW5jdGlvbiUyMHRoZW1lX2dldF9zc2xfYXZhdGFyKGF2YXRhciklMjAlN0JhdmF0YXIlMjAlM0QlMjBzdHJfcmVwbGFjZShhcnJheSglMjJ3d3cuZ3JhdmF0YXIuY29tJTIyJTJDJTIwJTIyMC5ncmF2YXRhci5jb20lMjIlMkMlMjAlMjIxLmdyYXZhdGFyLmNvbSUyMiUyQyUyMCUyMjIuZ3JhdmF0YXIuY29tJTIyJTJDJTIwJTIyc2VjdXJlLmdyYXZhdGFyLmNvbSUyMiklMkMlMjAlMjJjcmF2YXRhci5jbiUyMiUyQyUyMGF2YXRhciklM0IlMEElMDlyZXR1cm4lMjBhdmF0YXIlM0IlMEElN0QlMEFhZGRfZmlsdGVyKCdnZXRfYXZhdGFyJyUyQyUyMCd0aGVtZV9nZXRfc3NsX2F2YXRhcicpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-comment">// 替换 WordPress Gravatar 为国内头像源</span>
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">theme_get_ssl_avatar</span>(<span class="hljs-params">avatar</span>) </span>{avatar = <span class="hljs-title function_ invoke__">str_replace</span>(<span class="hljs-keyword">array</span>(<span class="hljs-string">&quot;www.gravatar.com&quot;</span>, <span class="hljs-string">&quot;0.gravatar.com&quot;</span>, <span class="hljs-string">&quot;1.gravatar.com&quot;</span>, <span class="hljs-string">&quot;2.gravatar.com&quot;</span>, <span class="hljs-string">&quot;secure.gravatar.com&quot;</span>), <span class="hljs-string">&quot;cravatar.cn&quot;</span>, avatar);
 	<span class="hljs-keyword">return</span> avatar;

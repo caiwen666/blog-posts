@@ -1,114 +1,258 @@
 <h2 id="io" tabindex="-1">IO</h2>
 <ul>
-<li>注意模数看好了不要写错（建议拿鼠标复制下来）</li>
-<li>看清楚输出的是 <code>YESNO</code> 还是 <code>YesNo</code> 还是 <code>YE5N0</code> （测大样例的时候应该能发现）</li>
-<li>注意有没有把调试信息删除</li>
+<li>
+<p>注意模数看好了不要写错（建议拿鼠标复制下来）</p>
+</li>
+<li>
+<p>看清楚输出的是 <code>YESNO</code> 还是 <code>YesNo</code> 还是 <code>YE5N0</code> （测大样例的时候应该能发现）</p>
+</li>
+<li>
+<p>注意有没有把调试信息删除</p>
+</li>
 </ul>
-<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 补充</div><p>事实上，你可以通过使用 <code>std:cerr&lt;&lt;&quot;...&quot;</code> 来输出调试信息，这样即使你忘记去掉了，也不会把调试信息输出到输出文件里。
-但还需要注意， <code>cerr</code> 比较慢
-综上，最好的方案应该是 <code>cerr</code> 输出调试信息，写完题目后全文查找 <code>cerr</code> 来删除调试信息</p>
+<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 补充</div><p>事实上，你可以通过使用 <code>std:cerr&lt;&lt;&quot;...&quot;</code> 来输出调试信息，这样即使你忘记去掉了，也不会把调试信息输出到输出文件里。</p>
+<p>但还需要注意， <code>cerr</code> 比较慢</p>
+<p>综上，最好的方案应该是 <code>cerr</code> 输出调试信息，写完题目后全文查找 <code>cerr</code> 来删除调试信息</p>
 </div></div>
 <ul>
-<li>看清楚 <code>freopen</code> 的文件名，文件后缀名，<code>w</code> 和 <code>r</code> ，<code>stdin</code> 和 <code>stdout</code> 是否对应。你最好不要第一行写完 <code>freopen</code> 之后直接复制到第二行，这容易出问题！每年都有无数的人踩了这个坑！</li>
-<li>看清楚无解输出什么，不要想当然以为无解就输出 <code>-1</code></li>
-<li>看清楚题目的名称，比如之前有人csp，题目名称 <code>snake</code> 写成了 <code>snack</code> ，还是建议直接从题目pdf里复制下来</li>
-<li>注意如果 <code>#define int long long</code> ，<code>scanf</code> 的时候不应该 <code>%d</code> 而应该 <code>%lld</code></li>
+<li>
+<p>看清楚 <code>freopen</code> 的文件名，文件后缀名，<code>w</code> 和 <code>r</code> ，<code>stdin</code> 和 <code>stdout</code> 是否对应。你最好不要第一行写完 <code>freopen</code> 之后直接复制到第二行，这容易出问题！每年都有无数的人踩了这个坑！</p>
+</li>
+<li>
+<p>看清楚无解输出什么，不要想当然以为无解就输出 <code>-1</code></p>
+</li>
+<li>
+<p>看清楚题目的名称，比如之前有人csp，题目名称 <code>snake</code> 写成了 <code>snack</code> ，还是建议直接从题目pdf里复制下来</p>
+</li>
+<li>
+<p>注意如果 <code>#define int long long</code> ，<code>scanf</code> 的时候不应该 <code>%d</code> 而应该 <code>%lld</code></p>
+</li>
 </ul>
-<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 注意</div><p>不出现特殊情况的话我们还是非常建议使用 <code>#define int long long</code>，因为在需要取模的题中，你可能因为某个变量没开 long long 就导致计算结果出现错误，又或者是题目需要开 long long ，但题面并没有很明显告诉你。
-还应该注意 <code>#define int long long</code> 会导致运行变慢，如果你确信题目 100000% 不需要开long long，而且计算出来的时间复杂度可能擦边过，那么就不要开 long long
-综上，我们还是建议开 <code>#define int long long</code>，因为比赛的题目开 <code>O2</code> 且 CCF 的评测机配置不低，TLE 总是比 WA 好看些</p>
+<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 注意</div><p>不出现特殊情况的话我们还是非常建议使用 <code>#define int long long</code>，因为在需要取模的题中，你可能因为某个变量没开 long long 就导致计算结果出现错误，又或者是题目需要开 long long ，但题面并没有很明显告诉你。</p>
+<p>还应该注意 <code>#define int long long</code> 会导致运行变慢，如果你确信题目 100000% 不需要开long long，而且计算出来的时间复杂度可能擦边过，那么就不要开 long long</p>
+<p>综上，我们还是建议开 <code>#define int long long</code>，因为比赛的题目开 <code>O2</code> 且 CCF 的评测机配置不低，TLE 总是比 WA 好看些</p>
 </div></div>
 <ul>
 <li>尽量使用万能头，防止忘记使用某个头文件在 windows 下编译通过但在 linux 下编译不通过（况且你可能忘记了一些函数是在哪个头文件里）。</li>
 </ul>
-<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 注意</div><p>但同时，你还要注意使用了万能头会导致一些变量名冲突。比如 <code>y1</code>
-所以你实在担心，并且想稳一稳，可以考虑比赛快结束前打开NOI Linux编译一遍</p>
+<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 注意</div><p>但同时，你还要注意使用了万能头会导致一些变量名冲突。比如 <code>y1</code></p>
+<p>所以你实在担心，并且想稳一稳，可以考虑比赛快结束前打开NOI Linux编译一遍</p>
 </div></div>
 <ul>
-<li>多测一定要记得清空！！！！！！！！！！！！</li>
-<li>多测的时候，如果数据读到一半就可以算出最后答案了（一些特殊情况），那么你仍然要继续读入剩余数据</li>
-<li>最好不要用 <code>ios::sync_with_stdio(false)</code> 这种关闭流同步，这会导致包括不能与 <code>scanf/printf/getchar</code> 混用，和文件读写使用会出现问题等各种奇怪的问题。使用快读+cout是一种稳妥的方法。</li>
-<li><code>cout</code> 的时候千万不要写 <code>endl</code> ！！！！！！！！！！，一定要使用 <code>\n</code></li>
-<li>看清楚行和列。在后续写代码的时候行和列也不要搞反！！！！！</li>
-<li><code>cout&lt;&lt;1.00</code> 会输出1而不是1.00</li>
-<li>浮点数要用printf输出，如果使用cout输出的话，可能输出的内容变成了科学计数法，导致wa。</li>
+<li>
+<p>多测一定要记得清空！！！！！！！！！！！！</p>
+</li>
+<li>
+<p>多测的时候，如果数据读到一半就可以算出最后答案了（一些特殊情况），那么你仍然要继续读入剩余数据</p>
+</li>
+<li>
+<p>最好不要用 <code>ios::sync_with_stdio(false)</code> 这种关闭流同步，这会导致包括不能与 <code>scanf/printf/getchar</code> 混用，和文件读写使用会出现问题等各种奇怪的问题。使用快读+cout是一种稳妥的方法。</p>
+</li>
+<li>
+<p><code>cout</code> 的时候千万不要写 <code>endl</code> ！！！！！！！！！！，一定要使用 <code>\n</code></p>
+</li>
+<li>
+<p>看清楚行和列。在后续写代码的时候行和列也不要搞反！！！！！</p>
+</li>
+<li>
+<p><code>cout&lt;&lt;1.00</code> 会输出1而不是1.00</p>
+</li>
+<li>
+<p>浮点数要用printf输出，如果使用cout输出的话，可能输出的内容变成了科学计数法，导致wa。</p>
+</li>
 </ul>
 <h2 id="shu-zu-bian-liang" tabindex="-1">数组/变量</h2>
 <ul>
-<li>不要开 1e6 或者是 2e5 个deque，如果能手写的话尽可能手写，不然会导致 mle 的情况。这种情况在 NOIP2022 和 NOI2022 中都已经坑害了不少选手</li>
-<li>不要对大数组进行类似于 <code>int foo[10000000]={1}</code> 的操作，这会导致编译时间非常慢，且编译后文件非常大，在评测时直接 ce。</li>
-<li>和上面的类似，结构体赋初始值需要在构造函数里面赋，否则也会导致上述错误<a href="https://www.luogu.com.cn/discuss/713864">https://www.luogu.com.cn/discuss/713864</a></li>
-<li>无向图记得开两倍数组！</li>
-<li>看清楚你要开多大的数组！</li>
-<li>如果你要打部分分，更要看好你要开多大的数组，不要想当然地直接开与部分分数据范围一样大小的数组，也不要无脑开100%数据范围大小的数组！</li>
-<li>不要就开整整好的数组大小，永远都多开几个，比如1e6开1000006的大小，这样会带来很多福利</li>
-<li>如果你的函数参数传递了数组，比如 <code>void fun(int arr[])</code> ，此时在fun函数内进行 <code>memset(arr,0,sizeof arr)</code> 是错误的。因为arr实际上传来的是指针，而对一个指针进行sizeof操作不是其原本代表的数组的大小。因此，对于第三个参数，你需要传递确定的大小</li>
-<li>如果你代码数组有的从下标0开始有的从1开始，那你脑子必须要时刻清楚应该怎么做</li>
-<li>函数内开的变量或者是数组初始值为随机数，记得一定要赋初始值</li>
-<li>注意函数内的变量名不要和函数外的变量名相同，不然会导致各种奇怪错误的发生。比如全局有l和r，枚举四层循环时枚举了i,j,k,l</li>
-<li>无符号的数据类型和有符号的数据类型混用（运算/比较）的时候容易出现问题，多加小心！</li>
-<li>注意合适的数组清空方式！一言不合就memset容易tle</li>
-<li>如果你会指针，不要随便炫技，指针会导致运行速度变慢</li>
-<li>你最好使用 <code>cout&lt;&lt;sizeof(arr)/1024/1024;</code> 看数组占用大小来防止mle</li>
-<li>赋无穷大的时候使用0x3f3f3f3f（4个3f）可以使得两个无穷大相加不会爆int，对于long long需要使用0x3f3f3f3f3f3f3f3f（8个3f）。如果你不需要两个无穷大相加，那么可以直接使用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>e</mi><mn>18</mn></mrow><annotation encoding="application/x-tex">1e18</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mord mathnormal">e</span><span class="mord">18</span></span></span></span> 作为无穷大（大概 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>60</mn></msup></mrow><annotation encoding="application/x-tex">2^{60}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">60</span></span></span></span></span></span></span></span></span></span></span></span>）。为了防止出现re，你最好<code>(long long)1e18</code></li>
-<li>double数组memset初始化正无穷第二个参数用127，经测试floyed不会爆负数，且比1e10还要大</li>
-<li>string类型的数组有概率会出现奇怪错误</li>
-<li>string容易出问题，还是用 <code>char[]</code> 吧。你可以采用形如 <code>cin&gt;&gt;str+1</code> （其中str为char数组）的方法读入字符串，而且这样读入是从数组下标为1的位置开始读入的。使用 <code>strlen(str+1)</code> 可获得字符串长度</li>
-<li>结构体中使用了string，再<code>memset(a,0,sizeof(a))</code>，在程序运行结束之后会产生奇怪的re。在linux上没有，在windows下会有。建议在结构体中字符串用char[]</li>
-<li>数组越界，可能不re，而是wa，并且可能出现灵异错误（比如把另外一个变量的值给修改了），如果你debug的时候发现灵异错误，不要以为是什么bug，可能是你数组越界了</li>
-<li>使用科学计数法，即“1e多少”这样的形式时需要注意，这种字面量的数据类型是浮点数，不是整数，即使你表示的数字没有小数点！这可能会导致ce</li>
+<li>
+<p>不要开 1e6 或者是 2e5 个deque，如果能手写的话尽可能手写，不然会导致 mle 的情况。这种情况在 NOIP2022 和 NOI2022 中都已经坑害了不少选手</p>
+</li>
+<li>
+<p>不要对大数组进行类似于 <code>int foo[10000000]={1}</code> 的操作，这会导致编译时间非常慢，且编译后文件非常大，在评测时直接 ce。</p>
+</li>
+<li>
+<p>和上面的类似，结构体赋初始值需要在构造函数里面赋，否则也会导致上述错误<a href="https://www.luogu.com.cn/discuss/713864">https://www.luogu.com.cn/discuss/713864</a></p>
+</li>
+<li>
+<p>无向图记得开两倍数组！</p>
+</li>
+<li>
+<p>看清楚你要开多大的数组！</p>
+</li>
+<li>
+<p>如果你要打部分分，更要看好你要开多大的数组，不要想当然地直接开与部分分数据范围一样大小的数组，也不要无脑开100%数据范围大小的数组！</p>
+</li>
+<li>
+<p>不要就开整整好的数组大小，永远都多开几个，比如1e6开1000006的大小，这样会带来很多福利</p>
+</li>
+<li>
+<p>如果你的函数参数传递了数组，比如 <code>void fun(int arr[])</code> ，此时在fun函数内进行 <code>memset(arr,0,sizeof arr)</code> 是错误的。因为arr实际上传来的是指针，而对一个指针进行sizeof操作不是其原本代表的数组的大小。因此，对于第三个参数，你需要传递确定的大小</p>
+</li>
+<li>
+<p>如果你代码数组有的从下标0开始有的从1开始，那你脑子必须要时刻清楚应该怎么做</p>
+</li>
+<li>
+<p>函数内开的变量或者是数组初始值为随机数，记得一定要赋初始值</p>
+</li>
+<li>
+<p>注意函数内的变量名不要和函数外的变量名相同，不然会导致各种奇怪错误的发生。比如全局有l和r，枚举四层循环时枚举了i,j,k,l</p>
+</li>
+<li>
+<p>无符号的数据类型和有符号的数据类型混用（运算/比较）的时候容易出现问题，多加小心！</p>
+</li>
+<li>
+<p>注意合适的数组清空方式！一言不合就memset容易tle</p>
+</li>
+<li>
+<p>如果你会指针，不要随便炫技，指针会导致运行速度变慢</p>
+</li>
+<li>
+<p>你最好使用 <code>cout&lt;&lt;sizeof(arr)/1024/1024;</code> 看数组占用大小来防止mle</p>
+</li>
+<li>
+<p>赋无穷大的时候使用0x3f3f3f3f（4个3f）可以使得两个无穷大相加不会爆int，对于long long需要使用0x3f3f3f3f3f3f3f3f（8个3f）。如果你不需要两个无穷大相加，那么可以直接使用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>e</mi><mn>18</mn></mrow><annotation encoding="application/x-tex">1e18</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mord mathnormal">e</span><span class="mord">18</span></span></span></span> 作为无穷大（大概 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>60</mn></msup></mrow><annotation encoding="application/x-tex">2^{60}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">60</span></span></span></span></span></span></span></span></span></span></span></span>）。为了防止出现re，你最好<code>(long long)1e18</code></p>
+</li>
+<li>
+<p>double数组memset初始化正无穷第二个参数用127，经测试floyed不会爆负数，且比1e10还要大</p>
+</li>
+<li>
+<p>string类型的数组有概率会出现奇怪错误</p>
+</li>
+<li>
+<p>string容易出问题，还是用 <code>char[]</code> 吧。你可以采用形如 <code>cin&gt;&gt;str+1</code> （其中str为char数组）的方法读入字符串，而且这样读入是从数组下标为1的位置开始读入的。使用 <code>strlen(str+1)</code> 可获得字符串长度</p>
+</li>
+<li>
+<p>结构体中使用了string，再<code>memset(a,0,sizeof(a))</code>，在程序运行结束之后会产生奇怪的re。在linux上没有，在windows下会有。建议在结构体中字符串用char[]</p>
+</li>
+<li>
+<p>数组越界，可能不re，而是wa，并且可能出现灵异错误（比如把另外一个变量的值给修改了），如果你debug的时候发现灵异错误，不要以为是什么bug，可能是你数组越界了</p>
+</li>
+<li>
+<p>使用科学计数法，即“1e多少”这样的形式时需要注意，这种字面量的数据类型是浮点数，不是整数，即使你表示的数字没有小数点！这可能会导致ce</p>
+</li>
 </ul>
 <h1>编译</h1>
 <ul>
-<li>由于windows的栈空间有限制，评测的时候栈空间和内存限制是相等的，因此你可能在devc++里re了，但实际上是ac的。你需要在编译选项里加上 <code>-Wl,--stack=102400000</code> 开增大栈大小</li>
-<li>最好加上 <code>-O2</code> 的编译参数，防止你没开O2是对的，但是最后评测开O2了就re了</li>
+<li>
+<p>由于windows的栈空间有限制，评测的时候栈空间和内存限制是相等的，因此你可能在devc++里re了，但实际上是ac的。你需要在编译选项里加上 <code>-Wl,--stack=102400000</code> 开增大栈大小</p>
+</li>
+<li>
+<p>最好加上 <code>-O2</code> 的编译参数，防止你没开O2是对的，但是最后评测开O2了就re了</p>
+</li>
 </ul>
 <div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 注意</div><p>但是你还需要注意，手动开了O2可能会导致你在debug的时候发现一些中间变量被优化掉了，看不到了，你需要心里有数</p>
 </div></div>
 <ul>
-<li>使用编译参数 <code>-Wall -Wextra -Wshadow</code> 可以尽可能显示编译的Warning，你的程序不应该有任何Warning，除非你确定出现的Warning会发生什么</li>
-<li>你最好不要直接在代码里写 <code>1e9</code> 这种表达式，容易出现CE</li>
-<li>检查非void返回类型的函数是不是都有返回值，定义了返回值类型却没有返回一个值会导致RE</li>
-<li>stringstream的clear不是清空！ 清空要这样 <code>ss.str(&quot;&quot;);</code></li>
-<li>如果比赛最后评测使用c++17，那么你要倒吸一口凉气了，因为c++17引入了若干保留字，包括但不限于 <code>size</code>，<code>next</code> 等</li>
+<li>
+<p>使用编译参数 <code>-Wall -Wextra -Wshadow</code> 可以尽可能显示编译的Warning，你的程序不应该有任何Warning，除非你确定出现的Warning会发生什么</p>
+</li>
+<li>
+<p>你最好不要直接在代码里写 <code>1e9</code> 这种表达式，容易出现CE</p>
+</li>
+<li>
+<p>检查非void返回类型的函数是不是都有返回值，定义了返回值类型却没有返回一个值会导致RE</p>
+</li>
+<li>
+<p>stringstream的clear不是清空！ 清空要这样 <code>ss.str(&quot;&quot;);</code></p>
+</li>
+<li>
+<p>如果比赛最后评测使用c++17，那么你要倒吸一口凉气了，因为c++17引入了若干保留字，包括但不限于 <code>size</code>，<code>next</code> 等</p>
+</li>
 </ul>
 <h2 id="zuo-ti" tabindex="-1">做题</h2>
 <ul>
-<li>如果最后结果是相减再输出，且要求取模，一定要 <code>(a-b+mod)%mod</code>，否则会输出复数</li>
-<li>暴力能优化就多优化优化，多过一个点可能就一等了</li>
-<li>使用滚动数组进行优化时，看好了最终答案用哪个数组！</li>
-<li>状压dp由于<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>∗</mo><msup><mn>2</mn><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">n*2^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4653em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span></span></span></span>的极限复杂度，在枚举状态的大循环里面要避免大常数操作。比如可以预处理的数据要预处理。以及不 <code>#define int long long</code></li>
-<li>一定要再三确定快读没有打错，不然全爆零！！！！</li>
-<li>要注意留出时间认真审题（最后草草审题写暴力大概率爆零）。</li>
-<li>如果题目数据比较容易生成，暴力容易写，<strong>而且时间充裕</strong>，那么最好使用对拍。</li>
-<li>对拍可以考虑生成数据范围小且比较特殊的数据，这样比中等规模随机数据相比对拍速度更快，且出现问题调试起来也更加方便</li>
-<li><code>两片雪花之间</code>，注意顺序，不一定是l小于r</li>
-<li>求两点距离的dis函数，需要这样写 <code>(double)(sqrt((double)(dx[a]-dx[b])*(dx[a]-dx[b])+(double)(dy[a]-dy[b])*(dy[a]-dy[b])))</code> 多加几个double，否则会造成精度损失，进而wa</li>
-<li>二分时，如果l和r有负数，那么应该用(l+r)&gt;&gt;1而不是(l+r)/2，否则会出现MLE错误</li>
-<li>有可能图不连通</li>
-<li>题目如果没有特殊说明，重边和自环最好也要考虑考虑</li>
-<li>判断元素是否存在于map中，不要使用 <code>[]==</code>，要用find，因为调用[]会在map中生成一个节点 多次判断存在会使长度非常大</li>
-<li>搜索时慎用map判重！会带来负优化</li>
-<li><code>set</code> 要用自带的二分查找函数，否则复杂度会和暴力同等（CSPS2021T1）</li>
-<li>离散化，最后是 <code>-a-1</code>。二分查找最后是 <code>-a</code></li>
+<li>
+<p>如果最后结果是相减再输出，且要求取模，一定要 <code>(a-b+mod)%mod</code>，否则会输出复数</p>
+</li>
+<li>
+<p>暴力能优化就多优化优化，多过一个点可能就一等了</p>
+</li>
+<li>
+<p>使用滚动数组进行优化时，看好了最终答案用哪个数组！</p>
+</li>
+<li>
+<p>状压dp由于<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>∗</mo><msup><mn>2</mn><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">n*2^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4653em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span></span></span></span>的极限复杂度，在枚举状态的大循环里面要避免大常数操作。比如可以预处理的数据要预处理。以及不 <code>#define int long long</code></p>
+</li>
+<li>
+<p>一定要再三确定快读没有打错，不然全爆零！！！！</p>
+</li>
+<li>
+<p>要注意留出时间认真审题（最后草草审题写暴力大概率爆零）。</p>
+</li>
+<li>
+<p>如果题目数据比较容易生成，暴力容易写，<strong>而且时间充裕</strong>，那么最好使用对拍。</p>
+</li>
+<li>
+<p>对拍可以考虑生成数据范围小且比较特殊的数据，这样比中等规模随机数据相比对拍速度更快，且出现问题调试起来也更加方便</p>
+</li>
+<li>
+<p><code>两片雪花之间</code>，注意顺序，不一定是l小于r</p>
+</li>
+<li>
+<p>求两点距离的dis函数，需要这样写 <code>(double)(sqrt((double)(dx[a]-dx[b])*(dx[a]-dx[b])+(double)(dy[a]-dy[b])*(dy[a]-dy[b])))</code> 多加几个double，否则会造成精度损失，进而wa</p>
+</li>
+<li>
+<p>二分时，如果l和r有负数，那么应该用(l+r)&gt;&gt;1而不是(l+r)/2，否则会出现MLE错误</p>
+</li>
+<li>
+<p>有可能图不连通</p>
+</li>
+<li>
+<p>题目如果没有特殊说明，重边和自环最好也要考虑考虑</p>
+</li>
+<li>
+<p>判断元素是否存在于map中，不要使用 <code>[]==</code>，要用find，因为调用[]会在map中生成一个节点 多次判断存在会使长度非常大</p>
+</li>
+<li>
+<p>搜索时慎用map判重！会带来负优化</p>
+</li>
+<li>
+<p><code>set</code> 要用自带的二分查找函数，否则复杂度会和暴力同等（CSPS2021T1）</p>
+</li>
+<li>
+<p>离散化，最后是 <code>-a-1</code>。二分查找最后是 <code>-a</code></p>
+</li>
 </ul>
 <h2 id="ying-shi" tabindex="-1">应试</h2>
 <ul>
-<li>进考场之后千万不要碰电脑</li>
-<li>考试的时候不要小声嘟囔，即使忍不住嘟囔也不要带脏字，不然被判定为辱骂CCF会被禁赛一年</li>
-<li>不要拿记事本看大样例，因为大样例的换行符是linux格式的换行符，在windows的记事本中无法显示。正确的打开方式是把样例文件直接拖入devc++的窗口里查看</li>
-<li>测大样例时，devc++会显示运行时间，根据经验，你在考试的电脑上运行6s的程序都可以在正式评测时以1s以内的时间运行完毕，所以不需要担心tle问题</li>
-<li>使用fc进行对比时可能出现问题，详见本文“checker”一节</li>
-<li>由于比赛时间紧张，如果你的代码不需要重新编译的话，可以按F10直接运行，省掉重新编译的时间。</li>
-<li>不要在代码里出现CCF字样，否则禁赛1年</li>
-<li>如果需要对暴力算法进行优化，请务必确保你最开始想到的暴力算法是正确的，不然你会浪费大量时间对一个假的做法进行优化</li>
-<li>根据经验，时限比较小的题目一般是难度比较低的。数据范围给的比较简单的题目一般是难度比较低的。t1和t2中有一个本场比赛最简单题目，t2和t3有一个本场比赛次简单题目，t4永远是最难的（上述规律仅为一般规律）</li>
+<li>
+<p>进考场之后千万不要碰电脑</p>
+</li>
+<li>
+<p>考试的时候不要小声嘟囔，即使忍不住嘟囔也不要带脏字，不然被判定为辱骂CCF会被禁赛一年</p>
+</li>
+<li>
+<p>不要拿记事本看大样例，因为大样例的换行符是linux格式的换行符，在windows的记事本中无法显示。正确的打开方式是把样例文件直接拖入devc++的窗口里查看</p>
+</li>
+<li>
+<p>测大样例时，devc++会显示运行时间，根据经验，你在考试的电脑上运行6s的程序都可以在正式评测时以1s以内的时间运行完毕，所以不需要担心tle问题</p>
+</li>
+<li>
+<p>使用fc进行对比时可能出现问题，详见本文“checker”一节</p>
+</li>
+<li>
+<p>由于比赛时间紧张，如果你的代码不需要重新编译的话，可以按F10直接运行，省掉重新编译的时间。</p>
+</li>
+<li>
+<p>不要在代码里出现CCF字样，否则禁赛1年</p>
+</li>
+<li>
+<p>如果需要对暴力算法进行优化，请务必确保你最开始想到的暴力算法是正确的，不然你会浪费大量时间对一个假的做法进行优化</p>
+</li>
+<li>
+<p>根据经验，时限比较小的题目一般是难度比较低的。数据范围给的比较简单的题目一般是难度比较低的。t1和t2中有一个本场比赛最简单题目，t2和t3有一个本场比赛次简单题目，t4永远是最难的（上述规律仅为一般规律）</p>
+</li>
 </ul>
 <h1>其他</h1>
 <ul>
-<li>注意运算符的优先级。如果你怕出事的话，我们建议你多用几个括号括起来</li>
-<li><code>min(a,b)</code>写成了<code>(a,b)</code></li>
-<li>for循环的上界不要随时计算，比如 <code>i&lt;=sqrt(q)</code>,<code>i&lt;=strlen(s)</code></li>
+<li>
+<p>注意运算符的优先级。如果你怕出事的话，我们建议你多用几个括号括起来</p>
+</li>
+<li>
+<p><code>min(a,b)</code>写成了<code>(a,b)</code></p>
+</li>
+<li>
+<p>for循环的上界不要随时计算，比如 <code>i&lt;=sqrt(q)</code>,<code>i&lt;=strlen(s)</code></p>
+</li>
 </ul>
 <div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 补充说明</div><p>这里有个神奇的错误：string的.size()容易爆，应该先 <code>int len=s.size()</code> 预先储存长度大小，不然频繁调用会发生莫名错误</p>
 </div></div>
@@ -120,33 +264,83 @@
 <h2 id="chang-jian-suan-fa-cuo-wu" tabindex="-1">常见算法错误</h2>
 <p><strong>快速幂</strong></p>
 <ul>
-<li>在引用cmath头文件，或者万能头之后，快速幂函数就不要命名为pow了。直接使用pow会调用cmath的pow，而不是你自己的快速幂函数。
-<strong>并查集</strong></li>
-<li><code>while(x!=fa[x])</code> 写成了 <code>if(...)</code></li>
-<li>并查集没有初始化</li>
-<li>并查集合并时注意一定是合并两个元素的祖先！！！！！
-<strong>st表/倍增求lca</strong></li>
-<li>st表取lg的时候从2开始循环，倍增求lca取lg的时候从1开始循环</li>
-<li>st表 <code>j&lt;=n-(1&lt;&lt;i)+1;</code> <code>st[r-(1&lt;&lt;k)+1][k]</code> 两处注意+1</li>
-<li>倍增求lca <code>x=fa[x][lg[dep[x]-dep[y]]-1];</code> <code>int k=lg[dep[x]]-1;k&gt;=0;k--</code> 注意两处-1
-<strong>主席树</strong></li>
-<li>注意开32倍大小
-<strong>fhq-treap</strong></li>
-<li>split完忘了 <code>update(now)</code></li>
-<li>注意开数组时除了算上操作次数，还要算上一开始就插入的数
-<strong>线段树</strong></li>
-<li>注意开4倍空间</li>
-<li>别忘记pushdown和pushup</li>
-<li>别忘了一开始build建树</li>
-<li>modify操作到最后别忘返回（写dfs的时候也要注意这一点）
-<strong>图论</strong></li>
-<li>遍历图的时候，把 <code>edge[i]</code> 写成了 <code>edge[x]</code></li>
-<li>无向图，edge数组忘开两倍</li>
-<li>tarjan算法时，将点弹出栈后忘记 <code>vis[x]=false</code></li>
-<li>求次短路的时候优先队列中以dis1为关键字排序</li>
-<li>求最短路的时候从队列/优先队列中取出元素后忘记pop</li>
-<li>kruskal重构树开二倍大小</li>
-<li>看清楚题目让点差分还是边差分，写的时候不要把边差分和点差分写混了</li>
+<li>在引用cmath头文件，或者万能头之后，快速幂函数就不要命名为pow了。直接使用pow会调用cmath的pow，而不是你自己的快速幂函数。</li>
+</ul>
+<p><strong>并查集</strong></p>
+<ul>
+<li>
+<p><code>while(x!=fa[x])</code> 写成了 <code>if(...)</code></p>
+</li>
+<li>
+<p>并查集没有初始化</p>
+</li>
+<li>
+<p>并查集合并时注意一定是合并两个元素的祖先！！！！！</p>
+</li>
+</ul>
+<p><strong>st表/倍增求lca</strong></p>
+<ul>
+<li>
+<p>st表取lg的时候从2开始循环，倍增求lca取lg的时候从1开始循环</p>
+</li>
+<li>
+<p>st表 <code>j&lt;=n-(1&lt;&lt;i)+1;</code> <code>st[r-(1&lt;&lt;k)+1][k]</code> 两处注意+1</p>
+</li>
+<li>
+<p>倍增求lca <code>x=fa[x][lg[dep[x]-dep[y]]-1];</code> <code>int k=lg[dep[x]]-1;k&gt;=0;k--</code> 注意两处-1</p>
+</li>
+</ul>
+<p><strong>主席树</strong></p>
+<ul>
+<li>注意开32倍大小</li>
+</ul>
+<p><strong>fhq-treap</strong></p>
+<ul>
+<li>
+<p>split完忘了 <code>update(now)</code></p>
+</li>
+<li>
+<p>注意开数组时除了算上操作次数，还要算上一开始就插入的数</p>
+</li>
+</ul>
+<p><strong>线段树</strong></p>
+<ul>
+<li>
+<p>注意开4倍空间</p>
+</li>
+<li>
+<p>别忘记pushdown和pushup</p>
+</li>
+<li>
+<p>别忘了一开始build建树</p>
+</li>
+<li>
+<p>modify操作到最后别忘返回（写dfs的时候也要注意这一点）</p>
+</li>
+</ul>
+<p><strong>图论</strong></p>
+<ul>
+<li>
+<p>遍历图的时候，把 <code>edge[i]</code> 写成了 <code>edge[x]</code></p>
+</li>
+<li>
+<p>无向图，edge数组忘开两倍</p>
+</li>
+<li>
+<p>tarjan算法时，将点弹出栈后忘记 <code>vis[x]=false</code></p>
+</li>
+<li>
+<p>求次短路的时候优先队列中以dis1为关键字排序</p>
+</li>
+<li>
+<p>求最短路的时候从队列/优先队列中取出元素后忘记pop</p>
+</li>
+<li>
+<p>kruskal重构树开二倍大小</p>
+</li>
+<li>
+<p>看清楚题目让点差分还是边差分，写的时候不要把边差分和点差分写混了</p>
+</li>
 </ul>
 <h2 id="checker" tabindex="-1">checker</h2>
 <p>春季测试时给出的大样例，如果在windows系统下直接使用fc进行对比，会报有差异，即使你的输出的答案文件是一样的。这可能是大样例的换行符出了点问题。如果你遇到了相同的问题，不要惊慌，你可以手写checker来进行对比</p>

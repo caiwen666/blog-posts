@@ -66,9 +66,10 @@
 我们有公式</p>
 <p class="katex-block"><span class="katex-error" title="ParseError: KaTeX parse error: Can&#x27;t use function &#x27;$&#x27; in math mode at position 73: …{i=1}^{n} di[i]$̲$  
 初始化
-```cpp
-…" style="color: #cc0000">\sum_{i=1}^{n} a_i =(n+1)\times \sum_{i=1}^{n} d[i]-\sum_{i=1}^{n} di[i]$$  
+
+```cpp…" style="color: #cc0000">\sum_{i=1}^{n} a_i =(n+1)\times \sum_{i=1}^{n} d[i]-\sum_{i=1}^{n} di[i]$$  
 初始化
+
 ```cpp
 for(int i=1;i&lt;=n;i++){
 	a[i]=read();
@@ -77,33 +78,50 @@ for(int i=1;i&lt;=n;i++){
 	add(di,i,tmp*i);
 }
 ```
+
 add操作
+
 ```cpp
 //在区间[l,r]中都加上v
 add(d,l,v);add(d,r+1,-v);
 add(di,l,l*v);add(di,r+1,-(r+1)*v);
 ```
+
 区间查询直接套上面的公式即可
+
 ## 并查集
+
 ### 普通并查集
+
 ```cpp
 int fa[10004];
 inline int find(int x){
 	while(x!=fa[x]) x=fa[x]=fa[fa[x]];
 	return x;
 }
+
 //初始化
 for(int i=1;i&lt;=n;i++) fa[i]=i;
 ```
+
 ### 带权并查集
+
 **[NOI2002] 银河英雄传说**
+
 **题目描述**
+
 杨威利擅长排兵布阵，巧妙运用各种战术屡次以少胜多，难免恣生骄气。在这次决战中，他将巴米利恩星域战场划分成 $30000$ 列，每列依次编号为 $1, 2,\ldots ,30000$。之后，他把自己的战舰也依次编号为 $1, 2, \ldots , 30000$，让第 $i$ 号战舰处于第 $i$ 列。
+
 合并指令为 `M i j`，含义为第 $i$ 号战舰所在的整个战舰队列，作为一个整体（头在前尾在后）接至第 $j$ 号战舰所在的战舰队列的尾部。
+
 询问指令：`C i j`。该指令意思是，询问第 $i$ 号战舰与第 $j$ 号战舰当前是否在同一列中，如果在同一列中，那么它们之间布置有多少战舰。
+
 作为一个资深的高级程序设计员，你被要求编写程序分析杨威利的指令，以及回答莱因哈特的询问。
+
 带权并查集需要在并查集合并和路径压缩时维护权值信息。下面是维护元素到根节点距离的实例（实际上还要顺便维护并查集连通块大小）
+
 带权并查集就需要使用递归式了
+
 ```cpp
 int fa[30001];
 int w[30001];
@@ -116,6 +134,7 @@ int find(int x){
 	size[x]=size[fa[x]];//更新
 	return fa[x];
 }
+
 //将a合并到b
 inline void unionn(int a,int b){
 	a=find(a);
@@ -126,15 +145,25 @@ inline void unionn(int a,int b){
 	size[b]=size[a];
 }
 ```
+
 ### 种类并查集
+
 种类并查集可以非常好地处理元素之间的关系。
+
 使用种类并查集的前提是，关系中的不等号**具有传递性**，比如满足类似&quot;a!=b,b!=c则必有a!=c&quot;的关系。更形象的话就是“非黑即白”
+
 如果不具有传递性，可以考虑将并查集的处理离线下来操作，详见P1955
+
 ### 并查集快速跳过
+
 在一个数列上，让每个点都指向另一个点（可以是自身也可以是后面的点），遍历到这个点之后就直接跳到指向的点，就可以达到快速跳过的目的。使用路径压缩会提高效率。其中的实现就是使用并查集
+
 ## 单调队列
+
 这里以单调递增队列为例
+
 push操作
+
 ```cpp
 struct Entry{
 	int val,pos;
@@ -145,19 +174,27 @@ void push(Entry x){
 	q.push_back(x);
 }
 ```
+
 将元素放入双端队列前要维持单调队列的单调性
 i为当前遍历到的位置，k为队列长度
+
 ```cpp
 while(!q.empty()&amp;&amp;q.front().pos&lt;=i-k) q.pop_front();
 ```
+
 取队头元素时要判断是否过期
+
 ## st表
+
 取log
+
 ```cpp
 int a[maxn],lg[maxn],st[maxn][20];
 for(int i=2;i&lt;=n;i++) lg[i]=lg[i&gt;&gt;1]+1;
 ```
+
 预处理
+
 ```cpp
 for(int i=1;i&lt;=n;i++) st[i][0]=a[i];
 for(int i=1;i&lt;=lg[n];i++){//枚举长度
@@ -166,14 +203,19 @@ for(int i=1;i&lt;=lg[n];i++){//枚举长度
 	}
 }
 ```
+
 查询
+
 ```cpp
 //求[l,r]之间的最大值
 int k=lg[r-l+1];
 int ans=max(st[l][k],st[r-(1&lt;&lt;k)+1][k]);
 ```
+
 ## FHQ Treap
+
 ### 维护值域
+
 ```cpp
 int ch[_][2],val[_],dat[_],size[_],tot;
 inline void update(int x){size[x]=1+size[ch[x][0]]+size[ch[x][1]];}
@@ -198,30 +240,45 @@ int query(int now,int k){
 	}
 }
 ```
+
 **插入**  
 `split(root,x,l,r),root=merge(merge(l,create(x)),r);`
+
 **删除**  
 `split(root,x,l,tmp),split(l,x-1,l,r),r=merge(ch[r][0],ch[r][1]),root=merge(merge(l,r),tmp);`
+
 **rank**  
 `split(root,x-1,l,r),cout&lt;&lt;size[l]+1&lt;&lt;endl,root=merge(l,r);`
+
 **kth**  
 `cout&lt;&lt;val[query(root,x)]&lt;&lt;endl;`
+
 **前驱**  
 `split(root,x-1,l,r),cout&lt;&lt;val[query(l,size[l])]&lt;&lt;endl,root=merge(l,r);`
+
 **后继**  
 `split(root,x,l,r),cout&lt;&lt;val[query(r,1)]&lt;&lt;endl,root=merge(l,r);`
+
 ### 维护序列
+
 事实上，在维护值域的时候，实际上就是在维护一个排好序的序列
+
 在维护序列时，只需要改动一下split操作即可
+
 **[CZOI Online #2] 滚动**
+
 我们规定将序列向左滚动表示：第二个数变为第一个数，第三个数变为第二个数...第一个数变为最后一个数。
+
 现给定一个长度为 $n$ 的序列。我们有 $m$ 个操作，每次操作给定一个数 $x$，表示查询序列中位置 $x$ 上的数，然后再将区间 $[x,n]$ 向左滚动。
+
 你需要回答每次的查询。
+
 ```cpp
 #include&lt;bits/stdc++.h&gt;
 #define int long long
 #define _ 2000006
 using namespace std;
+
 int n,m;
 int ch[_][2],dat[_],size[_],tot;
 long long val[_];
@@ -246,6 +303,7 @@ int query(int now,int k){
 		else k-=size[ch[now][0]]+1,now=ch[now][1];
 	}
 }
+
 signed main(){
 	ios::sync_with_stdio(false);
 	cin.tie(0);
@@ -267,14 +325,20 @@ signed main(){
 	return 0;
 }
 ```
+
 （原题数据比较毒瘤（虽然是自己出的），必须要开long long才能过）
+
 **P3391 【模板】文艺平衡树**
+
 您需要写一种数据结构（可参考题目标题），来维护一个有序数列。
+
 其中需要提供以下操作：翻转一个区间，例如原有序序列是 $5\ 4\ 3\ 2\ 1$，翻转区间是 $[2,4]$ 的话，结果是 $5\ 2\ 3\ 4\ 1$。
+
 ```cpp
 #include&lt;iostream&gt;
 #define maxn 100005
 using namespace std;
+
 int id,val[maxn],dat[maxn],size[maxn],ch[maxn][2],root,tag[maxn];
 inline int create(int x){
 	id++;
@@ -338,6 +402,7 @@ void print(int k){
 	cout&lt;&lt;val[k]&lt;&lt;&quot; &quot;;
 	if(ch[k][1]) print(ch[k][1]);
 }
+
 int main(){
 	int n,m;
 	cin&gt;&gt;n&gt;&gt;m;
@@ -356,9 +421,12 @@ int main(){
 	return 0;
 }
 ```
+
 可以直接把要翻转的区间分割出来打上懒标记
 值得注意的是，merge和split操作时都需要把懒标记pushdown
+
 ## 主席树
+
 ```cpp
 int in[_],din[_];
 int root[_],size;
@@ -372,6 +440,7 @@ int build(int l,int r){
 	tree[node].r=build(mid+1,r);
 	return node;
 }
+
 int update(int pre,int l,int r,int x){
 	int node=clone(pre);
 	tree[node].val++;
@@ -381,6 +450,7 @@ int update(int pre,int l,int r,int x){
 	else tree[node].r=update(tree[node].r,mid+1,r,x);
 	return node;
 }
+
 int query(int u,int v,int l,int r,int k){
 	if(l==r) return din[l];
 	int mid=(l+r)&gt;&gt;1;
@@ -388,10 +458,12 @@ int query(int u,int v,int l,int r,int k){
 	if(num&gt;=k) return query(tree[u].l,tree[v].l,l,mid,k);
 	else return query(tree[u].r,tree[v].r,mid+1,r,k-num);
 }
+
 int main(){
 	int n=read(),m=read();
 	for(int i=1;i&lt;=n;i++) in[i]=din[i]=read();
 	root[0]=build(1,n);
+
 	sort(din+1,din+1+n);
 	int len=unique(din+1,din+n+1)-din-1;
 	for(int i=1;i&lt;=n;i++){
@@ -405,15 +477,21 @@ int main(){
 	return 0;
 }
 ```
+
 ## 莫队
+
 ### 普通莫队
+
 以询问区间内有多少个不同的数为例
+
 ```cpp
 int n,in[1000010],bl[1000010],blo,ans[1000010];
 struct Query{int l,r,id;} q[1000010];
+
 //按左端点所在的块的位置排序。相同再按照右端点的位置排序
 inline bool cmp1(Query a,Query b){return bl[a.l]==bl[b.l]? a.r&lt;b.r:bl[a.l]&lt;bl[b.l];}
 inline bool cmp2(Query a,Query b){return a.id&lt;b.id;}
+
 int l=1,r,now,cnt[1000010];
 //加入
 inline void add(int x){
@@ -425,13 +503,16 @@ inline void del(int x){
 	--cnt[in[x]];
 	if(cnt[in[x]]==0) --now;
 }
+
 int main(){
 	cin&gt;&gt;n;
 	blo=sqrt(n);
 	for(int i=1;i&lt;=n;i++) cin&gt;&gt;in[i];
 	for(int i=1;i&lt;=n;i++) bl[i]=(i-1)/blo+1;
+
 	int m;cin&gt;&gt;m;
 	for(int i=1;i&lt;=m;i++) cin&gt;&gt;q[i].l&gt;&gt;q[i].r,q[i].id=i;
+
 	sort(q+1,q+m+1,cmp1);
 	for(int i=1;i&lt;=m;i++){
 		//注意删除操作是先删除，再移动指针
@@ -447,21 +528,28 @@ int main(){
 	return 0;
 }
 ```
+
 ### 带修莫队
+
 - 可修改莫队只用于单点修改，区间修改的题目就算了吧...
+
 - 时间上的优化：将块的大小从sqrt(n)改为n的二分之三次方，即 `blo=pow(n,0.666);`  
   复杂度大约为O(n的五分之三次方)
+
 修改和询问单独分开
+
 ```cpp
 int numq,numc;
 struct Query{int l,r,pre,id,ans;} q[maxn];
 struct Change{int pos,val;} c[maxn];
+
 //排序部分，右端点比较对象改变，新增了一个比较的关键字
 inline bool cmp1(Query a,Query b){
 	if(bl[a.l]!=bl[b.l]) return bl[a.l]&lt;bl[b.l];
 	if(bl[a.r]!=bl[b.r]) return bl[a.r]&lt;bl[b.r];
 	return a.pre&lt;b.pre;
 }
+
 //读入部分
 for(int i=1;i&lt;=m;i++){
 	char opt;
@@ -478,8 +566,10 @@ for(int i=1;i&lt;=m;i++){
 	}
 }
 ```
+
 新增 `now` 变量，表示当前处理了几个修改操作  
 移动指针后需要顺手处理一下操作
+
 ```cpp
 for(int i=1;i&lt;=numq;i++){
 	while(l&lt;q[i].l) del(l++);
@@ -491,6 +581,7 @@ for(int i=1;i&lt;=numq;i++){
 	while(now&gt;q[i].pre) work(now--,i);
 	q[i].ans=ans;
 }
+
 //不去真正执行这个操作，把数据修改。而是考虑操作对答案的贡献
 inline void work(int x,int i){
 	if(c[x].pos&gt;=q[i].l&amp;&amp;c[x].pos&lt;=q[i].r){//只有修改在查询区间内才会对ans产生影响
@@ -503,26 +594,37 @@ inline void work(int x,int i){
 	swap(c[x].val,in[c[x].pos]);
 }
 ```
+
 ## 分块
+
 块长度 `blo=sqrt(n)`
+
 每个元素属于第几个块 `bl=(i-1)/blo+1`
+
 并且有一个性质，第 $i$ 个块的右边界为 $i*blo$
+
 一般分块的做法为
+
 ```cpp
 for(int i=l;i&lt;=min(bl[l]*blo,r);i++) ...//对左侧的非整块进行暴力操作
 if(bl[l]!=bl[r])
 	for(int i=(bl[r]-1)*blo+1;i&lt;=r;i++) ...//对右侧的非整块进行暴力操作
 for(int i=bl[l]+1;i&lt;=bl[r]-1;i++) ...//对中间的整块进行操作
 ```
+
 ### 区间小于某个值
+
 区间加，然后查找区间第k小
+
 在块内进行二分查找，多加一个log的复杂度。对于非整块的数据，可以进行一个reset操作，即暴力对非整块进行加法操作，然后再重新对这个块的元素排序
+
 ```cpp
 inline void reset(int x){
 	v[x].clear();
 	for(int i=(x-1)*blo+1;i&lt;=min(x*blo,n);i++) v[x].push_back(in[i]);
 	sort(v[x].begin(),v[x].end());
 }
+
 inline void add(int l,int r,int c){
 	for(int i=l;i&lt;=min(bl[l]*blo,r);i++) in[i]+=c;
 	reset(bl[l]);
@@ -532,6 +634,7 @@ inline void add(int l,int r,int c){
 	}
 	for(int i=bl[l]+1;i&lt;=bl[r]-1;i++) tag[i]+=c;
 }
+
 inline int query(int l,int r,int c){
 	int ans=0;
 	for(int i=l;i&lt;=min(bl[l]*blo,r);i++) if(in[i]+tag[bl[i]]&lt;c) ans++;
@@ -545,8 +648,11 @@ inline int query(int l,int r,int c){
 	return ans;
 }
 ```
+
 ### 插入
+
 分块支持插入，使用vector维护。但会破坏块的大小，需要在若干次操作后对块进行重构。
+
 ```cpp
 pair&lt;int,int&gt; query(int a){
 	int x=1;
@@ -574,8 +680,11 @@ void insert(int l,int r){
 	if(v[t.first].size()&gt;20*blo) rebuild();
 }
 ```
+
 ## 线段树优化建图
+
 若干变量
+
 ```cpp
 //线段树
 //tree out/in存放线段树节点编号所代表图中的点
@@ -585,11 +694,14 @@ int treeIn[maxn&lt;&lt;2];//in是父节点向子树连边
 int cnt;//用cnt分发图中的点的编号
 //如果图中有n个节点，则cnt从n+1开始分发编号
 //前n个编号是给原图上的点保留的
+
 //线段树对图优化之后，图上最多有几个边不好计算所以直接采用邻接矩阵式
 typedef pair&lt;int,int&gt; pii; //第一个int是to，第二个int是w
 vector&lt;pii&gt; g[maxn*10];
 ```
+
 建树
+
 ```cpp
 void build(int k,int l,int r){
 	if(l==r){
@@ -609,7 +721,9 @@ void build(int k,int l,int r){
 	g[treeIn[k]].push_back(pii(treeIn[rs(k)],0));
 }
 ```
+
 建边
+
 ```cpp
 //区间与点之间建边
 //tp=true，区间向点建边
@@ -629,4 +743,5 @@ inline void connect(int k,int l,int r,int x,int y,int p,int w,bool type){
 	}
 }
 ```
+
 </span></p>

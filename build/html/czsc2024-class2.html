@@ -3,30 +3,57 @@
 <h2 id="1-shu-zu" tabindex="-1">1. 数组</h2>
 <p><strong>再谈变量——变量的作用域</strong></p>
 <ul>
-<li>作用域？</li>
-<li>定义的变量只能在自身作用域中使用</li>
-<li>作用域划分：以花括号划分，一个变量的作用域为最小包含它的花括号的区域</li>
-<li>不同作用域，变量名可以重复。使用变量时，如果有多个重名的，看最近的那个</li>
-<li>局部变量、全局变量</li>
-<li>局部变量默认值为随机数据，全局变量默认值为0
+<li>
+<p>作用域？</p>
+</li>
+<li>
+<p>定义的变量只能在自身作用域中使用</p>
+</li>
+<li>
+<p>作用域划分：以花括号划分，一个变量的作用域为最小包含它的花括号的区域</p>
+</li>
+<li>
+<p>不同作用域，变量名可以重复。使用变量时，如果有多个重名的，看最近的那个</p>
+</li>
+<li>
+<p>局部变量、全局变量</p>
+</li>
+<li>
+<p>局部变量默认值为随机数据，全局变量默认值为0</p>
 <ul>
 <li>随机值？因人而异</li>
 <li>陋习：局部变量不经初始化（赋值、cin输入）就使用</li>
 </ul>
 </li>
-<li>什么是数组？</li>
-<li>定义方法：在定义变量时加方括号，方括号里写数组长度，于是这个变量就成为了一个数组</li>
-<li>数据长度必须是确定的数，不能是变量（*）</li>
-<li>使用：和变量一样。需要加上中括号使用。不能直接使用。使用的时候的中括号里就可以写变量了</li>
-<li>数组角标从0开始，换句话说，数组的第一个”格子“为0号”格子“</li>
-<li>显然，中括号里面不能是个负数</li>
-<li>常见错误：数组越界
+<li>
+<p>什么是数组？</p>
+</li>
+<li>
+<p>定义方法：在定义变量时加方括号，方括号里写数组长度，于是这个变量就成为了一个数组</p>
+</li>
+<li>
+<p>数据长度必须是确定的数，不能是变量（*）</p>
+</li>
+<li>
+<p>使用：和变量一样。需要加上中括号使用。不能直接使用。使用的时候的中括号里就可以写变量了</p>
+</li>
+<li>
+<p>数组角标从0开始，换句话说，数组的第一个”格子“为0号”格子“</p>
+</li>
+<li>
+<p>显然，中括号里面不能是个负数</p>
+</li>
+<li>
+<p>常见错误：数组越界</p>
 <ul>
 <li>如何避免？写代码的时候看清楚点。或是尽量开大一点，不要怕浪费，但也不要太大</li>
 </ul>
 </li>
-<li>多维数组</li>
-<li>函数内最好不要定义数组。数组最好定义成全局变量。
+<li>
+<p>多维数组</p>
+</li>
+<li>
+<p>函数内最好不要定义数组。数组最好定义成全局变量。</p>
 <ul>
 <li>局部变量的数组的数组长度不能太大</li>
 <li>局部变量的数组默认值为随机数据</li>
@@ -35,7 +62,8 @@
 </ul>
 <h2 id="2-xun-huan-yu-ju" tabindex="-1">2. 循环语句</h2>
 <ul>
-<li>船新的运算符
+<li>
+<p>船新的运算符</p>
 <ul>
 <li><code>i++</code> 表示直接把 <code>i</code> 加上1，等价于 <code>i=i+1</code></li>
 <li><code>i--</code> 同理</li>
@@ -44,7 +72,8 @@
 <li><code>i-=n</code> <code>i*=n</code> <code>i/=n</code> <code>i%=n</code> 同理</li>
 </ul>
 </li>
-<li>while语句
+<li>
+<p>while语句</p>
 <ul>
 <li>语法：<code>while(条件){}</code></li>
 <li>如果条件满足，则执行花括号里的代码，执行完毕之后再次检查条件，如果条件仍成立，再次执行花括号代码，直到条件不成立</li>
@@ -58,23 +87,41 @@
 </li>
 </ul>
 </li>
-<li>for语句
+<li>
+<p>for语句</p>
 <ul>
-<li>语法：<code>for(初始化语句;条件语句;循环后执行语句){}</code></li>
-<li>等价于<pre><div class="head"><div class="language">c++</div><div class="copy" data="JUU1JTg4JTlEJUU1JUE3JThCJUU1JThDJTk2JUU4JUFGJUFEJUU1JThGJUE1JTNCJTBBd2hpbGUoJUU2JTlEJUExJUU0JUJCJUI2JUU4JUFGJUFEJUU1JThGJUE1KSU3QiUwQSUyMCUyMCUyMCUyMC4uLi4lMEElMjAlMjAlMjAlMjAlRTUlQkUlQUElRTclOEUlQUYlRTUlOTAlOEUlRTYlODklQTclRTglQTElOEMlRTglQUYlQUQlRTUlOEYlQTUlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code">初始化语句;
+<li>
+<p>语法：<code>for(初始化语句;条件语句;循环后执行语句){}</code></p>
+</li>
+<li>
+<p>等价于</p>
+<pre><div class="head"><div class="language">c++</div><div class="copy" data="JUU1JTg4JTlEJUU1JUE3JThCJUU1JThDJTk2JUU4JUFGJUFEJUU1JThGJUE1JTNCJTBBd2hpbGUoJUU2JTlEJUExJUU0JUJCJUI2JUU4JUFGJUFEJUU1JThGJUE1KSU3QiUwQSUyMCUyMCUyMCUyMC4uLi4lMEElMjAlMjAlMjAlMjAlRTUlQkUlQUElRTclOEUlQUYlRTUlOTAlOEUlRTYlODklQTclRTglQTElOEMlRTglQUYlQUQlRTUlOEYlQTUlM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code">初始化语句;
 <span class="hljs-keyword">while</span>(条件语句){
     ....
     循环后执行语句;
 }
 </div></code></pre>
 </li>
-<li>初始化语句中常用来定义变量</li>
-<li>条件语句同while</li>
-<li>花括号里的代码执行完毕之后就会执行一次第三个语句</li>
-<li>经典示例 <code>for(int i=1;i&lt;=n;i++){}</code></li>
-<li>三个语句都是可选的，且不能太复杂</li>
-<li>初始化语句中创建的变量作用域仅限for语句</li>
-<li>常见用法
+<li>
+<p>初始化语句中常用来定义变量</p>
+</li>
+<li>
+<p>条件语句同while</p>
+</li>
+<li>
+<p>花括号里的代码执行完毕之后就会执行一次第三个语句</p>
+</li>
+<li>
+<p>经典示例 <code>for(int i=1;i&lt;=n;i++){}</code></p>
+</li>
+<li>
+<p>三个语句都是可选的，且不能太复杂</p>
+</li>
+<li>
+<p>初始化语句中创建的变量作用域仅限for语句</p>
+</li>
+<li>
+<p>常见用法</p>
 <ul>
 <li><code>for(int i=1;i&lt;=n;i++){}</code> 从1循环到n、循环n次</li>
 <li><code>for(int i=1;i&lt;=10;i++){}</code> 从1循环到10、循环10次</li>
@@ -85,8 +132,12 @@
 </li>
 </ul>
 </li>
-<li>while、for都能嵌套</li>
-<li>给数组赋值</li>
+<li>
+<p>while、for都能嵌套</p>
+</li>
+<li>
+<p>给数组赋值</p>
+</li>
 </ul>
 <h2 id="3-ti-mu-xuan-jiang" tabindex="-1">3. 题目选讲</h2>
 <ul>
@@ -96,22 +147,35 @@
 </ul>
 <h2 id="4-zi-fu-chuan" tabindex="-1">4. 字符串</h2>
 <ul>
-<li>字符，char 数据类型
+<li>
+<p>字符，char 数据类型</p>
 <ul>
-<li>单引号，单引号里面只能有一个字符</li>
-<li>ASCII 码（不用记）
+<li>
+<p>单引号，单引号里面只能有一个字符</p>
+</li>
+<li>
+<p>ASCII 码（不用记）
 <div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/24/67934ec296150.png" style="transform: scale(1)" width=1245 height=958></div>
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/24/67934ec219917.png" style="transform: scale(1)" width=1231 height=660></div>
+<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/01/24/67934ec219917.png" style="transform: scale(1)" width=1231 height=660></div></p>
 <ul>
-<li>观察发现：数字的ASCII码是连续的，小写字母的ASCII码是连续的，大写字母的ASCII码也是连续的</li>
-<li>char强制转成int可看到ASCII码</li>
-<li>int也可按ASCII码强制转成char</li>
-<li>char能进行运算，运算时先强制转化为int（对应ASCII码）</li>
-</ul>
+<li>
+<p>观察发现：数字的ASCII码是连续的，小写字母的ASCII码是连续的，大写字母的ASCII码也是连续的</p>
+</li>
+<li>
+<p>char强制转成int可看到ASCII码</p>
+</li>
+<li>
+<p>int也可按ASCII码强制转成char</p>
+</li>
+<li>
+<p>char能进行运算，运算时先强制转化为int（对应ASCII码）</p>
 </li>
 </ul>
 </li>
-<li>字符串
+</ul>
+</li>
+<li>
+<p>字符串</p>
 <ul>
 <li>string 数据类型
 <ul>

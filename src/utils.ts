@@ -16,9 +16,6 @@ export const parseArticle = async (
 	let flag = 0;
 	const lines = data.split("\n"); // 按行拆分
 	lines.forEach((line) => {
-		if (line.trim().length === 0) {
-			return;
-		}
 		if (flag === -1) {
 			content += line + "\n";
 		}

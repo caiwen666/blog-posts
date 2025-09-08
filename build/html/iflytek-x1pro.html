@@ -1,99 +1,141 @@
-<p>高三，学校发了平板。大概看了一下，是科大讯飞x1pro课堂版。平板只能打开有限的几个软件（实际上有用的只有一个智学网），于是考虑破解。
-最终成果：
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-fe190eed2ab667d05260f053a800f078_1440w.png" style="transform: scale(1)" width=1440 height=900><div class="img-title">使用Nova启动器</div></div>
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-425cc901acdca1514f324b251a7684d7_1440w.png" style="transform: scale(1)" width=1440 height=900><div class="img-title">b站，注意b站原版没有平板适配，要用hd版本</div></div>
-本文将会介绍一下破解的思路。如果你对破解思路不敢兴趣的话可以跳读。个人觉得这个破解思路具有普遍性，即使你的平板型号不是x1pro课堂版，也可以仿照本文思路破解其他型号的平板。</p>
+<p>高三，学校发了平板。大概看了一下，是科大讯飞x1pro课堂版。平板只能打开有限的几个软件（实际上有用的只有一个智学网），于是考虑破解。</p>
+<p>最终成果：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-fe190eed2ab667d05260f053a800f078_1440w.png" style="transform: scale(1)" width=1440 height=900><div class="img-title">使用Nova启动器</div></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-425cc901acdca1514f324b251a7684d7_1440w.png" style="transform: scale(1)" width=1440 height=900><div class="img-title">b站，注意b站原版没有平板适配，要用hd版本</div></div></p>
+<p>本文将会介绍一下破解的思路。如果你对破解思路不敢兴趣的话可以跳读。个人觉得这个破解思路具有普遍性，即使你的平板型号不是x1pro课堂版，也可以仿照本文思路破解其他型号的平板。</p>
 <h2 id="qian-ren-de-po-jie-fang-an" tabindex="-1">前人的破解方案</h2>
-<p>要破解平板，第一件事自然就是直接去百度上搜索。网上搜到的方法，大部分是先下载“洋葱数学”，然后通过bug安装一个叫“创建快捷方式”的应用，然后打开隐藏的设置界面，打开开发者选项，从而实现adb调试，做到自由安装其他应用。实际上，x1pro分为课堂版和市场版。上述方法只适用于市场版（貌似市场版还把这个bug修复了），课堂版应用商店里根本没有洋葱数学。因此这个方法失效。
-还考虑过其他的方法，比如登录界面按三下屏幕左下角，按一下屏幕右下角，可以弹出本地管理员界面，但是密码不知道，网上公开的密码不正确。
-如果你够牛逼的话还可以把老师的平板偷过来，据说老师的平板上可以下发软件。我所在的学校上一届有人用这个办法给每人传了个音游，然后被学校发现，我们这届老师就不给发平板了。</p>
+<p>要破解平板，第一件事自然就是直接去百度上搜索。网上搜到的方法，大部分是先下载“洋葱数学”，然后通过bug安装一个叫“创建快捷方式”的应用，然后打开隐藏的设置界面，打开开发者选项，从而实现adb调试，做到自由安装其他应用。实际上，x1pro分为课堂版和市场版。上述方法只适用于市场版（貌似市场版还把这个bug修复了），课堂版应用商店里根本没有洋葱数学。因此这个方法失效。</p>
+<p>还考虑过其他的方法，比如登录界面按三下屏幕左下角，按一下屏幕右下角，可以弹出本地管理员界面，但是密码不知道，网上公开的密码不正确。</p>
+<p>如果你够牛逼的话还可以把老师的平板偷过来，据说老师的平板上可以下发软件。我所在的学校上一届有人用这个办法给每人传了个音游，然后被学校发现，我们这届老师就不给发平板了。</p>
 <h2 id="shua-ru-xiu-gai-jing-xiang" tabindex="-1">刷入修改镜像</h2>
-<p>继续搜索，我看到了这个网站 <a href="https://supersuroot.github.io/">https://supersuroot.github.io/</a> 。
-这是我们破解平板的突破点。我们照着这个教程走一遍。由于这个教程比较简陋，所以下文会对此进行补充。
-首先这个网站的百度网盘文件失效了，不过好在对应的github的discussion板块有好人补了下文件。我把链接直接放到这里：<a href="https://www.123pan.com/s/vxgrVv-8mu9A">https://www.123pan.com/s/vxgrVv-8mu9A</a>
-这里面有下面几个文件，我们简单介绍一下∶</p>
+<p>继续搜索，我看到了这个网站 <a href="https://supersuroot.github.io/">https://supersuroot.github.io/</a> 。</p>
+<p>这是我们破解平板的突破点。我们照着这个教程走一遍。由于这个教程比较简陋，所以下文会对此进行补充。</p>
+<p>首先这个网站的百度网盘文件失效了，不过好在对应的github的discussion板块有好人补了下文件。我把链接直接放到这里：<a href="https://www.123pan.com/s/vxgrVv-8mu9A">https://www.123pan.com/s/vxgrVv-8mu9A</a></p>
+<p>这里面有下面几个文件，我们简单介绍一下∶</p>
 <ul>
 <li>prog开头的那个文件∶引导文件，后续刷机的话需要。</li>
 <li>qpst∶刷机工具</li>
 <li>system.zip：刷机包，下载后解压，会得到img文件，后文所说的img镜像就是这个img文件</li>
 <li>高通9008刷机工具：又一个刷机工具</li>
-<li>高通usb：usb驱动
-先安装usb驱动，然后安装qpst工具。
-然后确保平板充好电。
-接下来把平板后盖拆开。首先你需要把平板外套弄下来，然后用卡针把侧面的卡槽取出（没想到吧，这平板还有卡槽），否则后盖弄不下来。然后用指甲盖从平板的卡槽附近，或者是角上，尝试撬开。这个步骤可能比较难搞，不过确实是可以拆下来的。到后面可能要用力掰开后盖，因为后盖和平板粘有双面胶，需要用点力气。
-撬开之后我们需要进入9008模式。此时你的平板<strong>必须处于关机状态</strong>，并且<strong>不能插数据线</strong>。我们需要准备一个铜丝（或者其他能导电的东西，最好硬一点）来短接。当然，你没有铜线的话，也可以用剪刀来短接，不过可能成功概率会低一点（因为剪刀的尖比较粗）。为了方便，你可以打开电脑声音，然后先把数据线一头连接电脑。让铜丝接触如图所示的两个位点，短接。保持短接（不能只短接一下就不短接了，保持短接），然后将数据线另一头插入平板。如果电脑出现新设备接入的提示音，说明平板成功进入9008模式。
-上述步骤有一点差错都会导致失败，请务必看清楚。
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/QQ%E6%88%AA%E5%9B%BE20231206114536.png" style="transform: scale(1)" width=432 height=645><div class="img-title">短接位点是靠近typec接口的</div></div>
-然后打开qpst，按照下面这个教程走，备份分区，防止后续操作不当，平板变砖：<a href="https://zhuanlan.zhihu.com/p/35422254?utm_id=0">https://zhuanlan.zhihu.com/p/35422254?utm_id=0</a></li>
+<li>高通usb：usb驱动</li>
 </ul>
+<p>先安装usb驱动，然后安装qpst工具。</p>
+<p>然后确保平板充好电。</p>
+<p>接下来把平板后盖拆开。首先你需要把平板外套弄下来，然后用卡针把侧面的卡槽取出（没想到吧，这平板还有卡槽），否则后盖弄不下来。然后用指甲盖从平板的卡槽附近，或者是角上，尝试撬开。这个步骤可能比较难搞，不过确实是可以拆下来的。到后面可能要用力掰开后盖，因为后盖和平板粘有双面胶，需要用点力气。</p>
+<p>撬开之后我们需要进入9008模式。此时你的平板<strong>必须处于关机状态</strong>，并且<strong>不能插数据线</strong>。我们需要准备一个铜丝（或者其他能导电的东西，最好硬一点）来短接。当然，你没有铜线的话，也可以用剪刀来短接，不过可能成功概率会低一点（因为剪刀的尖比较粗）。为了方便，你可以打开电脑声音，然后先把数据线一头连接电脑。让铜丝接触如图所示的两个位点，短接。保持短接（不能只短接一下就不短接了，保持短接），然后将数据线另一头插入平板。如果电脑出现新设备接入的提示音，说明平板成功进入9008模式。</p>
+<p>上述步骤有一点差错都会导致失败，请务必看清楚。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/QQ%E6%88%AA%E5%9B%BE20231206114536.png" style="transform: scale(1)" width=432 height=645><div class="img-title">短接位点是靠近typec接口的</div></div></p>
+<p>然后打开qpst，按照下面这个教程走，备份分区，防止后续操作不当，平板变砖：<a href="https://zhuanlan.zhihu.com/p/35422254?utm_id=0">https://zhuanlan.zhihu.com/p/35422254?utm_id=0</a></p>
 <div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 注意</div><p>分区管理器中列出了平板上的所有分区。注意最好不要用鼠标滚轮进行滑动，因为鼠标直接滚动的话列表的滚动幅度过大，会导致你可能找不到你想要操作的分区。建议点击右侧滚动条上下的箭头，慢慢滚动。</p>
 </div></div>
 <p>分区的说明如下：</p>
 <ul>
-<li>system：安卓系统存放在这个分区。这个是你一定要备份的。万一变砖了，或者平板破解被学校发现了，刷入已经备份好的system分区文件可恢复到原来的系统。</li>
-<li>cache：理论上讲刷完机之后需要清空userdata分区和cache分区，因此cache分区不备份也没关系，但科大讯飞对平板魔改了一下，cache分区中可能含有重要文件，如果后续不小心把cache分区清空了，将会导致平板无法开机（已经有人中招了）。所以这个也是你一定要备份的。</li>
-<li>userdata：这个分区不要备份，这玩意十好几个g，备份慢，而且这个分区加密了，备份了没用。这个分区即使情空也无非是原来平板上的用户数据全部丢失，不至于开不开机。而且我们后面还要清空这个分区。
-综上，我们备份 system 分区和 cache 分区。备份后的分区存放在“C:\Users\你电脑的用户名\AppData\Roaming\Qualcomm\QFIL\端口名称”中。你需要保证C盘有充足的空间。比较坑的是备份后的文件的文件名中不会有分区名称，这就会导致如果你一口气备份好几个分区，你可能最后无法分辨哪个文件对应哪个分区。这里建议每备份完一个分区，将分区文件重命名一下，以便区分。
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/QQ%E6%88%AA%E5%9B%BE20231206120212.png" style="transform: scale(1)" width=804 height=262><div class="img-title">备份后的分区（图中标出来的是我做的标记，用于区分哪个文件对应哪个分区）</div></div></li>
+<li>
+<p>system：安卓系统存放在这个分区。这个是你一定要备份的。万一变砖了，或者平板破解被学校发现了，刷入已经备份好的system分区文件可恢复到原来的系统。</p>
+</li>
+<li>
+<p>cache：理论上讲刷完机之后需要清空userdata分区和cache分区，因此cache分区不备份也没关系，但科大讯飞对平板魔改了一下，cache分区中可能含有重要文件，如果后续不小心把cache分区清空了，将会导致平板无法开机（已经有人中招了）。所以这个也是你一定要备份的。</p>
+</li>
+<li>
+<p>userdata：这个分区不要备份，这玩意十好几个g，备份慢，而且这个分区加密了，备份了没用。这个分区即使情空也无非是原来平板上的用户数据全部丢失，不至于开不开机。而且我们后面还要清空这个分区。</p>
+</li>
 </ul>
+<p>综上，我们备份 system 分区和 cache 分区。备份后的分区存放在“C:\Users\你电脑的用户名\AppData\Roaming\Qualcomm\QFIL\端口名称”中。你需要保证C盘有充足的空间。比较坑的是备份后的文件的文件名中不会有分区名称，这就会导致如果你一口气备份好几个分区，你可能最后无法分辨哪个文件对应哪个分区。这里建议每备份完一个分区，将分区文件重命名一下，以便区分。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/QQ%E6%88%AA%E5%9B%BE20231206120212.png" style="transform: scale(1)" width=804 height=262><div class="img-title">备份后的分区（图中标出来的是我做的标记，用于区分哪个文件对应哪个分区）</div></div></p>
 <div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 插一嘴</div><p>这里插一嘴，如果中间发生了什么意外，可能出现把数据线拔了，但是平板还处于9008模式，再插上数据线电脑也识别不到，或者识别到了但是进行一些操作时有报错。这时候你需要手动退出9008分区，具体操作就是同时按下电源键+音量减键，一直按着，直到平板开机（可能要按十几秒）</p>
 </div></div>
 <p>然后退出那个qpst。退出的同时平板也会退出9008模式，你需要重新再进入一下9008模式，打开9008刷指定分区的工具，分区名称填“system”，文件路径选择解压好的img镜像，引导路径选择引导文件，点击开始，即可进行刷入。输入成功会有提示，然后你可以拔掉数据线，然后开机。</p>
 <div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 补充说明</div><p>实际上QFIL也可以刷制定分区。但是官方的工具在刷分区时经常出现进度条瞬间跑完，实际上没刷进去的情况，所以选择了第三方工具。</p>
 </div></div>
-<p>不出意外你会看到鸿蒙的开机动画（不要以为自己刷入了鸿蒙系统，只是个开机动画）。
-如果这么顺利就成功了，也就没有这篇文章了。
-后续根据网站上的教程所说，连续点击版本号输入密码进入开发者选项。但你会发现连设置你都找不到。因此上述教程失效。但我们还是有所收获，这个刷机包是基于原版刷机包修改的，但只修改了两个地方：开机动画，还有相册里可以播放视频了。实际上这个刷机包的作者可以再多改点东西的</p>
+<p>不出意外你会看到鸿蒙的开机动画（不要以为自己刷入了鸿蒙系统，只是个开机动画）。</p>
+<p>如果这么顺利就成功了，也就没有这篇文章了。</p>
+<p>后续根据网站上的教程所说，连续点击版本号输入密码进入开发者选项。但你会发现连设置你都找不到。因此上述教程失效。但我们还是有所收获，这个刷机包是基于原版刷机包修改的，但只修改了两个地方：开机动画，还有相册里可以播放视频了。实际上这个刷机包的作者可以再多改点东西的</p>
 <h2 id="mo-gai-jing-xiang" tabindex="-1">魔改镜像</h2>
-<p>到此为止，全网的破解教程都失效了。
-然后我考虑，既然那个刷机包的作者可以对原版镜像做修改，那我能不能也修改一下呢？于是就有下面的内容。
-根据b站up主晨钟酱的一期视频：<a href="https://www.bilibili.com/video/BV19p4y1N7H8">https://www.bilibili.com/video/BV19p4y1N7H8</a> ，（我们只需要看解包img镜像的部分，使用drt工具对之前得到的img镜像解包），解包后可以修改镜像里的文件，然后打包，刷入平板（这一顿操作后面会经常用）。
-这里注意的是，原则上你刷完机要清空userdata分区。否则对刷机包的修改不能正常应用到平板里。
-下面我们细说修改镜像</p>
+<p>到此为止，全网的破解教程都失效了。</p>
+<p>然后我考虑，既然那个刷机包的作者可以对原版镜像做修改，那我能不能也修改一下呢？于是就有下面的内容。</p>
+<p>根据b站up主晨钟酱的一期视频：<a href="https://www.bilibili.com/video/BV19p4y1N7H8">https://www.bilibili.com/video/BV19p4y1N7H8</a> ，（我们只需要看解包img镜像的部分，使用drt工具对之前得到的img镜像解包），解包后可以修改镜像里的文件，然后打包，刷入平板（这一顿操作后面会经常用）。</p>
+<p>这里注意的是，原则上你刷完机要清空userdata分区。否则对刷机包的修改不能正常应用到平板里。</p>
+<p>下面我们细说修改镜像</p>
 <h3 id="zeng-jia-shan-chu-apk" tabindex="-1">增加/删除apk</h3>
-<p>将镜像解包后，会看到很多文件夹，其中系统自带的软件存放在了“app”文件夹里。我们可以直接删除一些 apk。如果你需要装软件的话，直接把 apk 丢进去即可。
-你可能直接大喜，这不就可以做到安装软件了吗，直接把什么“创建快捷方式”丢进去然后开启开发者模式，就和网上其他的教程一样不就好了。我一开始就是这么想的。我一开始丢了个“创建快捷方式”，打包刷进去，确实开机后看到了，也能用，但连点版本号，提示“你已处于开发者模式”，然后用这个软件打开开发者选项，却提示“你未处于开发者模式”。这就离大谱了，可见科大讯飞还是有点脑子的，把开发者模式毙了，因此这条路走不通。
-你可能又想到了，那我不搞什么adb，直接像这样安装软件不也行吗。我也想到了，丢了个via浏览器进入，打开之后，发现除了科大讯飞官网，智学网，畅言官网之外的网站一律打不开，甚至局域网也不行！连了自己的热点，仍然是这样。错误信息是“CONNECT_REFUSED”，不难猜到，应该是科大讯飞在系统里搞了个什么网络限制。
-这样的话意味着你只能玩一些不需要联网的软件，或许你仍然满意了，但你考虑，你需要把apk放入app文件夹里，然后打包，然后刷入，还要清userdata分区，然后第一次开机还非常慢，非常麻烦，一套下来可能要好几十分钟。更要命的是，这样安装的软件可能会缺少一些库文件，也就是打开会提示停止运行，这也就意味着你有相当一部分软件是不能安装的。
-而且平板上安装有管控平台，可能会被老师发现，十分危险。
-我测试了几个软件，他们的情况如下：</p>
+<p>将镜像解包后，会看到很多文件夹，其中系统自带的软件存放在了“app”文件夹里。我们可以直接删除一些 apk。如果你需要装软件的话，直接把 apk 丢进去即可。</p>
+<p>你可能直接大喜，这不就可以做到安装软件了吗，直接把什么“创建快捷方式”丢进去然后开启开发者模式，就和网上其他的教程一样不就好了。我一开始就是这么想的。我一开始丢了个“创建快捷方式”，打包刷进去，确实开机后看到了，也能用，但连点版本号，提示“你已处于开发者模式”，然后用这个软件打开开发者选项，却提示“你未处于开发者模式”。这就离大谱了，可见科大讯飞还是有点脑子的，把开发者模式毙了，因此这条路走不通。</p>
+<p>你可能又想到了，那我不搞什么adb，直接像这样安装软件不也行吗。我也想到了，丢了个via浏览器进入，打开之后，发现除了科大讯飞官网，智学网，畅言官网之外的网站一律打不开，甚至局域网也不行！连了自己的热点，仍然是这样。错误信息是“CONNECT_REFUSED”，不难猜到，应该是科大讯飞在系统里搞了个什么网络限制。</p>
+<p>这样的话意味着你只能玩一些不需要联网的软件，或许你仍然满意了，但你考虑，你需要把apk放入app文件夹里，然后打包，然后刷入，还要清userdata分区，然后第一次开机还非常慢，非常麻烦，一套下来可能要好几十分钟。更要命的是，这样安装的软件可能会缺少一些库文件，也就是打开会提示停止运行，这也就意味着你有相当一部分软件是不能安装的。</p>
+<p>而且平板上安装有管控平台，可能会被老师发现，十分危险。</p>
+<p>我测试了几个软件，他们的情况如下：</p>
 <ul>
-<li>Activity Manager、创建快捷方式、es文件管理器、fv文件管理器、geogebra、Haruka文件管理器、nova启动器、treble info、via浏览器：均可正常使用。</li>
-<li>wps：如果不清userdata，即使刷进去也会被原来自带的wps替换掉。清除userdata则可以正常使用。</li>
-<li>Edge浏览器、质感文件管理器、冰箱、智学网学生端、智学网家长端，MT管理器：无法使用。</li>
-<li>安装狮：这个非常奇怪，放入app文件夹里，打包img然后刷进去，开机后会显示系统被损坏。即无法开机。</li>
-<li>magisk：可以打开，但是提示无法安装为系统应用。
-下面着重介绍几个应用：</li>
-<li>IFlySCLauncher：平板在登录后进入的界面，即自带的桌面。你可以直接把这个东西删了，但是删了之后需要在app文件里放置一个启动器（比如nova启动器）。</li>
-<li>IFlySCMdmAdmin：本机管理，后面再说。</li>
-<li>IFlySCMdmService：管控平台，后面再说。</li>
-<li>IFlySCLogin：登录界面。如果你把上述的应用删除后，你就不得不删掉这个了，因为平板在登录时会检查一些应用是否缺失，缺失则不允许登录。经测试检查应用缺失仅检查包名。但我尝试将管控平台删掉，把其他应用的包名改成管控平台的包名，发现仍然登录不了。
-这里我选择把科大讯飞自带的垃圾“学习软件”全部删掉，即“app”文件夹里带“IFly”前缀的文件夹一律删掉，但是只保留“IFlyIMESigned”（讯飞输入法）。然后放入下面5个关键的软件（对应的apk文件在文末会给出）。</li>
-<li>nova启动器：我们把IFlySCLauncher删了，所以需要一个新的启动器。</li>
-<li>via浏览器</li>
-<li>Activity Manager：我们后面会使用这个来打开一些被系统隐藏了的东西</li>
-<li>es文件管理器和fv文件管理器：es文件管理器可以进行局域网传文件，还有比较好用的文件管理。fv文件管理器不好用，但是他可以在后面安装apk的时候弹出允许安装未知来源的设置。
-其他的apk先不要放！后面将平板完全破解后再安装也不迟。
-打包，刷入，清空userdata分区，开机，开机后就能进入到新的桌面了。
-实际上，我们把管控平台删掉后，平板的蓝牙功能可用。在activity manager中找到蓝牙设置，打开，可通过蓝牙与手机传输文件。
-你可能又大喜，我直接通过蓝牙传apk，直接安装，这样也够用了。这个想法我也试了，传完apk后，直接用es文件管理器打开，会提示“出于安全考虑，已禁止您的平板安装此来源的未知应用”。好在如果你使用fv文件管理器，他会先跳转到设置里，让你打开允许fv管理器安装apk，然后再继续安装。但安装到一半，会弹出“应用未安装。”。显然科大讯飞在这上面又做了限制。
-实际上管控平台去了之后平板还能开热点了，可以用es文件管理器，点击文件快传，然后他会让你开热点。你可能想到，科大讯飞应该只限制了平板访问外界，没限制外界访问平板吧。但很不幸，平板打开热点后，其他设备根本连不上平板。
-于是下面的问题仍然棘手：突破网络限制与安装apk。</li>
+<li>
+<p>Activity Manager、创建快捷方式、es文件管理器、fv文件管理器、geogebra、Haruka文件管理器、nova启动器、treble info、via浏览器：均可正常使用。</p>
+</li>
+<li>
+<p>wps：如果不清userdata，即使刷进去也会被原来自带的wps替换掉。清除userdata则可以正常使用。</p>
+</li>
+<li>
+<p>Edge浏览器、质感文件管理器、冰箱、智学网学生端、智学网家长端，MT管理器：无法使用。</p>
+</li>
+<li>
+<p>安装狮：这个非常奇怪，放入app文件夹里，打包img然后刷进去，开机后会显示系统被损坏。即无法开机。</p>
+</li>
+<li>
+<p>magisk：可以打开，但是提示无法安装为系统应用。</p>
+</li>
 </ul>
+<p>下面着重介绍几个应用：</p>
+<ul>
+<li>
+<p>IFlySCLauncher：平板在登录后进入的界面，即自带的桌面。你可以直接把这个东西删了，但是删了之后需要在app文件里放置一个启动器（比如nova启动器）。</p>
+</li>
+<li>
+<p>IFlySCMdmAdmin：本机管理，后面再说。</p>
+</li>
+<li>
+<p>IFlySCMdmService：管控平台，后面再说。</p>
+</li>
+<li>
+<p>IFlySCLogin：登录界面。如果你把上述的应用删除后，你就不得不删掉这个了，因为平板在登录时会检查一些应用是否缺失，缺失则不允许登录。经测试检查应用缺失仅检查包名。但我尝试将管控平台删掉，把其他应用的包名改成管控平台的包名，发现仍然登录不了。</p>
+</li>
+</ul>
+<p>这里我选择把科大讯飞自带的垃圾“学习软件”全部删掉，即“app”文件夹里带“IFly”前缀的文件夹一律删掉，但是只保留“IFlyIMESigned”（讯飞输入法）。然后放入下面5个关键的软件（对应的apk文件在文末会给出）。</p>
+<ul>
+<li>
+<p>nova启动器：我们把IFlySCLauncher删了，所以需要一个新的启动器。</p>
+</li>
+<li>
+<p>via浏览器</p>
+</li>
+<li>
+<p>Activity Manager：我们后面会使用这个来打开一些被系统隐藏了的东西</p>
+</li>
+<li>
+<p>es文件管理器和fv文件管理器：es文件管理器可以进行局域网传文件，还有比较好用的文件管理。fv文件管理器不好用，但是他可以在后面安装apk的时候弹出允许安装未知来源的设置。</p>
+</li>
+</ul>
+<p>其他的apk先不要放！后面将平板完全破解后再安装也不迟。</p>
+<p>打包，刷入，清空userdata分区，开机，开机后就能进入到新的桌面了。</p>
+<p>实际上，我们把管控平台删掉后，平板的蓝牙功能可用。在activity manager中找到蓝牙设置，打开，可通过蓝牙与手机传输文件。</p>
+<p>你可能又大喜，我直接通过蓝牙传apk，直接安装，这样也够用了。这个想法我也试了，传完apk后，直接用es文件管理器打开，会提示“出于安全考虑，已禁止您的平板安装此来源的未知应用”。好在如果你使用fv文件管理器，他会先跳转到设置里，让你打开允许fv管理器安装apk，然后再继续安装。但安装到一半，会弹出“应用未安装。”。显然科大讯飞在这上面又做了限制。</p>
+<p>实际上管控平台去了之后平板还能开热点了，可以用es文件管理器，点击文件快传，然后他会让你开热点。你可能想到，科大讯飞应该只限制了平板访问外界，没限制外界访问平板吧。但很不幸，平板打开热点后，其他设备根本连不上平板。</p>
+<p>于是下面的问题仍然棘手：突破网络限制与安装apk。</p>
 <h3 id="guan-yu-guan-kong-ping-tai-de-yan-jiu" tabindex="-1">关于管控平台的研究</h3>
 <p>管控平台及上文所说的 IFlySCMdmService。这个东西有下面几个作用：</p>
 <ul>
-<li>监控平板使用：包括但不限于你点开了什么软件，关闭了什么软件，以及各种日志什么的。有意思的是，他并不会监控你的屏幕，也就是说理论上学校那边是看不到你的屏幕的。</li>
-<li>做登录校验：如上文所述，管控平台缺失会导致你无法登录，因此删除了管控平台你不得不也把登录界面也删掉。</li>
-<li>与iflytek服务共同完成对平板的各种限制：实际上，平板在启动的时候，会注册一个“iflytek”的service，该service对平板进行了若干限制。管控平台通过调用该service，实现对平板的管控。这将是我们后续进一步破解的关键。
-管控平台将usb魔改了，这就导致你把平板插在电脑上，会限制什么“教育平板学习机”，而不能进行文件管理什么的。
-管控平台还把网络进行了限制。平板采用白名单机制，如果保留管控平台，则只能打开“智学网”、“科大讯飞官网”、“畅言官网”等。若删掉管控平台，则什么网站都打不开了。更神奇的是，他不光限制了网站，甚至局域网都限制了，即你不能访问局域网内的其他设备。不仅出去的流量被限制了，进来的流量也被限制了，即你无法访问别人，别人也无法访问你。甚至平板开启wifi热点，其他设备也连不上。作者后文会讲述如何破解。
-该平板实际上支持蓝牙的，但一方面系统内把蓝牙设置隐藏了，另一方面管控平台把蓝牙禁用了。我们把管控平台删掉就没事了。
-管控平台还会强制使用内置wps。这意味着即使你自己塞了个wps进去，管控平台仍然会使用内置的wps打开文档。
-实际上平板的下拉状态栏是可用的，多任务键也是可用的，但都被管控平台限制了。
-而且如果管控平台不删除，你冒冒失失直接去大力破解平板，学校那里会得到你的违纪记录！
-总之，管控平台限制了不少的东西，因此我们必须删除他。但有些功能即使删除了管控平台也仍然存在限制。后文会细说。</li>
+<li>
+<p>监控平板使用：包括但不限于你点开了什么软件，关闭了什么软件，以及各种日志什么的。有意思的是，他并不会监控你的屏幕，也就是说理论上学校那边是看不到你的屏幕的。</p>
+</li>
+<li>
+<p>做登录校验：如上文所述，管控平台缺失会导致你无法登录，因此删除了管控平台你不得不也把登录界面也删掉。</p>
+</li>
+<li>
+<p>与iflytek服务共同完成对平板的各种限制：实际上，平板在启动的时候，会注册一个“iflytek”的service，该service对平板进行了若干限制。管控平台通过调用该service，实现对平板的管控。这将是我们后续进一步破解的关键。</p>
+</li>
 </ul>
+<p>管控平台将usb魔改了，这就导致你把平板插在电脑上，会限制什么“教育平板学习机”，而不能进行文件管理什么的。</p>
+<p>管控平台还把网络进行了限制。平板采用白名单机制，如果保留管控平台，则只能打开“智学网”、“科大讯飞官网”、“畅言官网”等。若删掉管控平台，则什么网站都打不开了。更神奇的是，他不光限制了网站，甚至局域网都限制了，即你不能访问局域网内的其他设备。不仅出去的流量被限制了，进来的流量也被限制了，即你无法访问别人，别人也无法访问你。甚至平板开启wifi热点，其他设备也连不上。作者后文会讲述如何破解。</p>
+<p>该平板实际上支持蓝牙的，但一方面系统内把蓝牙设置隐藏了，另一方面管控平台把蓝牙禁用了。我们把管控平台删掉就没事了。</p>
+<p>管控平台还会强制使用内置wps。这意味着即使你自己塞了个wps进去，管控平台仍然会使用内置的wps打开文档。</p>
+<p>实际上平板的下拉状态栏是可用的，多任务键也是可用的，但都被管控平台限制了。</p>
+<p>而且如果管控平台不删除，你冒冒失失直接去大力破解平板，学校那里会得到你的违纪记录！</p>
+<p>总之，管控平台限制了不少的东西，因此我们必须删除他。但有些功能即使删除了管控平台也仍然存在限制。后文会细说。</p>
 <h3 id="kai-qi-adb" tabindex="-1">开启adb</h3>
 <p>如果你把上文提到晨钟酱的视频看完，会发现晨钟酱对build.prop进行了修改，实现了无需打开开发者选项即可开启adb调试。我们也这样做，修改build.prop，在末尾加入如下代码：</p>
 <pre><div class="head"><div class="language">yaml</div><div class="copy" data="cGVyc2lzdC5zZXJ2aWNlLmFkYi5lbmFibGUlM0QxJTBBcGVyc2lzdC5zZXJ2aWNlLmRlYnVnZ2FibGUlM0QxJTBBcGVyc2lzdC5zeXMudXNiLmNvbmZpZyUzRG10cCUyQ2FkYiUwQXJvLnN5cy51c2IuZGVmYXVsdC5jb25maWclM0RtdHAlMkNhZGIlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-string">persist.service.adb.enable=1</span>
@@ -101,55 +143,63 @@
 <span class="hljs-string">persist.sys.usb.config=mtp,adb</span>
 <span class="hljs-string">ro.sys.usb.default.config=mtp,adb</span>
 </div></code></pre>
-<p>保存，仍然是打包，刷机，清空userdata，开机。开机后插入数据线，果然弹出adb授权请求。
-可能又有人大喜，有了adb这不就好说了吗。直接adb install走起。这个想法我也试了，直接报错“INSTALL_FAILED”，想必科大讯飞在这上面也做了限制。
-可能还有些野路子，比如有人想root（能直接刷magisk，后文会讲）之后，把apk文件放入以其包名为名称的文件夹中，利用adb的root权限放入data/app中。但作者尝试过，这是无效的。
-但毕竟还是打开了adb，而且我们可以通过adb来与平板互传文件，比蓝牙快多了。</p>
+<p>保存，仍然是打包，刷机，清空userdata，开机。开机后插入数据线，果然弹出adb授权请求。</p>
+<p>可能又有人大喜，有了adb这不就好说了吗。直接adb install走起。这个想法我也试了，直接报错“INSTALL_FAILED”，想必科大讯飞在这上面也做了限制。</p>
+<p>可能还有些野路子，比如有人想root（能直接刷magisk，后文会讲）之后，把apk文件放入以其包名为名称的文件夹中，利用adb的root权限放入data/app中。但作者尝试过，这是无效的。</p>
+<p>但毕竟还是打开了adb，而且我们可以通过adb来与平板互传文件，比蓝牙快多了。</p>
 <h2 id="jin-yi-bu-de-po-jie" tabindex="-1">进一步的破解</h2>
-<p>作者一开始只做到了上述两个修改。这样可以做到两种效果：一个是保留管控平台，但多了一些软件，比如文件管理器，用起来更方便了，但不能随便往平板里传输数据。另一个是不保留管控平台，这样平板不能打开网站，智学网也打不开，但可以通过adb进行文件传输。
-实际上在之后的很长一段时间里我都停留在上面，没有进展。其中的网络限制问题尤为棘手，有了网络限制，平板无异于一个mp4。而科大讯飞对网络的限制并没有通过软件，因为我们在删除apk一节中已经把科大讯飞自带的所有apk，甚至管控平台都删了，但还是存在网络限制。于是我考虑科大讯飞是不是通过系统底层对网络进行了限制。
-后来，我在浏览解包镜像后的framework文件夹中，发现了“iflytek-mdm.jar”，个人感觉可能是科大讯飞魔改了什么底层组件，而这个jar貌似非常关键。于是我反编译看了下，果然不出我所料，这个jar里都是一些限制平板功能的函数。在分析其代码时，发现每个函数都调用了“iflytek”这个service。于是我继续从framework中找到了“services.jar”文件夹。同样反编译，果然在里面找到了，在“com.android.server.iflytek”中。在“IflytekServices”中发现了所有限制的实现方法。
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-d86272bf1245f0dbc21d5b973a5eea65_1440w.png" style="transform: scale(1)" width=369 height=686></div></p>
+<p>作者一开始只做到了上述两个修改。这样可以做到两种效果：一个是保留管控平台，但多了一些软件，比如文件管理器，用起来更方便了，但不能随便往平板里传输数据。另一个是不保留管控平台，这样平板不能打开网站，智学网也打不开，但可以通过adb进行文件传输。</p>
+<p>实际上在之后的很长一段时间里我都停留在上面，没有进展。其中的网络限制问题尤为棘手，有了网络限制，平板无异于一个mp4。而科大讯飞对网络的限制并没有通过软件，因为我们在删除apk一节中已经把科大讯飞自带的所有apk，甚至管控平台都删了，但还是存在网络限制。于是我考虑科大讯飞是不是通过系统底层对网络进行了限制。</p>
+<p>后来，我在浏览解包镜像后的framework文件夹中，发现了“iflytek-mdm.jar”，个人感觉可能是科大讯飞魔改了什么底层组件，而这个jar貌似非常关键。于是我反编译看了下，果然不出我所料，这个jar里都是一些限制平板功能的函数。在分析其代码时，发现每个函数都调用了“iflytek”这个service。于是我继续从framework中找到了“services.jar”文件夹。同样反编译，果然在里面找到了，在“com.android.server.iflytek”中。在“IflytekServices”中发现了所有限制的实现方法。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-d86272bf1245f0dbc21d5b973a5eea65_1440w.png" style="transform: scale(1)" width=369 height=686></div></p>
 <h3 id="po-jie-wang-luo-xian-zhi" tabindex="-1">破解网络限制</h3>
-<p>“addNetworkAccessWhiteList”想必就是添加某个网址到白名单了。“addNetworkAccessWhiteList”调用了“addNetworkAccessWhiteListInternal”
-在“addNetworkAccessWhiteListInternal”函数中说明了科大讯飞网络限制的原理。
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/kdpj1.png" style="transform: scale(1)" width=636 height=497></div>
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/kdpj2.png" style="transform: scale(1)" width=739 height=611></div>
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/kdpj3.png" style="transform: scale(1)" width=789 height=620></div>
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/kdpj4.png" style="transform: scale(1)" width=818 height=618></div>
-大概就是建了个“netwhitelist.txt”，然后往里面写了白名单地址，然后还在“settings”里写了白名单地址。当然这些都不重要。非常关键的代码为：
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-975a4b691d1b6aa36821e18047e531d0_1440w.png" style="transform: scale(1)" width=816 height=302></div>
-其中510行代码看起来是开启防火墙的意思。其调用了NetworkManagementService的setFirewallEnable。然后我转到com.android.server.NetworkManagementService中找到了setFirewallEnable这个函数。于是就有了这样的一个思路：修改代码，使传入的参数无论是false还是true，一律改成false。但我还是第一次接触安卓逆向，所以对应的smail代码不知道怎么实现比较稳妥，万一改完刷进去开不开机就很浪费时间。于是我干脆直接把这里的代码全部删掉，改成直接“return void;”
-使用apktool将services.jar反编译为smail文件
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-77700369eb445fc6536b57bfbdd584e5_1440w.png" style="transform: scale(1)" width=845 height=445><div class="img-title">找到对应方法</div></div>
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-301e39047f14a0e1b9f7c422335cbb2b_1440w.png" style="transform: scale(1)" width=423 height=144><div class="img-title">修改</div></div>
-实际上科大讯飞貌似除了对网址有白名单限制，对应用访问网络也有白名单限制，也和上述差不多的步骤操作即可。
-然后编译回去，把修改后的services.jar替换掉原来的。然后打包，刷进去，清userdata，开机，不出意外就成功解除网络限制了。并且平板开热点的话，其他设备也能连上了。</p>
+<p>“addNetworkAccessWhiteList”想必就是添加某个网址到白名单了。“addNetworkAccessWhiteList”调用了“addNetworkAccessWhiteListInternal”</p>
+<p>在“addNetworkAccessWhiteListInternal”函数中说明了科大讯飞网络限制的原理。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/kdpj1.png" style="transform: scale(1)" width=636 height=497></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/kdpj2.png" style="transform: scale(1)" width=739 height=611></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/kdpj3.png" style="transform: scale(1)" width=789 height=620></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/kdpj4.png" style="transform: scale(1)" width=818 height=618></div></p>
+<p>大概就是建了个“netwhitelist.txt”，然后往里面写了白名单地址，然后还在“settings”里写了白名单地址。当然这些都不重要。非常关键的代码为：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-975a4b691d1b6aa36821e18047e531d0_1440w.png" style="transform: scale(1)" width=816 height=302></div></p>
+<p>其中510行代码看起来是开启防火墙的意思。其调用了NetworkManagementService的setFirewallEnable。然后我转到com.android.server.NetworkManagementService中找到了setFirewallEnable这个函数。于是就有了这样的一个思路：修改代码，使传入的参数无论是false还是true，一律改成false。但我还是第一次接触安卓逆向，所以对应的smail代码不知道怎么实现比较稳妥，万一改完刷进去开不开机就很浪费时间。于是我干脆直接把这里的代码全部删掉，改成直接“return void;”</p>
+<p>使用apktool将services.jar反编译为smail文件</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-77700369eb445fc6536b57bfbdd584e5_1440w.png" style="transform: scale(1)" width=845 height=445><div class="img-title">找到对应方法</div></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-301e39047f14a0e1b9f7c422335cbb2b_1440w.png" style="transform: scale(1)" width=423 height=144><div class="img-title">修改</div></div></p>
+<p>实际上科大讯飞貌似除了对网址有白名单限制，对应用访问网络也有白名单限制，也和上述差不多的步骤操作即可。</p>
+<p>然后编译回去，把修改后的services.jar替换掉原来的。然后打包，刷进去，清userdata，开机，不出意外就成功解除网络限制了。并且平板开热点的话，其他设备也能连上了。</p>
 <h3 id="po-jie-apk-an-zhuang-xian-zhi" tabindex="-1">破解apk安装限制</h3>
-<p>其实一开始除了思考如何破解网络限制之外，我还有一直考虑如何破解apk安装限制。上文提到，打开apk后进度条走到一半显示“应用未安装”。于是我怀疑科大讯飞魔改了packagemanager。因为adb也无法安装，所以显然不是修改的packagemanager.apk，更可能是PackageManagerService。而这个代码量巨大，直接反编译甚至报错了，所以不能直接从这里着手。
-而自从我们破解网络限制之后，貌似可以如法炮制，以类似的方法破解应用安装限制。
-同样在iflytek服务中发现一个与之有关的方法。
-<div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-d7182bef5b60ae65442d1ba8ea0cadf6_1440w.png" style="transform: scale(1)" width=767 height=365><div class="img-title">大概意思是将包名放入settings中的install_whitelist中</div></div>
-看样子包名存在于这里面的apk才可以被安装。
-接下来我们上文开启的adb调试就有用了。将平板连上电脑，在命令行中执行但我在adb shell中输入</p>
+<p>其实一开始除了思考如何破解网络限制之外，我还有一直考虑如何破解apk安装限制。上文提到，打开apk后进度条走到一半显示“应用未安装”。于是我怀疑科大讯飞魔改了packagemanager。因为adb也无法安装，所以显然不是修改的packagemanager.apk，更可能是PackageManagerService。而这个代码量巨大，直接反编译甚至报错了，所以不能直接从这里着手。</p>
+<p>而自从我们破解网络限制之后，貌似可以如法炮制，以类似的方法破解应用安装限制。</p>
+<p>同样在iflytek服务中发现一个与之有关的方法。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://www.caiwen.work/wp-content/uploads/2023/12/v2-d7182bef5b60ae65442d1ba8ea0cadf6_1440w.png" style="transform: scale(1)" width=767 height=365><div class="img-title">大概意思是将包名放入settings中的install_whitelist中</div></div></p>
+<p>看样子包名存在于这里面的apk才可以被安装。</p>
+<p>接下来我们上文开启的adb调试就有用了。将平板连上电脑，在命令行中执行但我在adb shell中输入</p>
 <pre><div class="head"><div class="language">bash</div><div class="copy" data="c2V0dGluZ3MlMjBwdXQlMjBnbG9iYWwlMjBpbnN0YWxsX3doaXRlbGlzdCUyMCUyMiVFOCVBNiU4MSVFNSVBRSU4OSVFOCVBMyU4NSVFNyU5QSU4NGFwayVFNSU4QyU4NSVFNSU5MCU4RCUyMiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">settings put global install_whitelist <span class="hljs-string">&quot;要安装的apk包名&quot;</span>
 </div></code></pre>
 <p>然而仍然不起作用。貌似到这里就进入死胡同了。我不太甘心，于是考虑全局搜索“whitelist”，果然在一个地方找到了判断apk是否可以安装的代码。真相大白了，科大讯飞非常的sb，他判断一个apk是否被安装，判断的是 <code>;包名;</code> 是否存在于install_whitelist中（正常人应该是按分号分割，得到数组之后再去判断吧）。我们上述的adb指令需要改为</p>
 <pre><div class="head"><div class="language">bash</div><div class="copy" data="c2V0dGluZ3MlMjBwdXQlMjBnbG9iYWwlMjBpbnN0YWxsX3doaXRlbGlzdCUyMCUyMiUzQiVFOCVBNiU4MSVFNSVBRSU4OSVFOCVBMyU4NSVFNyU5QSU4NGFwayVFNSU4QyU4NSVFNSU5MCU4RCUzQiUyMiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">settings put global install_whitelist <span class="hljs-string">&quot;;要安装的apk包名;&quot;</span>
 </div></code></pre>
-<p>前后都需要加上分号。
-回到平板，使用fv文件管理器安装对应的apk。不出意外，安装成功。
-后续平板上想要安装apk都需要先连上adb，然后执行一行指令才能继续安装。当然仍然可以仿照破解网络限制的方法，修改PackageManager的代码（如果你是大佬的话）。
-为了让平板脱离电脑也能自由安装软件，我想了个法子，你可以使用shizuku，用rish结合termux或者mt管理器自带的终端模拟器，在平板上自己对自己进行adb，这样就不用其他设备辅助了。</p>
+<p>前后都需要加上分号。</p>
+<p>回到平板，使用fv文件管理器安装对应的apk。不出意外，安装成功。</p>
+<p>后续平板上想要安装apk都需要先连上adb，然后执行一行指令才能继续安装。当然仍然可以仿照破解网络限制的方法，修改PackageManager的代码（如果你是大佬的话）。</p>
+<p>为了让平板脱离电脑也能自由安装软件，我想了个法子，你可以使用shizuku，用rish结合termux或者mt管理器自带的终端模拟器，在平板上自己对自己进行adb，这样就不用其他设备辅助了。</p>
 <h3 id="qi-ta-de-po-jie" tabindex="-1">其他的破解</h3>
 <p>通过阅读iflytek服务的代码，可以了解更多的限制的实现，从而进行破解。这里给出几个比较关键的限制的解除方法。</p>
 <ul>
-<li><code>adb shell settings put global enter_app_detail_disabled 0</code>：解除进入应用详情界面的限制。不解除的话无法从设置中进入应用详情页，也就无法卸载安装过的应用。</li>
-<li><code>adb shell settings put global home_key_disabled 0</code>：解除home键的限制（不过貌似解除了之后按下home键仍然无法返回桌面。盲猜按下home键是返回到原来自带的IFlySCLauncher，但是这个被我们删掉了，所以home键失效。可能把nova启动器的包名改成IFlySCLauncher的包名就可以了？）。</li>
-<li><code>adb shell settings put global task_key_disabled 0</code>：解除多任务键的限制（没想到吧，平板的多任务键没坏，只不过是被禁用了）。</li>
-<li><code>adb shell settings put global status_bar_expand_panel_disabled 0</code>：解除下拉状态栏的限制（从顶部往下拉也是可以拉动的，只不过以前也是被禁用了）。
-实际上iflytekservice中还有更多的限制，如有需要可以查看源码然后考虑破解。</li>
+<li>
+<p><code>adb shell settings put global enter_app_detail_disabled 0</code>：解除进入应用详情界面的限制。不解除的话无法从设置中进入应用详情页，也就无法卸载安装过的应用。</p>
+</li>
+<li>
+<p><code>adb shell settings put global home_key_disabled 0</code>：解除home键的限制（不过貌似解除了之后按下home键仍然无法返回桌面。盲猜按下home键是返回到原来自带的IFlySCLauncher，但是这个被我们删掉了，所以home键失效。可能把nova启动器的包名改成IFlySCLauncher的包名就可以了？）。</p>
+</li>
+<li>
+<p><code>adb shell settings put global task_key_disabled 0</code>：解除多任务键的限制（没想到吧，平板的多任务键没坏，只不过是被禁用了）。</p>
+</li>
+<li>
+<p><code>adb shell settings put global status_bar_expand_panel_disabled 0</code>：解除下拉状态栏的限制（从顶部往下拉也是可以拉动的，只不过以前也是被禁用了）。</p>
+</li>
 </ul>
+<p>实际上iflytekservice中还有更多的限制，如有需要可以查看源码然后考虑破解。</p>
 <h2 id="geng-duo-de-tan-suo" tabindex="-1">更多的探索</h2>
 <p>实际上经过上述的破解，平板差不多已经接近可用了。不过中间作者还进行了更多的尝试。</p>
 <h3 id="root" tabindex="-1">root</h3>
@@ -157,10 +207,10 @@
 <h3 id="gsi" tabindex="-1">gsi</h3>
 <p>使用treble info可以看到，该平板支持treble project，且为arm64架构，aonly分区。但本人尝试了havoc和lineage的gsi，均失败。后来了解到可能是不解bl锁，即使是9008强制刷system分区搞gsi也不可以？</p>
 <h2 id="hou-ji" tabindex="-1">后记</h2>
-<p>本文可能是全网第一个近年的x1pro课堂版破解教程。奇怪的是，全网对于课堂版几乎只字不提。而网上已有的内容，大多数给人一种小学生的感觉，没啥技术含量。不过仍然感谢文中提到的文章/视频给我的思路。作者对这个平板研究了很久，中间遇到不少问题，并非教程呈现出来的那么顺利。在最后成功破解一个又一个难关后，心里十分的兴奋。
-课堂版平板貌似是专门提供给学校使用的。而本人所在学校在下发平板后，并没有好好教给老师如何利用。平板唯一的作用似乎就是打开智学网。而本人对其进行破解后，或许才是这个平板应有的样子。
-同时也感到了科大讯飞的敷衍。对于一个面向高中生的平板，该平板充斥大量小学和初中的东西，而且一大半的内置功能都已经废掉了。本以为科大讯飞会在防破解上下足功夫，但没想到这么简单就被破解了（虽然实际上破解起来也不是很轻松）。
-平板破解后差不多就跟普通平板一样了。不过虽然这平板有点年头了，但大多数软件还是处在能用的水准。minecraft可以流畅运行。pvz2也可以，但加载速度慢了点。原神就别想了，但是可以玩云游戏。实测白眼跑分单核95，多核749，还不如华强北老玩家mt6735。通知貌似也被砍了，把qq挂在后台收不到通知，其他应用的通知也无法显示。有意思的是这个平板内存貌似还虚标了，写的是3g，用白眼暴力填充，只有2g。
-这个平板可视角度比较差，因此你把亮度调低就可以在教室里光明正大地玩了，因为除非凑到屏幕面前，否则根本看不清屏幕显示的是什么。
-能看到这里的人有福了，上述修改services.jar的过程还是有点硬核的，所以这里给出我已经修改好的services.jar，顺便还有上面用到的apk：<a href="https://wwi.lanzouq.com/b0fhtggcb">https://wwi.lanzouq.com/b0fhtggcb</a>，密码a4ho。
-作者这里还存有已经修改过的system镜像，如果你有需要，可以联系作者获取（无偿）。</p>
+<p>本文可能是全网第一个近年的x1pro课堂版破解教程。奇怪的是，全网对于课堂版几乎只字不提。而网上已有的内容，大多数给人一种小学生的感觉，没啥技术含量。不过仍然感谢文中提到的文章/视频给我的思路。作者对这个平板研究了很久，中间遇到不少问题，并非教程呈现出来的那么顺利。在最后成功破解一个又一个难关后，心里十分的兴奋。</p>
+<p>课堂版平板貌似是专门提供给学校使用的。而本人所在学校在下发平板后，并没有好好教给老师如何利用。平板唯一的作用似乎就是打开智学网。而本人对其进行破解后，或许才是这个平板应有的样子。</p>
+<p>同时也感到了科大讯飞的敷衍。对于一个面向高中生的平板，该平板充斥大量小学和初中的东西，而且一大半的内置功能都已经废掉了。本以为科大讯飞会在防破解上下足功夫，但没想到这么简单就被破解了（虽然实际上破解起来也不是很轻松）。</p>
+<p>平板破解后差不多就跟普通平板一样了。不过虽然这平板有点年头了，但大多数软件还是处在能用的水准。minecraft可以流畅运行。pvz2也可以，但加载速度慢了点。原神就别想了，但是可以玩云游戏。实测白眼跑分单核95，多核749，还不如华强北老玩家mt6735。通知貌似也被砍了，把qq挂在后台收不到通知，其他应用的通知也无法显示。有意思的是这个平板内存貌似还虚标了，写的是3g，用白眼暴力填充，只有2g。</p>
+<p>这个平板可视角度比较差，因此你把亮度调低就可以在教室里光明正大地玩了，因为除非凑到屏幕面前，否则根本看不清屏幕显示的是什么。</p>
+<p>能看到这里的人有福了，上述修改services.jar的过程还是有点硬核的，所以这里给出我已经修改好的services.jar，顺便还有上面用到的apk：<a href="https://wwi.lanzouq.com/b0fhtggcb">https://wwi.lanzouq.com/b0fhtggcb</a>，密码a4ho。</p>
+<p>作者这里还存有已经修改过的system镜像，如果你有需要，可以联系作者获取（无偿）。</p>

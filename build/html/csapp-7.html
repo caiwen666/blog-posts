@@ -1,8 +1,8 @@
 <h2 id="bian-yi-qi-qu-dong-cheng-xu" tabindex="-1">编译器驱动程序</h2>
-<p>有如下的程序：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895e05c3f6cd.png" style="transform: scale(1)" width=1278 height=546></div>
-其中的 <code>main.c</code> 引用了另外一个 <code>sum.c</code> 文件的函数。我们可以通过 <code>gcc -Og -o prog main.c sum.c</code> 来把这两个文件链接到一块编译出一个产物。这里的 <code>gcc</code> 相当于是一个编译器驱动程序，代替用户执行预处理器、编译器、汇编器、链接器来生成一个可执行文件。
-上述 <code>gcc</code> 驱动编译的详细过程如下：</p>
+<p>有如下的程序：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895e05c3f6cd.png" style="transform: scale(1)" width=1278 height=546></div></p>
+<p>其中的 <code>main.c</code> 引用了另外一个 <code>sum.c</code> 文件的函数。我们可以通过 <code>gcc -Og -o prog main.c sum.c</code> 来把这两个文件链接到一块编译出一个产物。这里的 <code>gcc</code> 相当于是一个编译器驱动程序，代替用户执行预处理器、编译器、汇编器、链接器来生成一个可执行文件。</p>
+<p>上述 <code>gcc</code> 驱动编译的详细过程如下：</p>
 <ul>
 <li>首先把源码 <code>main.c</code> 翻译成一个中间文件 <code>main.i</code>：<code>cpp [other arguments] main.c /tmp/main.i</code></li>
 <li>然后将这个中间文件翻译成汇编的文件 <code>main.s</code>：<code>cc1 /tmp/main.i -Og -o /tmp/main.s</code></li>
@@ -15,12 +15,12 @@
 <ul>
 <li>可重定位目标文件：由汇编器生成，链接器将其与其他的可重定位目标文件合并，生成可执行目标文件</li>
 <li>可执行目标文件：可以被直接复制到内存中执行</li>
-<li>共享目标文件：一种特殊类型的可重定位目标文件，可以在编译时或是加载时被静态或是动态链接到程序中
-在 Linux 系统上，目标文件是 ELF 格式的。ELF 文件的开头会有一个 ELF 头，结尾会有一个节头部表，中间则是由若干个节组成。ELF 头指明当前文件的格式、机器类型等信息，还包括了节头部表起始位置偏移、节头部表条目的数量和大小。节头部表指明了 ELF 文件中间的节的位置和大小信息等信息。</li>
+<li>共享目标文件：一种特殊类型的可重定位目标文件，可以在编译时或是加载时被静态或是动态链接到程序中</li>
 </ul>
+<p>在 Linux 系统上，目标文件是 ELF 格式的。ELF 文件的开头会有一个 ELF 头，结尾会有一个节头部表，中间则是由若干个节组成。ELF 头指明当前文件的格式、机器类型等信息，还包括了节头部表起始位置偏移、节头部表条目的数量和大小。节头部表指明了 ELF 文件中间的节的位置和大小信息等信息。</p>
 <h3 id="ke-zhong-ding-wei-mu-biao-wen-jian" tabindex="-1">可重定位目标文件</h3>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895e6cac89c6.png" style="transform: scale(1)" width=482 height=520></div>
-其中包含的节如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895e6cac89c6.png" style="transform: scale(1)" width=482 height=520></div></p>
+<p>其中包含的节如下：</p>
 <ul>
 <li><code>.text</code>：已编译的程序的机器代码</li>
 <li><code>.rodata</code>：常量信息，是只读的</li>
@@ -34,40 +34,40 @@
 <li><code>.strtab</code>：<code>.symtab</code> 和 <code>.debug</code> 中的符号和节头部表的节名字这些 ELF 中的文本数据并没有直接存到相应的位置，而是存储到 <code>.strtab</code> 中。原来的位置上只存储文本在 <code>.strtab</code> 中的偏移。</li>
 </ul>
 <h3 id="ke-zhi-hang-mu-biao-wen-jian" tabindex="-1">可执行目标文件</h3>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895ef2149cec.png" style="transform: scale(1)" width=841 height=572></div>
-和可重定位目标文件大致差不多，区别在于： ELF 头中还包含了程序的入口点。<code>.text</code> 、<code>.rodata</code>、<code>.data</code> 中的内容已经经过重定位了。<code>.init</code> 节定义了一个小函数，叫做 <code>__init</code>，用于程序的初始化。由于重定位完毕，所以不需要 <code>.rel</code> 相关的节。
-可执行目标文件中还包含一个段头部表，这个表中表明了 ELF 中每个节要映射到的虚拟内存的地址、占用的虚拟内存大小、访问权限等。一般映射 <code>.data</code> 段的时候会多映射一些空间，留给 <code>.bss</code>。同时，段头部表中会指明一个节在内存中的对齐要求。对于一个对其要求是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mi>l</mi><mi>i</mi><mi>g</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">align</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span></span></span></span> 的节，该节映射到虚拟内存中的首地址 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mi>a</mi><mi>d</mi><mi>d</mi><mi>r</mi></mrow><annotation encoding="application/x-tex">vaddr</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal">a</span><span class="mord mathnormal">dd</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span></span></span></span> 应满足 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mi>a</mi><mi>d</mi><mi>d</mi><mi>r</mi><mspace></mspace><mspace width="0.6667em"/><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow><mtext> </mtext><mtext> </mtext><mi>a</mi><mi>l</mi><mi>i</mi><mi>g</mi><mi>n</mi><mo>=</mo><mi>o</mi><mi>f</mi><mi>f</mi><mspace></mspace><mspace width="0.6667em"/><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow><mtext> </mtext><mtext> </mtext><mi>a</mi><mi>l</mi><mi>i</mi><mi>g</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">vaddr\mod{align} = off \mod {align} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal">a</span><span class="mord mathnormal">dd</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace allowbreak"></span><span class="mspace" style="margin-right:0.6667em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord"><span class="mord mathrm">mod</span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.10764em;">ff</span><span class="mspace allowbreak"></span><span class="mspace" style="margin-right:0.6667em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord"><span class="mord mathrm">mod</span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>o</mi><mi>f</mi><mi>f</mi></mrow><annotation encoding="application/x-tex">off</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.10764em;">ff</span></span></span></span> 是可执行目标文件中第一个节的偏移量。
-有意思的是，尽管可执行目标文件不需要再与其他文件链接了，<code>.symtab</code> 还是存在。我们可以使用 <code>strip</code> 命令特意去掉。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895ef2149cec.png" style="transform: scale(1)" width=841 height=572></div></p>
+<p>和可重定位目标文件大致差不多，区别在于： ELF 头中还包含了程序的入口点。<code>.text</code> 、<code>.rodata</code>、<code>.data</code> 中的内容已经经过重定位了。<code>.init</code> 节定义了一个小函数，叫做 <code>__init</code>，用于程序的初始化。由于重定位完毕，所以不需要 <code>.rel</code> 相关的节。</p>
+<p>可执行目标文件中还包含一个段头部表，这个表中表明了 ELF 中每个节要映射到的虚拟内存的地址、占用的虚拟内存大小、访问权限等。一般映射 <code>.data</code> 段的时候会多映射一些空间，留给 <code>.bss</code>。同时，段头部表中会指明一个节在内存中的对齐要求。对于一个对其要求是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mi>l</mi><mi>i</mi><mi>g</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">align</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span></span></span></span> 的节，该节映射到虚拟内存中的首地址 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mi>a</mi><mi>d</mi><mi>d</mi><mi>r</mi></mrow><annotation encoding="application/x-tex">vaddr</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal">a</span><span class="mord mathnormal">dd</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span></span></span></span> 应满足 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mi>a</mi><mi>d</mi><mi>d</mi><mi>r</mi><mspace></mspace><mspace width="0.6667em"/><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow><mtext> </mtext><mtext> </mtext><mi>a</mi><mi>l</mi><mi>i</mi><mi>g</mi><mi>n</mi><mo>=</mo><mi>o</mi><mi>f</mi><mi>f</mi><mspace></mspace><mspace width="0.6667em"/><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi></mrow><mtext> </mtext><mtext> </mtext><mi>a</mi><mi>l</mi><mi>i</mi><mi>g</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">vaddr\mod{align} = off \mod {align} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mord mathnormal">a</span><span class="mord mathnormal">dd</span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace allowbreak"></span><span class="mspace" style="margin-right:0.6667em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord"><span class="mord mathrm">mod</span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.10764em;">ff</span><span class="mspace allowbreak"></span><span class="mspace" style="margin-right:0.6667em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord"><span class="mord mathrm">mod</span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span><span class="mord mathnormal">i</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>o</mi><mi>f</mi><mi>f</mi></mrow><annotation encoding="application/x-tex">off</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.10764em;">ff</span></span></span></span> 是可执行目标文件中第一个节的偏移量。</p>
+<p>有意思的是，尽管可执行目标文件不需要再与其他文件链接了，<code>.symtab</code> 还是存在。我们可以使用 <code>strip</code> 命令特意去掉。</p>
 <h3 id="gong-xiang-mu-biao-wen-jian" tabindex="-1">共享目标文件</h3>
-<p>C 语言规范中定义了一组函数，这些函数放在 libc 库中，如 <code>printf</code>、<code>scanf</code> 等。为了支持这些库函数，一种方式是直接让编译器识别出这些函数，然后生成相应的代码。但是这样会增加编译器的复杂性。
-另一种方法是将所有的函数放到一个单独的可重定位目标文件中，如 <code>libc.o</code> ，然后 <code>gcc main.c /usr/lib/libc.o</code> 即可让引入库函数。不过这样的话，每个编译出来的程序都会携带一个完整的 <code>libc.o</code> ，会浪费内存。
-又一种方法是为每个函数创建一个单独的可重定位目标文件。不过这样做需要程序员自行链接合适的文件：<code>gcc main.c /usr/lib/printf.o /usr/lib/scanf.o</code>。但是这样很麻烦又容易出错。</p>
+<p>C 语言规范中定义了一组函数，这些函数放在 libc 库中，如 <code>printf</code>、<code>scanf</code> 等。为了支持这些库函数，一种方式是直接让编译器识别出这些函数，然后生成相应的代码。但是这样会增加编译器的复杂性。</p>
+<p>另一种方法是将所有的函数放到一个单独的可重定位目标文件中，如 <code>libc.o</code> ，然后 <code>gcc main.c /usr/lib/libc.o</code> 即可让引入库函数。不过这样的话，每个编译出来的程序都会携带一个完整的 <code>libc.o</code> ，会浪费内存。</p>
+<p>又一种方法是为每个函数创建一个单独的可重定位目标文件。不过这样做需要程序员自行链接合适的文件：<code>gcc main.c /usr/lib/printf.o /usr/lib/scanf.o</code>。但是这样很麻烦又容易出错。</p>
 <h4 id="jing-tai-ku" tabindex="-1">静态库</h4>
-<p>静态库将若干个可重定位目标文件组合到一个 <code>.a</code> 后缀的静态库文件中。这个文件的头部描述了其包含成员目标的信息。使用静态库文件时，链接器会自动抽取静态库文件中被使用到的成员，没被使用的则不会被抽取。
-如我们创建一个 <code>libvector</code> 库：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895f95c9c626.png" style="transform: scale(1)" width=1267 height=590></div>
-使用 <code>gcc -c addvec.c multvec.c</code> 可以编译得到 <code>addvec.o</code> 和 <code>multvec.o</code>
-然后我们可以使用 <code>ar rcs libvector.a addvec.o multvec.o</code> 来打包得到静态库文件。
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895fa58d1cfb.png" style="transform: scale(1)" width=1105 height=596></div>
-使用时需要先有个头文件，头文件包含库函数的定义。
-然后使用如下命令编译：
-<code>gcc -static -o prog2c main2.o -L. -lvector</code>
-其中 <code>-static</code> 参数告诉编译驱动程序，链接器应该构建一个完全链接的可执行目标文件，可以直接加载到内存中运行。这个参数使得可执行文件不需要任何动态链接。
-<code>-L.</code> 表明寻找静态库的位置
-<code>-lvector</code> 是 <code>libvector.a</code> 的缩写
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895fb51961c7.png" style="transform: scale(1)" width=985 height=470></div></p>
+<p>静态库将若干个可重定位目标文件组合到一个 <code>.a</code> 后缀的静态库文件中。这个文件的头部描述了其包含成员目标的信息。使用静态库文件时，链接器会自动抽取静态库文件中被使用到的成员，没被使用的则不会被抽取。</p>
+<p>如我们创建一个 <code>libvector</code> 库：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895f95c9c626.png" style="transform: scale(1)" width=1267 height=590></div></p>
+<p>使用 <code>gcc -c addvec.c multvec.c</code> 可以编译得到 <code>addvec.o</code> 和 <code>multvec.o</code></p>
+<p>然后我们可以使用 <code>ar rcs libvector.a addvec.o multvec.o</code> 来打包得到静态库文件。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895fa58d1cfb.png" style="transform: scale(1)" width=1105 height=596></div></p>
+<p>使用时需要先有个头文件，头文件包含库函数的定义。</p>
+<p>然后使用如下命令编译：</p>
+<p><code>gcc -static -o prog2c main2.o -L. -lvector</code></p>
+<p>其中 <code>-static</code> 参数告诉编译驱动程序，链接器应该构建一个完全链接的可执行目标文件，可以直接加载到内存中运行。这个参数使得可执行文件不需要任何动态链接。</p>
+<p><code>-L.</code> 表明寻找静态库的位置</p>
+<p><code>-lvector</code> 是 <code>libvector.a</code> 的缩写</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6895fb51961c7.png" style="transform: scale(1)" width=985 height=470></div></p>
 <h4 id="gong-xiang-ku" tabindex="-1">共享库</h4>
-<p>静态库直接编译进程序了，这导致程序和静态库两者之间不能独立更新。同时，每个程序都会含有重复的静态库代码，仍然造成了很大的浪费。
-共享库可以解决上述缺陷。程序在编译时不去将共享库加入编译产物中，而是简单的记录共享库的名称，程序在加载的时候再去载入共享库。同时，利用虚拟内存技术，我们可以只加载一个共享库文件到内存中，让多个程序共享这块内存。
-我们可以使用如下命令生成共享库：
-<code>gcc -shared -fpic -o libvector.so addvec.c multvec.c</code>
-<code>-shared</code> 指明打包成共享库，<code>-fpic</code> 指明要生成与位置无关代码（这个参数是必须的）
-<strong>编译时链接</strong>
-<code>gcc -o prog2l main2.c ./libvector.so</code>
-<strong>运行时使用</strong>
-需添加编译参数 <code>-ldl</code> 来使得可执行文件链接动态加载器，以使用运行时链接的功能。
-在 <code>dlfcn.h</code> 头文件中，有如下的函数：
-<code>void *dlopen(const char *filename, int flag);</code></p>
+<p>静态库直接编译进程序了，这导致程序和静态库两者之间不能独立更新。同时，每个程序都会含有重复的静态库代码，仍然造成了很大的浪费。</p>
+<p>共享库可以解决上述缺陷。程序在编译时不去将共享库加入编译产物中，而是简单的记录共享库的名称，程序在加载的时候再去载入共享库。同时，利用虚拟内存技术，我们可以只加载一个共享库文件到内存中，让多个程序共享这块内存。</p>
+<p>我们可以使用如下命令生成共享库：</p>
+<p><code>gcc -shared -fpic -o libvector.so addvec.c multvec.c</code></p>
+<p><code>-shared</code> 指明打包成共享库，<code>-fpic</code> 指明要生成与位置无关代码（这个参数是必须的）</p>
+<p><strong>编译时链接</strong></p>
+<p><code>gcc -o prog2l main2.c ./libvector.so</code></p>
+<p><strong>运行时使用</strong></p>
+<p>需添加编译参数 <code>-ldl</code> 来使得可执行文件链接动态加载器，以使用运行时链接的功能。</p>
+<p>在 <code>dlfcn.h</code> 头文件中，有如下的函数：</p>
+<p><code>void *dlopen(const char *filename, int flag);</code></p>
 <ul>
 <li>加载和链接共享库 <code>filename</code></li>
 <li><code>flag</code> 可选如下选项
@@ -83,114 +83,144 @@
 <li><code>RTLD_LAZY</code> 将符号解析推迟到使用时，这样加载时很快，但是初次使用符号的时候比较慢</li>
 </ul>
 </li>
-<li>函数调用成功则返回一个指向句柄的指针，如果出错则返回 NULL
-<code>void *dlsym(void *handle, char *symbol);</code></li>
-<li>获取加载的共享库中的某个符号的地址</li>
-<li><code>handle</code> 为 <code>dlopen</code> 返回的句柄指针，<code>symbol</code> 指明要引用的符号名称</li>
-<li>成功则返回指向符号的指针，出错则返回 NULL
-<code>int dlclose(void *handle);</code></li>
+<li>函数调用成功则返回一个指向句柄的指针，如果出错则返回 NULL</li>
+</ul>
+<p><code>void *dlsym(void *handle, char *symbol);</code></p>
+<ul>
+<li>
+<p>获取加载的共享库中的某个符号的地址</p>
+</li>
+<li>
+<p><code>handle</code> 为 <code>dlopen</code> 返回的句柄指针，<code>symbol</code> 指明要引用的符号名称</p>
+</li>
+<li>
+<p>成功则返回指向符号的指针，出错则返回 NULL</p>
+</li>
+</ul>
+<p><code>int dlclose(void *handle);</code></p>
+<ul>
 <li>卸载某个共享库</li>
 <li><code>handle</code> 为 <code>dlopen</code> 返回的句柄指针</li>
-<li>成功则返回 0，失败返回 -1
-<code>const char *dlerror(void);</code></li>
+<li>成功则返回 0，失败返回 -1</li>
+</ul>
+<p><code>const char *dlerror(void);</code></p>
+<ul>
 <li>如果前面的函数调用失败了，那么可以根据这个函数获取最近一次失败的消息</li>
 <li>如果前面的函数存在错误则返回错误文本的指针，如果前面没发生过错误则返回 NULL</li>
 </ul>
 <h2 id="jing-tai-lian-jie" tabindex="-1">静态链接</h2>
 <h3 id="fu-hao-jie-xi" tabindex="-1">符号解析</h3>
-<p>一个 C 文件中定义的全局符号，有可能只是占位，实际上是要引用另一个文件的全局符号。同时一个 C 文件中定义的全局符号有可能也要被其他 C 文件引用。全局符号将会存在 ELF 的 <code>.symtab</code> 中，在于其他文件链接时提供信息。、
-<code>.symtab</code> 中的条目结构如下：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/689602709ec35.png" style="transform: scale(1)" width=1125 height=459></div></p>
+<p>一个 C 文件中定义的全局符号，有可能只是占位，实际上是要引用另一个文件的全局符号。同时一个 C 文件中定义的全局符号有可能也要被其他 C 文件引用。全局符号将会存在 ELF 的 <code>.symtab</code> 中，在于其他文件链接时提供信息。、</p>
+<p><code>.symtab</code> 中的条目结构如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/689602709ec35.png" style="transform: scale(1)" width=1125 height=459></div></p>
 <ul>
-<li><code>name</code> 是符号的名称，实际存储的是该名称在 <code>.strtab</code> 中的偏移。</li>
-<li><code>type</code> 指明这个符号是变量还是函数。</li>
-<li><code>binding</code> 指明这个符号是局部的还是全局的（局部的符号说明这个局部变量是被 <code>static</code> 修饰了）。</li>
-<li><code>section</code> 指明这个符号的定义是存在于哪个节中。实际存储的是一个到头部表的索引。</li>
-<li><code>value</code> 指明这个符号的定义存在于哪个位置。对于可重定位目标文件，这里存储的是相对于其所在的节中的偏移（配合 <code>section</code> 信息就知道其绝对位置）。对于可执行目标文件，这里存储的直接就是符号的定义的虚拟内存地址。</li>
-<li><code>size</code> 指明目标的大小，单位为字节。
-其中 <code>section</code> 中可取一些特殊值，称为伪节：</li>
+<li>
+<p><code>name</code> 是符号的名称，实际存储的是该名称在 <code>.strtab</code> 中的偏移。</p>
+</li>
+<li>
+<p><code>type</code> 指明这个符号是变量还是函数。</p>
+</li>
+<li>
+<p><code>binding</code> 指明这个符号是局部的还是全局的（局部的符号说明这个局部变量是被 <code>static</code> 修饰了）。</p>
+</li>
+<li>
+<p><code>section</code> 指明这个符号的定义是存在于哪个节中。实际存储的是一个到头部表的索引。</p>
+</li>
+<li>
+<p><code>value</code> 指明这个符号的定义存在于哪个位置。对于可重定位目标文件，这里存储的是相对于其所在的节中的偏移（配合 <code>section</code> 信息就知道其绝对位置）。对于可执行目标文件，这里存储的直接就是符号的定义的虚拟内存地址。</p>
+</li>
+<li>
+<p><code>size</code> 指明目标的大小，单位为字节。</p>
+</li>
+</ul>
+<p>其中 <code>section</code> 中可取一些特殊值，称为伪节：</p>
+<ul>
 <li><code>ABS</code> 表明这个符号不应该被重定位。</li>
 <li><code>UNDEF</code> 表明这个符号的定义在当前文件中虽被定义了，但具体定义在外部的文件中，如没有函数体的函数定义、被 <code>extern</code> 修饰的函数或是变量。</li>
-<li><code>COMMON</code> 则存储弱符号。
-伪节只会在可重定位目标文件中。
-在 C 语言中，有一个强弱符号机制来处理多个文件之间全局符号的引用。所有的函数和有初始值的全局变量归为强符号，没有初始值的全局变量归为弱符号。
-对于多个重名的全局符号，链接器有如下的规则进行选取：</li>
+<li><code>COMMON</code> 则存储弱符号。</li>
+</ul>
+<p>伪节只会在可重定位目标文件中。</p>
+<p>在 C 语言中，有一个强弱符号机制来处理多个文件之间全局符号的引用。所有的函数和有初始值的全局变量归为强符号，没有初始值的全局变量归为弱符号。</p>
+<p>对于多个重名的全局符号，链接器有如下的规则进行选取：</p>
+<ul>
 <li>规则 1：不允许有多个同名的的强符号</li>
 <li>规则 2：如果有一个强符号和多个弱符号，选择强符号</li>
-<li>规则 3：如果有多个弱符号，随机选择一个
-编译器在处理 C 文件时，如果遇到一个强符号，如果其初始值为 0，则会判定这个符号属于 <code>.bss</code> 节。如果其初始值不为 0，则会判定这个符号属于 <code>.data</code> 节。如果遇到一个弱符号，则编译器不知道这个符号是定义在当前文件中还是其他文件中的，因此就判定其处于 <code>COMMON</code> 节中，等待链接器进一步决定。
-如：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6896079679b24.png" style="transform: scale(1)" width=646 height=511></div>
-上述文件无法链接在一起，因为有两个强符号。
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/68960b5d337fc.png" style="transform: scale(1)" width=621 height=736></div>
-这个可以链接到一起，但是根据上述规则， <code>bar3.c</code> 中的 <code>x</code> 被判定为是在 <code>foo3.c</code> 中定义那个 <code>x</code>，所以调用 <code>f()</code> 时 <code>x</code> 发生了改变。由于只有弱符号的话会随机选择一个，因此也会带来类似的问题。
-现代的链接器默认自动开启 <code>-fno-common</code> 选项，使得存在重名符号的时候（即使不是强符号重名）也会直接报错。我们可以手动添加 <code>-fcommon</code> 来允许弱符号重名。
-而对于 C++，没有了强弱符号机制，而是有一个 ODR （One Definition Rule），全局符号一律不允许重名。如果在一个文件中想要引用另一个文件中的符号，则需要在当前文件的定义中添加 <code>extern</code> 修饰。编译器会将这个符号判定为属于 <code>UNDEF</code> 节中。
-上述过程则会为每个 C 文件构建了一个符号表。
-接着，链接器维护一个将要被合并的目标文件集合 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span></span></span></span>，一个未解析的符号集合 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span>，一个在前面输入文件中已经定义的符号集合 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span></span></span></span>。</li>
+<li>规则 3：如果有多个弱符号，随机选择一个</li>
+</ul>
+<p>编译器在处理 C 文件时，如果遇到一个强符号，如果其初始值为 0，则会判定这个符号属于 <code>.bss</code> 节。如果其初始值不为 0，则会判定这个符号属于 <code>.data</code> 节。如果遇到一个弱符号，则编译器不知道这个符号是定义在当前文件中还是其他文件中的，因此就判定其处于 <code>COMMON</code> 节中，等待链接器进一步决定。</p>
+<p>如：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/6896079679b24.png" style="transform: scale(1)" width=646 height=511></div></p>
+<p>上述文件无法链接在一起，因为有两个强符号。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/68960b5d337fc.png" style="transform: scale(1)" width=621 height=736></div></p>
+<p>这个可以链接到一起，但是根据上述规则， <code>bar3.c</code> 中的 <code>x</code> 被判定为是在 <code>foo3.c</code> 中定义那个 <code>x</code>，所以调用 <code>f()</code> 时 <code>x</code> 发生了改变。由于只有弱符号的话会随机选择一个，因此也会带来类似的问题。</p>
+<p>现代的链接器默认自动开启 <code>-fno-common</code> 选项，使得存在重名符号的时候（即使不是强符号重名）也会直接报错。我们可以手动添加 <code>-fcommon</code> 来允许弱符号重名。</p>
+<p>而对于 C++，没有了强弱符号机制，而是有一个 ODR （One Definition Rule），全局符号一律不允许重名。如果在一个文件中想要引用另一个文件中的符号，则需要在当前文件的定义中添加 <code>extern</code> 修饰。编译器会将这个符号判定为属于 <code>UNDEF</code> 节中。</p>
+<p>上述过程则会为每个 C 文件构建了一个符号表。</p>
+<p>接着，链接器维护一个将要被合并的目标文件集合 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span></span></span></span>，一个未解析的符号集合 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span>，一个在前面输入文件中已经定义的符号集合 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span></span></span></span>。</p>
+<ul>
 <li>对于命令行上的每个输入文件 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span>，链接器则会判断 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span> 是一个目标文件还是一个存档文件</li>
 <li>如果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span> 是目标文件，则会把 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span> 放入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span></span></span></span> 中，用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span></span></span></span> 尝试解决 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span> 中未解析的符号，再用把剩余未被解析的符号加入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span> 中</li>
 <li>如果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span> 是静态库文件，则在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi></mrow><annotation encoding="application/x-tex">f</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span></span> 中的成员（即静态库中包含的目标文件）所定义的符号中寻找当前未被解析的元素。把对解析有帮助的成员目标文件放入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi></mrow><annotation encoding="application/x-tex">F</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">F</span></span></span></span>，更新 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span></span></span></span>。对解析没有帮助的则会直接丢弃</li>
-<li>进行完毕之后，如果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span> 是非空的，则会报错
-根据上述过程，我们在编译时，命令行上放置的文件的顺序非常重要，必须要使得前面未被解析的符号在后面的文件中存在定义。如：
-<code>gcc -static ./libvector.a main2.c</code>，处理 <code>libvector.a</code> 时，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span> 是空的，这个库文件不会解决后面的 <code>main2.c</code> 的符号解析，所以会报错。所以我们最好是把静态库文件放在命令行的后面。
-同时我们还需要注意静态库文件的依赖关系。比如 <code>foo.c</code> 调用 <code>libx.a</code> 和 <code>libz.a</code>，而这两个库又调用 <code>liby.a</code>，那么我们需要这么写：<code>gcc foo.c libx.a libz.a liby.a</code>。
-如果出现循环依赖，我们可以在命令行上重复添加文件，比如 <code>libx.a</code> 调用 <code>liby.a</code>，而 <code>liby.a</code> 也调用了 <code>libx.a</code>，则有：<code>gcc foo.c libx.a liby.a libx.a</code>。当然另一个解决方法是把 <code>libx.a</code> 和 <code>liby.a</code> 合并成一个单独的静态库文件。
-完成符号解析后，链接器就知道所有的符号引用对应于哪个符号定义。</li>
+<li>进行完毕之后，如果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span> 是非空的，则会报错</li>
 </ul>
+<p>根据上述过程，我们在编译时，命令行上放置的文件的顺序非常重要，必须要使得前面未被解析的符号在后面的文件中存在定义。如：</p>
+<p><code>gcc -static ./libvector.a main2.c</code>，处理 <code>libvector.a</code> 时，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">U</span></span></span></span> 是空的，这个库文件不会解决后面的 <code>main2.c</code> 的符号解析，所以会报错。所以我们最好是把静态库文件放在命令行的后面。</p>
+<p>同时我们还需要注意静态库文件的依赖关系。比如 <code>foo.c</code> 调用 <code>libx.a</code> 和 <code>libz.a</code>，而这两个库又调用 <code>liby.a</code>，那么我们需要这么写：<code>gcc foo.c libx.a libz.a liby.a</code>。</p>
+<p>如果出现循环依赖，我们可以在命令行上重复添加文件，比如 <code>libx.a</code> 调用 <code>liby.a</code>，而 <code>liby.a</code> 也调用了 <code>libx.a</code>，则有：<code>gcc foo.c libx.a liby.a libx.a</code>。当然另一个解决方法是把 <code>libx.a</code> 和 <code>liby.a</code> 合并成一个单独的静态库文件。</p>
+<p>完成符号解析后，链接器就知道所有的符号引用对应于哪个符号定义。</p>
 <h3 id="zhong-ding-wei" tabindex="-1">重定位</h3>
-<p>链接器需要把多个可重定位目标文件中，名字相同的节合并，比如把各个文件的 <code>.text</code> 合并成一个 <code>.text</code>。但是合并之后，一些全局符号的地址就会发生改变。编译器会提前知道哪些全局符号的地址暂时无法确定，于是在引用这些符号的地方，先不设置具体的地址，而是先留空，并记录这些位置，生成重定位条目，放到 <code>.rel</code> 相关的节上。文件合并之后，各个符号的地址就确定下来了，链接器会进行重定位，就是根据重定位条目，设置好具体的地址。
-重定位条目的结构如下：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/68961551917cc.png" style="transform: scale(1)" width=1195 height=374></div>
-其中的 <code>offset</code> 表明需要重定位的地址。地址是相对于其所在节的偏移。
-<code>symbol</code> 表明这个要被重定位的引用，是引用了哪个符号，存储的是在符号表中的下标。
-<code>addend</code> 表明计算出重定位地址之后还需要进行的调整量。常用于重定位为 PC 相对地址时。
-<code>type</code> 表明重定位类型。这里讲两种最基本的类型：</p>
+<p>链接器需要把多个可重定位目标文件中，名字相同的节合并，比如把各个文件的 <code>.text</code> 合并成一个 <code>.text</code>。但是合并之后，一些全局符号的地址就会发生改变。编译器会提前知道哪些全局符号的地址暂时无法确定，于是在引用这些符号的地方，先不设置具体的地址，而是先留空，并记录这些位置，生成重定位条目，放到 <code>.rel</code> 相关的节上。文件合并之后，各个符号的地址就确定下来了，链接器会进行重定位，就是根据重定位条目，设置好具体的地址。</p>
+<p>重定位条目的结构如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/68961551917cc.png" style="transform: scale(1)" width=1195 height=374></div></p>
+<p>其中的 <code>offset</code> 表明需要重定位的地址。地址是相对于其所在节的偏移。</p>
+<p><code>symbol</code> 表明这个要被重定位的引用，是引用了哪个符号，存储的是在符号表中的下标。</p>
+<p><code>addend</code> 表明计算出重定位地址之后还需要进行的调整量。常用于重定位为 PC 相对地址时。</p>
+<p><code>type</code> 表明重定位类型。这里讲两种最基本的类型：</p>
 <ul>
 <li><code>R_X86_64_PC32</code>：重定位为一个 PC 相对地址</li>
-<li><code>R_X86_64_32</code>：重定位为一个绝对的地址
-上述类型重定位的地址都是 32 位的，这是因为这两个类型是基于 x86-64 小型代码模型。这个模型假设可执行目标文件的大小小于 2GB，32 位的寻址就足够，GCC 默认使用这个模型。
-重定位算法如下：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/68961722e82c6.png" style="transform: scale(1)" width=1190 height=644></div>
-其先枚举了要重定位的节，然后枚举该节下的重定位条目。现在我们已经知道每个节的真实首地址了，用 <code>ADDR(s)</code> 表示。已经知道引用的符号所被定义的真实地址了，用 <code>ADDR(r.symbol)</code> 表示。</li>
+<li><code>R_X86_64_32</code>：重定位为一个绝对的地址</li>
 </ul>
+<p>上述类型重定位的地址都是 32 位的，这是因为这两个类型是基于 x86-64 小型代码模型。这个模型假设可执行目标文件的大小小于 2GB，32 位的寻址就足够，GCC 默认使用这个模型。</p>
+<p>重定位算法如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/08/68961722e82c6.png" style="transform: scale(1)" width=1190 height=644></div></p>
+<p>其先枚举了要重定位的节，然后枚举该节下的重定位条目。现在我们已经知道每个节的真实首地址了，用 <code>ADDR(s)</code> 表示。已经知道引用的符号所被定义的真实地址了，用 <code>ADDR(r.symbol)</code> 表示。</p>
 <h2 id="dong-tai-lian-jie" tabindex="-1">动态链接</h2>
 <h3 id="chuan-tong-dong-tai-lian-jie" tabindex="-1">传统动态链接</h3>
-<p>在编译时，链接器不将共享库中的代码和数据复制到可执行目标文件中，而是复制了一些重定位和符号信息，以便后续加载时链接共享库。
-可执行目标文件在加载时，加载器注意到其包含了一个 <code>.interp</code> 节，这一节包含了动态链接器的路径名（动态链接器本身可视为一个共享库，在 Linux 中是 <code>ld-linux.so</code>），然后加载器加载并调用动态链接器。
-动态链接器会寻找程序中引用的共享库，将共享库所在的内存映射到当前程序的虚拟内存空间中，然后动态链接器此时重定位程序中对共享库的引用。
-传统的动态链接机制有一些缺陷。首先这样会使得 <code>.text</code> 节可写，会有漏洞隐患。其次，这样的话，每个进程都需要独立的代码段的副本，而现代的操作系统，每个进程都共享一个代码段以节省内存。而且对于一个比较大的程序，加载时重定位所有引用的话也会严重拖慢程序的加载速度。
-并且，如果是可执行文件调用共享库还好，如果是共享库之间进行调用的话，需要对共享库进行重定位，那么就失去了共享库的性质了。</p>
+<p>在编译时，链接器不将共享库中的代码和数据复制到可执行目标文件中，而是复制了一些重定位和符号信息，以便后续加载时链接共享库。</p>
+<p>可执行目标文件在加载时，加载器注意到其包含了一个 <code>.interp</code> 节，这一节包含了动态链接器的路径名（动态链接器本身可视为一个共享库，在 Linux 中是 <code>ld-linux.so</code>），然后加载器加载并调用动态链接器。</p>
+<p>动态链接器会寻找程序中引用的共享库，将共享库所在的内存映射到当前程序的虚拟内存空间中，然后动态链接器此时重定位程序中对共享库的引用。</p>
+<p>传统的动态链接机制有一些缺陷。首先这样会使得 <code>.text</code> 节可写，会有漏洞隐患。其次，这样的话，每个进程都需要独立的代码段的副本，而现代的操作系统，每个进程都共享一个代码段以节省内存。而且对于一个比较大的程序，加载时重定位所有引用的话也会严重拖慢程序的加载速度。</p>
+<p>并且，如果是可执行文件调用共享库还好，如果是共享库之间进行调用的话，需要对共享库进行重定位，那么就失去了共享库的性质了。</p>
 <h3 id="plt-got-lian-jie-ji-zhi" tabindex="-1">PLT/GOT 链接机制</h3>
-<p>现代系统有一个机制，可以生成位置无关代码，也就是无论代码被加载到哪里，都可以被正常执行，无需重定位代码段。现代编译器产生的共享库和可执行文件都是位置无关代码。
-位置无关代码的原理是，同一个共享库/可执行文件中的数据段和代码段的相对距离是不变的，也就是代码段中可以 PC 相对地址来引用代码段。
-编译器在数据段最开始的地方创建了一个叫做 GOT（全局偏移量表），这个表中每个条目都是 8 字节，表示一个地址。编译器会在 GOT 中给程序中的所有全局符号都建立一个条目，表示这个全局符号的绝对地址，初始时为空，等待重定位，GOT 会对应一个重定位表。这样，加载程序的时候，动态链接器无需重定位代码段，只需要重定位 GOT 表即可。每个可执行文件和共享库实例都有一个独立 GOT 表，也就是加载他们的时候只需要建立 GOT 表和重定位 GOT 表的代价。
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689acfc8512de.png" style="transform: scale(1)" width=1130 height=527></div>
-使用 GOT 表就可以解决很多问题了。但是现代编译系统引入了 PLT 来支持动态绑定机制。比如一个像 <code>libc.so</code> 的库，可能会输出成百上千个函数，如果在加载时，将这些函数对应在 GOT 表中的项目全部重定位，会造成很大的性能开销，且可执行程序可能只需要使用到库中的一部分函数，这也就使得很多重定位是浪费的。
-PLT 中每个条目都是一个 16 字节代码。 PLT 拥有可执行权限。GOT 和 PLT 联合使用时，<code>GOT[0]</code> 表明 <code>.dynamic</code> 节的地址，<code>GOT[1]</code> 表明重定位条目的地址，<code>GOT[2]</code> 表明动态链接器的入口地址，<code>PLT[0]</code> 将 <code>GOT[1]</code> 对应的地址压入栈中并调用动态链接器。
-每个外部函数都会有一个 ID，并在 PLT 中有一个对应的条目。
-当程序调用外部函数的时候，会先跳转到外部函数对应的 PLT 条目中，PLT 条目中的第一个执行是跳转指令，跳转到其对应的 GOT 条目中指向的地址。这个地址初始时又指向 PLT 条目的第二条执行，这个指令会将外部函数的 ID 压入栈中，然后跳到 <code>PLT[0]</code> 中，来调用动态链接器。
-动态链接器根据压入栈中的外部函数 ID 和重定位表来确定外部函数真实的运行地址，并重写 GOT 表，然后再调用外部函数。
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689adc5fce701.png" style="transform: scale(1)" width=623 height=736></div>
-后续再次调用外部函数的时候，从 PLT 跳到 GOT 对应的条目时，这个条目已经指明了外部函数的地址，可以直接跳过去：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689adcc85faec.png" style="transform: scale(1)" width=601 height=741></div>
-这也就实现了延迟绑定</p>
+<p>现代系统有一个机制，可以生成位置无关代码，也就是无论代码被加载到哪里，都可以被正常执行，无需重定位代码段。现代编译器产生的共享库和可执行文件都是位置无关代码。</p>
+<p>位置无关代码的原理是，同一个共享库/可执行文件中的数据段和代码段的相对距离是不变的，也就是代码段中可以 PC 相对地址来引用代码段。</p>
+<p>编译器在数据段最开始的地方创建了一个叫做 GOT（全局偏移量表），这个表中每个条目都是 8 字节，表示一个地址。编译器会在 GOT 中给程序中的所有全局符号都建立一个条目，表示这个全局符号的绝对地址，初始时为空，等待重定位，GOT 会对应一个重定位表。这样，加载程序的时候，动态链接器无需重定位代码段，只需要重定位 GOT 表即可。每个可执行文件和共享库实例都有一个独立 GOT 表，也就是加载他们的时候只需要建立 GOT 表和重定位 GOT 表的代价。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689acfc8512de.png" style="transform: scale(1)" width=1130 height=527></div></p>
+<p>使用 GOT 表就可以解决很多问题了。但是现代编译系统引入了 PLT 来支持动态绑定机制。比如一个像 <code>libc.so</code> 的库，可能会输出成百上千个函数，如果在加载时，将这些函数对应在 GOT 表中的项目全部重定位，会造成很大的性能开销，且可执行程序可能只需要使用到库中的一部分函数，这也就使得很多重定位是浪费的。</p>
+<p>PLT 中每个条目都是一个 16 字节代码。 PLT 拥有可执行权限。GOT 和 PLT 联合使用时，<code>GOT[0]</code> 表明 <code>.dynamic</code> 节的地址，<code>GOT[1]</code> 表明重定位条目的地址，<code>GOT[2]</code> 表明动态链接器的入口地址，<code>PLT[0]</code> 将 <code>GOT[1]</code> 对应的地址压入栈中并调用动态链接器。</p>
+<p>每个外部函数都会有一个 ID，并在 PLT 中有一个对应的条目。</p>
+<p>当程序调用外部函数的时候，会先跳转到外部函数对应的 PLT 条目中，PLT 条目中的第一个执行是跳转指令，跳转到其对应的 GOT 条目中指向的地址。这个地址初始时又指向 PLT 条目的第二条执行，这个指令会将外部函数的 ID 压入栈中，然后跳到 <code>PLT[0]</code> 中，来调用动态链接器。</p>
+<p>动态链接器根据压入栈中的外部函数 ID 和重定位表来确定外部函数真实的运行地址，并重写 GOT 表，然后再调用外部函数。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689adc5fce701.png" style="transform: scale(1)" width=623 height=736></div></p>
+<p>后续再次调用外部函数的时候，从 PLT 跳到 GOT 对应的条目时，这个条目已经指明了外部函数的地址，可以直接跳过去：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689adcc85faec.png" style="transform: scale(1)" width=601 height=741></div></p>
+<p>这也就实现了延迟绑定</p>
 <h2 id="ku-da-zhuang" tabindex="-1">库打桩</h2>
 <p>库打桩可以让我们拦截对一个共享库的调用，反而执行自己的代码。</p>
 <h3 id="bian-yi-shi-da-zhuang" tabindex="-1">编译时打桩</h3>
-<p>首先有一个我们自己的函数：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689ae09f6adf0.png" style="transform: scale(1)" width=1116 height=792></div>
-然后编译 <code>gcc -DCOMPILETIME -c mymalloc.c</code>
-然后我们再编写一个自己的头文件，在这个头文件里通过宏来更改调用函数的名称：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689ae0571730f.png" style="transform: scale(1)" width=1082 height=720></div>
-编译：<code>gcc -I. -o intc int.c mymalloc.o</code>
-其中 <code>-I.</code> 是打桩的关键。这个参数将会让编译器优先从当前目录下寻找头文件，所以编译器会使用我们的 <code>malloc.h</code> 而不是标准的 <code>malloc.h</code>。</p>
+<p>首先有一个我们自己的函数：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689ae09f6adf0.png" style="transform: scale(1)" width=1116 height=792></div></p>
+<p>然后编译 <code>gcc -DCOMPILETIME -c mymalloc.c</code></p>
+<p>然后我们再编写一个自己的头文件，在这个头文件里通过宏来更改调用函数的名称：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689ae0571730f.png" style="transform: scale(1)" width=1082 height=720></div></p>
+<p>编译：<code>gcc -I. -o intc int.c mymalloc.o</code></p>
+<p>其中 <code>-I.</code> 是打桩的关键。这个参数将会让编译器优先从当前目录下寻找头文件，所以编译器会使用我们的 <code>malloc.h</code> 而不是标准的 <code>malloc.h</code>。</p>
 <h3 id="lian-jie-shi-da-zhuang" tabindex="-1">链接时打桩</h3>
-<p>链接器支持使用 <code>--wrap f</code> 的选项进行链接时打桩。这个选项告诉链接器，把对符号 <code>f</code> 的引用全部解析为对 <code>__wrap_f</code> （用于拦截），还把对 <code>__real_f</code> 的引用解析为对 <code>f</code> 的引用（用于调用真实函数），于是我们有：
-<div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689ae2eeb389e.png" style="transform: scale(1)" width=1145 height=893></div>
-编译：<code>gcc -DLINKTIME -c mymalloc.c</code> ，<code>gcc -c int.c</code>
-链接：<code>gcc -Wl,--wrap,malloc -Wl,--wrap,free -o intc int.o mymalloc.o</code>
-其中 <code>-Wl,option</code> 用于将 <code>option</code> 传递给链接器，并且 <code>option</code> 中的每个逗号都被替换成空格。</p>
+<p>链接器支持使用 <code>--wrap f</code> 的选项进行链接时打桩。这个选项告诉链接器，把对符号 <code>f</code> 的引用全部解析为对 <code>__wrap_f</code> （用于拦截），还把对 <code>__real_f</code> 的引用解析为对 <code>f</code> 的引用（用于调用真实函数），于是我们有：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/08/12/689ae2eeb389e.png" style="transform: scale(1)" width=1145 height=893></div></p>
+<p>编译：<code>gcc -DLINKTIME -c mymalloc.c</code> ，<code>gcc -c int.c</code></p>
+<p>链接：<code>gcc -Wl,--wrap,malloc -Wl,--wrap,free -o intc int.o mymalloc.o</code></p>
+<p>其中 <code>-Wl,option</code> 用于将 <code>option</code> 传递给链接器，并且 <code>option</code> 中的每个逗号都被替换成空格。</p>
 <h3 id="yun-hang-shi-da-zhuang" tabindex="-1">运行时打桩</h3>
 <p>有一个全局变量 <code>LD_PRELOAD</code>，程序在加载共享库时，动态链接器会先从 <code>LD_PRELOAD</code> 中寻找对应的共享库。我们把要拦截的函数写成一个共享库之后，把路径添加到 <code>LD_PRELOAD</code> 中就可以实现打桩。</p>
 <h2 id="xiang-guan-gong-ju" tabindex="-1">相关工具</h2>
