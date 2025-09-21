@@ -1,0 +1,70 @@
+<h2 id="1-vector-hardware" tabindex="-1">1. Vector Hardware</h2>
+<h3 id="1-1-sse-zhi-ling-ji" tabindex="-1">1.1 SSE 指令集</h3>
+<p>CPU 内有 <code>xmm</code> 寄存器，可以存储 128 位，表示一个向量。可以存储 4 个 32 位标量，又或者 2 个 64 位标量。SSE 指令可以做到一条指令就可以将向量中的每个元素都执行某个操作。元素可以是单精度、双精度和整数。SSE 指令集也可以只使用寄存器的低 32 或 64 位进行操作。一般 SSE 指令是普通指令加下面的后缀：</p>
+<table>
+<thead>
+<tr>
+<th>汇编指令后缀</th>
+<th>精度</th>
+<th>标量/向量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ss</code></td>
+<td>单精度</td>
+<td>标量</td>
+</tr>
+<tr>
+<td><code>sd</code></td>
+<td>双精度</td>
+<td>标量</td>
+</tr>
+<tr>
+<td><code>ps</code></td>
+<td>单精度</td>
+<td>向量</td>
+</tr>
+<tr>
+<td><code>pd</code></td>
+<td>双精度</td>
+<td>向量</td>
+</tr>
+</tbody>
+</table>
+<p>比如：<code>mulsd %xmm0, %xmm1</code>、<code>movsd (%rcx, %rsi, 8), %xmm1</code></p>
+<p>如果想操作整数向量，那么需要加一个 <code>p</code> 前缀，然后后缀可选 <code>b</code>（8 位）、<code>w</code>（16 位）、<code>d</code>（32 位）、<code>q</code>（64 位），如：<code>paddq</code>。</p>
+<p>如果想操作整数标量的话，直接使用朴素的指令集即可。</p>
+<h3 id="1-2-avx-zhi-ling-ji" tabindex="-1">1.2 AVX 指令集</h3>
+<p>AVX 指令集可以选择 <code>ymm</code> 寄存器，相当于是 <code>xmm</code> 寄存器的扩展，有 256 位，也就是比如 <code>%ymm0</code> 的低 128 位是 <code>%xmm0</code>。AVX 的指令只需要在 SSE 指令的基础上在最前面加一个 <code>v</code> 前缀，如：<code>vpaddq</code>。</p>
+<ul>
+<li>AVX 指令集仅支持浮点数</li>
+<li>AVX2 指令集支持了整数</li>
+<li>AVX3（AVX-512）指令集又将寄存器扩展到 512 位（<code>zmm</code> 寄存器）。</li>
+</ul>
+<h2 id="2-out-of-order-execution" tabindex="-1">2. Out-of-order Execution</h2>
+<p>现代 CPU 不一定按照指令原来的顺序执行指令，因为我们考虑如果两个指令之间没什么数据关系的话，先执行谁都是无所谓的。不过我们会存在如下的数据冒险情况：</p>
+<ul>
+<li>RAW：前一条指令写了一个寄存器，后一条指令读这个寄存器</li>
+<li>WAR：前一条指令读了一个寄存器，后一条指令写这个寄存器</li>
+<li>WAW：前后两个指令都写了同一个寄存器</li>
+</ul>
+<p>其中后两者数据冒险在传统的流水线架构中不会发生，但是在乱序执行的过程中，前一条指令先执行还是后一条指令先执行就会带来不同的影响。</p>
+<p>现代处理器将借助 Renaming Table 、Reorder Buffer（ROB）和 Reservation Station（RS）使得乱序执行正常进行。</p>
+<p>处理器内部其实有很多物理寄存器。而对于一个逻辑寄存器（指令中使用的，如 <code>%rax</code> 这些）并不是直接对应于一个物理寄存器的。物理寄存器通常比逻辑寄存器多的多，逻辑寄存器到物理寄存器的映射关系也不是固定不变的，而是可以根据 Renaming Table 动态调整的。</p>
+<p>然后考虑如下的例子：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/15/68c6e9083062e.png" style="transform: scale(1)" width=1672 height=1084></div></p>
+<p>CPU 取出一个指令之后，将会将指令加入 ROB 和 RS 中。在 ROB 中，每个指令都会有一个 tag 进行标识。我们假定上图中指令 1 和指令 2 正在执行，执行的结果逻辑上应该是分别存放到 <code>%xmm0</code> 和 <code>%xmm2</code> 中，但 ROB 还记录其实际被存放到物理寄存器 7 和 2 中。而由于现在还没执行完毕，我们在 Renaming Table 中记录一下后续的 <code>%xmm0</code> 和 <code>%xmm2</code> 将分别来自指令 1 和指令 2 的结果。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/15/68c6ec4922cf6.png" style="transform: scale(1)" width=1677 height=1091></div></p>
+<p>再取出指令 3 后，将在 ROB 中记录其需要的操作数，也就是 <code>%xmm0</code> 和 <code>%xmm1</code>，在 Renaming Table 中被映射为 <code>t1</code> 和 <code>t2</code>。指令也被送往 RS，但是指令并不会立刻发射，因为指令 1 和 2 没有执行完毕，其所依赖的操作数没有准备就绪。这条指令只能停留在 RS 里等待发射。RS 还没开始执行，所以我们也不去考虑其运算结果存放到哪个物理寄存器中。由于指令 3 会更新 <code>%xmm2</code> 寄存器，所以相应的修改 Renaming Table 中 <code>%xmm2</code> 指向指令 3 的运算结果。</p>
+<p>然后是取出第四条指令：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/15/68c6eca92baa9.png" style="transform: scale(1)" width=1681 height=1087></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/15/68c6ecd4038a6.png" style="transform: scale(1)" width=1674 height=1086></div></p>
+<p>此时指令 1 执行完毕了，结果已经存到了物理寄存器 7 中，所以可以把所有的 <code>t1</code> 替换成 <code>Preg7</code>：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/15/68c6ed241a3f8.png" style="transform: scale(1)" width=1672 height=1084></div></p>
+<p>此时我们发现，指令 4 的所有操作数都已经被放入一个物理寄存器中了，这说明操作数已经准备就绪，指令 4 可以开始执行。指令 4 将会从 RS 中发射到相应的计算单元。我们发现，指令 3 还没准备好执行，指令 4 可以先于指令 3 执行，体现出乱序执行。</p>
+<p>当指令 4 开始执行前，我们可以从物理寄存器的空闲列表中分配一个物理寄存器给指令 4 ，表示指令 4 的运算结果应该放入这个物理寄存器中。</p>
+<h2 id="3-superscalar-processing" tabindex="-1">3. Superscalar Processing</h2>
+<p>传统的流水线寄存器，一个时钟周期只能发射一个指令。而对于现代寄存器，我们可以考虑，如果 RS 中多个指令的操作数都准备就绪了，那么可以直接全部发射出去，这就实现了一个周期发射多条指令。</p>
+<p>同时，现代 CPU 往往有多个运算单元，同一种类的运算单元也可能有多个，因此可以同时处理多个发射出去的指令。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/15/68c6ef0ce7854.png" style="transform: scale(1)" width=1687 height=918></div></p>

@@ -1,0 +1,79 @@
+<h2 id="1-wei-yun-suan" tabindex="-1">1. 位运算</h2>
+<p>一些位运算技巧</p>
+<h3 id="1-1-bu-ma-qu-fan-de-guan-xi" tabindex="-1">1.1 补码取反的关系</h3>
+<p><code>x + ~x = -1</code>（因为自身加上对自身取反的话，那么二进制所有位都变成 1 了，按补码规则表示为 -1）</p>
+<p>于是我们有 <code>-x = ~x + 1</code></p>
+<h3 id="1-2-she-zhi-wei" tabindex="-1">1.2 设置位</h3>
+<p>设置第 <code>k</code> 位：<code>y = x | (1 &lt;&lt; k)</code></p>
+<p>清除第 <code>k</code> 位：<code>y = x &amp; ~(1 &lt;&lt; k)</code></p>
+<p>切换第 <code>k</code> 位：<code>y = x ^ (1 &lt;&lt; k)</code></p>
+<h3 id="1-3-jiao-huan-shu-zi" tabindex="-1">1.3 交换数字</h3>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="eCUyMCUzRCUyMHglMjAlNUUlMjB5JTNCJTIwJTJGJTJGJTIwJUU2JUFEJUE0JUU2JTk3JUI2JTIweCUyMCVFNyU5QiVCOCVFNSVCRCU5MyVFNCVCQSU4RSVFNiU4QSU4QSVFNSU4RSU5RiVFNiU5RCVBNSVFNyU5QSU4NCVFNCVCOCVBNCVFNCVCOCVBQSVFNiU5NSVCMCVFNSVBRCU5NyVFNSU5MCU4OCVFNSU5QyVBOCVFNCVCQSU4NiVFNCVCOCU4MCVFOCVCNSVCNyUwQXklMjAlM0QlMjB4JTIwJTVFJTIweSUzQiUyMCUyRiUyRiUyMCVFNSU5MCU4OCVFNSU5QyVBOCVFNCVCOCU4MCVFOCVCNSVCNyVFNCVCOSU4QiVFNSU5MCU4RSVFNSVCQyU4MiVFNiU4OCU5NiUyMHklMjAlRTUlQjAlQjElRTclOUIlQjglRTUlQkQlOTMlRTQlQkElOEUlRTYlOEElOEElMjB5JTIwJUU2JUI2JTg4JUU2JThFJTg5JUVGJUJDJThDJUU1JThGJTk2JUU1JTg3JUJBJTIweCUwQXglMjAlM0QlMjB4JTIwJTVFJTIweSUzQiUyMCUyRiUyRiUyMCVFNSU5MCU4QyVFNCVCOCU4QSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">x = x ^ y; <span class="hljs-comment">// 此时 x 相当于把原来的两个数字合在了一起</span>
+y = x ^ y; <span class="hljs-comment">// 合在一起之后异或 y 就相当于把 y 消掉，取出 x</span>
+x = x ^ y; <span class="hljs-comment">// 同上</span>
+</div></code></pre>
+<p>不过这个技巧未必性能更优。因为上面三个操作之间有严重的数据依赖，导致指令的并行性很差。对比传统的引入临时变量来交换：</p>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="dGVtcCUyMCUzRCUyMHglM0IlMEF4JTIwJTNEJTIweSUzQiUwQXklMjAlM0QlMjB0ZW1wJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">temp = x;
+x = y;
+y = temp;
+</div></code></pre>
+<p>CPU 可以同时取出 <code>x</code> 和 <code>y</code> 然后并行地执行前两个操作。朴素的做法指令的并行性更好。</p>
+<h3 id="1-4-qu-min" tabindex="-1">1.4 取 min</h3>
+<p><code>r = min(x, y) = y ^ ((x ^ y) &amp; -(x &lt; y))</code></p>
+<p>如果 <code>x &lt; y</code> ，那么 <code>-(x &lt; y)</code> 为 -1，二进制下全 1，使得最后结果为 <code>(y ^ (x ^ y)) = x</code>。而如果 <code>x &gt;= y</code> 的话后面那堆东西就为 0。</p>
+<p>相比于朴素做法，直接通过判断取 min 的话，分支预测错误的代价比较大。不过也不好说，因为编译器应该会使用条件传送吧（）</p>
+<h3 id="1-5-jia-fa-qu-mo" tabindex="-1">1.5 加法取模</h3>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="eiUyMCUzRCUyMHglMjAlMkIlMjB5JTNCJTBBciUyMCUzRCUyMHolMjAtJTIwKG4lMjAlMjYlMjAtKHolMjAlM0UlM0QlMjBuKSklM0IlMEElMkYlMkYlMjAlRTclQUMlQUMlRTQlQkElOEMlRTglQTElOEMlRTclQUQlODklRTQlQkIlQjclRTQlQkElOEUlMjByJTIwJTNEJTIwKHolMjAlM0MlMjBuKSUyMCUzRiUyMHolMjAlM0ElMjB6JTIwLSUyMG4lM0IlMjAlRTglQkYlOTklRTklODclOEMlRTQlQkQlQkYlRTclOTQlQTglRTQlQkElODYlRTclQjElQkIlRTQlQkMlQkMlRTUlOEYlOTYlMjBtaW4lMjAlRTclOUElODQlRTYlOEElODAlRTUlQjclQTclMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">z = x + y;
+r = z - (n &amp; -(z &gt;= n));
+<span class="hljs-comment">// 第二行等价于 r = (z &lt; n) ? z : z - n; 这里使用了类似取 min 的技巧</span>
+</div></code></pre>
+<h3 id="1-6-xiang-shang-qu-zheng-dao-2-de-mi-ci" tabindex="-1">1.6 向上取整到 2 的幂次</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c53be508b6d.png" style="transform: scale(1)" width=814 height=949></div></p>
+<p>其大概思想就是将 <code>n - 1</code> 中的所有二进制位都向后覆盖，最后低位都是 <code>1</code>，再加一个 <code>1</code> 就变为 2 的幂次了：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c53c3b0c42d.png" style="transform: scale(1)" width=885 height=851></div></p>
+<p>其中 <code>-1</code> 是为了处理 <code>n</code> 已经是 2 的幂次的情况。</p>
+<h3 id="1-7-lowbit" tabindex="-1">1.7 lowbit</h3>
+<p><code>r = x &amp; (-x);</code></p>
+<p>树状数组学过，这里再复习一下：</p>
+<p>这里的 <code>-x</code> 为 <code>~x + 1</code>，其中对 <code>x</code> 取反之后，原来的 lowbit 就变为 0，而 lowbit 之前的位全变为了 1，此时我们直接再 <code>+ 1</code>，lowbit 之前的位全部进 1，使得 <code>lowbit</code> 又变为 <code>1</code> 了，而 <code>lowbit</code> 之后的位仍然不变，这使得再按位与的时候后面都是 0。</p>
+<h3 id="1-8-dui-2-de-mi-ci-qu-log" tabindex="-1">1.8 对 2 的幂次取 log</h3>
+<p>这里的取 log 的底数是 2，也就是我们想知道一个 2 的幂次的指数。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c53d7a6809a.png" style="transform: scale(1)" width=1899 height=1107></div></p>
+<p>原理是 deBruijn 序列。这种序列满足，序列中任意长度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> 的区间内的位表示的数字都是不同的，比如：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c53dc891533.png" style="transform: scale(1)" width=709 height=963></div></p>
+<p>其中的 <code>00011101</code> 就是一个 deBruijn 序列。我们可以得到一个 <code>convert</code> 数组，记录一个二进制下的三位数在上面的第几行出现。</p>
+<p>然后我们考虑，如果我们把这个 deBruijn 序列左移 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 位，然后取出高 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">k=3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">3</span></span></span></span> 位，就相当于拿到一个特征值，然后此时这个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 就对应于上图中左边的数字。如果我们不知道 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>，仅凭特征值和 <code>convert</code> 数组仍然可以得知这个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>。</p>
+<p>回到最开始的问题，对于 2 的幂次 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>，我们直接让 deBruijn 乘上这个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>，就相当于进行了左移。</p>
+<p>后面我查了一下如何构造 deBruijn 序列，可以使用求欧拉回路的算法。比如我们有如下的图：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c541579e247.png" style="transform: scale(1)" width=909 height=653></div></p>
+<p>一种欧拉回路是 <code>01011100</code> （从点 <code>00</code> 出发）。再验证一下，确实是 deBruijn 序列。</p>
+<p>我们现在想要通过一个长度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> 的区间，在 deBruijn 序列上滑动，得到所有的三位二进制数。当区间向右滑动时，低两位就变成了高两位，得到的新的数字的低两位数字发生了变化。我们将低两位看成是一个状态，对应于图上的点。在当前状态下再追加一个二进制位看成是状态的转移，对应于图上的有向边。然后在图上，点和连出去的边组合在一起就是一个三位的二进制数。如果存在一个回路能把所有的边覆盖，我们也就相当于覆盖了所有的数字，而这就是欧拉回路。</p>
+<h3 id="1-9-popcnt" tabindex="-1">1.9 popcnt</h3>
+<p>朴素的做法就是直接逐位枚举统计。</p>
+<p>我们还可以多个位多个位地统计：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c549266cf76.png" style="transform: scale(1)" width=1879 height=509></div></p>
+<p>理论上我们一次统计的位数越多，循环次数越少，速度越快。但是还需要考虑到缓存的影响，<code>count</code> 数组越大，其缓存的利用率越小，可能反而增加时间。</p>
+<p>还有一种分治的算法：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c5499f8e564.png" style="transform: scale(1)" width=1998 height=1296></div></p>
+<p>大概思想就是，两个两个地计算 1 的数量，然后再四个四个地，再八个八个地：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c549e42e975.png" style="transform: scale(1)" width=2108 height=1168></div></p>
+<p>最后算出来的数字就是 1 的数量。这样做是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log N)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="mclose">)</span></span></span></span> 的。</p>
+<p>一些现代的 CPU 内置了 popcnt 的指令。在 GCC 可以直接使用函数 <code>__builtin_popcount</code> 。但是这样会使得代码的可移植性变得稍微差一点。</p>
+<h2 id="2-li-zi" tabindex="-1">2. 例子</h2>
+<h3 id="2-1-li-xiao-chu-bu-ke-yu-ce-de-fen-zhi" tabindex="-1">2.1 例：消除不可预测的分支</h3>
+<p>归并排序中合并两个已经排好序的序列：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c539e70fe7a.png" style="transform: scale(1)" width=1213 height=1300></div></p>
+<p>其中分支 1、2、4 都是可预测的，因为 CPU 可以假定条件永远成立，这样在大多数情况下都是预测正确的，如果预测错误，那么就结束循环，只会错误一次，至少预测永远成立<strong>不劣于</strong>预测永远不成立。而分支 3 无论预测成立还是不成立，似乎没有个轻重，所以是不可预测的。</p>
+<p>通过消除不可预测的分支，我们可以提升性能，我们将代码变为：</p>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="bG9uZyUyMGNtcCUyMCUzRCUyMCgqQSUyMCUzQyUzRCUyMCpCKSUzQiUwQWxvbmclMjBtaW4lMjAlM0QlMjAqQiUyMCU1RSUyMCgoKkIlMjAlNUUlMjAqQSklMjAlMjYlMjAoLWNtcCkpJTNCJTBBKkMlMkIlMkIlMjAlM0QlMjBtaW4lM0IlMEFBJTIwJTJCJTNEJTIwY21wJTNCJTIwbmElMjAtJTNEJTIwY21wJTNCJTBBQiUyMCUyQiUzRCUyMCFjbXAlM0IlMjBuYiUyMC0lM0QlMjAhY21wJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-type">long</span> cmp = (*A &lt;= *B);
+<span class="hljs-type">long</span> min = *B ^ ((*B ^ *A) &amp; (-cmp));
+*C++ = min;
+A += cmp; na -= cmp;
+B += !cmp; nb -= !cmp;
+</div></code></pre>
+<p>不过实际上这么搞可能未必真的能提升性能，因为编译器可以选用条件传送指令。</p>
+<h3 id="2-2-li-ba-huang-hou-wen-ti" tabindex="-1">2.2 例：八皇后问题</h3>
+<p>大意就是在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8</mn><mo>×</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">8\times 8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">8</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8</span></span></span></span> 的棋盘上放棋子，要求一个棋子所在位置的同一行、同一列、同一对角线上不能有其他棋子。朴素的做法就是 dfs 暴搜，枚举在一行的哪个位置放棋子是合法的，然后再 dfs 下一行，直到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8</mn></mrow><annotation encoding="application/x-tex">8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8</span></span></span></span> 行全部搜完。此时一个问题就是怎么比较好地 check 某个位置是否合法。</p>
+<p>我们可以定义 <code>down</code> 变量的第 <code>i</code> 位表示第 <code>i</code> 列是否存在棋子。</p>
+<p>不用记录某一行是否存在棋子，因为我们一行只放一个。</p>
+<p>对角线有两个，一个是横纵坐标之和为定值，一个是横纵坐标之差为定值，可以根据这个来安排二进制位。</p>
