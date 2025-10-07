@@ -1,0 +1,202 @@
+<h2 id="1-duo-jin-cheng" tabindex="-1">1. 多进程</h2>
+<p>每当需要监听一个文件描述符时，我们就启动一个子进程，让这个子进程专门去处理这个文件描述符。</p>
+<p>有一些注意点：</p>
+<ul>
+<li>可能会启动很多子进程，我们需要来处理 <code>SIGCHLD</code> 信号来回收僵尸子进程的资源</li>
+</ul>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003140713860.png" style="transform: scale(1)" width=813 height=207></div></p>
+<ul>
+<li>父进程和子进程可能需要关闭一些文件描述符来避免内存泄漏。比如在一个服务端程序中，父进程会有一个监听描述符，当有一个连接进入的时候，会创建一个已连接描述符。<code>fork</code> 之后，子进程也有了监听描述符和已连接描述符。对于子进程来说，监听描述符是没必要的，需要关闭。对于父进程来说，已连接描述符是没必要的，需要关闭。</li>
+</ul>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003145607955.png" style="transform: scale(1)" width=1280 height=1276></div></p>
+<p>这样做有一些缺点，比如父子进程的通信会有点麻烦。</p>
+<h2 id="2-duo-lu-fu-yong" tabindex="-1">2. 多路复用</h2>
+<p>我们可以使用 <code>select</code> 函数实现多路复用。</p>
+<p><code>int select(int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);</code></p>
+<ul>
+<li>包含在 <code>sys/select.h</code> 中</li>
+<li>内核会监听文件描述符的值位于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 且在 <code>readfds</code>、<code>writefds</code>、<code>exceptfds</code> 中设置的文件描述符。所以一般将 <code>n</code> 设置为监听的文件描述符的最大值再加一</li>
+<li><code>readfds</code> 存放要监听读事件的文件描述符，<code>writefds</code> 监听写事件，<code>exceptfds</code> 监听异常事件（网络连接的描述符可能会产生异常事件）。有如下的宏来操作 <code>fd_set</code> ：
+<ul>
+<li><code>FD_ZERO(fd_set *fdset)</code>：将 <code>fdset</code> 清空</li>
+<li><code>FD_CLR(int fd, fd_set *fdset)</code>：在 <code>fdset</code> 中删去 <code>fd</code></li>
+<li><code>FD_SET(int fd, fd_set *fdset)</code>：把 <code>fd</code> 加入到 <code>fdset</code> 中</li>
+<li><code>FD_ISSET(int fd, fd_set *fdset)</code>：判断 <code>fd</code> 是否位于 <code>fdset</code> 中</li>
+</ul>
+</li>
+<li><code>timeout</code> 用于设置 <code>select</code> 函数的超时事件
+<ul>
+<li><code>struct timeval</code> 的定义为：<code>struct timeval { long tv_sec; long tv_usec; }</code> 。其中 <code>tv_sec</code> 表示秒数，<code>tv_usec</code> 表示微秒数（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mtext>s</mtext><mo>=</mo><msup><mn>10</mn><mn>6</mn></msup><mtext>us</mtext></mrow><annotation encoding="application/x-tex">1 \text{s} = 10^6\text{us}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span><span class="mord text"><span class="mord">s</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">6</span></span></span></span></span></span></span></span><span class="mord text"><span class="mord">us</span></span></span></span></span>）</li>
+<li>设置的超时时间为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>tv_sec</mtext><mo>+</mo><mtext>tv_usec</mtext></mrow><annotation encoding="application/x-tex">\text{tv\_sec} + \text{tv\_usec}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9251em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">tv_sec</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9251em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">tv_usec</span></span></span></span></span></li>
+<li>如果不需要设置超时时间的话传入 <code>NULL</code></li>
+</ul>
+</li>
+<li><code>select</code> 函数会一致堵塞，直到有事件准备就绪，或是超时，或是被 <code>SIGINT</code> 中断。返回准备就绪的文件描述符的个数。并会修改 <code>readfds</code>、<code>writefds</code>、<code>exceptfds</code> 为准备好该事件的文件描述符的集合</li>
+<li>在大多数系统中，<code>fd_set</code> 的大小由宏 <code>FD_SETSIZE</code> 定义，通常为 1024。这也就意味着 <code>n</code> 最多给 1024，且 <code>select</code> 只能监听文件描述符值在 0 到 1023 范围内的文件描述符。由于这个限制，<code>select</code> 函数只适合低并发场景</li>
+</ul>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003145639691.png" style="transform: scale(1)" width=1107 height=1446><div class="img-title">等待监听描述符上的连接请求和标准输入</div></div></p>
+<p>多路复用一直在单一的上下文中运行，不存在上下文切换的开销，并且使得数据共享和调试都更加容易。但使用多路复用有一些缺点：</p>
+<ul>
+<li>从上述代码中我们可以看到，事件发生后，只有当前事件处理完毕之后才能继续执行下一个事件。这使得如果事件执行地很慢，或是有人故意产生大量垃圾事件，就会阻碍程序继续处理别的事件。</li>
+<li>多路复用不能利用多核处理器的优势</li>
+</ul>
+<h2 id="3-xian-cheng" tabindex="-1">3. 线程</h2>
+<h3 id="3-1-pthread" tabindex="-1">3.1 pthread</h3>
+<p><code>int pthread_create(pthread_t *tid, pthread_attr_t *attr, func *f, void *arg)</code></p>
+<ul>
+<li>包含在 <code>pthread.h</code> 中</li>
+<li>其中 <code>func</code> 类型的定义为 <code>typedef void *(func)(void *);</code></li>
+<li>创建的线程的 id 会被放入到 <code>tid</code> 中</li>
+<li><code>attr</code> 用来设置新创建的线程的默认属性，一般可以设置为 <code>NULL</code></li>
+<li><code>f</code> 接受一个函数指针</li>
+<li><code>arg</code> 是传递给线程的参数</li>
+<li>创建一个线程，成功则返回 0，失败则返回非零</li>
+</ul>
+<p><code>pthread_t pthread_self(void)</code></p>
+<ul>
+<li>包含在 <code>pthread.h</code> 中</li>
+<li>返回当前线程的 id</li>
+</ul>
+<p><code>void pthread_exit(void *thread_return)</code></p>
+<ul>
+<li>包含在 <code>pthread.h</code> 中</li>
+<li>结束当前线程，并以 <code>thread_return</code> 作为返回值。效果类似直接 <code>return</code>。如果主线程调用该函数，则会等待其他线程终止，然后再终止主线程和整个进程</li>
+<li>如果一个线程直接调用 <code>exit</code> 的话会直接终止整个进程</li>
+</ul>
+<p><code>int pthread_cancel(pthread_t tid)</code></p>
+<ul>
+<li>包含在 <code>pthread.h</code> 中</li>
+<li>终止 id 为 <code>tid</code> 的线程</li>
+<li>成功返回 0，失败返回非零</li>
+</ul>
+<p><code>int pthread_join(pthread_t tid, void **thread_return)</code></p>
+<ul>
+<li>包含在 <code>pthread.h</code> 中</li>
+<li>等待 id 为 <code>tid</code> 的线程终止，并回收该线程的资源，并把线程的返回值放到 <code>thread_return</code> 中</li>
+<li>成功返回 0，失败返回非零</li>
+</ul>
+<p><code>int pthread_detach(pthread_t tid)</code></p>
+<ul>
+<li>包含在 <code>pthread.h</code> 中</li>
+<li>将 id 为 <code>tid</code> 的线程分离</li>
+<li>成功返回 0，失败返回非零</li>
+<li>一般情况下，线程结束之后，其资源（例如栈）不会被立即回收。需要使用 <code>pthread_join</code> 来显式等待线程结束并回收。但有时我们不希望显式等待线程结束，就可以使用 <code>pthread_detach</code> 将线程分离，分离后的线程结束之后将会由系统自动回收资源</li>
+</ul>
+<p><code>int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))</code></p>
+<ul>
+<li>包含在 <code>pthread.h</code> 中</li>
+<li>该函数可以保证对于同一个 <code>once_control</code>，不管有多少个线程调用多少次 <code>pthread_once</code>，<code>init_routine</code> 执行且仅执行一次。这主要用于在多个线程之间进行共享的变量的初始化</li>
+<li><code>once_control</code> 一般要声明为 static 。并且设置初始值为 <code>PTHREAD_ONCE_INIT</code></li>
+<li>总是返回 0</li>
+</ul>
+<h3 id="3-2-xin-hao-liang" tabindex="-1">3.2 信号量</h3>
+<p><code>int sem_init(sem_t *sem, int pshared, unsigned int value)</code></p>
+<ul>
+<li>
+<p>包含在 <code>semaphore.h</code> 中</p>
+</li>
+<li>
+<p>将内存位置 <code>sem</code> 初始化为一个信号量</p>
+</li>
+<li>
+<p><code>pshared</code> 为 0 则表示信号量是在同一进程的不同线程之间共享。为非 0 则表示信号量是跨进程共享的，此时可能还要考虑结合 <code>mmap</code> 来共享内存</p>
+</li>
+<li>
+<p>信号量的初始值为 <code>value</code></p>
+</li>
+<li>
+<p>成功则返回 0，失败则返回 -1</p>
+</li>
+</ul>
+<p><code>int sem_wait(sem_t *s)</code></p>
+<ul>
+<li>
+<p>包含在 <code>semaphore.h</code> 中</p>
+</li>
+<li>
+<p>尝试将信号量减一。如果信号量之前已经为 0 了则堵塞</p>
+</li>
+<li>
+<p>该操作也称为 P 操作</p>
+</li>
+<li>
+<p>成功则返回 0，失败则返回 -1</p>
+</li>
+</ul>
+<p><code>int sem_post(sem_t *s)</code></p>
+<ul>
+<li>
+<p>包含在 <code>semaphore.h</code> 中</p>
+</li>
+<li>
+<p>尝试将信号量加一。如果信号量之前已经为 0 了则会唤醒被堵塞的 <code>sem_wait</code></p>
+</li>
+<li>
+<p>该操作也称为 V 操作</p>
+</li>
+<li>
+<p>成功则返回 0，失败则返回 -1</p>
+</li>
+</ul>
+<h4 id="3-2-1-sheng-chan-xiao-fei-zhe-wen-ti" tabindex="-1">3.2.1 生产-消费者问题</h4>
+<p>我们考虑实现一个生产/消费模式的队列。这个队列有一个缓冲区。当缓冲区为空时，再次从队列取元素则会堵塞。当缓冲区满时，再次往队列中加入元素则会堵塞。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003162243471.png" style="transform: scale(1)" width=1083 height=410><div class="img-title">要维护的数据</div></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003162333812.png" style="transform: scale(1)" width=1255 height=1382><div class="img-title">具体实现</div></div></p>
+<p>维护 <code>slots</code> 和 <code>items</code> 信号量的目的在于确保有空位或是元素时再拿锁访问缓冲区，以完成 insert 和 remove 操作。</p>
+<h4 id="3-2-2-du-zhe-xie-zhe-wen-ti" tabindex="-1">3.2.2 读者-写者问题</h4>
+<p>如果一些线程只对某个数据进行读，另一些线程只对这个数据进行写，此时我们考虑，可以有任意数量的仅读线程进入 critical section，只需要限制有一个仅写线程进入 critical section 即可。</p>
+<p>读者-写者问题有几个变种，下面是其中两种：</p>
+<p><strong>第一类读者-写者问题：读者有更高的优先级</strong></p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003164639596.png" style="transform: scale(1)" width=662 height=1381></div></p>
+<p>当有读者访问的时候，就加锁（<code>w</code> 对应的锁）。这样使得有读者在时写者就进不来，但 <code>w</code> 锁并不排斥其他的读者，也就是多个读者可以同时访问。由于我们需要记录一下当前读者是不是第一个读者或是最后读者来决定 <code>w</code> 锁的获取和释放，所以我们还需要再加一个 <code>mutex</code> 锁。</p>
+<p>这个解答也会带来其他的问题：</p>
+<ul>
+<li>可能导致饥饿（即一个线程无限期地阻塞，无法进展）。因为可能有读者不断地到达，于是写者就不断地等待。</li>
+<li>读者的优先级并非很高，某种意义上反而很弱。比如当一个写者进入 critical section 并离开时，其可能唤醒另一个写者而并非唤醒另一个读者，使得读者饥饿。</li>
+</ul>
+<p><strong>第二类读者-写者问题：写者有更高的优先级</strong></p>
+<p>类似第一类。</p>
+<h3 id="3-3-yu-xian-cheng-hua" tabindex="-1">3.3 预线程化</h3>
+<p>如果类似多进程那样，每次有一个连接进来就启动一个线程来进行处理的话，会支付很高的创建线程的代价。我们可以使用预线程化的技术来优化。我们预先创建一定数量的工作者线程，只需要这些线程来处理客户端的连接：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003172036786.png" style="transform: scale(1)" width=1044 height=427></div></p>
+<h3 id="3-4-xian-cheng-an-quan" tabindex="-1">3.4 线程安全</h3>
+<p>有如下几类线程不安全的函数：</p>
+<ul>
+<li><strong>不保护共享变量</strong>：函数直接修改全局变量而不带锁。将这样的函数变为线程安全比较简单，只需要加锁即可。</li>
+<li><strong>保持跨越多个调用状态的函数</strong>：当前函数调用的结果依赖于前一次调用的结果。这样的函数可能是内部维护了一个全局变量。比如 <code>rand</code> 函数，如果给定随机数种子，在单线程中反复调用，得到的结果是确定的，但是在多线程中不是了，即使加锁都不好使（无 data race 但有 determinacy race）。将这类函数变为线程安全的，需要把函数内部依赖的全局变量作为函数的参数。</li>
+</ul>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003173925230.png" style="transform: scale(1)" width=1163 height=666></div></p>
+<ul>
+<li><strong>返回指向静态变量的指针的函数</strong>：一些函数，如 <code>ctime</code>、<code>gethostbyname</code> ，会将计算结果放在一个 static 变量中，然后返回指向该变量的指针。在多线程情况下，很有可能一个线程的调用把另一个线程调用的结果的数据覆盖了。如果想把这类函数变为线程安全的，除了重写函数外，还可以使用加锁-复制技术，即调用前后加锁，然后把数据复制出来。但是这个技术也有个缺点，如果函数返回的指针指向的数据中还包含指向另一个数据的指针，那么我们就需要 deep copy。</li>
+</ul>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003174531853.png" style="transform: scale(1)" width=1274 height=533></div></p>
+<ul>
+<li><strong>调用线程不安全的函数</strong>：把这类函数变成线程安全的，除了重写以外没什么好办法了，因为我们不清楚其调用的线程不安全函数是不是第二类。</li>
+</ul>
+<p>如果一个函数不依赖任何全局变量，我们就称这种函数是<strong>可重入函数</strong>，这种函数一定是线程安全的，并且肯定是无锁的，效率更高。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003175322251.png" style="transform: scale(1)" width=596 height=371></div></p>
+<p>更细分一下，如果一个可重入函数的所有参数都是按值传递的，没有传递指针，那么我们就说这个函数是<strong>显式可重入的</strong>。反之，我们称之为<strong>隐式可重入的</strong>。对于隐式可重入函数，如果其传递的指针没有被共享，那么该函数就是可重入的，否则，该函数就是不可重入的。</p>
+<p>Linux 中的一些线程不安全函数有可重入版本，可重入版本的名字总是以 <code>_r</code> 后缀结尾，我们应尽可能使用可重入函数：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003175830217.png" style="transform: scale(1)" width=902 height=412></div></p>
+<h3 id="3-5-si-suo" tabindex="-1">3.5 死锁</h3>
+<p>我们可以把要执行的代码分成几个部分：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003183719812.png" style="transform: scale(1)" width=1577 height=630></div></p>
+<p>然后我们有进度图：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003183813678.png" style="transform: scale(1)" width=1843 height=799></div></p>
+<p>然后一条轨迹线就代表一种并发执行情况。轨迹线只会往右往上走。</p>
+<p>如果 L、U、S 三个部分的执行出现交错，那么就会出现 data race：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003184006309.png" style="transform: scale(1)" width=1211 height=940></div></p>
+<p>我们可以使用锁来使得不安全区变为禁止区，这样轨迹线就不会经过那里。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003184107570.png" style="transform: scale(1)" width=1449 height=1172></div></p>
+<p>当出现两个锁的时候就会引入两个禁止区：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003184153984.png" style="transform: scale(1)" width=1326 height=1103></div></p>
+<p>当轨迹线进入到死锁区后，由于其方向是向右或者是向上的，所以无论怎样都会进入到禁止区，这就产生了死锁。</p>
+<p>有一个简单的规则可以避免死锁：给定所有互斥操作的一个全序，如果每个线程都是以一种顺序获得互斥锁并以相反的顺序释放，那么这个程序就是无死锁的。</p>
+<p>按照这个规则，在进度图上，每个锁产生的禁止区的左下角的点，在这个二维坐标系上是以斜向上的方向进行排列的，使得不会出现死锁区。</p>
+<p><strong>Dining Philosophers 问题</strong></p>
+<p>这是一个经典的并行问题。问题可以看成有若干个人围坐在一个圆桌上，每个人的两边都有一双筷子。如果一个人拿到了两个筷子，那么其两边的人就拿不到完整的一双筷子，就需要等待。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003214504305.png" style="transform: scale(1)" width=774 height=767></div></p>
+<p>一个代码如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/03/image-20251003214554999.png" style="transform: scale(1)" width=963 height=588></div></p>
+<p>这个代码就会出现死锁，因为有可能每个人都只拿到了其右手边的筷子，每个人都等待其左手边的筷子，从而出现死锁。</p>
+<p>解决方法是按照我们刚才说的规则。我们先拿 <code>min(i, (i+1)%n)</code> 的锁，再拿 <code>max(i, (i+1)%n)</code> 的锁，这样就不会出现死锁。</p>

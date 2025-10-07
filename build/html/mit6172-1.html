@@ -43,6 +43,15 @@
 <p>对于图，也有对应的手法：</p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c4deb75af6a.png" style="transform: scale(1)" width=1931 height=662></div></p>
 <p><code>edges</code> 数组存放一个点连出去的边。我个人觉得和直接用 <code>vector</code> 建图的差距不大。</p>
+<p>这种图的表示方式还可以再进行压缩，首先每个点对应 <code>edges</code> 元素从小到大排序。然后每个点对应的第一个 <code>edges</code> 元素减去该点的编号，即 <code>edges[offsets[v]]-=v</code>，然后 <code>edges</code> 中剩余的元素做差分，即 <code>edges[offsets[v]+i]-=edges[offsets[v]+i-1]</code>。这么做的原因是让 <code>edges</code> 中元素的绝对值尽可能小，从而使得能用尽可能少的位/字节表示：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/07/image-20251007141034163.png" style="transform: scale(1)" width=1684 height=663><div class="img-title">image-20251007141034163</div></div></p>
+<p>然后就有两种方案：</p>
+<p><strong>k-bit codes</strong></p>
+<p>每个 <code>edges</code> 元素的值用若干个 <code>k</code> 位数据表示，其中低 <code>k-1</code> 位用于编码数据，第 <code>k</code> 位为 continue bit，如果其为 1 就说明还没编码完，需要继续往后读 <code>k</code> 位。这样的话每个元素所使用的位的数量可能是不一样的。</p>
+<p>这样做有一个问题，我们需要判断第 <code>k</code> 位，而这个分支判断是不可预测的，分支预测的开销会比较大。</p>
+<p><strong>另一个方法</strong></p>
+<p><a href="https://ieeexplore.ieee.org/document/7149297">这篇论文</a> 介绍了不用 continue bit 的方法。首先用一个字节来表示一个 header，header 的高 2 位表示后续每个整数所使用的字节的大小（1 到 4 个字节），然后低 6 位表示后面有几个整数：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/07/image-20251007142313883.png" style="transform: scale(1)" width=1604 height=481></div></p>
 <h2 id="2-logic" tabindex="-1">2. Logic</h2>
 <h3 id="2-1-constant-folding-and-propagation" tabindex="-1">2.1 Constant Folding and Propagation</h3>
 <p>就是直接传播常量，把能在编译期算出来的东西算出来，没什么好说的。应该是编译器自己能搞定的。</p>
@@ -110,6 +119,11 @@ d = b;
 }
 </div></code></pre>
 <p>另一个解决方案是写 <code>static inline int func() {...}</code>，多加一个 <code>static</code> 修饰，使得即使没内联，每个 <code>.c</code> 文件也都生成一个局部的符号，不会有链接冲突。</p>
+<p>为了更严格地控制编译器内联优化的行为，我们有：</p>
+<ul>
+<li><code>__attribute__((always_inline))</code>：强制编译器去内联函数</li>
+<li><code>__attribute__((no_inline))</code>：强制编译器不去内联函数</li>
+</ul>
 <h3 id="4-2-tail-recursion-elimination" tabindex="-1">4.2 Tail-Recursion Elimination</h3>
 <p>这个优化说的是，如果一个递归函数，最后的行为是进行递归（也就是尾递归），那么我们起始可以不去递归，而是复用当前的函数（更改下参数再从头开始跑一遍），这样可以减少函数调用的开销：</p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/09/13/68c4f173c17e9.png" style="transform: scale(1)" width=1704 height=833></div></p>
