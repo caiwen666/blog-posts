@@ -1,0 +1,302 @@
+<h2 id="1-qian-yan" tabindex="-1">1. 前言</h2>
+<p>最近由于成都上游服务器厂商倒闭，服务器数据差点丢了。为了保险起见，我打算改用一个国外的厂商的日本服务器。迁移的过程中突然想到了一些痛点：现在我的博客是 Next.js 写的，之前都是手动部署的，如果博客发生了一些修改，那么就要重新打包，传到服务器上，然后再解压，中间还要确保原来的一些配置文件不动，总之就很麻烦，也在一定程度上打消了开发博客的积极性。而我最近恰好在开发小程序时体验到了 CI/CD 的便利，于是打算也将博客和其他的一些项目进行自动化部署，并写下本文章记录一下。</p>
+<p>我们希望最终要达成的目的是，当我对代码进行更改后，提交到 Github 仓库，然后 Github 上自动运行 Action，对项目进行编译，然后部署到服务器上。这样我们只需要提交代码，部署的事情全部自动完成，不需要再操心了。</p>
+<h2 id="2-action" tabindex="-1">2. Action</h2>
+<h3 id="2-1-gai-lan" tabindex="-1">2.1 概览</h3>
+<p>Action 可以在仓库发生特定事件之后执行一系列自动化行为。我们可以使用 Action 来对代码进行检查和构建。考虑到如果我们还要自动部署的话，一般会构建成一个 Docker 镜像。</p>
+<p>在 yaml 文件中，<code>name</code> 可以设置这个 Action 的名称：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="bmFtZSUzQSUyMEJ1aWxkJTIwYW5kJTIwRGVwbG95JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-attr">name:</span> <span class="hljs-string">Build</span> <span class="hljs-string">and</span> <span class="hljs-string">Deploy</span>
+</div></code></pre>
+<p>我们还可以在 <code>on</code> 中设置触发条件：</p>
+<ul>
+<li>向 master 分支提交后触发：</li>
+</ul>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="b24lM0ElMEElMjAlMjBwdXNoJTNBJTBBJTIwJTIwJTIwJTIwYnJhbmNoZXMlM0ElMEElMjAlMjAlMjAlMjAlMjAlMjAtJTIwbWFzdGVyJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-attr">on:</span>
+  <span class="hljs-attr">push:</span>
+    <span class="hljs-attr">branches:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">master</span>
+</div></code></pre>
+<ul>
+<li>发布 release 之后触发：</li>
+</ul>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="b24lM0ElMEElMjAlMjByZWxlYXNlJTNBJTBBJTIwJTIwJTIwJTIwdHlwZXMlM0ElMjAlNUJwdWJsaXNoZWQlNUQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-attr">on:</span>
+  <span class="hljs-attr">release:</span>
+    <span class="hljs-attr">types:</span> [<span class="hljs-string">published</span>]
+</div></code></pre>
+<p>一个 Action 可以有多个 Job，一个 Job 又包含若干个 Steps。</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="am9icyUzQSUwQSUwOWpvYjElM0ElMEElMDklMDlydW5zLW9uJTNBJTIwLi4uJTBBJTA5JTA5ZW52JTNBJTBBJTA5JTA5JTA5Li4uJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwc3RlcHMlM0ElMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMDkuLi4lMEElMjAlMjAlMjAlMjBqb2IyJTNBJTBBJTIwJTA5JTA5Li4uJTBBJTIwJTIwJTIwJTIwam9iMyUzQSUwQSUyMCUyMCUyMCUyMCUwOS4uLiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-attr">jobs:</span>
+	<span class="hljs-attr">job1:</span>
+		<span class="hljs-attr">runs-on:</span> <span class="hljs-string">...</span>
+		<span class="hljs-attr">env:</span>
+			<span class="hljs-string">...</span>
+        <span class="hljs-attr">steps:</span>
+        	<span class="hljs-string">...</span>
+    <span class="hljs-attr">job2:</span>
+ 		<span class="hljs-string">...</span>
+    <span class="hljs-attr">job3:</span>
+    	<span class="hljs-string">...</span>
+</div></code></pre>
+<p>其中 <code>runs-on</code> 指明了这个 Action 要在哪个 Runner 上运行。在 Github 上可以直接设置为 <code>ubuntu-latest</code>。</p>
+<p><code>env</code> 可以设置当前 Job 的环境变量。</p>
+<p><code>steps</code> 里填写当前 Job 执行的各种行为。</p>
+<p>注意，Job 之间是隔离的，在一个 Job 里做出的修改不会影响到另一个 Job（可以视为不同 Job 位于不同的容器）</p>
+<p>Action 中可能需要使用变量/密钥，我们可以在仓库中设置。然后使用 <code>{{secrets.KEY}}</code> 或是 <code>{{vars.KEY}}</code> 这样的形式来在 yaml 中引用。</p>
+<h3 id="2-2-zhi-jie-yun-hang-zhi-ling" tabindex="-1">2.2 直接运行指令</h3>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBEbyUyMFNvbWV0aGluZyUwQSUyMCUyMHJ1biUzQSUyMCU3QyUwQSUyMCUyMCUyMCUyMC4uLiglRTglQkYlOTklRTklODclOEMlRTUlOEYlQUYlRTQlQkIlQTUlRTUlODYlOTklRTUlQTQlOUElRTglQTElOEMlRTclOUElODQlRTYlOEMlODclRTQlQkIlQTQpJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Do</span> <span class="hljs-string">Something</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">|
+    ...(这里可以写多行的指令)
+</span></div></code></pre>
+<h3 id="2-3-checkout" tabindex="-1">2.3 Checkout</h3>
+<p>Job 默认不会直接拉取当前仓库，需要我们手动使用 <code>checkout</code> 这个 action：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBDaGVja291dCUyMHJlcG9zaXRvcnklMEElMjAlMjB1c2VzJTNBJTIwYWN0aW9ucyUyRmNoZWNrb3V0JTQwdjQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Checkout</span> <span class="hljs-string">repository</span>
+  <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v4</span>
+</div></code></pre>
+<p>由于 Job 之间的隔离，在一个 Job 中 checkout 了，另一个 job 如果需要，还要重新 checkout。</p>
+<h3 id="2-4-yu-yan-xiang-guan" tabindex="-1">2.4 语言相关</h3>
+<h4 id="2-4-1-node-js" tabindex="-1">2.4.1 Node.js</h4>
+<p>这里还使用 <code>yarn</code> 作为包管理工具：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBTZXR1cCUyME5vZGUuanMlMEElMjAlMjB1c2VzJTNBJTIwYWN0aW9ucyUyRnNldHVwLW5vZGUlNDB2MyUwQSUyMCUyMHdpdGglM0ElMEElMjAlMjAlMjAlMjBub2RlLXZlcnNpb24lM0ElMjAlMjIyMiUyMiUwQSUyMCUyMCUyMCUyMGNhY2hlJTNBJTIwJTIyeWFybiUyMiUwQS0lMjBuYW1lJTNBJTIwSW5zdGFsbCUyMGRlcGVuZGVuY2llcyUwQSUyMCUyMHJ1biUzQSUyMHlhcm4lMjBpbnN0YWxsJTIwLS1mcm96ZW4tbG9ja2ZpbGUlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Setup</span> <span class="hljs-string">Node.js</span>
+  <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-node@v3</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">node-version:</span> <span class="hljs-string">&quot;22&quot;</span>
+    <span class="hljs-attr">cache:</span> <span class="hljs-string">&quot;yarn&quot;</span>
+<span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Install</span> <span class="hljs-string">dependencies</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">yarn</span> <span class="hljs-string">install</span> <span class="hljs-string">--frozen-lockfile</span>
+</div></code></pre>
+<p>注意，如果只是 <code>yarn install</code>，则 yarn 则会根据 <code>package.json</code> 来安装依赖。如果使用 <code>--frozen-lockfile</code> 参数，则会严格使用 <code>yarn.lock</code>。</p>
+<h4 id="2-4-2-rust" tabindex="-1">2.4.2 Rust</h4>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBTZXR1cCUyMFRvb2xjaGFpbiUwQSUyMCUyMHVzZXMlM0ElMjBhY3Rpb25zLXJ1c3QtbGFuZyUyRnNldHVwLXJ1c3QtdG9vbGNoYWluJTQwdjElMEElMjAlMjB3aXRoJTNBJTBBJTIwJTIwJTIwJTIwdG9vbGNoYWluJTNBJTIwc3RhYmxlJTBBJTIwJTIwJTIwJTIwdGFyZ2V0JTNBJTIweDg2XzY0LXVua25vd24tbGludXgtbXVzbCUwQSUyMCUyMCUyMCUyMGNvbXBvbmVudHMlM0ElMjBjbGlwcHklMkMlMjBydXN0Zm10JTBBJTIwJTIwJTIwJTIwY2FjaGUtYWxsLWNyYXRlcyUzQSUyMCUyMnRydWUlMjIlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Setup</span> <span class="hljs-string">Toolchain</span>
+  <span class="hljs-attr">uses:</span> <span class="hljs-string">actions-rust-lang/setup-rust-toolchain@v1</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">toolchain:</span> <span class="hljs-string">stable</span>
+    <span class="hljs-attr">target:</span> <span class="hljs-string">x86_64-unknown-linux-musl</span>
+    <span class="hljs-attr">components:</span> <span class="hljs-string">clippy,</span> <span class="hljs-string">rustfmt</span>
+    <span class="hljs-attr">cache-all-crates:</span> <span class="hljs-string">&quot;true&quot;</span>
+</div></code></pre>
+<p>这里使用 musl ，具体原因会在后面说。同时别忘了后面 <code>build</code> 的时候传入 <code>--target x86_64-unknown-linux-musl</code> 参数。</p>
+<h3 id="2-5-docker" tabindex="-1">2.5 Docker</h3>
+<p>使用 Docker 前可能需要连接到 Registry</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBMb2dpbiUyMHRvJTIwRG9ja2VyJTIwUmVnaXN0cnklMEElMjAlMjB1c2VzJTNBJTIwZG9ja2VyJTJGbG9naW4tYWN0aW9uJTQwdjMlMEElMjAlMjB3aXRoJTNBJTBBJTIwJTIwJTIwJTIwcmVnaXN0cnklM0ElMjAlMjQlN0IlN0IlMjB2YXJzLkRPQ0tFUl9TRVJWRVIlMjAlN0QlN0QlMEElMjAlMjAlMjAlMjB1c2VybmFtZSUzQSUyMCUyNCU3QiU3QiUyMHZhcnMuRE9DS0VSX1VTRVJOQU1FJTIwJTdEJTdEJTBBJTIwJTIwJTIwJTIwcGFzc3dvcmQlM0ElMjAlMjQlN0IlN0IlMjBzZWNyZXRzLkRPQ0tFUl9QQVNTV09SRCUyMCU3RCU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Login</span> <span class="hljs-string">to</span> <span class="hljs-string">Docker</span> <span class="hljs-string">Registry</span>
+  <span class="hljs-attr">uses:</span> <span class="hljs-string">docker/login-action@v3</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">registry:</span> <span class="hljs-string">${{</span> <span class="hljs-string">vars.DOCKER_SERVER</span> <span class="hljs-string">}}</span>
+    <span class="hljs-attr">username:</span> <span class="hljs-string">${{</span> <span class="hljs-string">vars.DOCKER_USERNAME</span> <span class="hljs-string">}}</span>
+    <span class="hljs-attr">password:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.DOCKER_PASSWORD</span> <span class="hljs-string">}}</span>
+</div></code></pre>
+<p>然后可以 build 当前的 Dockerfile 并推送到已经连接到的 Registry</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBCdWlsZCUyMGFuZCUyMFB1c2glMjBEb2NrZXIlMjBJbWFnZSUwQSUyMCUyMHVzZXMlM0ElMjBkb2NrZXIlMkZidWlsZC1wdXNoLWFjdGlvbiU0MHY1JTBBJTIwJTIwd2l0aCUzQSUwQSUyMCUyMCUyMCUyMGNvbnRleHQlM0ElMjAuJTBBJTIwJTIwJTIwJTIwZmlsZSUzQSUyMERvY2tlcmZpbGUlMEElMjAlMjAlMjAlMjBwdXNoJTNBJTIwdHJ1ZSUwQSUyMCUyMCUyMCUyMHRhZ3MlM0ElMjAlMjQlN0IlN0IlMjB2YXJzLkRPQ0tFUl9TRVJWRVIlMjAlN0QlN0QlMkYlRTklOTUlOUMlRTUlODMlOEYlRTUlOTAlOEQlRTclQTclQjAlM0ElRTklOTUlOUMlRTUlODMlOEYlRTclODklODglRTYlOUMlQUMlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Build</span> <span class="hljs-string">and</span> <span class="hljs-string">Push</span> <span class="hljs-string">Docker</span> <span class="hljs-string">Image</span>
+  <span class="hljs-attr">uses:</span> <span class="hljs-string">docker/build-push-action@v5</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">context:</span> <span class="hljs-string">.</span>
+    <span class="hljs-attr">file:</span> <span class="hljs-string">Dockerfile</span>
+    <span class="hljs-attr">push:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-attr">tags:</span> <span class="hljs-string">${{</span> <span class="hljs-string">vars.DOCKER_SERVER</span> <span class="hljs-string">}}/镜像名称:镜像版本</span>
+</div></code></pre>
+<h3 id="2-6-ssh-xiang-guan" tabindex="-1">2.6 SSH 相关</h3>
+<p>一般我们使用 ssh 密钥的方式连接到生产环境。设置密钥：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBTZXR1cCUyMFNTSCUwQSUyMCUyMHVzZXMlM0ElMjBzaGltYXRhcm8lMkZzc2gta2V5LWFjdGlvbiU0MHYyJTBBJTIwJTIwd2l0aCUzQSUwQSUyMCUyMCUyMCUyMGtleSUzQSUyMCUyNCU3QiU3QiUyMHNlY3JldHMuU1NIX0tFWSUyMCU3RCU3RCUwQSUyMCUyMCUyMCUyMGtub3duX2hvc3RzJTNBJTIwdW5uZWNlc3NhcnklMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Setup</span> <span class="hljs-string">SSH</span>
+  <span class="hljs-attr">uses:</span> <span class="hljs-string">shimataro/ssh-key-action@v2</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">key:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.SSH_KEY</span> <span class="hljs-string">}}</span>
+    <span class="hljs-attr">known_hosts:</span> <span class="hljs-string">unnecessary</span>
+</div></code></pre>
+<p>而后就可以直接通过命令行连接服务器了：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBEZXBsb3klMEElMjAlMjBydW4lM0ElMjAlN0MlMEElMjAlMjAlMjAlMjBzc2glMjAtbyUyMFN0cmljdEhvc3RLZXlDaGVja2luZyUzRG5vJTIwJTI0JTdCJTdCJTIwdmFycy5TU0hfVVNFUiUyMCU3RCU3RCU0MCUyNCU3QiU3QiUyMHZhcnMuU1NIX0hPU1QlMjAlN0QlN0QlMjAlM0MlM0MlMjAnRU9GJyUwQSUyMCUyMCUyMCUyMC4uLiUwQSUyMCUyMCUyMCUyMEVPRiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Deploy</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">|
+    ssh -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} &lt;&lt; &#x27;EOF&#x27;
+    ...
+    EOF
+</span></div></code></pre>
+<p>最后的那个 EOF 表示中断 SSH 连接。</p>
+<p>使用 <code>sshpass</code> 来上传文件到服务器：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBEZXBsb3klMjB0byUyMFNlcnZlciUwQSUyMCUyMHJ1biUzQSUyMCU3QyUwQSUyMCUyMCUyMCUyMGFwdC1nZXQlMjBpbnN0YWxsJTIwLXklMjBzc2hwYXNzJTBBJTIwJTIwJTIwJTIwc3NocGFzcyUyMHNjcCUyMC1vJTIwU3RyaWN0SG9zdEtleUNoZWNraW5nJTNEbm8lMjAlNUMlMEElMjAlMjAlMjAlMjAlMjAlMjAtUCUyMDIyJTIwdGFyZ2V0JTJGeDg2XzY0LXVua25vd24tbGludXgtbXVzbCUyRnJlbGVhc2UlMkYlMjQlN0IlN0IlMjBnaXRodWIuZXZlbnQucmVwb3NpdG9yeS5uYW1lJTIwJTdEJTdEJTIwJTVDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTI0JTdCJTdCJTIwc2VjcmV0cy5TU0hfVVNFUk5BTUUlMjAlN0QlN0QlNDAlMjQlN0IlN0IlMjBzZWNyZXRzLlNTSF9TRVJWRVIlMjAlN0QlN0QlM0ElMjQlN0IlN0IlMjB2YXJzLkRFUExPWV9ESVIlMjAlN0QlN0QlMkYlMEElMjAlMjAlMjAlMjBFT0YlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Deploy</span> <span class="hljs-string">to</span> <span class="hljs-string">Server</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">|
+    apt-get install -y sshpass
+    sshpass scp -o StrictHostKeyChecking=no \
+      -P 22 target/x86_64-unknown-linux-musl/release/${{ github.event.repository.name }} \
+      ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_SERVER }}:${{ vars.DEPLOY_DIR }}/
+    EOF
+</span></div></code></pre>
+<h3 id="2-7-kua-job-chuan-shu-wen-jian" tabindex="-1">2.7 跨 Job 传输文件</h3>
+<p>由于 Job 之间的隔离，如果你想把一个 Job 的产物给下一个 Job 接着用的话，需要先上传：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMHVzZXMlM0ElMjBhY3Rpb25zJTJGdXBsb2FkLWFydGlmYWN0JTQwdjQlMEElMjAlMjB3aXRoJTNBJTBBJTIwJTIwJTIwJTIwbmFtZSUzQSUyMGRlcGxveS1hcnRpZmFjdHMlMEElMjAlMjAlMjAlMjBwYXRoJTNBJTIwZGVwbG95JTJGJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/upload-artifact@v4</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">deploy-artifacts</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">deploy/</span>
+</div></code></pre>
+<p>然后再在另一个 Job 中下载：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMHVzZXMlM0ElMjBhY3Rpb25zJTJGZG93bmxvYWQtYXJ0aWZhY3QlNDB2NCUwQSUyMCUyMHdpdGglM0ElMEElMjAlMjAlMjAlMjBuYW1lJTNBJTIwZGVwbG95LWFydGlmYWN0cyUwQSUyMCUyMCUyMCUyMHBhdGglM0ElMjBkZXBsb3klMkYlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/download-artifact@v4</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">deploy-artifacts</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">deploy/</span>
+</div></code></pre>
+<h2 id="3-docker" tabindex="-1">3. Docker</h2>
+<p>Docker 允许我们将自己的项目放入容器内运行，这样容器和宿主系统之间就是隔离的，我们就不用担心容器和宿主系统之间的影响，而只需要考虑不应被隔离的部分，如将容器内部的端口映射到宿主的哪个端口，以及容器内的文件/文件夹应该映射到宿主的哪个位置。</p>
+<h3 id="3-1-dockerfile" tabindex="-1">3.1 Dockerfile</h3>
+<p>Action 会根据 Dockerfile 来构建 Docker 镜像。Dockerfile 中主要配置运行的环境之类的，这里就简单列举一下不同语言大致的模板</p>
+<h4 id="3-1-1-python" tabindex="-1">3.1.1 Python</h4>
+<pre><div class="head"><div class="language">dockerfile</div><div class="copy" data="RlJPTSUyMHB5dGhvbiUzQTMuMTQuMHJjMy1zbGltJTBBV09SS0RJUiUyMCUyRmFwcCUwQUNPUFklMjAuJTIwLiUwQVJVTiUyMHBpcCUyMGluc3RhbGwlMjAtLW5vLWNhY2hlLWRpciUyMC1yJTIwcmVxdWlyZW1lbnRzLnR4dCUwQS4uLiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">FROM</span> python:<span class="hljs-number">3.14</span>.<span class="hljs-number">0</span>rc3-slim
+<span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /app</span>
+<span class="hljs-keyword">COPY</span><span class="language-bash"> . .</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> pip install --no-cache-dir -r requirements.txt</span>
+...
+</div></code></pre>
+<h4 id="3-1-2-node-js" tabindex="-1">3.1.2 Node.js</h4>
+<pre><div class="head"><div class="language">dockerfile</div><div class="copy" data="RlJPTSUyMG5vZGUlM0Fpcm9uLXRyaXhpZS1zbGltJTBBV09SS0RJUiUyMCUyRmFwcCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">FROM</span> node:iron-trixie-slim
+<span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /app</span>
+</div></code></pre>
+<h3 id="3-2-docker-registry" tabindex="-1">3.2 Docker Registry</h3>
+<p>Action 构建好镜像之后需要把镜像传到一个仓库中。虽然 Github 提供 docker 仓库，但如果你的服务器在国内的话可能会有网络问题。一个办法是自己在服务器上搭建 docker registry。</p>
+<p>首先创建一个 <code>auth</code> 目录，并在其中生成一个 <code>htpasswd</code> 用来配置 docker registry 的登录认证：</p>
+<pre><div class="head"><div class="language">shell</div><div class="copy" data="bWtkaXIlMjBhdXRoJTBBc3VkbyUyMGFwdCUyMGluc3RhbGwlMjBhcGFjaGUyLXV0aWxzJTBBaHRwYXNzd2QlMjAtQmJuJTIwJUU3JTk0JUE4JUU2JTg4JUI3JUU1JTkwJThEJTIwJUU1JUFGJTg2JUU3JUEwJTgxJTIwJTNFJTIwYXV0aCUyRmh0cGFzc3dkJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">mkdir auth
+sudo apt install apache2-utils
+htpasswd -Bbn 用户名 密码 &gt; auth/htpasswd
+</div></code></pre>
+<p>然后执行</p>
+<pre><div class="head"><div class="language">shell</div><div class="copy" data="ZG9ja2VyJTIwcnVuJTIwLWQlMjAlNUMlMEElMjAlMjAtcCUyMDUwMDAlM0E1MDAwJTIwJTVDJTBBJTIwJTIwLS1yZXN0YXJ0JTNEYWx3YXlzJTIwJTVDJTBBJTIwJTIwLS1uYW1lJTIwcmVnaXN0cnklMjAlNUMlMEElMjAlMjAtdiUyMCVFNCVCOCU4QSVFOSU5RCVBMiVFNSU4OCU5QiVFNSVCQiVCQSVFNyU5QSU4NGF1dGglRTclOUIlQUUlRTUlQkQlOTUlRTclOUElODQlRTUlOUMlQjAlRTUlOUQlODAlM0ElMkZhdXRoJTIwJTVDJTBBJTIwJTIwLWUlMjAlMjJSRUdJU1RSWV9BVVRIJTNEaHRwYXNzd2QlMjIlMjAlNUMlMEElMjAlMjAtZSUyMCUyMlJFR0lTVFJZX0FVVEhfSFRQQVNTV0RfUkVBTE0lM0RSZWdpc3RyeSUyMFJlYWxtJTIyJTIwJTVDJTBBJTIwJTIwLWUlMjBSRUdJU1RSWV9BVVRIX0hUUEFTU1dEX1BBVEglM0QlMkZhdXRoJTJGaHRwYXNzd2QlMjAlNUMlMEElMjAlMjAtdiUyMHJlZ2lzdHJ5JUU2JTk1JUIwJUU2JThEJUFFJUU1JUFEJTk4JUU2JTk0JUJFJUU3JTlBJTg0JUU3JTlCJUFFJUU1JUJEJTk1JTNBJTJGdmFyJTJGbGliJTJGcmVnaXN0cnklMjAlNUMlMEElMjAlMjByZWdpc3RyeSUzQTIuNy4wJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code">docker run -d \
+  -p 5000:5000 \
+  --restart=always \
+  --name registry \
+  -v 上面创建的auth目录的地址:/auth \
+  -e &quot;REGISTRY_AUTH=htpasswd&quot; \
+  -e &quot;REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm&quot; \
+  -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+  -v registry数据存放的目录:/var/lib/registry \
+  registry:2.7.0
+</div></code></pre>
+<p>不出意外的话 registry 就跑起来了。</p>
+<p>docker registry 默认是 http 的，但这样的话，你在别的地方登录自己的 registry 时会报错，让你用 https。如果你执意要用 http 的话需要把自己的 registry 地址添加到 docker 的配置文件中然后再重启 docker 服务，非常麻烦。简单起见我们还是考虑配置 https，使用反向代理即可。</p>
+<p>需要注意的是，如果你使用 nginx 的话，还需要调整一下最大上传大小：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="Y2xpZW50X21heF9ib2R5X3NpemUlMjAxMDI0bSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">client_max_body_size 1024m;
+</div></code></pre>
+<h3 id="3-3-docker-compose" tabindex="-1">3.3 DockerCompose</h3>
+<p>直接运行 Docker 容器的话，如果启动容器需要的配置多了起来，那么启动容器的命令就会很长。同时，我们的项目可能由多个组件构成，比如可能还会用到 MySQL，Redis，Meilisearch，或者对于 Next.js 项目可能除了运行一个 Next.js 还需要运行一个 Rust 后端，此时再单个容器地管理就比较困难了，而把这些组件全部放入一个容器中也不是一个好选择（容器应该满足单一职责）。 而 DockerCompose 可以让我们把多个容器看成整体地管理。</p>
+<p>DockerCompose 是一个 yaml 文件。在一个目录中创建一个 <code>docker-compose.yaml</code>，那么这个目录就成为了一个”项目目录“，我们可以在这个目录下运行 <code>docker-compose up</code> 来启动整个项目，或是 <code>docker-compose down</code> 来终止整个项目。</p>
+<p><code>docker-compose.yaml</code> 中需要填写整个项目需要的容器及配置，如：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="dmVyc2lvbiUzQSUyMCczJyUwQXNlcnZpY2VzJTNBJTBBJTA5Y29udGFpbmVyMSUzQSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGltYWdlJTNBJTIwJUU5JTk1JTlDJUU1JTgzJThGJUU3JTlBJTg0JUU1JTkwJThEJUU3JUE3JUIwJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwY29udGFpbmVyX25hbWUlM0ElMjAlRTUlQUUlQjklRTUlOTklQTglRTUlOTAlOEQlRTclQTclQjAlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByZXN0YXJ0JTNBJTIwdW5sZXNzLXN0b3BwZWQlMjAlMjMlMjAlRTklODclOEQlRTUlOTAlQUYlRTclQUQlOTYlRTclOTUlQTUlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjMlMjAlRTglQUUlQkUlRTclQkQlQUUlRTUlQUUlQjklRTUlOTklQTglRTUlODYlODUlRTclOUElODQlRTclOEUlQUYlRTUlQTIlODMlRTUlOEYlOTglRTklODclOEYlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBlbnZfZmlsZSUzQSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC0lMjAuZW52JTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZW52aXJvbm1lbnQlM0ElMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAtJTIwa2V5JTNEdmFsdWUlMEElMjAlMjAlMjAlMjAlMjAlMjAlMDlwb3J0cyUzQSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC4uLiUyMCUyMyUyMCVFNiU5OCVBMCVFNSVCMCU4NCVFNyU5QSU4NCVFNyVBQiVBRiVFNSU4RiVBMyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUwOXZvbHVtZXMlM0ElMEElMjAlMjAlMjAlMjAlMjAlMjAlMDklMjAlMjAuLi4lMjAlMjMlMjAlRTYlOEMlODIlRTglQkQlQkQlRTUlOEQlQjclMEElMjAlMjAlMDljb250YWluZXIyJTNBJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZGVwZW5kc19vbiUzQSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMC0lMjBjb250YWluZXIxJTIwJTIzJTIwJUU4JUFFJUJFJUU3JUJEJUFFJUU0JUJFJTlEJUU4JUI1JTk2JUU3JTlBJTg0JUU1JUFFJUI5JUU1JTk5JUE4JUVGJUJDJThDJUU1JThGJUFBJUU2JTlDJTg5JUU0JUJFJTlEJUU4JUI1JTk2JUU3JTlBJTg0JUU1JUFFJUI5JUU1JTk5JUE4JUU1JTkwJUFGJUU1JThBJUE4JUU1JUE1JUJEJUU0JUI5JThCJUU1JTkwJThFJUU2JTg5JThEJUU0JUJDJTlBJUU1JTkwJUFGJUU1JThBJUE4JUU1JUJEJTkzJUU1JTg5JThEJUU4JUJGJTk5JUU0JUI4JUFBJUU1JUFFJUI5JUU1JTk5JUE4JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div></div><div class="code"><span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;3&#x27;</span>
+<span class="hljs-attr">services:</span>
+	<span class="hljs-attr">container1:</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-string">镜像的名称</span>
+        <span class="hljs-attr">container_name:</span> <span class="hljs-string">容器名称</span>
+        <span class="hljs-attr">restart:</span> <span class="hljs-string">unless-stopped</span> <span class="hljs-comment"># 重启策略</span>
+        <span class="hljs-comment"># 设置容器内的环境变量</span>
+        <span class="hljs-attr">env_file:</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">.env</span>
+        <span class="hljs-attr">environment:</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">key=value</span>
+      	<span class="hljs-attr">ports:</span>
+          <span class="hljs-string">...</span> <span class="hljs-comment"># 映射的端口</span>
+      	<span class="hljs-attr">volumes:</span>
+      	  <span class="hljs-string">...</span> <span class="hljs-comment"># 挂载卷</span>
+  	<span class="hljs-attr">container2:</span>
+        <span class="hljs-attr">depends_on:</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">container1</span> <span class="hljs-comment"># 设置依赖的容器，只有依赖的容器启动好之后才会启动当前这个容器</span>
+</div></code></pre>
+<p><code>docker-compose pull</code> 会检查当前项目所涉及到的所有容器是否存在更新，如果有更新的话则会拉取最新的镜像（只拉取需要更新的）因此使用 docker compose 之后，Action 中的部署过程就会非常简单：我们直接 ssh 连接到生产环境，然后 cd 到项目目录，然后：</p>
+<pre><div class="head"><div class="language">shell</div><div class="copy" data="ZG9ja2VyLWNvbXBvc2UlMjBkb3duJTBBZG9ja2VyLWNvbXBvc2UlMjBwdWxsJTBBZG9ja2VyLWNvbXBvc2UlMjB1cCUyMC1kJTBBZG9ja2VyJTIwY29udGFpbmVyJTIwcHJ1bmUlMjAtZiUwQWRvY2tlciUyMHJtaSUyMC1mJTIwJTI0KGRvY2tlciUyMGltYWdlcyUyMCU3QyUyMGdyZXAlMjAnJTNDbm9uZSUzRSclMjAlN0MlMjBhd2slMjAnJTdCcHJpbnQlMjAlMjQzJTdEJyklMEFkb2NrZXIlMjBpbWFnZSUyMHBydW5lJTIwLWElMjAtZiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code">docker-compose down
+docker-compose pull
+docker-compose up -d
+docker container prune -f
+docker rmi -f $(docker images | grep &#x27;&lt;none&gt;&#x27; | awk &#x27;{print $3}&#x27;)
+docker image prune -a -f
+</div></code></pre>
+<p>其中最后三行则会清理无用的容器和镜像（Docker 中拉取新的镜像后，原来的镜像还保留，需要手动删除。</p>
+<p>使用 docker compose 还需要注意一个问题。位于同一个 docker compose 的容器之间进行网络通信的话，需要使用 service 的名称来当地址。比如原来连接 MySQL 可能是 <code>localhost:3306</code> ，现在把 MySQL 作为位于同一 docker compose 的容器，并且定义该容器的 service 名称为 <code>db</code>，那么就需要使用 <code>db:3306</code> 来连接。</p>
+<h2 id="4-qi-ta-wen-ti" tabindex="-1">4. 其他问题</h2>
+<h3 id="4-1-next-js-xiang-mu" tabindex="-1">4.1 Next.js 项目</h3>
+<p>对于 Next.js 项目，我一般会使用 standalone 方式进行部署。在项目的 <code>next.config.ts</code> 中设置：</p>
+<pre><div class="head"><div class="language">ts</div><div class="copy" data="Y29uc3QlMjBuZXh0Q29uZmlnJTNBJTIwTmV4dENvbmZpZyUyMCUzRCUyMCU3QiUwQSUwOSUyRiolMjBjb25maWclMjBvcHRpb25zJTIwaGVyZSUyMColMkYlMEElMDlvdXRwdXQlM0ElMjAlMjJzdGFuZGFsb25lJTIyJTJDJTBBJTdEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">const</span> <span class="hljs-attr">nextConfig</span>: <span class="hljs-title class_">NextConfig</span> = {
+	<span class="hljs-comment">/* config options here */</span>
+	<span class="hljs-attr">output</span>: <span class="hljs-string">&quot;standalone&quot;</span>,
+};
+</div></code></pre>
+<p>然后需要复制文件：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMG5hbWUlM0ElMjBQcmVwYXJlJTIwYXJ0aWZhY3RzJTBBJTIwJTIwcnVuJTNBJTIwJTdDJTBBJTIwJTIwJTIwJTIwbWtkaXIlMjAtcCUyMGRlcGxveSUwQSUyMCUyMCUyMCUyMGNwJTIwLXIlMjBwdWJsaWMlMjBkZXBsb3klMkYlMEElMjAlMjAlMjAlMjBjcCUyMC1yJTIwLm5leHQlMkZzdGFuZGFsb25lJTJGJTdCLiU1QiEuJTVEKiUyQyolN0QlMjBkZXBsb3klMkYlMEElMjAlMjAlMjAlMjBjcCUyMC1yJTIwLm5leHQlMkZzdGF0aWMlMjBkZXBsb3klMkYubmV4dCUyRnN0YXRpYyUyRiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Prepare</span> <span class="hljs-string">artifacts</span>
+  <span class="hljs-attr">run:</span> <span class="hljs-string">|
+    mkdir -p deploy
+    cp -r public deploy/
+    cp -r .next/standalone/{.[!.]*,*} deploy/
+    cp -r .next/static deploy/.next/static/
+</span></div></code></pre>
+<p>由于 Next.js 的编译产物中有一些 <code>.</code> 开头的文件/文件，这使得我们在复制的时候需要使用 <code>{.[!.]*,*}</code> 避免 <code>cp</code> 忽略了这些文件。</p>
+<p>同理，如果我们需要 <code>actions/upload-artifact@v4</code>，那么还需要：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="LSUyMHVzZXMlM0ElMjBhY3Rpb25zJTJGdXBsb2FkLWFydGlmYWN0JTQwdjQlMEElMjAlMjB3aXRoJTNBJTBBJTIwJTIwJTIwJTIwbmFtZSUzQSUyMGRlcGxveS1hcnRpZmFjdHMlMEElMjAlMjAlMjAlMjBwYXRoJTNBJTIwZGVwbG95JTJGJTBBJTIwJTIwJTIwJTIwaW5jbHVkZS1oaWRkZW4tZmlsZXMlM0ElMjB0cnVlJTIwJTIzJUU4JUJGJTk5JUU5JTg3JThDJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/upload-artifact@v4</span>
+  <span class="hljs-attr">with:</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">deploy-artifacts</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">deploy/</span>
+    <span class="hljs-attr">include-hidden-files:</span> <span class="hljs-literal">true</span> <span class="hljs-comment">#这里</span>
+</div></code></pre>
+<h3 id="4-2-rust-jing-tai-bian-yi" tabindex="-1">4.2 Rust 静态编译</h3>
+<p>Rust 在 Linux 上编译时默认使用 glibc。而 glibc 是动态链接的，这导致如果你的生产环境上的 glibc 版本较低时就无法运行了。如果你不方便更新 glibc 版本的话，就需要考虑 musl 了，musl 是静态链接的。</p>
+<p>首先需要安装一些工具：</p>
+<pre><div class="head"><div class="language">shell</div><div class="copy" data="YXB0LWdldCUyMGluc3RhbGwlMjAteSUyMG11c2wtdG9vbHMlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">apt-get install -y musl-tools
+</div></code></pre>
+<p>然后按 <code>2.4.2</code> 中所述，设置 <code>target: x86_64-unknown-linux-musl</code>，再编译就可以了。</p>
+<p>有些 crate 使用了 <code>openssl</code> 而不是 <code>rustls</code> ，此时使用 <code>musl</code> 编译会出现问题。解决办法是在 <code>Cargo.toml</code> 中添加：</p>
+<pre><div class="head"><div class="language">toml</div><div class="copy" data="JTVCdGFyZ2V0LidjZmcobm90KHdpbmRvd3MpKScuZGVwZW5kZW5jaWVzJTVEJTBBb3BlbnNzbCUyMCUzRCUyMCU3QiUyMHZlcnNpb24lMjAlM0QlMjAlMjIwLjEwJTIyJTJDJTIwZmVhdHVyZXMlMjAlM0QlMjAlNUIlMjJ2ZW5kb3JlZCUyMiU1RCUyMCU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-section">[target.&#x27;cfg(not(windows))&#x27;.dependencies]</span>
+<span class="hljs-attr">openssl</span> = { version = <span class="hljs-string">&quot;0.10&quot;</span>, features = [<span class="hljs-string">&quot;vendored&quot;</span>] }
+</div></code></pre>
+<h3 id="4-2-zi-jian-gitea-yin-fa-de-wen-ti" tabindex="-1">4.2 自建 Gitea 引发的问题</h3>
+<p>上面的内容在 Github 上面进行应该是问题不大的。但如果你选择了自建 Gitea，则会有新的注意事项。</p>
+<h4 id="4-2-1-wang-luo-wen-ti" tabindex="-1">4.2.1 网络问题</h4>
+<p>我们的 Gitea 是放在国内服务器上的，因此会出现一些网络问题。</p>
+<p><strong>Action</strong></p>
+<p>Action 中引用的外部 action 默认都是从 github 上拉取的。我们的解决方案是在 gitee 上建一个镜像仓库，然后引用 gitee 上的 action。</p>
+<p><strong>rust</strong></p>
+<p>为 rustup 和 cargo 设置镜像。同时我们把 <code>2.4.2</code> 的内容整合在一起，形成了新的 action：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="bmFtZSUzQSUyMFNldHVwJTIwVG9vbGNoYWluJTBBJTBBcnVucyUzQSUwQSUyMCUyMHVzaW5nJTNBJTIwJTIyY29tcG9zaXRlJTIyJTBBJTIwJTIwc3RlcHMlM0ElMEElMjAlMjAlMjAlMjAtJTIwbmFtZSUzQSUyMFJ1c3R1cCUyME1pcnJvciUwQSUyMCUyMCUyMCUyMCUyMCUyMHJ1biUzQSUyMCU3QyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGVjaG8lMjAlMjJSVVNUVVBfRElTVF9TRVJWRVIlM0RodHRwcyUzQSUyRiUyRm1pcnJvcnMudHVuYS50c2luZ2h1YS5lZHUuY24lMkZydXN0dXAlMjIlMjAlM0UlM0UlMjAlMjRHSVRIVUJfRU5WJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwZWNobyUyMCUyMlJVU1RVUF9VUERBVEVfUk9PVCUzRGh0dHBzJTNBJTJGJTJGbWlycm9ycy51c3RjLmVkdS5jbiUyRnJ1c3Qtc3RhdGljJTJGcnVzdHVwJTIyJTIwJTNFJTNFJTIwJTI0R0lUSFVCX0VOViUwQSUwQSUyMCUyMCUyMCUyMC0lMjBuYW1lJTNBJTIwU2V0dXAlMjBUb29sY2hhaW4lMEElMjAlMjAlMjAlMjAlMjAlMjB1c2VzJTNBJTIwaHR0cHMlM0ElMkYlMkZnaXRlZS5jb20lMkZza3IyMDA1JTJGc2V0dXAtcnVzdC10b29sY2hhaW4lNDBtYWluJTBBJTIwJTIwJTIwJTIwJTIwJTIwd2l0aCUzQSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHRvb2xjaGFpbiUzQSUyMHN0YWJsZSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHRhcmdldCUzQSUyMHg4Nl82NC11bmtub3duLWxpbnV4LW11c2wlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBjb21wb25lbnRzJTNBJTIwY2xpcHB5JTJDJTIwcnVzdGZtdCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGNhY2hlLWFsbC1jcmF0ZXMlM0ElMjAlMjJ0cnVlJTIyJTBBJTBBJTIwJTIwJTIwJTIwLSUyMHJ1biUzQSUyMGVjaG8lMjAlMjIlMkZyb290JTJGLmNhcmdvJTJGYmluJTIyJTIwJTNFJTNFJTIwJTI0R0lUSFVCX1BBVEglMEElMEElMjAlMjAlMjAlMjAtJTIwbmFtZSUzQSUyMENyYXRlcyUyME1pcnJvciUwQSUyMCUyMCUyMCUyMCUyMCUyMHJ1biUzQSUyMCU3QyUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMG1rZGlyJTIwLXZwJTIwJTI0JTdCQ0FSR09fSE9NRSUzQS0lMjRIT01FJTJGLmNhcmdvJTdEJTBBJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwY2F0JTIwJTNDJTNDJTIwRU9GJTIwJTdDJTIwdGVlJTIwLWElMjAlMjQlN0JDQVJHT19IT01FJTNBLSUyNEhPTUUlMkYuY2FyZ28lN0QlMkZjb25maWcudG9tbCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU1QnNvdXJjZS5jcmF0ZXMtaW8lNUQlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByZXBsYWNlLXdpdGglMjAlM0QlMjAndXN0YyclMEElMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlNUJzb3VyY2UudXN0YyU1RCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHJlZ2lzdHJ5JTIwJTNEJTIwJTIyc3BhcnNlJTJCaHR0cHMlM0ElMkYlMkZtaXJyb3JzLnVzdGMuZWR1LmNuJTJGY3JhdGVzLmlvLWluZGV4JTJGJTIyJTBBJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTVCcmVnaXN0cmllcy51c3RjJTVEJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaW5kZXglMjAlM0QlMjAlMjJzcGFyc2UlMkJodHRwcyUzQSUyRiUyRm1pcnJvcnMudXN0Yy5lZHUuY24lMkZjcmF0ZXMuaW8taW5kZXglMkYlMjIlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBFT0YlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div></div><div class="code"><span class="hljs-attr">name:</span> <span class="hljs-string">Setup</span> <span class="hljs-string">Toolchain</span>
+
+<span class="hljs-attr">runs:</span>
+  <span class="hljs-attr">using:</span> <span class="hljs-string">&quot;composite&quot;</span>
+  <span class="hljs-attr">steps:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Rustup</span> <span class="hljs-string">Mirror</span>
+      <span class="hljs-attr">run:</span> <span class="hljs-string">|
+        echo &quot;RUSTUP_DIST_SERVER=https://mirrors.tuna.tsinghua.edu.cn/rustup&quot; &gt;&gt; $GITHUB_ENV
+        echo &quot;RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup&quot; &gt;&gt; $GITHUB_ENV
+</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Setup</span> <span class="hljs-string">Toolchain</span>
+      <span class="hljs-attr">uses:</span> <span class="hljs-string">https://gitee.com/skr2005/setup-rust-toolchain@main</span>
+      <span class="hljs-attr">with:</span>
+        <span class="hljs-attr">toolchain:</span> <span class="hljs-string">stable</span>
+        <span class="hljs-attr">target:</span> <span class="hljs-string">x86_64-unknown-linux-musl</span>
+        <span class="hljs-attr">components:</span> <span class="hljs-string">clippy,</span> <span class="hljs-string">rustfmt</span>
+        <span class="hljs-attr">cache-all-crates:</span> <span class="hljs-string">&quot;true&quot;</span>
+
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">echo</span> <span class="hljs-string">&quot;/root/.cargo/bin&quot;</span> <span class="hljs-string">&gt;&gt;</span> <span class="hljs-string">$GITHUB_PATH</span>
+
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Crates</span> <span class="hljs-string">Mirror</span>
+      <span class="hljs-attr">run:</span> <span class="hljs-string">|
+        mkdir -vp ${CARGO_HOME:-$HOME/.cargo}
+</span>
+        <span class="hljs-string">cat</span> <span class="hljs-string">&lt;&lt;</span> <span class="hljs-string">EOF</span> <span class="hljs-string">|</span> <span class="hljs-string">tee</span> <span class="hljs-string">-a</span> <span class="hljs-string">${CARGO_HOME:-$HOME/.cargo}/config.toml</span>
+        [<span class="hljs-string">source.crates-io</span>]
+        <span class="hljs-string">replace-with</span> <span class="hljs-string">=</span> <span class="hljs-string">&#x27;ustc&#x27;</span>
+
+        [<span class="hljs-string">source.ustc</span>]
+        <span class="hljs-string">registry</span> <span class="hljs-string">=</span> <span class="hljs-string">&quot;sparse+https://mirrors.ustc.edu.cn/crates.io-index/&quot;</span>
+
+        [<span class="hljs-string">registries.ustc</span>]
+        <span class="hljs-string">index</span> <span class="hljs-string">=</span> <span class="hljs-string">&quot;sparse+https://mirrors.ustc.edu.cn/crates.io-index/&quot;</span>
+        <span class="hljs-string">EOF</span>
+</div></code></pre>
+<p><strong>python</strong></p>
+<p>为 <code>pip</code> 设置镜像：</p>
+<pre><div class="head"><div class="language">shell</div><div class="copy" data="UlVOJTIwcGlwJTIwaW5zdGFsbCUyMC0tbm8tY2FjaGUtZGlyJTIwLXIlMjByZXF1aXJlbWVudHMudHh0JTIwLWklMjBodHRwcyUzQSUyRiUyRnB5cGkubWlycm9ycy51c3RjLmVkdS5jbiUyRnNpbXBsZSUyRiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.mirrors.ustc.edu.cn/simple/
+</div></code></pre>
+<p><strong>apt</strong></p>
+<p>我们还需要为 action runner 中的 apt 添加镜像。我们同时整合了设置 <code>musl-tools</code>，得到了如下的 Dockerfile：</p>
+<pre><div class="head"><div class="language">dockerfile</div><div class="copy" data="RlJPTSUyMGdpdGVhJTJGcnVubmVyLWltYWdlcyUzQXVidW50dS0yMi4wNCUwQSUwQSUyMyUyMCVFOCVBRSVCRSVFNyVCRCVBRSUyMFRVTkElMjAlRTYlQjglODUlRTUlOEQlOEUlRTYlQkElOTAlRTMlODAlODElRTYlQjglODUlRTklOTklQTQlRTQlQjglOEQlRTklOUMlODAlRTglQTYlODElRTclOUElODQlRTYlQkElOTAlRUYlQkMlOEMlRTUlQUUlODklRTglQTMlODUlMjBtdXNsLXRvb2xzJTBBUlVOJTIwc2VkJTIwLWklMjAncyU3Q2h0dHAlM0ElMkYlMkYuKi51YnVudHUuY29tJTdDaHR0cCUzQSUyRiUyRm1pcnJvcnMudHVuYS50c2luZ2h1YS5lZHUuY24lN0NnJyUyMCUyRmV0YyUyRmFwdCUyRnNvdXJjZXMubGlzdCUyMCU1QyUwQSUyMCUyMCUyMCUyMCUyNiUyNiUyMHJtJTIwLWYlMjAlMkZldGMlMkZhcHQlMkZzb3VyY2VzLmxpc3QuZCUyRiolMjAlNUMlMEElMjAlMjAlMjAlMjAlMjYlMjYlMjBhcHQtZ2V0JTIwdXBkYXRlJTIwJTVDJTBBJTIwJTIwJTIwJTIwJTI2JTI2JTIwYXB0LWdldCUyMGluc3RhbGwlMjAteSUyMG11c2wtdG9vbHMlMjAlMjMlMjAlNUMlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">FROM</span> gitea/runner-images:ubuntu-<span class="hljs-number">22.04</span>
+
+<span class="hljs-comment"># 设置 TUNA 清华源、清除不需要的源，安装 musl-tools</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> sed -i <span class="hljs-string">&#x27;s|http://.*.ubuntu.com|http://mirrors.tuna.tsinghua.edu.cn|g&#x27;</span> /etc/apt/sources.list \
+    &amp;&amp; <span class="hljs-built_in">rm</span> -f /etc/apt/sources.list.d/* \
+    &amp;&amp; apt-get update \
+    &amp;&amp; apt-get install -y musl-tools <span class="hljs-comment"># \</span>
+</span></div></code></pre>
+<p>构建上述镜像，并设置 <code>musl-ubuntu:ubuntu-22.04</code> 的 tag。在 gitea 的配置文件中设置：</p>
+<pre><div class="head"><div class="language">yaml</div><div class="copy" data="bGFiZWxzJTNBJTBBJTIwJTIwLSUyMCUyMnVidW50dS0yMi4wNCUzQWRvY2tlciUzQSUyRiUyRm11c2wtdWJ1bnR1JTNBdWJ1bnR1LTIyLjA0JTIyJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-attr">labels:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;ubuntu-22.04:docker://musl-ubuntu:ubuntu-22.04&quot;</span>
+</div></code></pre>
+<p>类似的方法还可以用在其他需要用到 apt 的 Dockerfile 中。</p>
+<h4 id="4-2-2-kua-job-chuan-shu-wen-jian" tabindex="-1">4.2.2 跨 Job 传输文件</h4>
+<p>这个事我们已经在 <code>2.7</code> 中说了。但是需要注意一点，这个 <code>actions/upload-artifact@v4</code> 是将文件从 action runner 中上传到 gitea 所在的服务器的。如果 runner 和 gitea 不在一个服务器上，那么这个过程可能会很慢。</p>
