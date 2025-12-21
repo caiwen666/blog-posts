@@ -1,0 +1,839 @@
+<div class="alert alert-info"><div class="icon"><svg focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg></div><div class="message"><div class="title"> 说明</div><p>本文为湖南大学易千工作室技术部门的第三次培训文档</p>
+</div></div>
+<h2 id="1-nei-cun" tabindex="-1">1. 内存</h2>
+<h3 id="1-1-shi-mo-shi-nei-cun" tabindex="-1">1.1 什么是内存</h3>
+<p>计算机分内存和储存，我们一般认识到的存储容量是硬盘的容量，存放着我们的各种数据：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/29/image-20251029213811293.png" style="transform: scale(1)" width=606 height=261></div></p>
+<p>关于内存，我们可以在任务管理器中查看到关于他的容量以及占用信息等：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/29/image-20251029214110808.png" style="transform: scale(1)" width=1908 height=1382></div></p>
+<p>相比于储存</p>
+<ul>
+<li>内存比较小（8G、16G，32G...）。</li>
+<li>当电脑关机后，内存中的数据会立刻消失。</li>
+<li>但是内存的读写速度非常快，比硬盘读写快很多（似乎能达到70GB/s）。因此我们的操作系统会把比较常用的数据存放在内存中。</li>
+</ul>
+<p>（例：如果你的手机或是电脑内存比较小的话，就容易发生卡顿，这是因为内存不够用了，操作系统就会迫不得已把数据存放在储存中，而储存的读写速度相比于内存慢的很，于是就卡了）</p>
+<p>我们在操作系统上运行的所有程序，大部分数据，都是放在内存的：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/03/image-20251103110019378.png" style="transform: scale(1)" width=1327 height=1182><div class="img-title">image-20251103110019378</div></div></p>
+<h3 id="1-2-shi-yong-nei-cun" tabindex="-1">1.2 使用内存</h3>
+<p>内存可以视为一个非常大的数组。理论上我们可以在这个非常大的数组中随便存取数据。</p>
+<p>对于普通数组，我们使用下标来访问</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwZGF0YSUyMCUzRCUyMGFyciU1QmluZGV4JTVEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-type">int</span> data = arr[index];
+</div></code></pre>
+<p>对于内存，我们也需要一个“下标”来访问。对于内存，“下标”实际上就是地址。</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwZGF0YSUyMCUzRCUyMCphZGRyJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-type">int</span> data = *addr;
+</div></code></pre>
+<p><code>*</code> 叫做解引用，可以把一个内存地址的数据取出来，类似数组的 <code>[]</code>。</p>
+<p>C++ 是强类型语言，我们需要注意一下类型。上面的数组的例子，<code>arr</code> 的类型应该是 <code>int[]</code>。</p>
+<p>而对于内存似乎没这么自然。</p>
+<p>众所周知，计算机中的数据都是 0 和 1 二进制表示的。0/1 叫做位。而计算机实际上并不会一位一位地运算，计算机实际上是把 8 个位看成一个整体进行操作。8 位称为一个字节。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="MDAxMDEwMDAxMTAwMDAxMSUwQSVFMiU4MCU5NCVFMiU4MCU5NCVFMiU4MCU5NCVFMiU4MCU5NCVFMiU4MCU5NCVFMiU4MCU5NC0tJTIwLSUzRSUyMCVFNCVCOCU4MCVFNCVCOCVBQSVFNSVBRCU5NyVFOCU4QSU4MiUwQSU1RSUwOSUwOSUyMC0lM0UlMjAlRTQlQjglODAlRTQlQjglQUElRTQlQkQlOEQlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">0010100011000011
+——————-- -&gt; 一个字节
+^		 -&gt; 一个位
+</div></code></pre>
+<p>在 C++ 中，字节对应于 <code>char</code> 类型。准确来说是 <code>unsigned char</code> 类型。</p>
+<p>那么我们可以把内存视为一个非常大的 <code>unsigned char</code> 数组。</p>
+<p><code>*</code> 只能对“指针”这个数据类型进行操作。很多人闻指针色变，但我认为指针实际上就是一个地址，只不过又加了一个类型。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwMTIlMjAxMyUyMDE0JTIwMTUlMjAxNiUyMDE3JTIwMTglMEElN0MlMjAlMjAlN0MlMjAlMjAlN0MlMjAlMjAlN0MlMjAlMjAlN0MlMjAlMjAlN0MlMjAlMjAlN0MlMjAlMjAlN0MlMEElNUUtLS0lMDklMDklMDljb25kMSUwQSU1RS0tLS0tLSUwOSUwOSUwOWNvbmQyJTBBJTVFLS0tLS0tLS0tLS0tJTA5Y29uZDMlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"> 12 13 14 15 16 17 18
+|  |  |  |  |  |  |  |
+^---			cond1
+^------			cond2
+^------------	cond3
+</div></code></pre>
+<p>如上图，现在我们想获得内存中 12 这个位置的数据。按照“内存是一个非常大的 <code>unsigned char</code> 数组“的观点，12 处数据应该是一个 <code>unsigned char</code> 数据。</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="dW5zaWduZWQlMjBjaGFyJTIwKmFkZHIlMjAlM0QlMjAodW5zaWduZWQlMjBjaGFyJTIwKikxMiUzQiUwQXVuc2lnbmVkJTIwY2hhciUyMGRhdGElMjAlM0QlMjAqYWRkciUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> *addr = (<span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> *)<span class="hljs-number">12</span>;
+<span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> data = *addr;
+</div></code></pre>
+<p>这里的 <code>*</code> 出现位置不同表示不同的含义。如果出现在类型上，则表示是一个指针类型。如果用作运算符，则表示解引用操作。</p>
+<p>这里还要再提一点，数据类型和数据本身没啥关系，数据类型只是告诉编译器应该把这个数据解释成什么东西。因此我们还可以这样：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="Ym9vbCUyMCphZGRyJTIwJTNEJTIwKGJvb2wqKTEyJTNCJTBBYm9vbCUyMGRhdGElMjAlM0QlMjAqYWRkciUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-type">bool</span> *addr = (<span class="hljs-type">bool</span>*)<span class="hljs-number">12</span>;
+<span class="hljs-type">bool</span> data = *addr;
+</div></code></pre>
+<p>上面例子中的 <code>unsigned char</code> 和 <code>bool</code> 类型都是只占用 1 个字节的。如 cond1 所示。</p>
+<p>如果我们写成：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="c2hvcnQlMjAqYWRkciUyMCUzRCUyMChzaG9ydCopMTIlM0IlMEFzaG9ydCUyMGRhdGElMjAlM0QlMjAqYWRkciUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-type">short</span> *addr = (<span class="hljs-type">short</span>*)<span class="hljs-number">12</span>;
+<span class="hljs-type">short</span> data = *addr;
+</div></code></pre>
+<p>由于 <code>short</code> 是占用 2 字节的，上面这个代码就会从指针处的位置开始，向后读取两个数据，然后根据某些编码规则将其解释成 <code>short</code> 类型。类似 cond2 那样。</p>
+<p>又比如我们最喜欢的 <code>int</code> 类型：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwKmFkZHIlMjAlM0QlMjAoaW50KikxMiUzQiUwQWludCUyMGRhdGElMjAlM0QlMjAqYWRkciUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-type">int</span> *addr = (<span class="hljs-type">int</span>*)<span class="hljs-number">12</span>;
+<span class="hljs-type">int</span> data = *addr;
+</div></code></pre>
+<p>这个 <code>*</code> 解引用实际上直接读了 4 个数据，类似 cond3 那样。</p>
+<p>上面提到，我们定义的变量也是放在内存中的。那么就有个疑问，它放在了内存的那个位置？我们可以用 <code>&amp;</code> 取地址运算符来得到答案，<code>&amp;</code> 运算符将会得到一个指针。</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwYSUzQiUwQWludCUyMCphZGRyJTIwJTNEJTIwJTI2YSUzQiUwQXN0ZCUzQSUzQWNvdXQlMjAlM0MlM0MlMjBhZGRyJTIwJTNDJTNDJTIwZW5kbCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-type">int</span> a;
+<span class="hljs-type">int</span> *addr = &amp;a;
+std::cout &lt;&lt; addr &lt;&lt; endl;
+</div></code></pre>
+<p>综合我们所讲的东西，我们还可以这么玩：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwYSUyMCUzRCUyMDExNDUxNCUzQiUwQWRvdWJsZSUyMCpwJTIwJTNEJTIwKGRvdWJsZSUyMCopJTI2YSUzQiUwQXN0ZCUzQSUzQWNvdXQlMjAlM0MlM0MlMjAqcCUyMCUzQyUzQyUyMGVuZGwlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-type">int</span> a = <span class="hljs-number">114514</span>;
+<span class="hljs-type">double</span> *p = (<span class="hljs-type">double</span> *)&amp;a;
+std::cout &lt;&lt; *p &lt;&lt; endl;
+</div></code></pre>
+<h3 id="1-3-nei-cun-fen-bu" tabindex="-1">1.3 内存分布</h3>
+<p>如果你直接去运行上面所讲的代码，如：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwKmFkZHIlMjAlM0QlMjAoaW50KikxMiUzQiUwQWludCUyMGRhdGElMjAlM0QlMjAqYWRkciUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-type">int</span> *addr = (<span class="hljs-type">int</span>*)<span class="hljs-number">12</span>;
+<span class="hljs-type">int</span> data = *addr;
+</div></code></pre>
+<p>会发现程序出现段错误，其中的原因我们将会逐步解释。</p>
+<p>还记得吗，我们的电脑上，各个程序之间是共享内存的：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/03/image-20251103110019378.png" style="transform: scale(1)" width=1327 height=1182><div class="img-title">image-20251103110019378</div></div></p>
+<p>现在我们已经知道了怎么去利用内存，那么有一个想法就是，能不能访问别的程序的内存？理论上是可以的，但这样不太安全，因为这样一个恶意的程序可以随便破坏内存数据，使得电脑崩溃。于是，现代操作系统有一个“虚拟内存”技术，即在每个程序的眼中，他是独占所有的内存的，看不到其他程序：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/29/image-20251029220246267.png" style="transform: scale(1)" width=1275 height=848></div></p>
+<p>同时，理论上来说，你作为程序的编写者，可以随意支配这“虚拟空间”内的所有内存。但是为了能让程序正常运行，我们不得不遵循一些约定：内存中不同的位置的内存是有他的作用的。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/10/29/image-20251029220745845.png" style="transform: scale(1)" width=1489 height=1163></div></p>
+<ul>
+<li>整个内存空间的最上面，是分给操作系统用的，你不能乱用</li>
+<li>在比较靠上面的区域，叫做栈，我们后面会细说。如果这块区域的内存不够用了就向下扩容</li>
+<li>再靠下一点的区域，叫做堆，我们后面会细说。如果这块区域的内存不够用了就向上扩容</li>
+<li>再往下的区域，我们称之为段。有很多段，每个段都有自己的名称和作用，比较值得注意的是这些段：
+<ul>
+<li><code>.text</code> 段：你的程序的代码（准确来说是已经编译好的机器码，CPU能够直接执行的）放在这里。当程序加载完毕之后CPU将会执行这里的代码来执行你的程序。</li>
+<li><code>.data</code> 段：如果你定义了有初始值的全局变量，那么这个初始值的数据就放在这里</li>
+<li><code>.rodata</code> 段：一些常量会放在这里，比如最常见的 <code>cout&lt;&lt;&quot;hello,world&quot;;</code>，这个 <code>&quot;hello,world&quot;</code> 字符串就放在这里</li>
+<li><code>.bss</code> 段：如果你定义了没有初始值的全局变量，那么这个全局变量会存在于内存的这个位置。<code>.bss</code> 段会被操作系统清 0，这也就是为什么 C++ 中的全局变量默认值为 0</li>
+</ul>
+</li>
+</ul>
+<p>其中 <code>.text/.data/.rodata</code> 这些段都是在编译时被写进可执行文件（如 <code>.exe</code> 文件中的）</p>
+<p>除了上述这些内存区域之外，其他的内存区域你是不能够访问的。然后再来看我们刚才的代码，<code>12</code> 这个位置在上图中没有对应任何区域，因此你直接访问就会报错。</p>
+<p>那么其实我们在电脑上点击一个 <code>exe</code> 文件时启动一个程序时，操作系统无非干了这么几件事：</p>
+<ul>
+<li>给我们的程序分配了一个“虚拟”的内存空间</li>
+<li>把 <code>.exe</code> 文件中的 <code>.text/.data/.rodata</code> 部分的数据解析出来，存到内存中</li>
+<li>又开辟了 <code>.bss</code> 段，堆、栈这些内存区域</li>
+<li>执行 <code>.text</code> 段的代码</li>
+</ul>
+<p>然后我们来到代码层面。一般来说，函数中的局部变量是开在栈上的：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwYSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-type">int</span> a;
+</div></code></pre>
+<p>定义变量，于是栈指针 <code>%rsp</code> 就向下移动，移动后会在栈区域腾出一块空间，这个空间就存放着我们定义的变量。</p>
+<p>栈有个性质，你只能在栈的顶部（也就是 <code>%rsp</code> 所指的位置）添加数据或者是删除数据。添加和删除的时候只需要移动 <code>%rsp</code> 指针即可做到。</p>
+<p>栈的这个性质也可以很方便地处理函数调用：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="dm9pZCUyMGZ1bmMxKCklM0IlMEF2b2lkJTIwZnVuYzIoaW50KSUzQiUwQSUwQWludCUyMG1haW4oKSU3QiUwQSUyMCUyMCUyMCUyMGludCUyMGElMkMlMjBiJTNCJTBBJTIwJTIwJTIwJTIwY2luJTIwJTNFJTNFJTIwYSUyMCUzRSUzRSUyMGIlM0IlMEElMjAlMjAlMjAlMjAlMkYlMkYlMjBkbyUyMHNvbWV0aGluZy4uLiUwQSUyMCUyMCUyMCUyMGZ1bmMxKCklM0IlMEElMjAlMjAlMjAlMjByZXR1cm4lMjAwJTNCJTBBJTdEJTBBdm9pZCUyMGZ1bmMxKCklN0IlMEElMjAlMjAlMjAlMjBpbnQlMjBjJTIwJTNEJTIwMSUyQyUyMGQlM0IlMEElMjAlMjAlMjAlMjBmdW5jMihjKSUzQiUwQSU3RCUwQXZvaWQlMjBmdW5jMihpbnQlMjB4KSU3QiUwQSUyMCUyMCUyMCUyMGlmKHglMjAlM0QlM0QlMjAyKSUyMHJldHVybiUzQiUwQSUyMCUyMCUyMCUyMGNoYXIlMjAqc3RyJTIwJTNEJTIwJTIyaGVsbG8lMjIlM0IlMEElMjAlMjAlMjAlMjBjb3V0JTIwJTNDJTNDJTIwc3RyJTIwJTNDJTNDJTIwZW5kbCUzQiUwQSUyMCUyMCUyMCUyMGZ1bmMyKHglMjAlMkIlMjAxKSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div></div><div class="code"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func1</span><span class="hljs-params">()</span></span>;
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func2</span><span class="hljs-params">(<span class="hljs-type">int</span>)</span></span>;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+    <span class="hljs-type">int</span> a, b;
+    cin &gt;&gt; a &gt;&gt; b;
+    <span class="hljs-comment">// do something...</span>
+    <span class="hljs-built_in">func1</span>();
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func1</span><span class="hljs-params">()</span></span>{
+    <span class="hljs-type">int</span> c = <span class="hljs-number">1</span>, d;
+    <span class="hljs-built_in">func2</span>(c);
+}
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func2</span><span class="hljs-params">(<span class="hljs-type">int</span> x)</span></span>{
+    <span class="hljs-keyword">if</span>(x == <span class="hljs-number">2</span>) <span class="hljs-keyword">return</span>;
+    <span class="hljs-type">char</span> *str = <span class="hljs-string">&quot;hello&quot;</span>;
+    cout &lt;&lt; str &lt;&lt; endl;
+    <span class="hljs-built_in">func2</span>(x + <span class="hljs-number">1</span>);
+}
+</div></code></pre>
+<p>我们看一下上述代码的执行过程中栈的变化：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwLi4uLi4lMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMjAlM0MtJTIwJTI1cnNwJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">|------------|
+|    .....   |
+|------------| &lt;- %rsp
+</div></code></pre>
+<p>首先，<code>main</code> 函数刚执行的时候，栈中可能有一些其他的数据。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwLi4uLi4lMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBhJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwYiUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUyMCUzQy0lMjAlMjVyc3AlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">|------------|
+|    .....   |
+|------------|
+|     a      |
+|------------|
+|     b      |
+|------------| &lt;- %rsp
+</div></code></pre>
+<p>定义了变量。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwLi4uLi4lMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBhJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwYiUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBjJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwZCUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUyMCUzQy0lMjAlMjVyc3AlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div></div><div class="code">|------------|
+|    .....   |
+|------------|
+|     a      |
+|------------|
+|     b      |
+|------------|
+|return addr |
+|------------|
+|     c      |
+|------------|
+|     d      |
+|------------| &lt;- %rsp
+</div></code></pre>
+<p><code>main</code> 函数调用 <code>func1</code> 前，会先在栈中放置一个返回的地址。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwLi4uLi4lMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBhJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwYiUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBjJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwZCUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjB4JTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTIwJTNDLSUyMCUyNXJzcCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div></div><div class="code">|------------|
+|    .....   |
+|------------|
+|     a      |
+|------------|
+|     b      |
+|------------|
+|return addr |
+|------------|
+|     c      |
+|------------|
+|     d      |
+|------------|
+|return addr |
+|------------|
+|     x      |
+|------------| &lt;- %rsp
+</div></code></pre>
+<p>调用 <code>func2</code> 时，<code>func1</code> 除了也在栈中放置一个返回地址外，还把当前的 <code>c</code> 复制了一份再放入栈中，以此来达到传递参数的目的。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwLi4uLi4lMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBhJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwYiUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBjJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwZCUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjB4JTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwc3RyJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTIwJTNDLSUyMCUyNXJzcCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div></div><div class="code">|------------|
+|    .....   |
+|------------|
+|     a      |
+|------------|
+|     b      |
+|------------|
+|return addr |
+|------------|
+|     c      |
+|------------|
+|     d      |
+|------------|
+|return addr |
+|------------|
+|     x      |
+|------------|
+|    str     |
+|------------| &lt;- %rsp
+</div></code></pre>
+<p>然后声明了变量 <code>str</code>。</p>
+<p><code>cout</code> 实际上发生了函数的调用，对栈也会产生影响，简单起见我们忽略掉中间这些。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwLi4uLi4lMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBhJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwYiUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBjJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwZCUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjB4JTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwc3RyJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDcmV0dXJuJTIwYWRkciUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3QyUyMCUyMCUyMCUyMCUyMHglMjAlMjAlMjAlMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMjAlM0MtJTIwJTI1cnNwJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div></div><div class="code">|------------|
+|    .....   |
+|------------|
+|     a      |
+|------------|
+|     b      |
+|------------|
+|return addr |
+|------------|
+|     c      |
+|------------|
+|     d      |
+|------------|
+|return addr |
+|------------|
+|     x      |
+|------------|
+|    str     |
+|------------|
+|return addr |
+|------------|
+|     x      |
+|------------| &lt;- %rsp
+</div></code></pre>
+<p>然后进行一次递归，后面 <code>func2</code> 开始返回了，函数返回之后，函数内部所定义的变量都不会在使用到了，所以可以把他们从内存中清除掉。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwLi4uLi4lMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBhJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwYiUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBjJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwZCUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjB4JTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwc3RyJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDcmV0dXJuJTIwYWRkciUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUyMCUzQy0lMjAlMjVyc3AlMEElN0MlMjAlMjAlMjAlMjAlMjB4JTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div></div><div class="code">|------------|
+|    .....   |
+|------------|
+|     a      |
+|------------|
+|     b      |
+|------------|
+|return addr |
+|------------|
+|     c      |
+|------------|
+|     d      |
+|------------|
+|return addr |
+|------------|
+|     x      |
+|------------|
+|    str     |
+|------------|
+|return addr |
+|------------| &lt;- %rsp
+|     x      |
+|------------|
+</div></code></pre>
+<p>清理时，我们只需要改变一下 <code>%rsp</code> 指针即可，原来的变量可能还留在内存中，但其实已经被清理掉了。</p>
+<p>我们说局部变量的默认值不一定会是 0，就是这个道理，因为新变量的内存位置在原来可能存在了数据。</p>
+<p>函数返回时，他要知道回到哪里去，所以此时从栈顶就能得到返回地址了。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwLi4uLi4lMjAlMjAlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBhJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwYiUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjBjJTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwJTIwZCUyMCUyMCUyMCUyMCUyMCUyMCU3QyUwQSU3Qy0tLS0tLS0tLS0tLSU3QyUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjB4JTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBBJTdDJTIwJTIwJTIwJTIwc3RyJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTIwJTNDLSUyMCUyNXJzcCUwQSU3Q3JldHVybiUyMGFkZHIlMjAlN0MlMEElN0MtLS0tLS0tLS0tLS0lN0MlMEElN0MlMjAlMjAlMjAlMjAlMjB4JTIwJTIwJTIwJTIwJTIwJTIwJTdDJTBBJTdDLS0tLS0tLS0tLS0tJTdDJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div></div><div class="code">|------------|
+|    .....   |
+|------------|
+|     a      |
+|------------|
+|     b      |
+|------------|
+|return addr |
+|------------|
+|     c      |
+|------------|
+|     d      |
+|------------|
+|return addr |
+|------------|
+|     x      |
+|------------|
+|    str     |
+|------------| &lt;- %rsp
+|return addr |
+|------------|
+|     x      |
+|------------|
+</div></code></pre>
+<p>只使用栈会有一些局限性。首先，栈一般比较小，如果你有比较大的数据，就不适合放入栈中。同时，我们看到，栈中的数据的“生命周期”和当前函数相当，如果当前函数结束的话，那么其在栈中的数据也会被清理，有时候我们可能希望数据在函数结束时仍然保留。还有种情况，如果我想扩容/缩容某个数据所占内存空间，那么栈将会比较难以做到。</p>
+<p>于是我们就有堆这个东西。堆的使用就比较自由了，你的程序可以自由使用堆的内存。而且堆往往很大，而且如果堆不够用了我们还可以向操作系统申请扩容。</p>
+<p>那么我们就来想一个问题，如果我们想在堆中放一个数据，我们该怎么做？首先数据放在哪里？我们可以简单地像栈一样维护一个指针，表示指针之后的数据都可以进行分配。然后再考虑，如果我要把堆中的某个数据释放掉怎么办？有可能我先在堆中放置了若干个数据，然后把其中的一些数据释放掉，此时就不能简单地像栈那样维护一个指针了，而是可能要记录堆中哪些位置是空闲的。同时随着堆内空间不断地被分配又释放，堆中可能出现很多零散的空间，变得碎片化，此时一个高效的分配策略就显得很重要。总之，使用堆要考虑的问题非常多...</p>
+<p>关于堆的使用，有很多内存分配算法来解决。C/C++ 的标准库中就实现了一个内存分配算法。我们直观地来看就是为我们提供了 <code>malloc</code> 和 <code>free</code> 等函数</p>
+<p><code>malloc</code> 函数将自动帮我们在堆中分出一块指定大小的内存：</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="aW50JTIwKmFyciUyMCUzRCUyMChpbnQqKW1hbGxvYyhzaXplb2YoaW50KSoxMDApJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-type">int</span> *arr = (<span class="hljs-type">int</span>*)<span class="hljs-built_in">malloc</span>(<span class="hljs-built_in">sizeof</span>(<span class="hljs-type">int</span>)*<span class="hljs-number">100</span>);
+</div></code></pre>
+<p><code>malloc</code> 返回一个 <code>void*</code> 类型，需要我们再手动，转换成自己需要的指针类型。上述这个代码就相当于申请了一块内存，这块内存可以存 100 个 int。这块内存是被放在堆上的。</p>
+<p><code>arr</code> 作为一个指针位于栈中。当 <code>arr</code> 所处的函数结束之后，<code>arr</code> 将会被清理，但是只是指针本身被清理，指针指向的内存仍留在堆中。</p>
+<p>堆中的内存的生命周期基本上和任何东西都没有什么关联。堆中的内存，除非你手动使用 <code>free</code> 函数释放，否则他就会一直留在堆中，直到程序结束，由操作系统释放掉程序所占有的内存。</p>
+<pre><div class="head"><div class="language">cpp</div><div class="copy" data="ZnJlZShhcnIpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-built_in">free</span>(arr);
+</div></code></pre>
+<h3 id="1-4-nei-cun-an-quan" tabindex="-1">1.4 内存安全</h3>
+<p>在堆上开内存好是好，但是如果你不小心忘记了把开在堆上的内存释放了，那么你的程序可能会一直占用着内存，使得内存只增不减，直到消耗完电脑的全部内存，程序崩溃。我们管这种情形叫做“内存泄漏”。</p>
+<p>对于 C 和 C++ 这种语言，需要你手动管理内存，申请完的内存在不需要使用了时候要释放掉。但是有时候你可能难以做到这一点：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/20/image-20251120120648728.png" style="transform: scale(1)" width=1514 height=731><div class="img-title">image-20251120120648728</div></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/20/image-20251120120706113.png" style="transform: scale(1)" width=1548 height=745><div class="img-title">image-20251120120706113</div></div></p>
+<p>同时，如果你在释放掉内存之后，还在使用那块内存的话，就会出现&quot;悬垂引用&quot;。同时，栈上的内存也会出现悬垂引用。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/20/image-20251120120948574.png" style="transform: scale(1)" width=1548 height=796><div class="img-title">image-20251120120948574</div></div></p>
+<p>内存安全主要考虑这两件事：该释放的内存要释放（否则就是内存泄漏了），不该释放的内存不要释放（否则就是悬垂引用了）。</p>
+<h2 id="2-rust-nei-cun-an-quan" tabindex="-1">2. Rust 内存安全</h2>
+<p>关于内存安全，主要有两大阵营：</p>
+<ul>
+<li>第一个阵营是以 C 和 C++ 为代表的，他们希望给程序员最大限度的自由，让程序员手动管理内存。</li>
+<li>第二个阵营是以 Java、Python 为代表的，同时也是绝大部分编程语言的选择，他们设计了一套垃圾回收（GC）的算法，程序在运行过程中自动回收没有被使用的内存。有 GC 的编程语言的效率往往低一些。</li>
+</ul>
+<p>Rust 则站在了第三个阵营，他精心设计了一套规则，用编译器来强制执行这套规则，使得程序员难以写出内存不安全的代码。</p>
+<h3 id="2-1-vec-he-string" tabindex="-1">2.1 Vec 和 String</h3>
+<p>为了方便我们后面举例，这里先介绍两个东西：<code>Vec</code> 和 <code>String</code>。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwcGFkb3ZhbiUyMCUzRCUyMHZlYyElNUIxJTJDMSUyQzElMkMyJTJDMiUyQzMlMkM0JTJDNSUyQzclMkM5JTVEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">padovan</span> = <span class="hljs-built_in">vec!</span>[<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>,<span class="hljs-number">7</span>,<span class="hljs-number">9</span>];
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/20/image-20251120134144667.png" style="transform: scale(1)" width=780 height=405><div class="img-title">image-20251120134144667</div></div></p>
+<p><code>Vec</code> 既使用了栈又使用了堆。他把具体的数据都放在堆上，而栈上则只存放三个东西：指向<code>Vec</code>已经在堆上申请的内存的一块连续内存的指针（<code>buffer</code>），元素的数量（<code>length</code>），以及目前已申请的内存块最多能存储的数量（<code>capacity</code>）。</p>
+<p>当我们往 <code>Vec</code> 里面添加元素时，如果 <code>Vec</code> 的 <code>length</code> 小于 <code>capacity</code> 的话，那么可以直接在已经申请的内存块中添加。但如果内存块中的空间不够再继续加元素了，那么此时就需要扩容。<code>Vec</code> 将会在堆中申请一块更大的内存，然后再把原来的数据复制过去，再把原来的数据释放掉。</p>
+<p>扩容也是有讲究的，每次扩容不能太大（不然会有很多浪费），也不能太小（不然会频繁进行内存复制，使得程序效率降低）。一般来说，每次扩容会扩容到原来容量的多少倍。</p>
+<p>对于 <code>String</code>，我们可以将其视为元素为 <code>u8</code> 类型的 <code>Vec</code>，于是 <code>String</code> 的结构就不再过多赘述。（这里 <code>u8</code> 表示一个字节。不是 <code>char</code> 是因为 Rust 中的 char 和 C++ 不同，是固定 4 字节的（按 Unicode 编码））。</p>
+<p>然后我们发现，<code>String</code> 和 <code>Vec</code> 的主要数据都放在堆上，然后 <code>String</code> 和 <code>Vec</code> 本身是指向堆上的指针再加上一些额外的数据。因此，某种意义上 <code>String</code> 和 <code>Vec</code> 可以说是“胖指针”。</p>
+<h3 id="2-2-suo-you-quan" tabindex="-1">2.2 所有权</h3>
+<p>当我们使用 <code>let</code> 定义变量的时候，我们应该视为创建了一个数据，然后把这个数据的“所有权”进行了绑定。你需要把变量和数据分开来看。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwcyUyMCUzRCUyMHZlYyElNUIlMjJ1ZG9uJTIyLnRvX3N0cmluZygpJTJDJTIwJTIycmFtZW4lMjIudG9fc3RyaW5nKCklMkMlMjAlMjJzb2JhJTIyLnRvX3N0cmluZygpJTVEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = <span class="hljs-built_in">vec!</span>[<span class="hljs-string">&quot;udon&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>(), <span class="hljs-string">&quot;ramen&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>(), <span class="hljs-string">&quot;soba&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>()];
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/24/image-20251124170854973.png" style="transform: scale(1)" width=932 height=364><div class="img-title">image-20251124170854973</div></div></p>
+<p>Rust 中，<code>=</code> 不仅是赋值，还意味着所有权的转移：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwdCUyMCUzRCUyMHMlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">t</span> = s;
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/24/image-20251124171408457.png" style="transform: scale(1)" width=981 height=432><div class="img-title">image-20251124171408457</div></div></p>
+<p>上述代码会把 <code>s</code> 的数据的所有权交给 <code>t</code>，而 <code>s</code> 变成未初始化状态（没有拥有任何数据）</p>
+<p>此时我们再写：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwdSUyMCUzRCUyMHMlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">u</span> = s;
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/24/image-20251124171908074.png" style="transform: scale(1)" width=1678 height=606><div class="img-title">image-20251124171908074</div></div></p>
+<h4 id="2-2-1-drop" tabindex="-1">2.2.1 Drop</h4>
+<p>一个变量拥有某个数据的所有权，这意味着这个数据的内存由这个变量管理。如果一个变量是某个数据的所有者，当这个变量掉出作用域时，这个变量肯定是不会再使用到了，其拥有的数据就应该被释放。（类似于我们之前讲栈时说的那样，但是这里扩充了一下，不仅仅是函数结束后函数内的变量释放，而是变量所处作用域结束，变量就被释放）</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTdCJTBBJTIwJTIwJTIwJTIwbGV0JTIwcyUyMCUzRCUyMHZlYyElNUIlMjJ1ZG9uJTIyLnRvX3N0cmluZygpJTJDJTIwJTIycmFtZW4lMjIudG9fc3RyaW5nKCklMkMlMjAlMjJzb2JhJTIyLnRvX3N0cmluZygpJTVEJTNCJTBBJTIwJTIwJTIwJTIwJTJGJTJGJTIwZG8lMjBzb21ldGhpbmclMEElN0QlMjAlMkYlMkYlMjAlRTglQkYlOTklRTklODclOEMlMjBzJTIwJUU1JUIwJUIxJUU4JUEyJUFCJUU5JTg3JThBJUU2JTk0JUJFJUU2JThFJTg5JUU0JUJBJTg2JTBBcHJpbnRsbiEoJTIyJTdCJTdEJTIyJTJDJTIwcyklM0IlMjAlMkYlMkYlMjBzJTIwJUU1JUI3JUIyJUU3JUJCJThGJUU4JUEyJUFCJUU5JTg3JThBJUU2JTk0JUJFJUVGJUJDJThDJUU4JUJGJTk5JUU5JTg3JThDJUU0JUI4JThEJUU4JTgzJUJEJUU1JTg2JThEJUU0JUJEJUJGJUU3JTk0JUE4JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code">{
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = <span class="hljs-built_in">vec!</span>[<span class="hljs-string">&quot;udon&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>(), <span class="hljs-string">&quot;ramen&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>(), <span class="hljs-string">&quot;soba&quot;</span>.<span class="hljs-title function_ invoke__">to_string</span>()];
+    <span class="hljs-comment">// do something</span>
+} <span class="hljs-comment">// 这里 s 就被释放掉了</span>
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{}&quot;</span>, s); <span class="hljs-comment">// s 已经被释放，这里不能再使用</span>
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/11/24/image-20251124172429415.png" style="transform: scale(1)" width=1464 height=454><div class="img-title">image-20251124172429415</div></div></p>
+<p>当然这些并不是理所当然的。Rust 在释放变量所拥有的数据的时候，会先判断其数据类型是否实现了 Drop trait，如果没有则仅释放其在栈上的数据，反之则调用其 drop 函数，然后再释放其在栈上的数据。同时这个过程是递归的，也就是如果我准备释放一个结构体，那么我会先释放结构体的成员。如果这个成员也是结构体的话，这个过程就会递归下去。</p>
+<p>拿 <code>String</code> 举例：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTIwaHR0cHMlM0ElMkYlMkZkb2MucnVzdC1sYW5nLm9yZyUyRnNyYyUyRmFsbG9jJTJGc3RyaW5nLnJzLmh0bWwlMEFwdWIlMjBzdHJ1Y3QlMjBTdHJpbmclMjAlN0IlMEElMjAlMjAlMjAlMjB2ZWMlM0ElMjBWZWMlM0N1OCUzRSUyQyUwQSU3RCUwQSUwQSUyRiUyRiUyMGh0dHBzJTNBJTJGJTJGZG9jLnJ1c3QtbGFuZy5vcmclMkZzcmMlMkZhbGxvYyUyRnZlYyUyRm1vZC5ycy5odG1sJTBBcHViJTIwc3RydWN0JTIwVmVjJTNDVCUyQyUyMCUyMyU1QnVuc3RhYmxlKGZlYXR1cmUlMjAlM0QlMjAlMjJhbGxvY2F0b3JfYXBpJTIyJTJDJTIwaXNzdWUlMjAlM0QlMjAlMjIzMjgzOCUyMiklNUQlMjBBJTNBJTIwQWxsb2NhdG9yJTIwJTNEJTIwR2xvYmFsJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIwYnVmJTNBJTIwUmF3VmVjJTNDVCUyQyUyMEElM0UlMkMlMEElMjAlMjAlMjAlMjBsZW4lM0ElMjB1c2l6ZSUyQyUwQSU3RCUwQSUwQSUyRiUyRiUyMGh0dHBzJTNBJTJGJTJGZG9jLnJ1c3QtbGFuZy5vcmclMkZub21pY29uJTJGdmVjJTJGdmVjLXJhdy5odG1sJTBBc3RydWN0JTIwUmF3VmVjJTNDVCUzRSUyMCU3QiUwQSUyMCUyMCUyMCUyMHB0ciUzQSUyME5vbk51bGwlM0NUJTNFJTJDJTBBJTIwJTIwJTIwJTIwY2FwJTNBJTIwdXNpemUlMkMlMEElN0QlMEElMEFpbXBsJTNDVCUzRSUyMERyb3AlMjBmb3IlMjBSYXdWZWMlM0NUJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIwZm4lMjBkcm9wKCUyNm11dCUyMHNlbGYpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWYlMjBzZWxmLmNhcCUyMCElM0QlMjAwJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwbGV0JTIwbGF5b3V0JTIwJTNEJTIwTGF5b3V0JTNBJTNBYXJyYXklM0ElM0ElM0NUJTNFKHNlbGYuY2FwKS51bndyYXAoKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHVuc2FmZSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGFsbG9jJTNBJTNBZGVhbGxvYyhzZWxmLnB0ci5hc19wdHIoKSUyMGFzJTIwKm11dCUyMHU4JTJDJTIwbGF5b3V0KSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMCU3RCUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div></div><div class="code"><span class="hljs-comment">// https://doc.rust-lang.org/src/alloc/string.rs.html</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">String</span> {
+    vec: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">u8</span>&gt;,
+}
+
+<span class="hljs-comment">// https://doc.rust-lang.org/src/alloc/vec/mod.rs.html</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">Vec</span>&lt;T, <span class="hljs-meta">#[unstable(feature = <span class="hljs-string">&quot;allocator_api&quot;</span>, issue = <span class="hljs-string">&quot;32838&quot;</span>)]</span> A: Allocator = Global&gt; {
+    buf: RawVec&lt;T, A&gt;,
+    len: <span class="hljs-type">usize</span>,
+}
+
+<span class="hljs-comment">// https://doc.rust-lang.org/nomicon/vec/vec-raw.html</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">RawVec</span>&lt;T&gt; {
+    ptr: NonNull&lt;T&gt;,
+    cap: <span class="hljs-type">usize</span>,
+}
+
+<span class="hljs-keyword">impl</span>&lt;T&gt; <span class="hljs-built_in">Drop</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">RawVec</span>&lt;T&gt; {
+    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">drop</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) {
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">self</span>.cap != <span class="hljs-number">0</span> {
+            <span class="hljs-keyword">let</span> <span class="hljs-variable">layout</span> = Layout::array::&lt;T&gt;(<span class="hljs-keyword">self</span>.cap).<span class="hljs-title function_ invoke__">unwrap</span>();
+            <span class="hljs-keyword">unsafe</span> {
+                alloc::<span class="hljs-title function_ invoke__">dealloc</span>(<span class="hljs-keyword">self</span>.ptr.<span class="hljs-title function_ invoke__">as_ptr</span>() <span class="hljs-keyword">as</span> *<span class="hljs-keyword">mut</span> <span class="hljs-type">u8</span>, layout);
+            }
+        }
+    }
+}
+</div></code></pre>
+<p>我们可以在 drop 函数中来释放掉当前类型在堆上关联的数据。于是堆上内存生命周期和栈上内存相绑定，我们之前所说的堆上内存释放时机不好把控的问题就解决了。这样的数据类型本质上也是指针，由于其能够在合适的时机自动释放栈上内存，因此也叫做智能指针。</p>
+<p>drop 函数非常类似 C++ 中的析构函数。</p>
+<p>同时这里再强调一下，我们说某个变量“拥有”某个数据，这个数据指的是栈上数据，栈上的数据有且仅有一个所有者。堆上数据并没有所有者，多数情况下我们是通过 <code>drop</code> 函数和栈上的指针，将堆上数据和栈上数据关联起来的。</p>
+<p>总结：所有权 -&gt; Drop -&gt; 堆上内存生命周期和栈上数据相绑定 -&gt; 内存安全</p>
+<h4 id="2-2-2-clone" tabindex="-1">2.2.2 Clone</h4>
+<p>如果我们在 C++ 中写类似上述的代码，<code>s</code> 赋值给 <code>u</code> 后也能赋值给 <code>t</code>。这是因为 C++ 中，赋值时的行为是由一个叫做赋值拷贝构造函数决定的。C++ 中很多类型默认的行为是将其在栈上的数据都完全赋值一份：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/qq_pic_merged_1765167653151.jpg" style="transform: scale(1)" width=1700 height=570><div class="img-title">qq_pic_merged_1765167653151</div></div></p>
+<p>所以在 C++ 中我们可能不知不觉进行了很多内存的复制，但是复制内存是有代价的，Rust 希望你自己决定要不要来复制。</p>
+<p>Rust 的设计是，赋值相当于数据的转移而非像 C++ 这样隐含着数据的复制（并且由于赋值拷贝构造函数的存在，你也不好直接判断使用 <code>=</code> 赋值之后发生了什么，而 Rust 则更简单直接，就是数据的转移）。如果你确实需要复制数据，那么你需要手动写出代码来进行这个操作。这也使得代码的行为更加确定。</p>
+<p>有些数据类型，如 <code>String</code> 和 <code>Vec</code>，这样的数据类型实现了 Clone trait，表示可以复制。实现了 Clone trait 的类型就可以使用 <code>.clone</code> 这个函数：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208133201323.png" style="transform: scale(1)" width=1759 height=639><div class="img-title">image-20251208133201323</div></div></p>
+<p>这个函数可以允许在你只获得某个变量的借用的情况下，将该变量的数据复制一份，然后返回这个数据的所有权。例如，在<code>Vec</code>上使用<code>.clone()</code>会将堆上的的每个元素都<code>.clone()</code>，再以此构建一个新的<code>Vec</code>。</p>
+<p>Rust 默认的 Clone 只是赋值了栈上数据，和堆上数据没有什么关系。<code>String</code> 和 <code>Vec</code> 这种往往在实现 Clone trait 时，自定义了 <code>clone</code> 函数，在这个函数内进行了堆上数据的复制。类似 Drop。</p>
+<p>又比如，如果我们也想让上面的赋值行为和 C++ 一样的话，我们可以这么写：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwdCUyMCUzRCUyMHMuY2xvbmUoKSUzQiUwQWxldCUyMHUlMjAlM0QlMjBzLmNsb25lKCklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">t</span> = s.<span class="hljs-title function_ invoke__">clone</span>();
+<span class="hljs-keyword">let</span> <span class="hljs-variable">u</span> = s.<span class="hljs-title function_ invoke__">clone</span>();
+</div></code></pre>
+<p>并非所有的数据类型都是可以复制的，这样的数据类型往往有着特殊含义。比如 <code>std::sync::MutexGuard</code>，当调用 <code>Mutex::lock()</code> 时就会获得他。他是当前线程持有某个数据的凭证，只有获得该凭证的线程才能访问对应的数据。<code>Mutex</code> 要求每时每刻最多只能存在一个 <code>MutexGuard</code>，<code>MutexGuard</code> 没有实现 Clone trait。</p>
+<h4 id="2-2-3-copy" tabindex="-1">2.2.3 Copy</h4>
+<p>有些数据类型，比如 <code>i32</code> 这种基本数据类型，他的复制是没成本的，而且也没什么特殊含义，可以随便复制。这种数据类型往往实现了 Copy trait，带有这种 trait 就意味着编译器可以在赋值时自动将其在栈上的数据原封不动地复制过去，而不再搞什么所有权的转移。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwYSUyMCUzRCUyMDExNDUxNCUzQiUwQWxldCUyMGIlMjAlM0QlMjBhJTNCJTBBbGV0JTIwYyUyMCUzRCUyMGElM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">a</span> = <span class="hljs-number">114514</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">b</span> = a;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">c</span> = a;
+</div></code></pre>
+<p>总结：</p>
+<ul>
+<li>Rust 的赋值含义很简单，就表示栈上数据的移动（对于没有实现 Copy trait 的数据类型）（没有堆上数据的移动）。</li>
+<li>而 C++ 的赋值行为则很不确定
+<ul>
+<li>默认情况下是复制栈上内存，这相当于给所有数据类型都实现了 Copy trait</li>
+<li>赋值的行为还可以通过赋值拷贝构造函数自定义，这相当于赋值时自动调用 <code>.clone</code></li>
+</ul>
+</li>
+</ul>
+<p>同时，所有权和 Drop trait 的配合使得内存被正确地，自动地释放。当然他不只是针对于内存，我们可以在 <code>drop</code> 函数中关联到任何的资源（内存也是一种资源），比如文件描述符，当你在向操作系统申请一个文件描述符时，表示你正在访问一个文件，文件描述符是有限的，我们需要在合适的时机释放掉，此时我们遇到了和管理内存同样的问题，我们像管理堆上内存那样在 <code>drop</code> 函数中释放文件描述符写，使得其被正确地，自动地释放。</p>
+<h3 id="2-3-yin-yong-jie-yong" tabindex="-1">2.3 引用/借用</h3>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="Zm4lMjBmKGElM0ElMjBTdHJpbmclMkMlMjBiJTNBJTIwU3RyaW5nKSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyRiUyRiUyMGRvJTIwc29tZXRoaW5nJTBBJTdEJTJGJTJGJTIwYSUyMCVFNSU5MiU4QyUyMGIlMjAlRTUlOUMlQTglRTglQkYlOTklRTklODclOEMlRTglQTIlQUIlRTklODclOEElRTYlOTQlQkUlMEElMEFsZXQlMjB4JTIwJTNEJTIwLi4uJTBBbGV0JTIweSUyMCUzRCUyMC4uLiUwQWYoeCUyQyUyMHkpJTBBJTJGJTJGJTIweCUyMCVFNSU5MiU4QyUyMHklMjAlRTUlQjAlQjElRTQlQjglOEQlRTglODMlQkQlRTUlQTQlOUYlRTQlQkQlQkYlRTclOTQlQTglRTQlQkElODYlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">f</span>(a: <span class="hljs-type">String</span>, b: <span class="hljs-type">String</span>) {
+    <span class="hljs-comment">// do something</span>
+}<span class="hljs-comment">// a 和 b 在这里被释放</span>
+
+<span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = ...
+<span class="hljs-keyword">let</span> <span class="hljs-variable">y</span> = ...
+<span class="hljs-title function_ invoke__">f</span>(x, y)
+<span class="hljs-comment">// x 和 y 就不能够使用了</span>
+</div></code></pre>
+<p>上面这个函数的参数直接拿走了数据的所有权，这导致调用完函数之后 <code>x</code> 和 <code>y</code> 就不能继续使用了，但可能这个函数就只是想“借用”一下某个数据，那么我们可以这样写：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="Zm4lMjBmKGElM0ElMjAlMjZTdHJpbmclMkMlMjBiJTNBJTIwJTI2U3RyaW5nKSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyRiUyRiUyMGRvJTIwc29tZXRoaW5nJTBBJTdEJTBBJTBBZm4lMjBtYWluKCklMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjB4JTIwJTNEJTIwU3RyaW5nJTNBJTNBZnJvbSglMjJ4eHglMjIpJTNCJTBBJTIwJTIwJTIwJTIwbGV0JTIweSUyMCUzRCUyMFN0cmluZyUzQSUzQWZyb20oJTIyeXl5JTIyKSUzQiUwQSUyMCUyMCUyMCUyMGYoJTI2eCUyQyUyMCUyNnkpJTNCJTBBJTIwJTIwJTIwJTIwJTJGJTJGJTIweCUyMCVFNSU5MiU4QyUyMHklMjAlRTQlQkIlOEQlRTclODQlQjYlRTUlOEYlQUYlRTQlQkIlQTUlRTUlOUMlQTglRTglQkYlOTklRTklODclOEMlRTQlQkQlQkYlRTclOTQlQTglMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">f</span>(a: &amp;<span class="hljs-type">String</span>, b: &amp;<span class="hljs-type">String</span>) {
+    <span class="hljs-comment">// do something</span>
+}
+
+<span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;xxx&quot;</span>);
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">y</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;yyy&quot;</span>);
+    <span class="hljs-title function_ invoke__">f</span>(&amp;x, &amp;y);
+    <span class="hljs-comment">// x 和 y 仍然可以在这里使用</span>
+}
+</div></code></pre>
+<p><code>&amp;</code> 在这里有两个含义，它可以用作类型，表示数据的引用，也可以用作运算符，表示引用数据。</p>
+<p>从 C++ 的角度看，Rust 的引用就相当于是指针。<code>&amp;</code> 用作运算符就相当于 C++ 中的取地址运算符，用作类型里面就相当于 C++ 中的指针。</p>
+<p><code>&amp;</code> 产生的引用也叫做不可变引用：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwcyUyMCUzRCUyMFN0cmluZyUzQSUzQWZyb20oJTIyaGVsbG8lMjB3b3JsZCUyMiklM0IlMEFsZXQlMjByJTNBJTIwJTI2U3RyaW5nJTIwJTNEJTIwJTI2cyUzQiUwQSgqciklMjAlM0QlMjBTdHJpbmclM0ElM0Fmcm9tKCUyMmhlbGxvJTIwcnVzdCUyMiklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello world&quot;</span>);
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span>: &amp;<span class="hljs-type">String</span> = &amp;s;
+(*r) = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello rust&quot;</span>);
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208141949292.png" style="transform: scale(1)" width=1442 height=400><div class="img-title">image-20251208141949292</div></div></p>
+<p>Rust 还有一种可变引用：<code>&amp;mut</code>。我们可以根据上面的报错提示将代码改写成下面这种：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwcyUyMCUzRCUyMFN0cmluZyUzQSUzQWZyb20oJTIyaGVsbG8lMjB3b3JsZCUyMiklM0IlMEFsZXQlMjByJTIwJTNEJTIwJTI2bXV0JTIwcyUzQiUwQSgqciklMjAlM0QlMjBTdHJpbmclM0ElM0Fmcm9tKCUyMmhlbGxvJTIwcnVzdCUyMiklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello world&quot;</span>);
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;<span class="hljs-keyword">mut</span> s;
+(*r) = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello rust&quot;</span>);
+</div></code></pre>
+<p>但还是报错：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208142144426.png" style="transform: scale(1)" width=1350 height=414><div class="img-title">image-20251208142144426</div></div></p>
+<p>这是因为 Rust 中，变量默认是不可变的。如果我们想要可变地借用，那么必须变量本身就是可变的：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwbXV0JTIwcyUyMCUzRCUyMFN0cmluZyUzQSUzQWZyb20oJTIyaGVsbG8lMjB3b3JsZCUyMiklM0IlMEFsZXQlMjByJTIwJTNEJTIwJTI2bXV0JTIwcyUzQiUwQSgqciklMjAlM0QlMjBTdHJpbmclM0ElM0Fmcm9tKCUyMmhlbGxvJTIwcnVzdCUyMiklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">s</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello world&quot;</span>);
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;<span class="hljs-keyword">mut</span> s;
+(*r) = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello rust&quot;</span>);
+</div></code></pre>
+<h4 id="2-3-1-jie-yin-yong" tabindex="-1">2.3.1 解引用</h4>
+<p>C++ 中可以解引用，在 Rust 中也可以，我们上面例子就已经看到。需要注意的是解引用会获得其所有权，如果你再把所有权转移出去，就会报错：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIweCUyMCUzRCUyMFN0cmluZyUzQSUzQWZyb20oJTIyeHh4JTIyKSUzQiUwQWxldCUyMHIlMjAlM0QlMjAlMjZ4JTNCJTBBbGV0JTIweSUyMCUzRCUyMCpyJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;xxx&quot;</span>);
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;x;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">y</span> = *r;
+</div></code></pre>
+<p>我们明明是借用 <code>x</code> 的，后面又通过这个借用尝试获得其所有权，这显然是不行的：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208132748149.png" style="transform: scale(1)" width=1676 height=677><div class="img-title">image-20251208132748149</div></div></p>
+<p>他建议你使用 <code>.clone</code>。还记得吗，<code>.clone</code> 函数的只需要变量的引用即可进行复制：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208133201323.png" style="transform: scale(1)" width=1759 height=639><div class="img-title">image-20251208133201323</div></div></p>
+<p>又或者是实现了 Copy trait，这意味着数据可以随便复制，于是解引用就相当于给你复制一份出来。</p>
+<p>如果我解引用不是为了转移所有权，那还是允许的：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUG9pbnQlMjAlN0IlMEElMjAlMjAlMjAlMjB4JTNBJTIwaTMyJTJDJTBBJTIwJTIwJTIwJTIweSUzQSUyMGkzMiUyQyUwQSUyMCUyMCUyMCUyMHMlM0ElMjBTdHJpbmclMkMlMEElN0QlMEFsZXQlMjBwJTIwJTNEJTIwUG9pbnQlMjAlN0IlMjB4JTNBJTIwMTAlMkMlMjB5JTNBJTIwMjAlMkMlMjBzJTNBJTIwU3RyaW5nJTNBJTNBZnJvbSglMjJoZWxsbyUyMiklMjAlN0QlM0IlMEFsZXQlMjByJTIwJTNEJTIwJTI2cCUzQiUwQWxldCUyMHMlMjAlM0QlMjAlMjYoKnIpLnMlM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">Point</span> {
+    x: <span class="hljs-type">i32</span>,
+    y: <span class="hljs-type">i32</span>,
+    s: <span class="hljs-type">String</span>,
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">p</span> = Point { x: <span class="hljs-number">10</span>, y: <span class="hljs-number">20</span>, s: <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello&quot;</span>) };
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;p;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = &amp;(*r).s;
+</div></code></pre>
+<h4 id="2-3-2-zi-dong-yin-yong-jie-yin-yong" tabindex="-1">2.3.2 自动引用/解引用</h4>
+<p>考虑到在 Rust 中，引用比较常见，所以 <code>.</code> 这个东西还有些额外作用。首先他可以自动解引用：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUG9pbnQlMjAlN0IlMEElMjAlMjAlMjAlMjB4JTNBJTIwaTMyJTJDJTBBJTIwJTIwJTIwJTIweSUzQSUyMGkzMiUyQyUwQSUyMCUyMCUyMCUyMHMlM0ElMjBTdHJpbmclMkMlMEElN0QlMEFsZXQlMjBwJTIwJTNEJTIwUG9pbnQlMjAlN0IlMjB4JTNBJTIwMTAlMkMlMjB5JTNBJTIwMjAlMkMlMjBzJTNBJTIwU3RyaW5nJTNBJTNBZnJvbSglMjJoZWxsbyUyMiklMjAlN0QlM0IlMEFsZXQlMjByJTIwJTNEJTIwJTI2cCUzQiUwQWxldCUyMHglMjAlM0QlMjByLnglM0IlMEElMkYlMkYlMjAtLS0tJTIwJUU3JUFEJTg5JUU0JUJCJUI3JUU0JUJBJThFJTIwLS0tLSUwQWxldCUyMHglMjAlM0QlMjAoKnIpLnglM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">Point</span> {
+    x: <span class="hljs-type">i32</span>,
+    y: <span class="hljs-type">i32</span>,
+    s: <span class="hljs-type">String</span>,
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">p</span> = Point { x: <span class="hljs-number">10</span>, y: <span class="hljs-number">20</span>, s: <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello&quot;</span>) };
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;p;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = r.x;
+<span class="hljs-comment">// ---- 等价于 ----</span>
+<span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = (*r).x;
+</div></code></pre>
+<p>Rust 中引用也是一个“实体”，比如上面，<code>r</code> 相当于拥有了某个对 <code>p</code> 的不可变引用的所有权。我们可以对引用进行引用：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwcnIlMjAlM0QlMjAlMjZyJTNCJTBBbGV0JTIwcnJyJTIwJTNEJTIwJTI2cnIlM0IlMEFsZXQlMjBycnJyJTIwJTNEJTIwJTI2cnJyJTNCJTBBbGV0JTIweCUyMCUzRCUyMHJycnIueCUzQiUwQSUyRiUyRiUyMC0tLS0lMjAlRTclQUQlODklRTQlQkIlQjclRTQlQkElOEUlMjAtLS0tJTBBbGV0JTIweCUyMCUzRCUyMCgqKCooKnJycnIpKSkueCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">rr</span> = &amp;r;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">rrr</span> = &amp;rr;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">rrrr</span> = &amp;rrr;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = rrrr.x;
+<span class="hljs-comment">// ---- 等价于 ----</span>
+<span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = (*(*(*rrrr))).x;
+</div></code></pre>
+<p>用 <code>.</code> 调用函数时，如果需要引用，那么会自动引用：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwcyUyMCUzRCUyMFN0cmluZyUzQSUzQWZyb20oJTIyYSUyMGIlMjBjJTIyKSUzQiUwQWxldCUyMGFyciUyMCUzRCUyMHMuc3BsaXQoJTIyJTIwJTIyKSUzQiUwQSUyRiUyRiUyMC0tLS0lMjAlRTclQUQlODklRTQlQkIlQjclRTQlQkElOEUlMjAtLS0tJTBBbGV0JTIwYXJyJTIwJTNEJTIwKCUyNnMpLnNwbGl0KCUyMiUyMCUyMiklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;a b c&quot;</span>);
+<span class="hljs-keyword">let</span> <span class="hljs-variable">arr</span> = s.<span class="hljs-title function_ invoke__">split</span>(<span class="hljs-string">&quot; &quot;</span>);
+<span class="hljs-comment">// ---- 等价于 ----</span>
+<span class="hljs-keyword">let</span> <span class="hljs-variable">arr</span> = (&amp;s).<span class="hljs-title function_ invoke__">split</span>(<span class="hljs-string">&quot; &quot;</span>);
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208141309177.png" style="transform: scale(1)" width=1749 height=628><div class="img-title">image-20251208141309177</div></div></p>
+<p>又比如：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwbXV0JTIwdiUyMCUzRCUyMHZlYyElNUIxJTJDJTIwMiUyQyUyMDMlMkMlMjA0JTJDJTIwNSU1RCUzQiUwQXYuc29ydCgpJTNCJTBBJTJGJTJGJTIwLS0tLSUyMCVFNyVBRCU4OSVFNCVCQiVCNyVFNCVCQSU4RSUyMC0tLS0lMEEoJTI2bXV0JTIwdikuc29ydCgpJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">v</span> = <span class="hljs-built_in">vec!</span>[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>];
+v.<span class="hljs-title function_ invoke__">sort</span>();
+<span class="hljs-comment">// ---- 等价于 ----</span>
+(&amp;<span class="hljs-keyword">mut</span> v).<span class="hljs-title function_ invoke__">sort</span>()
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208143332796.png" style="transform: scale(1)" width=1773 height=644><div class="img-title">image-20251208143332796</div></div></p>
+<h4 id="2-3-3-yin-yong-jie-gou-ti" tabindex="-1">2.3.3 引用结构体</h4>
+<p>如果要借用某个变量，那么这个变量必须是完整的。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUyMCU3QiUwQSUyMCUyMCUyMCUyMHglM0ElMjBTdHJpbmclMkMlMEElMjAlMjAlMjAlMjB5JTNBJTIwU3RyaW5nJTJDJTBBJTdEJTBBbGV0JTIwcyUyMCUzRCUyMFMlMjAlN0IlMEElMjAlMjAlMjAlMjB4JTNBJTIwU3RyaW5nJTNBJTNBZnJvbSglMjJsb25nJTIwc3RyaW5nJTIwaXMlMjBsb25nJTIyKSUyQyUwQSUyMCUyMCUyMCUyMHklM0ElMjBTdHJpbmclM0ElM0Fmcm9tKCUyMnh5eiUyMiklMkMlMEElN0QlM0IlMEFsZXQlMjB4JTIwJTNEJTIwcy54JTNCJTIwJTJGJTJGJTIwJUU2JUFEJUE0JUU2JTk3JUI2JTIwcyUyMCVFNCVCOCU4RCVFNSU4NiU4RCVFNiU4QiVBNSVFNiU5QyU4OSUyMHglMjAlRTclOUElODQlRTYlODklODAlRTYlOUMlODklRTYlOUQlODMlRUYlQkMlOENzJTIwJUU0JUI4JThEJUU1JTg2JThEJUU1JUFFJThDJUU2JTk1JUI0JTBBbGV0JTIwciUyMCUzRCUyMCUyNnMlM0IlMEFsZXQlMjB5JTIwJTNEJTIwcy55JTNCJTIwJTJGJTJGJTIwJUU0JUJEJTg2JUU2JTg4JTkxJUU1JThGJUFGJUU0JUJCJUE1JUU3JUJCJUE3JUU3JUJCJUFEJUU0JUJCJThFJUU2JUFFJThCJUU3JUJDJUJBJUU3JTlBJTg0JTIwcyUyMCVFNCVCOCVBRCVFNSU4NiU4RCVFNiU4QSU4QSUyMHklMjAlRTUlOEYlOTYlRTUlODclQkElRTYlOUQlQTUlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    x: <span class="hljs-type">String</span>,
+    y: <span class="hljs-type">String</span>,
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = S {
+    x: <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;long string is long&quot;</span>),
+    y: <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;xyz&quot;</span>),
+};
+<span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = s.x; <span class="hljs-comment">// 此时 s 不再拥有 x 的所有权，s 不再完整</span>
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;s;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">y</span> = s.y; <span class="hljs-comment">// 但我可以继续从残缺的 s 中再把 y 取出来</span>
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208171218039.png" style="transform: scale(1)" width=1685 height=423><div class="img-title">image-20251208171218039</div></div></p>
+<p>Rust 的这种设计带来了一个好处，我们可以很清楚的从函数的签名中大概知道函数想要做什么。</p>
+<ul>
+<li>如果函数要求传递所有权，那么这个函数就表示我想“消耗”掉这个数据，数据被消耗掉之后就不应该被继续使用了。</li>
+<li>如果函数要求传递不可变引用，那么这个函数就表示我就是想“借用”一下这个数据，而且不会对这个数据进行任何修改。</li>
+<li>如果函数要求传递可变引用，那么这个函数不仅想“借用”一下这个数据，还会对这个数据进行修改。</li>
+</ul>
+<h3 id="2-4-nei-cun-an-quan" tabindex="-1">2.4 内存安全</h3>
+<h4 id="2-4-1-nei-cun-xie-lou" tabindex="-1">2.4.1 内存泄漏</h4>
+<p>妥。</p>
+<h4 id="2-4-2-sharing-versus-mutation" tabindex="-1">2.4.2 Sharing Versus Mutation</h4>
+<p>当共享和可变之间结合时可能会出问题，因此有一些规则限制引用的使用：</p>
+<p><strong>引用期间不能够移动</strong></p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwdiUyMCUzRCUyMHZlYyElNUIxJTJDJTIwMiUyQyUyMDMlMkMlMjA0JTVEJTNCJTBBbGV0JTIwciUyMCUzRCUyMCUyNnYlM0IlMEFsZXQlMjBhc2lkZSUyMCUzRCUyMHYlM0IlMEFyJTVCMCU1RCUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">v</span> = <span class="hljs-built_in">vec!</span>[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>];
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;v;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">aside</span> = v;
+r[<span class="hljs-number">0</span>];
+</div></code></pre>
+<p>如果我们借用了某个变量，那么在整个借用期间，这个变量指向的数据不能被移动到别的地方去，不然我们的引用就变成悬垂引用了。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208172152505.png" style="transform: scale(1)" width=1253 height=637><div class="img-title">image-20251208172152505</div></div></p>
+<p>这样就可以了，确保移动时不存在其他的引用。注意，尽管我们之前可能一直在说函数结束之后某个变量才会被释放，但是 Rust 的编译器会足够聪明，如果从某个地方开始你就不再使用一个变量了，那么 Rust 会认为这个变量的生命周期就持续到那里。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTdCJTBBJTIwJTIwJTIwJTIwbGV0JTIwdiUyMCUzRCUyMHZlYyElNUIxJTJDJTIwMiUyQyUyMDMlMkMlMjA0JTVEJTNCJTBBJTA5bGV0JTIwciUyMCUzRCUyMCUyNnYlM0IlMEElMDlyJTVCMCU1RCUzQiUwQSUwOWxldCUyMGFzaWRlJTIwJTNEJTIwdiUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div></div><div class="code">{
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">v</span> = <span class="hljs-built_in">vec!</span>[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>];
+	<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;v;
+	r[<span class="hljs-number">0</span>];
+	<span class="hljs-keyword">let</span> <span class="hljs-variable">aside</span> = v;
+}
+</div></code></pre>
+<p>而在 C++ 中，我们很可能将某个指针指向的数据释放掉了，但忘了这个事，继续用这个指针。而 Rust 中你想释放内存肯定要有所有权，而引用期间所有权不会发生转移，所以不会出现这种情况。</p>
+<p>又比如：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwbXV0JTIweCUyMCUzRCUyMDEwJTNCJTBBbGV0JTIwcjElMjAlM0QlMjAlMjZtdXQlMjB4JTNCJTBBeCUyMCUyQiUzRCUyMDEwJTNCJTIwJTJGJTJGJTIwJUU1JUE0JTg0JUU1JTlDJUE4JUU1JUJDJTk1JUU3JTk0JUE4JUU2JTlDJTlGJUU5JTk3JUI0JUVGJUJDJThDJUU0JUI4JThEJUU4JTgzJUJEJUU1JUE0JTlGJUU4JUEyJUFCJUU3JUE3JUJCJUU1JThBJUE4JTBBcHJpbnRsbiEoJTIyJTdCJTdEJTIyJTJDJTIwcjEpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">x</span> = <span class="hljs-number">10</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r1</span> = &amp;<span class="hljs-keyword">mut</span> x;
+x += <span class="hljs-number">10</span>; <span class="hljs-comment">// 处在引用期间，不能够被移动</span>
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{}&quot;</span>, r1);
+</div></code></pre>
+<p><strong>不可变引用期间不能够有可变引用</strong></p>
+<p>从直觉上来说，如果不可变引用期间，我们把数据改变了，但是后面又忘了这个事，可能就容易出 bug（类似于变量默认不可变的设计思想），但有时可能没这么简单：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwbXV0JTIwdiUyMCUzRCUyMHZlYyElNUIxJTJDJTIwMiUyQyUyMDMlMkMlMjA0JTVEJTNCJTBBbGV0JTIwciUyMCUzRCUyMCUyNnYlNUIwJTVEJTNCJTBBdi5wdXNoKDUpJTNCJTBBcHJpbnRsbiEoJTIyciUzQSUyMCU3QiU3RCUyMiUyQyUyMHIpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">v</span> = <span class="hljs-built_in">vec!</span>[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>];
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = &amp;v[<span class="hljs-number">0</span>];
+v.<span class="hljs-title function_ invoke__">push</span>(<span class="hljs-number">5</span>);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;r: {}&quot;</span>, r);
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208174732360.png" style="transform: scale(1)" width=1762 height=632><div class="img-title">image-20251208174732360</div></div></p>
+<p><code>.push</code> 虽然可能看起来只会改变数组最后面的部分，并不会影响到我对 <code>v[0]</code> 的引用。但是你注意，<code>.push</code> 接受可变引用就意味着他可能改变整个 Vector 的任何部分。一种情况是，如果我们 <code>push</code> 时发现 vector 容量不够了，需要扩容，那么我们将会重新再堆上分配一个空间，把数据复制过去，然后再释放掉原来的数据，此时之前对 <code>v[0]</code> 的引用就失效了。</p>
+<p>C++ 的 vector 也是类似的。而 C++ 并不会去检查这些，一旦出现这种问题将会非常棘手。</p>
+<p><strong>可变引用期间不能够有其他引用</strong></p>
+<p>其中的道理和上面是差不多的。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwbXV0JTIweCUyMCUzRCUyMDEwJTNCJTBBbGV0JTIwcjElMjAlM0QlMjAlMjZtdXQlMjB4JTNCJTBBbGV0JTIwcjIlMjAlM0QlMjAlMjZ4JTNCJTBBKCpyMSklMjAlM0QlMjAxMiUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">x</span> = <span class="hljs-number">10</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r1</span> = &amp;<span class="hljs-keyword">mut</span> x;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r2</span> = &amp;x;
+(*r1) = <span class="hljs-number">12</span>;
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208175551838.png" style="transform: scale(1)" width=1503 height=376><div class="img-title">image-20251208175551838</div></div></p>
+<p><strong>更多</strong></p>
+<p>Rust 中，每个数据有且仅有一个拥有其所有权的变量，因此这可以形成一个树形结构：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208180312171.png" style="transform: scale(1)" width=1255 height=560><div class="img-title">image-20251208180312171</div></div></p>
+<p>当我们不可变地借用某个变量时，其所拥有的变量（即图中子树部分）是只读的（毕竟你只是借用，甚至还是不可变的借用）。其父节点一直到根节点这条链上的点也都是只读的（否则的话就可以在祖先节点上将数据修改掉，制造出悬垂引用）。</p>
+<p>当我们可变地借用某个变量时，其所拥有的变量是可读可写的,也就是整个子树部分都相当于是进行了一个可变引用。如果直接引用其子节点，Rust 会认为你在可变引用的基础上又进行了一个不可变引用。但你可以通过这个可变引用来引用：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTIzJTVCZGVyaXZlKERlYnVnKSU1RCUwQXN0cnVjdCUyMFMlMjAlN0IlMEElMjAlMjAlMjAlMjB4JTNBJTIwaTMyJTJDJTBBJTIwJTIwJTIwJTIweSUzQSUyMGkzMiUwQSU3RCUwQWxldCUyMG11dCUyMHMlMjAlM0QlMjBTJTIwJTdCJTIweCUzQSUyMDEwJTJDJTIweSUzQSUyMDIwJTIwJTdEJTNCJTBBbGV0JTIwdF9tdXQlMjAlM0QlMjAlMjZtdXQlMjBzJTNCJTBBbGV0JTIwcjElMjAlM0QlMjAlMjZzLnglM0IlMEFwcmludGxuISglMjIlN0IlM0ElMjMlM0YlN0QlMjIlMkMlMjB0X211dCklM0IlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-meta">#[derive(Debug)]</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    x: <span class="hljs-type">i32</span>,
+    y: <span class="hljs-type">i32</span>
+}
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">s</span> = S { x: <span class="hljs-number">10</span>, y: <span class="hljs-number">20</span> };
+<span class="hljs-keyword">let</span> <span class="hljs-variable">t_mut</span> = &amp;<span class="hljs-keyword">mut</span> s;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r1</span> = &amp;s.x;
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{:#?}&quot;</span>, t_mut);
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208181336379.png" style="transform: scale(1)" width=1497 height=378><div class="img-title">image-20251208181336379</div></div></p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTIzJTVCZGVyaXZlKERlYnVnKSU1RCUwQXN0cnVjdCUyMFMlMjAlN0IlMEElMjAlMjAlMjAlMjB4JTNBJTIwaTMyJTJDJTBBJTIwJTIwJTIwJTIweSUzQSUyMGkzMiUwQSU3RCUwQWxldCUyMG11dCUyMHMlMjAlM0QlMjBTJTIwJTdCJTIweCUzQSUyMDEwJTJDJTIweSUzQSUyMDIwJTIwJTdEJTNCJTBBbGV0JTIwdF9tdXQlMjAlM0QlMjAlMjZtdXQlMjBzJTNCJTBBbGV0JTIwcjElMjAlM0QlMjAlMjZ0X211dC54JTNCJTBBcHJpbnRsbiEoJTIyJTdCJTNBJTIzJTNGJTdEJTIyJTJDJTIwdF9tdXQpJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-meta">#[derive(Debug)]</span>
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    x: <span class="hljs-type">i32</span>,
+    y: <span class="hljs-type">i32</span>
+}
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">s</span> = S { x: <span class="hljs-number">10</span>, y: <span class="hljs-number">20</span> };
+<span class="hljs-keyword">let</span> <span class="hljs-variable">t_mut</span> = &amp;<span class="hljs-keyword">mut</span> s;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r1</span> = &amp;t_mut.x;
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{:#?}&quot;</span>, t_mut);
+</div></code></pre>
+<p>同时，产生可变引用的祖先节点不仅是不能够写，甚至连引用都不行了，因为有可能顺着祖先节点的引用来引用到可变引用部分，此时就违背了可变引用单独存在的规则。</p>
+<h4 id="2-4-3-yin-yong-de-sheng-ming-zhou-qi" tabindex="-1">2.4.3 引用的生命周期</h4>
+<p>生命周期就是变量/数据从产生到释放的这个范围。在之前我们看到过，变量的生命周期是从定义到离开变量的作用域的这段时间。通过所有权，我们将栈上数据的生命周期绑定到变量上。通过 Drop trait，我们将堆上数据的生命周期绑定到变量上。现在我们又遇到了引用，引用的生命周期是其保持有效的范围。如果我们引用了某个东西，那么我们需要保证在引用的这段时间，被引用的数据没有被释放：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTdCJTBBJTIwJTIwJTIwJTIwbGV0JTIwciUzQiUwQSUyMCUyMCUyMCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGxldCUyMHglMjAlM0QlMjAxJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwciUyMCUzRCUyMCUyNnglM0IlMEElMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjBhc3NlcnRfZXEhKCpyJTJDJTIwMSklM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">{
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">r</span>;
+    {
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = <span class="hljs-number">1</span>;
+        r = &amp;x;
+    }
+    <span class="hljs-built_in">assert_eq!</span>(*r, <span class="hljs-number">1</span>);
+}
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208144538892.png" style="transform: scale(1)" width=1190 height=450><div class="img-title">image-20251208144538892</div></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208144713692.png" style="transform: scale(1)" width=992 height=414><div class="img-title">image-20251208144713692</div></div></p>
+<p>蓝色表示 <code>x</code> 的生命周期，绿色表示 <code>r</code> 的生命周期，我们可以看到，在 <code>x</code> 生命周期已经结束，被释放后，<code>r</code> 的生命周期还没结束。Rust 会阻止这样的代码通过编译。</p>
+<p>如果我们改成这样就可以了：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208145626337.png" style="transform: scale(1)" width=1157 height=441><div class="img-title">image-20251208145626337</div></div></p>
+<p>而我们在 C++ 中很容易写出这样的代码：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208173518262.png" style="transform: scale(1)" width=1645 height=1233><div class="img-title">image-20251208173518262</div></div></p>
+<p>使用结构体也会有类似的问题：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUyMCU3QiUwQSUyMCUyMCUyMCUyMHIlM0ElMjAlMjZpMzIlMEElN0QlMEFsZXQlMjBzJTNCJTBBJTdCJTBBJTIwJTIwJTIwJTIwbGV0JTIweCUyMCUzRCUyMDEwJTNCJTBBJTIwJTIwJTIwJTIwcyUyMCUzRCUyMFMlMjAlN0IlMjByJTNBJTIwJTI2eCUyMCU3RCUzQiUwQSU3RCUwQWFzc2VydF9lcSEoKnMuciUyQyUyMDEwKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    r: &amp;<span class="hljs-type">i32</span>
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">s</span>;
+{
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = <span class="hljs-number">10</span>;
+    s = S { r: &amp;x };
+}
+<span class="hljs-built_in">assert_eq!</span>(*s.r, <span class="hljs-number">10</span>);
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208153020329.png" style="transform: scale(1)" width=983 height=453><div class="img-title">image-20251208153020329</div></div></p>
+<p>Rust 还是发现了这个问题。但是即使我们改成下面这样，不再尝试引用已经被释放掉的变量了，Rust 还是会报错：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUyMCU3QiUwQSUyMCUyMCUyMCUyMHIlM0ElMjAlMjZpMzIlMEElN0QlMEFsZXQlMjB4JTIwJTNEJTIwMTAlM0IlMEElN0IlMEElMjAlMjAlMjAlMjBsZXQlMjBzJTNCJTBBJTIwJTIwJTIwJTIwcyUyMCUzRCUyMFMlMjAlN0IlMjByJTNBJTIwJTI2eCUyMCU3RCUzQiUwQSUyMCUyMCUyMCUyMGFzc2VydF9lcSEoKnMuciUyQyUyMDEwKSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    r: &amp;<span class="hljs-type">i32</span>
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = <span class="hljs-number">10</span>;
+{
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">s</span>;
+    s = S { r: &amp;x };
+    <span class="hljs-built_in">assert_eq!</span>(*s.r, <span class="hljs-number">10</span>);
+}
+</div></code></pre>
+<p><strong>手动标注生命周期</strong></p>
+<p>这是因为 Rust 要求结构体中的引用必须手动标注生命周期。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUzQydhJTNFJTIwJTdCJTIwJTJGJTJGJTIwJTNDJTNFJTIwJUU5JTg3JThDJUU1JTg2JTk5JUU3JUJCJTkzJUU2JTlFJTg0JUU0JUJEJTkzJUU1JTg2JTg1JUU2JTg5JTgwJUU2JTlDJTg5JUU2JTg5JThCJUU1JThBJUE4JUU2JUEwJTg3JUU2JUIzJUE4JUU3JTlBJTg0JUU3JTk0JTlGJUU1JTkxJUJEJUU1JTkxJUE4JUU2JTlDJTlGJTBBJTIwJTIwJTIwJTIwciUzQSUyMCUyNidhJTIwaTMyJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt; { <span class="hljs-comment">// &lt;&gt; 里写结构体内所有手动标注的生命周期</span>
+    r: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">i32</span>
+}
+</div></code></pre>
+<p>其中 <code>'a</code> 中的 <code>a</code> 是可以自己命名的，我们一般用 <code>a</code>、<code>b</code>、<code>c</code>... 这样的字母来手动标注。在 Rust 中，生命周期也是数据类型的一部分，起到<strong>约束</strong>的作用。只不过在大多数情况下，Rust 会自动推导生命周期，无需我们手动标注。在结构体中，结构体的生命周期显然取各个引用成员中生命周期最短的那个就好了，但是各个成员之间的生命周期 Rust 无法决定。上面只有一个成员还看不出什么问题来，但如果有多个，比如，对于有两个成员变量：</p>
+<p>写法一</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUzQydhJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIweCUzQSUyMCUyNidhJTIwaTMyJTJDJTBBJTIwJTIwJTIwJTIweSUzQSUyMCUyNidhJTIwaTMyJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt; {
+    x: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">i32</span>,
+    y: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">i32</span>
+}
+</div></code></pre>
+<p>写法二</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUzQydhJTJDJTIwJ2IlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjB4JTNBJTIwJTI2J2ElMjBpMzIlMkMlMEElMjAlMjAlMjAlMjB5JTNBJTIwJTI2J2IlMjBpMzIlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span>&lt;<span class="hljs-symbol">&#x27;a</span>, <span class="hljs-symbol">&#x27;b</span>&gt; {
+    x: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">i32</span>,
+    y: &amp;<span class="hljs-symbol">&#x27;b</span> <span class="hljs-type">i32</span>
+}
+</div></code></pre>
+<p>有两种写法，并且表示的含义完全不同，Rust 无法确定。这就是为什么你需要手动标注生命周期。</p>
+<p>写法一表示，结构体内的 <code>x</code> 和结构体内的 <code>y</code> 和结构体本身，三者的生命周期一致。注意，这并不意味着创建结构体的时候必须是两个活得一样长的变量才能够赋值进去。Rust 会自动将 <code>'a</code> 推导成带有 <code>'a</code> 的成员中较短的生命周期。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIweCUyMCUzRCUyMDEwJTNCJTBBbGV0JTIwciUzQiUwQSU3QiUwQSUyMCUyMCUyMCUyMGxldCUyMHklMjAlM0QlMjAyMCUzQiUwQSUyMCUyMCUyMCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGxldCUyMHMlMjAlM0QlMjBTJTIwJTdCJTIweCUzQSUyMCUyNnglMkMlMjB5JTNBJTIwJTI2eSUyMCU3RCUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHIlMjAlM0QlMjBzLnglM0IlMEElMjAlMjAlMjAlMjAlN0QlMEElN0QlMEFwcmludGxuISglMjIlN0IlN0QlMjIlMkMlMjByKSUzQiUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = <span class="hljs-number">10</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-variable">r</span>;
+{
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">y</span> = <span class="hljs-number">20</span>;
+    {
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = S { x: &amp;x, y: &amp;y };
+        r = s.x;
+    }
+}
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{}&quot;</span>, r);
+</div></code></pre>
+<p>理论上来说，上面的代码是不会产生悬垂引用的，Rust 没理由报错，但是还是报错了：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208165848267.png" style="transform: scale(1)" width=1494 height=542><div class="img-title">image-20251208165848267</div></div></p>
+<p>这是因为 Rust 会将 <code>'a</code> 推导为 <code>y</code> 的生命周期。于是结构体中的 <code>s.x</code> 的生命周期就和 <code>y</code> 相当了，尽管 <code>x</code> 的生命周期是比较长的。</p>
+<p>而写法二则不同。写法二则表示 <code>x</code> 和 <code>y</code> 的生命周期没有关联。这样的话上面的代码就正确了，<code>s.x</code> 就会和 <code>x</code> 的生命周期一致，<code>s.y</code> 就会和 <code>y</code> 的生命周期一致，而 <code>s</code> 的生命周期会取 <code>'a</code> 和 <code>'b</code> 中较小的那个，也就是会和 <code>y</code> 生命周期一致（尽管实际上 <code>s</code> 会先比 <code>y</code> 释放掉）。这样即使结构体释放掉了，其中较长生命周期的那个引用还能够接着用。</p>
+<p>又比如：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUzQydhJTJDJTIwJ2IlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjB4JTNBJTIwJTI2J2ElMjBpMzIlMkMlMEElMjAlMjAlMjAlMjB5JTNBJTIwJTI2J2IlMjBpMzIlMkMlMEElMjAlMjAlMjAlMjB6JTNBJTIwJTI2J2IlMjBpMzIlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span>&lt;<span class="hljs-symbol">&#x27;a</span>, <span class="hljs-symbol">&#x27;b</span>&gt; {
+    x: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">i32</span>,
+    y: &amp;<span class="hljs-symbol">&#x27;b</span> <span class="hljs-type">i32</span>,
+    z: &amp;<span class="hljs-symbol">&#x27;b</span> <span class="hljs-type">i32</span>
+}
+</div></code></pre>
+<p>这就表示 <code>x</code> 和 <code>y</code> 与 <code>z</code> 的生命周期没有关联，但是 <code>y</code> 和 <code>z</code> 生命周期是一样的。也就是比如结构体被实例化为变量 <code>s</code>，<code>y</code> 生命周期较大而 <code>z</code> 较小，当 <code>s.z</code> 生命结束，<code>s.y</code> 也跟着结束，尽管 <code>y</code> 还没结束生命。</p>
+<p>总的来说，给结构体手动标注生命周期相当于对成员之间生命周期关系做出了约束。</p>
+<p>当函数需要返回引用的时候也会遇到这种问题，比如：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="Zm4lMjBsb25nZXN0KHglM0ElMjAlMjZTdHJpbmclMkMlMjB5JTNBJTIwJTI2U3RyaW5nKSUyMC0lM0UlMjAlMjZTdHJpbmclMjAlN0IlMEElMjAlMjAlMjAlMjBpZiUyMHgubGVuKCklMjAlM0UlMjB5LmxlbigpJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIweCUwQSUyMCUyMCUyMCUyMCU3RCUyMGVsc2UlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjB5JTBBJTIwJTIwJTIwJTIwJTdEJTBBJTdEJTBBZm4lMjBtYWluKCklMjAlN0IlMEElMjAlMjAlMjAlMjBsb25nZXN0KCUyNlN0cmluZyUzQSUzQWZyb20oJTIyaGVsbG8lMjIpJTJDJTIwJTI2U3RyaW5nJTNBJTNBZnJvbSglMjJ3b3JsZCElMjIpKSUzQiUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">longest</span>(x: &amp;<span class="hljs-type">String</span>, y: &amp;<span class="hljs-type">String</span>) <span class="hljs-punctuation">-&gt;</span> &amp;<span class="hljs-type">String</span> {
+    <span class="hljs-keyword">if</span> x.<span class="hljs-title function_ invoke__">len</span>() &gt; y.<span class="hljs-title function_ invoke__">len</span>() {
+        x
+    } <span class="hljs-keyword">else</span> {
+        y
+    }
+}
+<span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-title function_ invoke__">longest</span>(&amp;<span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello&quot;</span>), &amp;<span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;world!&quot;</span>));
+}
+</div></code></pre>
+<p>此时 Rust 不清楚返回值的生命周期是什么，有可能生命周期和 <code>x</code> 是一样的，有可能和 <code>y</code> 是一样的，有可能取 <code>x</code> 和 <code>y</code> 中存活最短的那个，也有可能和 <code>x</code> 与 <code>y</code> 没有关系（生命周期为 <code>'static</code>）。此时我们分析一下我们究竟要干什么，我们想要返回两个字符串之间最长的那个的引用，那么我们的返回值的生命周期应该和 <code>x</code> 与 <code>y</code> 之间较长的那个是一致的。但是我们只有运行的时候才知道 <code>x</code> 和 <code>y</code> 哪个存活时间更久，而 Rust 作为静态类型语言，需要在编译期间就知道所有类型的情况。我们可以保守一点，令返回值的生命周期为两者之中较小的那个：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="Zm4lMjBsb25nZXN0JTNDJ2ElM0UoeCUzQSUyMCUyNidhJTIwU3RyaW5nJTJDJTIweSUzQSUyMCUyNidhJTIwU3RyaW5nKSUyMC0lM0UlMjAlMjYnYSUyMFN0cmluZyUyMCU3QiUwQSUyMCUyMCUyMCUyMGlmJTIweC5sZW4oKSUyMCUzRSUyMHkubGVuKCklMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjB4JTBBJTIwJTIwJTIwJTIwJTdEJTIwZWxzZSUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHklMEElMjAlMjAlMjAlMjAlN0QlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">longest</span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt;(x: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">String</span>, y: &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">String</span>) <span class="hljs-punctuation">-&gt;</span> &amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-type">String</span> {
+    <span class="hljs-keyword">if</span> x.<span class="hljs-title function_ invoke__">len</span>() &gt; y.<span class="hljs-title function_ invoke__">len</span>() {
+        x
+    } <span class="hljs-keyword">else</span> {
+        y
+    }
+}
+</div></code></pre>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="Zm4lMjBtYWluKCklMjAlN0IlMEElMjAlMjAlMjAlMjBsZXQlMjB5JTIwJTNEJTIwU3RyaW5nJTNBJTNBZnJvbSglMjJ3b3JsZCElMjIpJTNCJTBBJTIwJTIwJTIwJTIwbGV0JTIwciUzQiUwQSUyMCUyMCUyMCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGxldCUyMHglMjAlM0QlMjBTdHJpbmclM0ElM0Fmcm9tKCUyMmhlbGxvJTIyKSUzQiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHIlMjAlM0QlMjBsb25nZXN0KCUyNnglMkMlMjAlMjZ5KSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMHByaW50bG4hKCUyMlRoZSUyMGxvbmdlc3QlMjBzdHJpbmclMjBpcyUyMCU3QiU3RCUyMiUyQyUyMHIpJTNCJTBBJTdEJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">y</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;world!&quot;</span>);
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">r</span>;
+    {
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">x</span> = <span class="hljs-type">String</span>::<span class="hljs-title function_ invoke__">from</span>(<span class="hljs-string">&quot;hello&quot;</span>);
+        r = <span class="hljs-title function_ invoke__">longest</span>(&amp;x, &amp;y);
+    }
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;The longest string is {}&quot;</span>, r);
+}
+</div></code></pre>
+<p>给函数标注生命周期相当于约束了返回值之间，返回值和参数之间生命周期的关系。</p>
+<p>我们可以设想，在 C++ 中，可能也会有两个指针传入一个函数，然后经过比这个例子复杂多的逻辑处理后返回一个指针，此时我们可能就不好去分析这个指针和原来的参数之间有什么关系，此时就可能出现什么悬垂指针，double free 等各种问题。</p>
+<h3 id="2-5-za-xiang" tabindex="-1">2.5 杂项</h3>
+<h4 id="2-5-1-string-and-string-and-str" tabindex="-1">2.5.1 String，&amp;String，&amp;str</h4>
+<p>String 在内存中的结构不再赘述。但我们需要注意到，String 在栈上就是一个指向其在堆上数据的指针再加了两个额外信息，其实 String 本质上就是一个指针，是一个“胖”指针。</p>
+<p>而对于 <code>&amp;str</code> 就纯粹了一些，<code>&amp;str</code> 只在栈上有数据，其包含了一个指向字符串首字符的指针还有字符串的长度，因此 <code>&amp;str</code> 也是个胖指针，但是 <code>&amp;str</code> 并不会像 String 那样通过 Drop trait 将堆上数据和自己的生命周期关联起来。</p>
+<p><code>&amp;String</code> 就更纯粹了，他就是一个完全的指针，本质就是一串数字，指向被引用的 <code>String</code> 的栈上数据。他不像 <code>&amp;str</code> 那样还包含字符串长度这种额外数据。当然，在 Rust 中他的含义会更多一点，他还表示是一个引用。</p>
+<p>之前我们提到，代码中的字符串字面量是放在 <code>.rodata</code> 段上的，所以 Rust 中的字符串字面量的类型应该是 <code>&amp;str</code>。<code>.rodata</code> 段的内存会一直到程序结束后才被操作系统释放，因此我们说字符串字面量有一种特殊的生命周期：<code>'static</code> ，他是最长的生命周期，表示从程序的开始到程序的结束。也就是完整的说，字符串字面量类型为 <code>&amp;'static str</code>。</p>
+<p>Rust 中，String 有 <code>.as_str()</code> 可以将其转化为 <code>&amp;str</code> 类型。对于 <code>&amp;str</code>，我们也有 <code>.to_string()</code> 来将其复制从而得到 String 类型，这是我们用的比较多的。</p>
+<p>考虑到 <code>&amp;String</code> 和 <code>&amp;str</code> 的主要区别是</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTI2U3RyaW5nJTIwLS0tJUU2JThDJTg3JUU1JTkwJTkxLS0tJTNFJTIwU3RyaW5nJTIwJUU3JTlBJTg0JUU2JUEwJTg4JUU0JUI4JThBJUU2JTk1JUIwJUU2JThEJUFFJTIwLS0tJUU1JThDJTg1JUU1JTkwJUFCLS0tJTNFJTIwJUU2JThDJTg3JUU1JTkwJTkxJUU1JUEwJTg2JUU0JUI4JThBJUU2JTk1JUIwJUU2JThEJUFFJUU3JTlBJTg0JUU2JThDJTg3JUU5JTkyJTg4JTIwLS0tJUU2JThDJTg3JUU1JTkwJTkxLS0tJTNFJTIwJUU1JUEwJTg2JUU0JUI4JThBJUU2JTk1JUIwJUU2JThEJUFFJTBBJTI2c3RyJTIwLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0lRTYlOEMlODclRTUlOTAlOTEtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSUzRSUyMCVFNSVBMCU4NiVFNCVCOCU4QSVFNiU5NSVCMCVFNiU4RCVBRSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">&amp;String ---指向---&gt; String 的栈上数据 ---包含---&gt; 指向堆上数据的指针 ---指向---&gt; 堆上数据
+&amp;str -----------------------------指向--------------------------------------&gt; 堆上数据
+</div></code></pre>
+<p>所以其实 <code>&amp;String</code> 转 <code>&amp;str</code> 是简单的。Rust 实现了前者到后者的隐式数据类型转换（From trait），直观的说就是很多接受 <code>&amp;str</code> 类型参数的地方可以传 <code>&amp;String</code> 类型。</p>
+<h4 id="2-5-2-zhi-neng-zhi-zhen" tabindex="-1">2.5.2 智能指针</h4>
+<p>我们前面说 <code>String</code> 和 <code>Vec</code> 可以通过 Drop trait 自动管理其在堆上的数据，因此他两个比较智能，可以算是智能指针。但他俩是针对于字符串和数组这种场景的，如果我也想让我自己的类型的数据也能被这么智能地管理，就需要用真正意义上的智能指针。</p>
+<p><strong>Box</strong></p>
+<p>如果我创建了一个结构体，那么其大概是在栈上的：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUyMCU3QiUwQSUyMCUyMCUyMCUyMHglM0ElMjB1MzIlMkMlMEElMjAlMjAlMjAlMjB5JTNBJTIwdTMyJTBBJTdEJTBBbGV0JTIwcyUyMCUzRCUyMFMlMjAlN0IlMjB4JTNBJTIwMSUyQyUyMHklM0ElMjAyJTIwJTdEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    x: <span class="hljs-type">u32</span>,
+    y: <span class="hljs-type">u32</span>
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = S { x: <span class="hljs-number">1</span>, y: <span class="hljs-number">2</span> };
+</div></code></pre>
+<p>我可以使用 <code>Box</code> 这个东西将其搞到堆上面：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="bGV0JTIwcyUyMCUzRCUyMEJveCUzQSUzQW5ldyhTJTIwJTdCJTIweCUzQSUyMDElMkMlMjB5JTNBJTIwMiUyMCU3RCklM0IlMEElMkYlMkYlMjBzJTIwJUU3JTlBJTg0JUU3JUIxJUJCJUU1JTlFJThCJUU2JTk4JUFGJTIwQm94JTNDUyUzRSUwQSgqcykueCUwQXMueCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = <span class="hljs-type">Box</span>::<span class="hljs-title function_ invoke__">new</span>(S { x: <span class="hljs-number">1</span>, y: <span class="hljs-number">2</span> });
+<span class="hljs-comment">// s 的类型是 Box&lt;S&gt;</span>
+(*s).x
+s.x
+</div></code></pre>
+<p>涉及到堆的话我们就要讨论一下内存安全问题。<code>Box</code> 会将其包裹的数据放到堆上面，然后 <code>Box</code> 本身相当于一个指针，指向堆上的数据。</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="JTJGJTJGJTIwaHR0cHMlM0ElMkYlMkZkb2MucnVzdC1sYW5nLm9yZyUyRnNyYyUyRmFsbG9jJTJGYm94ZWQucnMuaHRtbCUyMzIzMS0yMzQlMEFwdWIlMjBzdHJ1Y3QlMjBCb3glM0MlMEElMjAlMjAlMjAlMjBUJTNBJTIwJTNGU2l6ZWQlMkMlMEElMjAlMjAlMjAlMjAlMjMlNUJ1bnN0YWJsZShmZWF0dXJlJTIwJTNEJTIwJTIyYWxsb2NhdG9yX2FwaSUyMiUyQyUyMGlzc3VlJTIwJTNEJTIwJTIyMzI4MzglMjIpJTVEJTIwQSUzQSUyMEFsbG9jYXRvciUyMCUzRCUyMEdsb2JhbCUyQyUwQSUzRShVbmlxdWUlM0NUJTNFJTJDJTIwQSklM0IlMEElMEFpbXBsJTNDVCUzRSUyMEJveCUzQ1QlM0UlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjMlNUJjZmcobm90KG5vX2dsb2JhbF9vb21faGFuZGxpbmcpKSU1RCUwQSUyMCUyMCUyMCUyMCUyMyU1QmlubGluZShhbHdheXMpJTVEJTBBJTIwJTIwJTIwJTIwJTIzJTVCc3RhYmxlKGZlYXR1cmUlMjAlM0QlMjAlMjJydXN0MSUyMiUyQyUyMHNpbmNlJTIwJTNEJTIwJTIyMS4wLjAlMjIpJTVEJTBBJTIwJTIwJTIwJTIwJTIzJTVCbXVzdF91c2UlNUQlMEElMjAlMjAlMjAlMjAlMjMlNUJydXN0Y19kaWFnbm9zdGljX2l0ZW0lMjAlM0QlMjAlMjJib3hfbmV3JTIyJTVEJTBBJTIwJTIwJTIwJTIwJTIzJTVCY2ZnX2F0dHIobWlyaSUyQyUyMHRyYWNrX2NhbGxlciklNUQlMjAlMkYlMkYlMjBldmVuJTIwd2l0aG91dCUyMHBhbmljcyUyQyUyMHRoaXMlMjBoZWxwcyUyMGZvciUyME1pcmklMjBiYWNrdHJhY2VzJTBBJTIwJTIwJTIwJTIwcHViJTIwZm4lMjBuZXcoeCUzQSUyMFQpJTIwLSUzRSUyMFNlbGYlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjByZXR1cm4lMjBib3hfbmV3KHgpJTNCJTBBJTIwJTIwJTIwJTIwJTdEJTBBJTdEJTBBJTBBJTJGJTJGJTIwaHR0cHMlM0ElMkYlMkZkb2NzLnJzJTJGdW5pcXVlJTJGbGF0ZXN0JTJGc3JjJTJGdW5pcXVlJTJGbGliLnJzLmh0bWwlMjM0NyUwQSUyRiUyRiUyRiUyMENvbnN0cnVjdHMlMjBhJTIwJTYwQm94JTNDVCUzRSU2MCUyMGJ5JTIwY2FsbGluZyUyMHRoZSUyMCU2MGV4Y2hhbmdlX21hbGxvYyU2MCUyMGxhbmclMjBpdGVtJTIwYW5kJTIwbW92aW5nJTIwdGhlJTIwYXJndW1lbnQlMjBpbnRvJTBBJTJGJTJGJTJGJTIwdGhlJTIwbmV3bHklMjBhbGxvY2F0ZWQlMjBtZW1vcnkuJTIwVGhpcyUyMGlzJTIwYW4lMjBpbnRyaW5zaWMlMjB0byUyMGF2b2lkJTIwdW5uZWNlc3NhcnklMjBjb3BpZXMuJTBBJTJGJTJGJTJGJTBBJTJGJTJGJTJGJTIwVGhpcyUyMGlzJTIwdGhlJTIwc3VyZmFjZSUyMHN5bnRheCUyMGZvciUyMCU2MGJveCUyMCUzQ2V4cHIlM0UlNjAlMjBleHByZXNzaW9ucy4lMEElMjMlNUJydXN0Y19pbnRyaW5zaWMlNUQlMEElMjMlNUJ1bnN0YWJsZShmZWF0dXJlJTIwJTNEJTIwJTIybGliYWxsb2NfaW50ZXJuYWxzJTIyJTJDJTIwaXNzdWUlMjAlM0QlMjAlMjJub25lJTIyKSU1RCUwQXB1YiUyMGZuJTIwYm94X25ldyUzQ1QlM0UoeCUzQSUyMFQpJTIwLSUzRSUyMEJveCUzQ1QlM0UlM0IlMEElMEElMjMlNUJzdGFibGUoZmVhdHVyZSUyMCUzRCUyMCUyMnJ1c3QxJTIyJTJDJTIwc2luY2UlMjAlM0QlMjAlMjIxLjAuMCUyMiklNUQlMEF1bnNhZmUlMjBpbXBsJTNDJTIzJTVCbWF5X2RhbmdsZSU1RCUyMFQlM0ElMjAlM0ZTaXplZCUyQyUyMEElM0ElMjBBbGxvY2F0b3IlM0UlMjBEcm9wJTIwZm9yJTIwQm94JTNDVCUyQyUyMEElM0UlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjMlNUJpbmxpbmUlNUQlMEElMjAlMjAlMjAlMjBmbiUyMGRyb3AoJTI2bXV0JTIwc2VsZiklMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMkYlMkYlMjB0aGUlMjBUJTIwaW4lMjB0aGUlMjBCb3glMjBpcyUyMGRyb3BwZWQlMjBieSUyMHRoZSUyMGNvbXBpbGVyJTIwYmVmb3JlJTIwdGhlJTIwZGVzdHJ1Y3RvciUyMGlzJTIwcnVuJTBBJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwbGV0JTIwcHRyJTIwJTNEJTIwc2VsZi4wJTNCJTBBJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwdW5zYWZlJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwbGV0JTIwbGF5b3V0JTIwJTNEJTIwTGF5b3V0JTNBJTNBZm9yX3ZhbHVlX3JhdyhwdHIuYXNfcHRyKCkpJTNCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwaWYlMjBsYXlvdXQuc2l6ZSgpJTIwISUzRCUyMDAlMjAlN0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBzZWxmLjEuZGVhbGxvY2F0ZShGcm9tJTNBJTNBZnJvbShwdHIuY2FzdCgpKSUyQyUyMGxheW91dCklM0IlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjAlN0QlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div><div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div><div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div><div>43</div></div><div class="code"><span class="hljs-comment">// https://doc.rust-lang.org/src/alloc/boxed.rs.html#231-234</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">Box</span>&lt;
+    T: ?<span class="hljs-built_in">Sized</span>,
+    <span class="hljs-meta">#[unstable(feature = <span class="hljs-string">&quot;allocator_api&quot;</span>, issue = <span class="hljs-string">&quot;32838&quot;</span>)]</span> A: Allocator = Global,
+&gt;(Unique&lt;T&gt;, A);
+
+<span class="hljs-keyword">impl</span>&lt;T&gt; <span class="hljs-type">Box</span>&lt;T&gt; {
+    <span class="hljs-meta">#[cfg(not(no_global_oom_handling))]</span>
+    <span class="hljs-meta">#[inline(always)]</span>
+    <span class="hljs-meta">#[stable(feature = <span class="hljs-string">&quot;rust1&quot;</span>, since = <span class="hljs-string">&quot;1.0.0&quot;</span>)]</span>
+    <span class="hljs-meta">#[must_use]</span>
+    <span class="hljs-meta">#[rustc_diagnostic_item = <span class="hljs-string">&quot;box_new&quot;</span>]</span>
+    <span class="hljs-meta">#[cfg_attr(miri, track_caller)]</span> <span class="hljs-comment">// even without panics, this helps for Miri backtraces</span>
+    <span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">new</span>(x: T) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-keyword">Self</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">box_new</span>(x);
+    }
+}
+
+<span class="hljs-comment">// https://docs.rs/unique/latest/src/unique/lib.rs.html#47</span>
+<span class="hljs-comment">/// Constructs a `Box&lt;T&gt;` by calling the `exchange_malloc` lang item and moving the argument into</span>
+<span class="hljs-comment">/// the newly allocated memory. This is an intrinsic to avoid unnecessary copies.</span>
+<span class="hljs-comment">///</span>
+<span class="hljs-comment">/// This is the surface syntax for `box &lt;expr&gt;` expressions.</span>
+<span class="hljs-meta">#[rustc_intrinsic]</span>
+<span class="hljs-meta">#[unstable(feature = <span class="hljs-string">&quot;liballoc_internals&quot;</span>, issue = <span class="hljs-string">&quot;none&quot;</span>)]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">box_new</span>&lt;T&gt;(x: T) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Box</span>&lt;T&gt;;
+
+<span class="hljs-meta">#[stable(feature = <span class="hljs-string">&quot;rust1&quot;</span>, since = <span class="hljs-string">&quot;1.0.0&quot;</span>)]</span>
+<span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">impl</span>&lt;<span class="hljs-meta">#[may_dangle]</span> T: ?<span class="hljs-built_in">Sized</span>, A: Allocator&gt; <span class="hljs-built_in">Drop</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">Box</span>&lt;T, A&gt; {
+    <span class="hljs-meta">#[inline]</span>
+    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">drop</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) {
+        <span class="hljs-comment">// the T in the Box is dropped by the compiler before the destructor is run</span>
+
+        <span class="hljs-keyword">let</span> <span class="hljs-variable">ptr</span> = <span class="hljs-keyword">self</span>.<span class="hljs-number">0</span>;
+
+        <span class="hljs-keyword">unsafe</span> {
+            <span class="hljs-keyword">let</span> <span class="hljs-variable">layout</span> = Layout::for_value_raw(ptr.<span class="hljs-title function_ invoke__">as_ptr</span>());
+            <span class="hljs-keyword">if</span> layout.<span class="hljs-title function_ invoke__">size</span>() != <span class="hljs-number">0</span> {
+                <span class="hljs-keyword">self</span>.<span class="hljs-number">1</span>.<span class="hljs-title function_ invoke__">deallocate</span>(<span class="hljs-built_in">From</span>::<span class="hljs-title function_ invoke__">from</span>(ptr.<span class="hljs-title function_ invoke__">cast</span>()), layout);
+            }
+        }
+    }
+}
+</div></code></pre>
+<p>上面这个例子一眼看去感觉没什么实际意义，无非就是换了个地方放数据。但有这样一种情形需要考虑：</p>
+<p>比如我们想实现一个类似链表的东西：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUyMCU3QiUwQSUyMCUyMCUyMCUyMHglM0ElMjB1MzIlMkMlMEElMjAlMjAlMjAlMjB5JTNBJTIwdTMyJTJDJTBBJTIwJTIwJTIwJTIwbmV4dCUzQSUyME9wdGlvbiUzQ1MlM0UlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    x: <span class="hljs-type">u32</span>,
+    y: <span class="hljs-type">u32</span>,
+    next: <span class="hljs-type">Option</span>&lt;S&gt;
+}
+</div></code></pre>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208190224551.png" style="transform: scale(1)" width=1429 height=511><div class="img-title">image-20251208190224551</div></div></p>
+<p>Rust 要求在编译期间知道每个类型的大小，但是上面这种“自我引用”的类型，会让 Rust 无法计算。我们需要一种固定大小的东西，还能通过这个东西间接访问到数据。那么这个东西就是指针了。然后考虑一下指针大概指向上或是堆上。</p>
+<p>如果我们把数据放到栈上，那么这个指针就相当于是引用，我们可以这么写：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUzQydhJTNFJTIwJTdCJTBBJTIwJTIwJTIwJTIweCUzQSUyMHUzMiUyQyUwQSUyMCUyMCUyMCUyMHklM0ElMjB1MzIlMkMlMEElMjAlMjAlMjAlMjBuZXh0JTNBJTIwT3B0aW9uJTNDJTI2J2ElMjBTJTNDJ2ElM0UlM0UlMEElN0QlMEFsZXQlMjBub2RlJTIwJTNEJTIwUyUyMCU3QiUwQSUyMCUyMCUyMCUyMHglM0ElMjA1JTJDJTBBJTIwJTIwJTIwJTIweSUzQSUyMDYlMkMlMEElMjAlMjAlMjAlMjBuZXh0JTNBJTIwTm9uZSUwQSU3RCUzQiUwQWxldCUyMHJvb3QlMjAlM0QlMjBTJTIwJTdCJTBBJTIwJTIwJTIwJTIweCUzQSUyMDElMkMlMEElMjAlMjAlMjAlMjB5JTNBJTIwMiUyQyUwQSUyMCUyMCUyMCUyMG5leHQlM0ElMjBTb21lKCUyNm5vZGUpJTBBJTdEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt; {
+    x: <span class="hljs-type">u32</span>,
+    y: <span class="hljs-type">u32</span>,
+    next: <span class="hljs-type">Option</span>&lt;&amp;<span class="hljs-symbol">&#x27;a</span> S&lt;<span class="hljs-symbol">&#x27;a</span>&gt;&gt;
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">node</span> = S {
+    x: <span class="hljs-number">5</span>,
+    y: <span class="hljs-number">6</span>,
+    next: <span class="hljs-literal">None</span>
+};
+<span class="hljs-keyword">let</span> <span class="hljs-variable">root</span> = S {
+    x: <span class="hljs-number">1</span>,
+    y: <span class="hljs-number">2</span>,
+    next: <span class="hljs-title function_ invoke__">Some</span>(&amp;node)
+};
+</div></code></pre>
+<p>不过这样的话，这里的 <code>node</code> 的所有权是在 <code>root</code> 的外面的，换句话说就是链表中节点的所有权在链表外，这多少看起来有点不妥，比如我想把一个链表的所有权转移出去，我可能要把所有节点的所有权也跟着一个个转走。而且这后面可能会涉及到生命周期的问题。</p>
+<p>如果把数据放到堆上，就可以使用 <code>Box</code> 了：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="c3RydWN0JTIwUyUyMCU3QiUwQSUyMCUyMCUyMCUyMHglM0ElMjB1MzIlMkMlMEElMjAlMjAlMjAlMjB5JTNBJTIwdTMyJTJDJTBBJTIwJTIwJTIwJTIwbmV4dCUzQSUyME9wdGlvbiUzQ0JveCUzQ1MlM0UlM0UlMEElN0QlMEFsZXQlMjByb290JTIwJTNEJTIwUyUyMCU3QiUwQSUyMCUyMCUyMCUyMHglM0ElMjAxJTJDJTBBJTIwJTIwJTIwJTIweSUzQSUyMDIlMkMlMEElMjAlMjAlMjAlMjBuZXh0JTNBJTIwU29tZShCb3glM0ElM0FuZXcoUyUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHglM0ElMjAzJTJDJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIweSUzQSUyMDQlMkMlMEElMjAlMjAlMjAlMjAlMjAlMjAlMjAlMjBuZXh0JTNBJTIwTm9uZSUwQSUyMCUyMCUyMCUyMCU3RCkpJTBBJTdEJTNCJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div></div><div class="code"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    x: <span class="hljs-type">u32</span>,
+    y: <span class="hljs-type">u32</span>,
+    next: <span class="hljs-type">Option</span>&lt;<span class="hljs-type">Box</span>&lt;S&gt;&gt;
+}
+<span class="hljs-keyword">let</span> <span class="hljs-variable">root</span> = S {
+    x: <span class="hljs-number">1</span>,
+    y: <span class="hljs-number">2</span>,
+    next: <span class="hljs-title function_ invoke__">Some</span>(<span class="hljs-type">Box</span>::<span class="hljs-title function_ invoke__">new</span>(S {
+        x: <span class="hljs-number">3</span>,
+        y: <span class="hljs-number">4</span>,
+        next: <span class="hljs-literal">None</span>
+    }))
+};
+</div></code></pre>
+<p>这样我们就可以认为链表内节点的所有权都在链表内部，看起来更舒服一点（准确来说我们只是有了 <code>Box</code> 的所有权，然后再通过 <code>Box</code> 的 Drop trait 将其再与堆上数据关联起来）</p>
+<p><strong>Rc</strong></p>
+<p>目前 Rust 的所有权机制使得每个数据只能由一个所有者，这样一个数据的生命周期就比较清晰。但是很多时候一个数据的生命周期是不好说的。比如我有多个结构体都需要引用一个数据，那么这个数据的所有者是不好说的，因为这个数据的生命周期就不好确定，其被释放的最好时机应该是这些结构体都被释放了，也就没人引用这个数据了，那么这个数据就应该被释放了。但是单纯依赖单一所有者机制是不好实现这个东西。</p>
+<p><code>Rc</code> 就帮助我们解决了这一点，其基本原理是引用计数，大概如图所示。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/08/image-20251208192002688.png" style="transform: scale(1)" width=1458 height=511><div class="img-title">image-20251208192002688</div></div></p>
+<p>To be continued...</p>
