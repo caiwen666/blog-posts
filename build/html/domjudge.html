@@ -1,0 +1,241 @@
+<h2 id="1-qian-yan" tabindex="-1">1. 前言</h2>
+<p>之前的校赛一直在老 OJ 上举行。老 OJ 是好几年前的老学长的毕业设计，功能特别少，页面老旧，并且体验感也特别差，比如排行榜上只能显示队伍编号，不知道编号对应的是谁。更重要的是，评测机速度特别慢，去年的新生赛比赛时竟然有 6 页的 pending，交一发要等十几分钟，所以今年下定决心做出点改变。</p>
+<p>目前正式比赛的 OJ 一般有三种选择：Domjudge，CCPC OJ，Hydro。Hydro 今年刚开始使用，貌似还没有正式对外公布用于比赛的 Hydro 版本。Domjudge 一眼看上去有点复杂，所以最开始选择使用 CCPC OJ。不过 CCPC OJ 的大屏展示、滚榜不是 ICPC Tools，少点感觉，并且 CCPC OJ 不能测交互题，而且中间测试感觉 CCPC OJ 的体验感也不是很好，于是又打算改用 Domjudge。</p>
+<h2 id="2-fu-wu-qi" tabindex="-1">2. 服务器</h2>
+<p>虽然作为 985（甚至还有一个超算中心），但学校的服务器配置都很低，难以作为评测机。于是考虑直接在网上买公网服务器。最开始考虑的是阿里云，但是有文章说<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup> 可能阿里云的服务器会出现问题，于是又考虑使用腾讯云的服务器。</p>
+<p>直接包月买肯定买不起了，而且也没必要，我们可以按量付费。我买的是计算型 C6 （ C6.LARGE8）这个服务器。腾讯云的可用地区里貌似离湖南最近的地区就是广州了，于是地域选的是广州。然后把硬盘容量调成最低（20GB），镜像用的 Ubuntu，公网流量也按量付费，把带宽上限拉到最大（200Mbps）：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/29/image-20251229111023348.png" style="transform: scale(1)" width=2916 height=1056><div class="img-title">配置清单</div></div></p>
+<p>这样下来一小时只有 0.75，感觉还可以接受。</p>
+<p>后面我在服务器上安装了一个宝塔面板，然后在宝塔面板里又安装了一个 Docker，随后部分都是以 Docker 容器的形式部署的。</p>
+<p>前期在准备比赛的时候可能会时不时用一下服务器上传或者更新的功能，但总的来说用的比较少。服务器不用的时候可以选择关机不收费（其实硬盘的费用还是要收的，不过没那么多就是了）。服务器每次启动的时候 IP 可能会变，可以考虑开通一个弹性公网 IP（这个只有没有绑定服务器才会收费，服务器处于关机状态的话应该是不收费的）</p>
+<h2 id="3-domjudge" tabindex="-1">3. Domjudge</h2>
+<h3 id="3-1-bu-shu" tabindex="-1">3.1 部署</h3>
+<p>Domjudge 的配置过程比我想象中简单不少。首先部署数据库：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="ZG9ja2VyJTIwcnVuJTIwLS1yZXN0YXJ0JTNEYWx3YXlzJTIwLWQlMjAtaXQlMjAtLW5hbWUlMjBkai1tYXJpYWRiJTIwJTVDJTBBLWUlMjBNWVNRTF9ST09UX1BBU1NXT1JEJTNEZG9tanVkZ2UxMTQ1MTQlMjAlNUMlMEEtZSUyME1ZU1FMX1VTRVIlM0Rkb21qdWRnZSUyMCU1QyUwQS1lJTIwQ09OVEFJTkVSX1RJTUVaT05FJTNEQXNpYSUyRlNoYW5naGFpJTIwJTVDJTBBLWUlMjBNWVNRTF9QQVNTV09SRCUzRGRvbWp1ZGdlMTE0NTE0JTIwJTVDJTBBLWUlMjBNWVNRTF9EQVRBQkFTRSUzRGRvbWp1ZGdlJTIwLXAlMjAzMzA2JTNBMzMwNiUyMCU1QyUwQW1hcmlhZGIlMjAlMjAtLW1heC1jb25uZWN0aW9ucyUzRDEwMDAlMjAtLW1heC1hbGxvd2VkLXBhY2tldCUzRDEwMjQwMDAwMCUyMC0taW5ub2RiLWxvZy1maWxlLXNpemUlM0QyMDI0MDAwMDAlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">docker run --restart=always -d -it --name dj-mariadb \
+-e MYSQL_ROOT_PASSWORD=domjudge114514 \
+-e MYSQL_USER=domjudge \
+-e CONTAINER_TIMEZONE=Asia/Shanghai \
+-e MYSQL_PASSWORD=domjudge114514 \
+-e MYSQL_DATABASE=domjudge -p 3306:3306 \
+mariadb  --max-connections=1000 --max-allowed-packet=102400000 --innodb-log-file-size=202400000
+</div></code></pre>
+<ul>
+<li><code>max-connections</code> 设为 1000，确保能够顺利进行数据库连接</li>
+<li><code>max-allowed-packet</code> 的单位是 B，一般设为最大测试点的两倍</li>
+<li><code>innodb-log-file-size</code> 的单位是 B，一般设为最大测试点的十倍</li>
+<li>由于我们使用 Docker 进行部署，所以上述的参数最好在开始就想好，后面再改动的话就会非常麻烦</li>
+</ul>
+<p>然后部署 Domjudge：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="ZG9ja2VyJTIwcnVuJTIwLS1yZXN0YXJ0JTNEYWx3YXlzJTIwLS1saW5rJTIwZGotbWFyaWFkYiUzQW1hcmlhZGIlMjAtZCUyMC1pdCUyMCU1QyUwQS1lJTIwTVlTUUxfSE9TVCUzRG1hcmlhZGIlMjAlNUMlMEEtZSUyME1ZU1FMX1VTRVIlM0Rkb21qdWRnZSUyMCU1QyUwQS1lJTIwTVlTUUxfREFUQUJBU0UlM0Rkb21qdWRnZSUyMCU1QyUwQS1lJTIwQ09OVEFJTkVSX1RJTUVaT05FJTNEQXNpYSUyRlNoYW5naGFpJTIwJTVDJTBBLWUlMjBNWVNRTF9QQVNTV09SRCUzRGRvbWp1ZGdlMTE0NTE0JTIwJTVDJTBBLWUlMjBNWVNRTF9ST09UX1BBU1NXT1JEJTNEZG9tanVkZ2UxMTQ1MTQlMjAlNUMlMEEtcCUyMDgwJTNBODAlMjAtLW5hbWUlMjBkb21zZXJ2ZXIlMjBkb21qdWRnZSUyRmRvbXNlcnZlciUzQTguMy4xJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">docker run --restart=always --<span class="hljs-built_in">link</span> dj-mariadb:mariadb -d -it \
+-e MYSQL_HOST=mariadb \
+-e MYSQL_USER=domjudge \
+-e MYSQL_DATABASE=domjudge \
+-e CONTAINER_TIMEZONE=Asia/Shanghai \
+-e MYSQL_PASSWORD=domjudge114514 \
+-e MYSQL_ROOT_PASSWORD=domjudge114514 \
+-p 80:80 --name domserver domjudge/domserver:8.3.1
+</div></code></pre>
+<p>然后 Domjudge 就顺利跑起来了。</p>
+<p>然后我们还需要执行下面这些命令来获取初始的管理员密码和评测机连接的密钥：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="ZG9ja2VyJTIwZXhlYyUyMC1pdCUyMGRvbXNlcnZlciUyMGNhdCUyMCUyRm9wdCUyRmRvbWp1ZGdlJTJGZG9tc2VydmVyJTJGZXRjJTJGaW5pdGlhbF9hZG1pbl9wYXNzd29yZC5zZWNyZXQlMEElMjMlMjAlRTQlQjglOEIlRTklOUQlQTIlRTglQkYlOTklRTYlOUQlQTElRTUlOTElQkQlRTQlQkIlQTQlRTglOEUlQjclRTUlOEYlOTYlRTclOUElODQlRTUlQjAlQjElRTYlOTglQUYlRTglQUYlODQlRTYlQjUlOEIlRTYlOUMlQkElRTglQkYlOUUlRTYlOEUlQTUlRTclOUElODQlRTUlQUYlODYlRTklOTIlQTUlMEFkb2NrZXIlMjBleGVjJTIwLWl0JTIwZG9tc2VydmVyJTIwY2F0JTIwJTJGb3B0JTJGZG9tanVkZ2UlMkZkb21zZXJ2ZXIlMkZldGMlMkZyZXN0YXBpLnNlY3JldCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">docker <span class="hljs-built_in">exec</span> -it domserver <span class="hljs-built_in">cat</span> /opt/domjudge/domserver/etc/initial_admin_password.secret
+<span class="hljs-comment"># 下面这条命令获取的就是评测机连接的密钥</span>
+docker <span class="hljs-built_in">exec</span> -it domserver <span class="hljs-built_in">cat</span> /opt/domjudge/domserver/etc/restapi.secret
+</div></code></pre>
+<h3 id="3-2-pei-zhi" tabindex="-1">3.2 配置</h3>
+<p>进入 domjudge 后台，点击 Configuration settings。</p>
+<p>首先在 Scoring 这里，domjudge 中的内存超限可能会返回 RE 的结果，于是打算直接把 MLE 映射成 RE，然后赛前提醒选手这种情况。同时还把输出超限和没有输出给映射到 WA。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/29/image-20251229130138414.png" style="transform: scale(1)" width=1481 height=443><div class="img-title">评测结果映射</div></div></p>
+<p>然后在 Judging 这里，建议调大 Output limit，因为默认的 Output limit 可能不太大（大概 8MB），且后面导入题目的时候，可能很多题目没有特别去设置 Output limit，如果此时测试点的答案本身就超过了这个 Output limit，就会出现问题。</p>
+<p>在 Clarifications 这里可以提前设置一下快捷回复。</p>
+<p>在 Display 这里，首先关闭 Show flags，打开 Show affiliations 和 Show affiliation logos，这样榜单的样子就和区域赛的比较接近了。同时我还将 Show compile 设为 always，以及打开了 Allow team submission download。</p>
+<h2 id="4-ping-ce-ji" tabindex="-1">4. 评测机</h2>
+<h3 id="4-1-bu-shu" tabindex="-1">4.1 部署</h3>
+<p>首先需要在 <code>/etc/default/grub</code> 这个文件中，在 <code>GRUB_CMDLINE_LINUX_DEFAULT</code> 那里，将 <code>quiet cgroup_enable=memory swapaccount=1 systemd.unified_cgroup_hierarchy=0</code> 追加到后面，然后执行：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="dXBkYXRlLWdydWIlMEFyZWJvb3QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">update-grub
+reboot
+</div></code></pre>
+<p>随后服务器将会重启。重启后再执行：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="ZG9ja2VyJTIwcnVuJTIwLWQlMjAtLXJlc3RhcnQlM0RhbHdheXMlMjAtaXQlMjAtLXByaXZpbGVnZWQlMjAlNUMlMEEtdiUyMCUyRnN5cyUyRmZzJTJGY2dyb3VwJTNBJTJGc3lzJTJGZnMlMkZjZ3JvdXAlM0FydyUyMCU1QyUwQS0tbmFtZSUyMGp1ZGdlaG9zdC0wJTIwJTVDJTBBLS1saW5rJTIwZG9tc2VydmVyJTNBZG9tc2VydmVyJTIwJTVDJTBBLWUlMjBEQUVNT05fSUQlM0QyJTIwJTVDJTBBLWUlMjBKVURHRURBRU1PTl9QQVNTV09SRCUzRHJ5bm1rR1BQNGljVm9TOEJnSXRoOUFrRWVGM2ljVXBZJTIwJTVDJTBBLWUlMjBDT05UQUlORVJfVElNRVpPTkUlM0RBc2lhJTJGQ2hlbmR1JTIwJTVDJTBBZG9tanVkZ2UlMkZqdWRnZWhvc3QlM0E4LjMuMSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">docker run -d --restart=always -it --privileged \
+-v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+--name judgehost-0 \
+--<span class="hljs-built_in">link</span> domserver:domserver \
+-e DAEMON_ID=2 \
+-e JUDGEDAEMON_PASSWORD=rynmkGPP4icVoS8BgIth9AkEeF3icUpY \
+-e CONTAINER_TIMEZONE=Asia/Chendu \
+domjudge/judgehost:8.3.1
+</div></code></pre>
+<ul>
+<li><code>--name</code> 是设置容器名称，可以自行设置，只要不重复就可以</li>
+<li><code>JUDGEDAEMON_PASSWORD</code> 那里写上面获得的评测机连接密钥</li>
+<li><code>DAEMON_ID=2</code> 这里设置评测机在哪个 CPU 核心上执行，这里的数字是从下标 0 开始的。值得注意的是，云服务器的厂商在服务器配置那里写的核心数量大概率是超线程过的。比如我买的服务器是 4 核心的，但其实只有两个物理核心。我们可以执行 <code>cat /sys/devices/system/cpu/cpu*/topology/thread_siblings_list</code> 查看哪几个虚拟核心是同属于一个物理核心，然后一个物理核心只绑定一个评测机，确保评测的速度。</li>
+</ul>
+<h3 id="4-2-kuo-rong" tabindex="-1">4.2 扩容</h3>
+<p>考虑到我们是购买公网服务器，所以扩容也是非常方便的。我们可以再买一台服务器（需要和 domjudge 所在的主服务器的地域是一样的），专门用来放评测机。在这台服务器上执行：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="ZG9ja2VyJTIwcnVuJTIwLWQlMjAtLXJlc3RhcnQlM0RhbHdheXMlMjAtaXQlMjAtLXByaXZpbGVnZWQlMjAlNUMlMEEtdiUyMCUyRnN5cyUyRmZzJTJGY2dyb3VwJTNBJTJGc3lzJTJGZnMlMkZjZ3JvdXAlM0FydyUyMCU1QyUwQS0tbmFtZSUyMGp1ZGdlaG9zdC0wJTIwJTVDJTBBLS1uZXR3b3JrJTNEaG9zdCUyMCU1QyUwQS1lJTIwREFFTU9OX0lEJTNEMCUyMCU1QyUwQS1lJTIwSlVER0VEQUVNT05fUEFTU1dPUkQlM0RyeW5ta0dQUDRpY1ZvUzhCZ0l0aDlBa0VlRjNpY1VwWSUyMCU1QyUwQS1lJTIwRE9NU0VSVkVSX0JBU0VVUkwlM0RodHRwJTNBJTJGJTJGMTcyLjE2LjAuMTAlMkYlMjAlNUMlMEEtZSUyMENPTlRBSU5FUl9USU1FWk9ORSUzREFzaWElMkZDaGVuZHUlMjAlNUMlMEFkb21qdWRnZSUyRmp1ZGdlaG9zdCUzQTguMy4xJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div></div><div class="code">docker run -d --restart=always -it --privileged \
+-v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+--name judgehost-0 \
+--network=host \
+-e DAEMON_ID=0 \
+-e JUDGEDAEMON_PASSWORD=rynmkGPP4icVoS8BgIth9AkEeF3icUpY \
+-e DOMSERVER_BASEURL=http://172.16.0.10/ \
+-e CONTAINER_TIMEZONE=Asia/Chendu \
+domjudge/judgehost:8.3.1
+</div></code></pre>
+<ul>
+<li><code>DOMSERVER_BASEURL</code> 这里需要填主服务器的内网 ip</li>
+<li><code>--network=host</code> 让容器可以通过局域网连接到主服务器</li>
+</ul>
+<p>然后我们可以对服务器制作镜像，然后创建一个快速启动模板。赛时需要扩容的话鼠标一点，创建新的服务器就可以了，非常方便。（不过如果要缩容的话不能直接把服务器释放，因为可能释放的时候服务器上的评测机正在跑评测任务，可能会出意外。感觉先在 domjudge 后台禁用掉评测机以后再释放会不会好一点？）</p>
+<h2 id="5-da-ping-zhan-shi" tabindex="-1">5. 大屏展示</h2>
+<p>大屏展示就是区域赛现场会放的倒计时、Judge Queue 之类的。</p>
+<h3 id="5-1-cds" tabindex="-1">5.1 CDS</h3>
+<p>首先我们需要搞一个叫做 CDS 的东西。本来一开始打算不用 Docker 部署，于是光 Java 版本就搞了半天。成功启动之后又发现页面有问题...总之又改用 Docker 了。</p>
+<p>CDS 的镜像是放在 Github 上的，于是这就有了网络的麻烦。还好南京大学提供了镜像源。我们执行：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="ZG9ja2VyJTIwcnVuJTIwJTVDJTBBJTIwJTIwJTIwJTIwLS1uYW1lJTIwY2RzJTIwJTVDJTBBJTIwJTIwJTIwJTIwLWQlMjAtaXQlMjAlNUMlMEElMjAlMjAlMjAlMjAtLW5ldHdvcmslM0Rob3N0JTIwJTVDJTBBJTIwJTIwJTIwJTIwLXAlMjA4MDgwJTNBODA4MCUyMCU1QyUwQSUyMCUyMCUyMCUyMC1wJTIwODQ0MyUzQTg0NDMlMjAlNUMlMEElMjAlMjAlMjAlMjAtZSUyMENDU19VUkwlM0RodHRwJTNBJTJGJTJGbG9jYWxob3N0JTJGYXBpJTJGY29udGVzdHMlMkYxJTIwJTVDJTBBJTIwJTIwJTIwJTIwLWUlMjBDQ1NfVVNFUiUzRGFkbWluJTIwJTVDJTBBJTIwJTIwJTIwJTIwLWUlMjBDQ1NfUEFTU1dPUkQlM0RhZG1pbl9wYXNzd29yZCUyMCU1QyUwQSUyMCUyMCUyMCUyMGdoY3Iubmp1LmVkdS5jbiUyRmljcGN0b29scyUyRmNkcyUzQTIuNi4xMzMxJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code">docker run \
+    --name cds \
+    -d -it \
+    --network=host \
+    -p 8080:8080 \
+    -p 8443:8443 \
+    -e CCS_URL=http://localhost/api/contests/1 \
+    -e CCS_USER=admin \
+    -e CCS_PASSWORD=admin_password \
+    ghcr.nju.edu.cn/icpctools/cds:2.6.1331
+</div></code></pre>
+<ul>
+<li>
+<p><code>CCS_PASSWORD</code> 要设置成 domjudge 的管理员账号的密码</p>
+</li>
+<li>
+<p><code>CCS_URL</code> 的 <code>1</code> 表示的是比赛的 ID，可以在 domjudge 的后台看到</p>
+</li>
+</ul>
+<p>然后再进入容器中：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="ZG9ja2VyJTIwZXhlYyUyMC1pdCUyMGNkcyUyMGJhc2glMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">docker <span class="hljs-built_in">exec</span> -it cds bash
+</div></code></pre>
+<p>执行：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="Y2F0JTIwJTJGb3B0JTJGd2xwJTJGdXNyJTJGc2VydmVycyUyRmNkcyUyRmNvbmZpZyUyRmFjY291bnRzLnlhbWwlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-built_in">cat</span> /opt/wlp/usr/servers/cds/config/accounts.yaml
+</div></code></pre>
+<p>就能看到 CDS 的账号信息，我们需要记录一下 <code>admin</code>、<code>presAdmin</code> 和 <code>presentation</code> 的密码。</p>
+<p>然后执行：</p>
+<pre><div class="head"><div class="language">sh</div><div class="copy" data="dmltJTIwJTJGb3B0JTJGd2xwJTJGdXNyJTJGc2VydmVycyUyRmNkcyUyRmNvbmZpZyUyRmNkc0NvbmZpZy54bWwlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">vim /opt/wlp/usr/servers/cds/config/cdsConfig.xml
+</div></code></pre>
+<p>将其中 <code>ccs</code> 的 <code>url</code> 和 <code>password</code> 设为与上面的 <code>CCS_URL</code> 和 <code>CCS_PASSWORD</code> 一致，然后保存。（<code>cds</code> 的镜像里是没有 <code>vim</code> 的，需要先自己在容器里安装）</p>
+<p>注意，当服务器关机又重启之后，CDS 这个容器可能不会自动启动，需要自己在后台手动启动一下。</p>
+<h3 id="5-2-presentation-client" tabindex="-1">5.2 Presentation Client</h3>
+<p>后面需要注意，CDS 和后面要说的 Presentation Client、Presentation Admin、Resolver 这些都属于 ICPC Tools，他们之间的版本要保持一致（而且最好是最新版，不是最新版的话在启动时可能会触发自动更新，比较麻烦）。这些工具是基于 Java 的，所以大屏展示工具和滚榜工具在运行前需要安装 Java，而且 Java 的版本好还要对应好。</p>
+<p>我用的 ICPC Tools 的版本号都是 2.6.1331 的，对应的 Java 版本是 JDK 17。</p>
+<p>首先安装好 Java，然后去 <a href="https://tools.icpc.global/">The ICPC Tools | Home</a> 这里下载 Presentation Client，这是大屏展示的客户端。下载解压后在对应的目录下执行：</p>
+<pre><div class="head"><div class="language">cmd</div><div class="copy" data="c2V0JTIwJTIySUNQQ19GT05UJTNERGVuZ1hpYW4lMjIlMjAlMjYlMjYlMjBjbGllbnQuYmF0JTIwaHR0cHMlM0ElMkYlMkZpcCUzQTg0NDMlMkZhcGklMkZjb250ZXN0cyUyRjElMjBwcmVzZW50YXRpb24lMjBwYXNzd29yZCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-built_in">set</span> &quot;ICPC_FONT=DengXian&quot; &amp;&amp; client.bat https://ip:<span class="hljs-number">8443</span>/api/contests/<span class="hljs-number">1</span> presentation password
+</div></code></pre>
+<ul>
+<li>ICPC Tools 中除了 CDS 在服务器上跑，其他的都在个人电脑的 Windows 下跑就可以</li>
+<li>上面这个指令要在 cmd 中运行，不能在 power shell 中运行</li>
+<li><code>set &quot;ICPC_FONT=DengXian&quot;</code> 以做到可以显示中文</li>
+<li><code>ip</code> 要替换成 cds 服务器所在的 ip</li>
+<li><code>1</code> 也要替换成对应的比赛 id，和上面 <code>CCS_URL</code> 的保持一致</li>
+<li><code>password</code> 要填上面获得到的 cds 的 <code>presentation</code> 密码</li>
+</ul>
+<p>然后稍等片刻即可进入大屏展示的界面。</p>
+<h3 id="5-3-presentation-admin" tabindex="-1">5.3 Presentation Admin</h3>
+<p>开始时大屏展示上是只显示 ICPC Tools 的图标的，需要我们自行为其设置页面。</p>
+<p>有两种方法，一种是在 ICPC Tools 的网站中下载 Presentation Admin，然后解压，运行：</p>
+<pre><div class="head"><div class="language">cmd</div><div class="copy" data="c2V0JTIwJTIySUNQQ19GT05UJTNERGVuZ1hpYW4lMjIlMjAlMjYlMjYlMjBwcmVzQWRtaW4uYmF0JTIwaHR0cHMlM0ElMkYlMkZpcCUzQTg0NDMlMjBwcmVzQWRtaW4lMjBwYXNzd29yZCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-built_in">set</span> &quot;ICPC_FONT=DengXian&quot; &amp;&amp; presAdmin.bat https://ip:<span class="hljs-number">8443</span> presAdmin password
+</div></code></pre>
+<ul>
+<li>
+<p><code>ip</code> 要替换成 cds 服务器所在的 ip</p>
+</li>
+<li>
+<p><code>password</code> 要填上面获得到的 cds 的 <code>presAdmin</code> 密码</p>
+</li>
+</ul>
+<p>稍等片刻即可打开大屏展示的后台管理界面，在这个界面中可以设置每个大屏展示客户端显示什么内容。</p>
+<p>另一种方法是直接打开 <code>https://ip:8443</code>，可以来到 CDS 面板，点击 <code>Sign in</code> ，输入 CDS 的 <code>admin</code> 账号和密码，登录，然后就可以在左边菜单中看到 <code>Presentation Admin</code>，然后就可以在里面选择对所有的大屏展示设置成某个界面。</p>
+<p>注意，上面提到 <code>CCS_URL</code>、<code>/opt/wlp/usr/servers/cds/config/cdsConfig.xml</code> 、<code>Presentation Client</code> 的命令行中，这些地方都需要填比赛 id，一定要记得在比赛前将这些地方改好。</p>
+<h2 id="6-shu-ju-dao-ru" tabindex="-1">6. 数据导入</h2>
+<h3 id="6-1-ti-mu-dao-ru" tabindex="-1">6.1 题目导入</h3>
+<p>一般题目是在 Polygon 上出的，然后有现成的工具可以将 Polygon 的题目转换成 domjudge 的题目。直接参考：</p>
+<p><a href="https://github.com/cn-xcpc-tools/Polygon2DOMjudge/blob/master/README.cn.md">Polygon2DOMjudge/README.cn.md at master · cn-xcpc-tools/Polygon2DOMjudge</a></p>
+<p>值得注意的是，需要在 Polygon 上构建 Full Package 而不是 Standard Package，然后下载 Full Package 的 Linux 版本，然后再用这个工具进行转换。转换成 domjudge 的格式之后就可以直接导入 domjudge 中。</p>
+<p>可以在题目的编辑界面下方重新导入题目，这样的话题目将会被更新。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/29/image-20251229132401625.png" style="transform: scale(1)" width=1082 height=575></div></p>
+<h3 id="6-2-dui-wu-zhang-hao-dao-ru" tabindex="-1">6.2 队伍/账号导入</h3>
+<p>首先先在 Domjudge 的后台 Configuration settings -&gt; External systems -&gt; Data source ，将其设为 configuration data external，这样将会在 domjudge 的很多界面中新增 external id 这个字段。</p>
+<p>在 Team Categories 中可以添加队伍种类：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/29/image-20251229131437425.png" style="transform: scale(1)" width=1066 height=1310><div class="img-title">添加页面</div></div></p>
+<ul>
+<li>External ID 可以自己设置</li>
+<li>不同 Sortorder 的分类的选手，在排行榜上会显示在不同的区域。不过区域赛中，一般都是打星选手和正是选手混在一个区域的，所以 Sortorder 都可以设为 0</li>
+</ul>
+<p>在 Team Affiliations 中可以添加学校信息：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/29/image-20251229131815305.png" style="transform: scale(1)" width=1046 height=1449><div class="img-title">添加界面</div></div></p>
+<ul>
+<li>External ID 可以自己设置</li>
+<li>Logo 这里建议在创建的时候不上传（疑似是 domjudge 的 bug，因为只有更新页面上传 logo 才有用，创建页面上传 logo 没用），而是创建完之后再点编辑再上传。可以在 <a href="https://www.urongda.com/">中国大学矢量校徽大全</a> 这里找到大多数学校的校徽矢量图。</li>
+</ul>
+<p>由于我们本次比赛的学校种类数比较少，所以手动添加即可。如果要批量添加的话可以参考官方文档：<a href="https://www.domjudge.org/docs/manual/8.3/import.html#importing-team-affiliations">Adding contest data in bulk — DOMjudge 8.3.2/0152847a5 documentation</a></p>
+<p>接下来导入队伍，我们可以用 python 之类的将报名数据生成一个 json 数组，格式如下：</p>
+<pre><div class="head"><div class="language">json</div><div class="copy" data="JTVCJTBBJTA5JTdCJTBBJTA5JTA5JTIyaWQlMjIlM0ElMjAlMjJkdXA0dGVhbTAwMSUyMiUyQyUwQSUwOSUwOSUyMmdyb3VwX2lkcyUyMiUzQSUyMCU1QiUyMjMlMjIlNUQlMkMlMEElMDklMDklMjJuYW1lJTIyJTNBJTIwJTIyZHVwNHRlYW0wMDElMjIlMkMlMEElMDklMDklMjJkaXNwbGF5X25hbWUlMjIlM0ElMjAlMjJkdXA0dGVhbTAwMSUyMiUyQyUwQSUwOSUwOSUyMm9yZ2FuaXphdGlvbl9pZCUyMiUzQSUyMCUyMjMlMjIlMkMlMEElMDklMDklMjJsYWJlbCUyMiUzQSUyMCUyMiUyMiUyQyUwQSUwOSUwOSUyMm1lbWJlcnMlMjIlM0ElMjAlMjIlMjIlMkMlMEElMDklMDklMjJsb2NhdGlvbi5kZXNjcmlwdGlvbiUyMiUzQSUyMCUyMiUyMiUwQSUwOSU3RCUwQSU1RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div></div><div class="code"><span class="hljs-punctuation">[</span>
+	<span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dup4team001&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;group_ids&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;3&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dup4team001&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;display_name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dup4team001&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;organization_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;3&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;label&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;members&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;location.description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">]</span>
+</div></code></pre>
+<ul>
+<li>domjudge 后台的 Teams 页面中的 <code>id</code> 一列是导入时 domjudge 自己生成的，无法自定义。上面 <code>id</code> 字段设置的是 <code>external ID</code></li>
+<li><code>group_ids</code> 设置该队伍的分类。一个队伍可以有多个分类。里面的元素是 Team Categories 的 external ID。</li>
+<li><code>name</code> 和 <code>display_name</code> 都表示队伍的名称。虽然官方文档中说 <code>display_name</code> 是可选的，但是如果不设置的话，榜单上将不会显示队伍名称。</li>
+<li><code>label</code> 是队伍标签，一般可以填队伍的位置。<code>location.description</code> 也表示队伍位置。不过前者基本出现在 domjudge 后台所有显示队伍名称的前面，而后者貌似只会出现在气球分发的页面。</li>
+<li><code>members</code> 的内容其实会显示在队伍描述那里。可以填队伍的成员名称。</li>
+<li><code>organization_id</code>：填队伍对应的 team affiliations 的 external id。</li>
+</ul>
+<p>然后在后台的 Import / export 中导入。</p>
+<p>接下来导入队伍账号。虽然官方文档中账号的导入没说支持 json 格式，但是这篇文章<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup> 提到了 json 格式的导入方法。格式如下：</p>
+<pre><div class="head"><div class="language">json</div><div class="copy" data="JTVCJTBBJTA5JTdCJTBBJTA5JTA5JTIyaWQlMjIlM0ElMjAlMjJkdXA0YWNjb3VudDAwMSUyMiUyQyUwQSUwOSUwOSUyMnVzZXJuYW1lJTIyJTNBJTIwJTIyZHVwNGFjY291bnQwMDElMjIlMkMlMEElMDklMDklMjJwYXNzd29yZCUyMiUzQSUyMCUyMlAzeG0zM2ltdmUlMjIlMkMlMEElMDklMDklMjJ0eXBlJTIyJTNBJTIwJTIydGVhbSUyMiUyQyUwQSUwOSUwOSUyMm5hbWUlMjIlM0ElMjAlMjJkdXA0YWNjb3VudDAwMSUyMiUyQyUwQSUwOSUwOSUyMnRlYW1faWQlMjIlM0ElMjAlMjJkdXA0dGVhbTAwMSUyMiUwQSUwOSU3RCUwQSU1RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code"><span class="hljs-punctuation">[</span>
+	<span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dup4account001&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;username&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dup4account001&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;password&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;P3xm33imve&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;team&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dup4account001&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;team_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dup4team001&quot;</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">]</span>
+</div></code></pre>
+<ul>
+<li><code>id</code> 将会设置账号的 external id</li>
+<li><code>username</code> 和 <code>password</code> 设置账号的用户名和密码</li>
+<li><code>name</code> 应该是账号的昵称，感觉直接和用户名保持一致就好</li>
+<li><code>team_id</code> 是账号对应队伍的 external_id</li>
+</ul>
+<p>然后在后台的 Import / export 中导入。</p>
+<p>值得一提的是，使用 json 导入的时候 domjudge 不会对密码的安全性进行检查（比如检查是否大于多少位之类的）</p>
+<p>如果中间导入出了什么问题的话，可以考虑直接发 http 请求来批量操作数据（）</p>
+<p>如果你在将 Data source 设为 configuration data external 之前已经创建了比赛，那么这个比赛是没有设置 external id 的，于是你在操作这个比赛时（编辑/查看榜单之类的）就会出现类似于下图的问题：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2025/12/29/image-20251229141330490.png" style="transform: scale(1)" width=3037 height=565></div></p>
+<p>此时我们只需要把 Data source 改为原来的就好了。</p>
+<h2 id="7-gun-bang" tabindex="-1">7. 滚榜</h2>
+<p>需要把比赛结束之后的数据转成 ICPC Tools 的 Resolver 接受的数据。ICPC Tools 中貌似已经有对应的工具，但是不太好用。我使用了这个工具：<a href="https://github.com/Lanly109/icpc-resolver-from-domjudge">Lanly109/icpc-resolver-from-domjudge</a></p>
+<p>不过这个工具感觉也不太好使用。我打算后面再专门做一个处理滚榜的工具，所以关于滚榜的内容这里就暂时不讲了......</p>
+<h2 id="8-qi-ta" tabindex="-1">8. 其他</h2>
+<p>赛前如果要在 domjudge 上开测试比赛的话，需要记得后面把测试比赛的 public 和 enable 都给关了。同时如果赛前开了些测试账号和队伍，也需要把这些账号和队伍 enable 给关了，并放入 jury 或者其他什么分类中（不然上面的滚榜工具还会把测试队伍给导入进去）。目前还有个问题是，如果不删除测试账号/队伍的话，那么大屏展示显示排行榜的时候还会显示。</p>
+<p>由于是使用公网 IP，所以赛后需要检查一下选手登录的 IP，防止有人赛时提前离场然后在考场外面继续答题。</p>
+<p>同时由于是使用腾讯云的按量付费服务器，赛后需要把服务器释放掉，不然一直扣费。释放前可能还需要把选手的提交记录什么的都给存档下来。</p>
+<p>上面两个我自己写了一个工具：<a href="https://github.com/caiwen666/domjudge-tools">caiwen666/domjudge-tools</a>，后面还会继续更新。</p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://zhuanlan.zhihu.com/p/258024151">计算机 · DOMjudge Docker 配置 - 知乎</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://dup4.com/blog/2022/5/domjudge-team-account-import-guide/">DOMjudge Team Account Import Guide - Dup4's Blog</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>

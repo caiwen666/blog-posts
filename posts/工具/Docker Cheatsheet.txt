@@ -1,0 +1,44 @@
+**镜像拉取**
+
+镜像的格式一般为 `<repository>/<image>:<tag>`，其中 `image` 必选，`repository` 可选，如果为空则为 Docker Hub，`tag` 可选，如果为空则为 `latest`。
+
+镜像分为 public 和 private 两种，对于 public 的镜像无需登录即可拉取：
+
+```shell
+docker pull [OPTIONS] [IMAGE]
+```
+
+* `-a`：拉取仓库中所有的带标签的镜像
+* `-q`：静默拉取
+
+对于 private 的镜像则需要登录后才能拉取，登录命令如下：
+
+```shell
+docker login [OPTIONS] ${repository}
+```
+
+* `-u + 用户名`：传入用户名
+* `-p + 密码`：传入密码
+
+**镜像列表**
+
+列出当前所有的镜像
+
+```shell
+docker images
+```
+
+
+
+
+
+
+
+查看镜像组成，有助于分析镜像大小：
+
+```shell
+docker image history [IMAGE]
+```
+
+
+
