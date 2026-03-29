@@ -4,8 +4,9 @@
 {
 	"id": "promising-semantics",
 	"createTime": "2025-12-21 13:08",
-	"key": ["并行", "内存", "内存模型", "promising-semantics", "popl"],
-	"background": "https://api.file.caiwen.work/picture/2025/12/21/20251221131016581.png"
+	"key": ["并行", "内存", "内存模型", "promising-semantics", "popl", "论文"],
+	"background": "https://api.file.caiwen.work/picture/2025/12/21/20251221131016581.png",
+	"summary": "Promising Semantics 是对于宽松内存模型的一种解释模型，使用多值内存与 View、Promising—Certificate 等机制解释各种内存读写行为。"
 }
 ```
 
