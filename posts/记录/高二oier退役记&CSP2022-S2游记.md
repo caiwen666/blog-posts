@@ -7,7 +7,6 @@
 	"summary": "参加CSP-S2022，由于缺乏实战经验，失手。疫情期间在宾馆隔离。由于疫情原因，NOIP在举办前夕突然宣布取消。",
 	"key": ["noip", "csp", "游记", "疫情", "2022"],
 	"background": "https://www.caiwen.work/wp-content/uploads/2022/11/QQ截图20221125020846.png",
-	"recommend": true,
 	"tags": [{ "value": "精选", "color": "success" }]
 }
 ```

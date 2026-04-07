@@ -10,15 +10,7 @@
 <p>看了一下指导文档，发现很多地方讲的不是很详细，还以为需要很多前置知识。就在准备继续去看 csapp 补前置知识的时候发现原来还有个详细版本的 rCore 文档，训练营的指导文档只是精简版本</p>
 <p>看完了第一章，初步对内核的基本结构和 riscv 有了点了解，感觉意犹未尽...</p>
 <h3 id="riscv-ji-cun-qi" tabindex="-1">riscv寄存器</h3>
-<p>x0/zero 寄存器恒恒为零</p>
-<p>x1/ra 寄存器存放当前函数调用结束之后的返回到的地址，由被调用者保存</p>
-<p>x2/sp 寄存器存放栈指针，由被调用者保存。开栈时，sp 减小，[新sp, 旧sp) 部分即为新开的栈空间</p>
-<p>x3/gp 寄存器在程序运行期间不会发生变化，调用过程中无需保存</p>
-<p>x4/tp 寄存器同上</p>
-<p>x5~x7 和 x28~x31（又被合称为 t0~t6） 寄存器调用者保存</p>
-<p>x8~x9 和 x18~x27（又被合称为 s0~s11） 寄存器被调用者保存</p>
-<p>其中，s0/fp 寄存器既可以作为一个临时寄存器，也可以作为栈帧指针（即指向栈的起始位置）的寄存器。是被调用者保存寄存器。</p>
-<p>x10~x17（又被合称为 a0~a7） 用来传递参数，调用者保存。其中 a0 和 a1 还用来保存返回值</p>
+<p>该部分内容已迁移至：<a href="https://www.caiwen.work/post/cs-riscv">https://www.caiwen.work/post/cs-riscv</a></p>
 <h2 id="04-09-te-quan-ji-qie-huan" tabindex="-1">04-09（特权级切换）</h2>
 <p>看完了第二章，跟着完整的敲了一遍代码</p>
 <p>这一章为了实现在操作系统上运行应用程序，引入了特权级机制。特权级机制是软硬件配合得以实现的</p>
@@ -80,25 +72,6 @@
 <p>我照着指导书敲了一遍代码之后发现神秘bug，有的用户程序在调用 println 后触发了 IllegalInstruction 的 trap，有时候甚至触发 InstructionFault 。开始我在代码中插入一些 println 语句来看大概是哪个地方出现了问题，发现是 <code>__switch</code> 函数调用时发生问题。于是考虑 gdb 调试，单步调试发现 <code>__switch</code> 函数已经成功切换上下文并将控制权交给了用户程序，上述异常是用户程序触发的，但应用程序中只有 println。由于 rust 编译后的代码加了很多内容（毕竟 println 宏并非单纯的系统调用，还有 fmt 相关的东西），所以不太能调试。</p>
 <p>后续问 ai 得知触发异常的 trap 之后 sepc 会储存发生异常的指令的地址。然后我在内核代码里输出了一下，更灵异了：异常指令的地址是一块未被使用的内存。此时我考虑可能是程序链接出现了什么问题，于是各种排查...</p>
 <p>最终发现，指导书上的多道程序在链接的时候是用 python 脚本修改 linker.ld 的 BASE_ADDRESS 来让程序加载到不同的位置，而仓库代码却是在编译时传递 <code>-Clink-args=-Ttext=地址</code> 的方法来指定链接位置。前者有概率会出现奇怪 bug，会让我们的用户程序未链接到我们期望的位置，这就导致程序在执行的过程中跳到了某个未被使用的内存，从而触发上述异常。</p>
-<h3 id="gdb-de-yi-xie-shi-yong-bi-ji" tabindex="-1">gdb 的一些使用笔记</h3>
-<p><code>break [symbol]/[*address]</code> 在某个符号或者地址处打断点</p>
-<p><code>clear [symbol]/[*address]</code> 清除某个符号或者地址处的断点</p>
-<p><code>info breakpoints</code> 可以查看当前所有断点</p>
-<p><code>delete 3</code> 删除某个编号的断点</p>
-<p><code>display/i $pc</code> 可以在每条指令执行结束后显示一下指定的寄存器/地址的内容，可以用来持续监控</p>
-<p><code>p/x $寄存器名</code> 可以以十六进制显示某个寄存器的值</p>
-<p><code>disas</code> 反编译当前函数</p>
-<p><code>disas [symbol]</code> 反编译指定函数</p>
-<p><code>disas /m 开始地址,结束地址</code> 反编译指定地址范围的指令</p>
-<p>其中的参数可选</p>
-<ul>
-<li><code>/m</code> 显示源代码和汇编代码混合视图</li>
-<li><code>/r</code> 显示原始指令码</li>
-<li><code>/s</code> 显示汇编代码大小</li>
-</ul>
-<h3 id="fan-hui-bian-gong-ju" tabindex="-1">反汇编工具</h3>
-<p><code>rust-objdump -S [elf]</code> 可以反汇编某个 elf 文件，但是只反汇编 .text 段</p>
-<p><code>rust-objdump -S -D [elf]</code> 反汇编所有的段</p>
 <h2 id="04-13-04-16-xu-ni-nei-cun" tabindex="-1">04-13~04-16（虚拟内存）</h2>
 <p>内容非常多的一章！</p>
 <p>本章首先先实现了如何让内核得以实现动态内存分配，这样内核就可以使用堆了，与此同时一些数据结构也能够被使用。实现的过程大概是采用了一个第三方的 crate 实现堆内存分配算法，然后堆是在 bss 段中提前开好的。</p>

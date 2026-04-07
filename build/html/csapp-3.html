@@ -1,235 +1,8 @@
-<h2 id="shu-ju-ge-shi" tabindex="-1">数据格式</h2>
-<ul>
-<li>字节，8位，汇编后缀为 <code>b</code></li>
-<li>字（word）表示 16 位，2 字节，汇编后缀为 <code>w</code></li>
-<li>双字（double words）表示 32 位，4 字节，汇编后缀为 <code>l</code></li>
-<li>四字（quad words）表示 64 位，8 字节，汇编后缀为 <code>q</code></li>
-</ul>
-<p>浮点数使用单独的指令集，和上述一般的数据有所不同</p>
-<ul>
-<li>单精度（float），32 位，4 字节，汇编后缀为 <code>s</code></li>
-<li>双精度（double），64 位，8 字节，汇编后缀位 <code>l</code></li>
-</ul>
-<h2 id="ji-cun-qi" tabindex="-1">寄存器</h2>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b710866f7d.png" style="transform: scale(1)" width=1107 height=1256></div></p>
-<p>总的来说是 16 个寄存器，每个寄存器又分 4 个具体的寄存器，可以分别访问低 8、低 16、低 32、低 64 位的数据</p>
-<p>此外 CPU 中还有一些条件码寄存器，主要配合控制指令来使用。条件码寄存器只存储一个位：</p>
-<ul>
-<li><code>CF</code>：进位标志。对于整数操作，表示最近的操作的最高位是否产生了进位，可用来检查无符号操作的溢出。对于浮点运算，如果运算结果是负数，或是有一个操作数是 NaN 的话就设置为 1</li>
-<li><code>ZF</code>：零标志。对于整数操作，表示最近的操作结果是否为 0。对于浮点运算，如果运算结果为 0 或是有一个操作数是 NaN 的话就设置为 1</li>
-<li><code>SF</code>：符号标志，表示最近的操作结果是否为负数</li>
-<li><code>OF</code>：溢出标志，表示最近的操作是否导致一个补码发生了正溢出或者负溢出</li>
-<li><code>PF</code>：奇偶标志位。对于整数操作，如果最近的操作结果是偶校验的（即含有偶数个二进制 1），则设置为 1。对于浮点运算，如果有一个操作数是 NaN 的话就设置为 1</li>
-</ul>
-<p>一般情况下算数指令执行后就会设置条件码，但有如下的注意：</p>
-<ul>
-<li><code>leaq</code> 指令不设置条件码</li>
-<li><code>xor</code> 指令不设置 <code>CF</code> 和 <code>OF</code></li>
-<li>所有的移位操作，<code>CF</code> 为最后一个被移出的位，<code>OF</code> 被设置为 0</li>
-<li><code>inc</code> 和 <code>dec</code> 只设置 <code>OF</code> 和 <code>ZF</code>，不设置 <code>CF</code></li>
-</ul>
-<p>还有一些特殊的寄存器：</p>
-<ul>
-<li><code>%rip</code> 又称为 PC ，程序计数器，存放将要执行的下一条指令在内存中的地址</li>
-</ul>
-<p>AVX 浮点体系架构还提供如下的寄存器：</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c98eff3c66.png" style="transform: scale(1)" width=963 height=1296></div></p>
-<p>这些寄存器主要用来存储向量，如每个 ymm 寄存器可以存放 8 个32 位值，或是 4 个64 位值，浮点数和整数都可以。不过如果单纯用来进行单个浮点数运算的话，只需要用到 xmm 寄存器的低 32 或 64 位</p>
-<h2 id="cao-zuo-shu" tabindex="-1">操作数</h2>
-<ul>
-<li>立即数，以 <code>$</code> 开头随后接一个 C 语言中可以表示的整数字面量，如 <code>$-577</code>、<code>$0x1F</code></li>
-<li>寄存器，以 <code>%</code> 开头随后接寄存器的名称</li>
-<li>内存引用，完整的格式是 <code>Imm(rb,ri,s)</code>，表示的地址为 <code>Imm+rb+s*ri</code>，我们其中 <code>Imm</code> 是一个数字，<code>rb</code> 和 <code>ri</code> 是寄存器，<code>s</code> 是一个只能为 1 2 4 8 的数字。我们把 <code>rb</code> 称为基址寄存器，<code>Imm</code> 称为偏移，<code>ri</code> 称为变址寄存器，<code>s</code> 称为比例因子</li>
-</ul>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b731de5f78.png" style="transform: scale(1)" width=1226 height=499></div></p>
-<h2 id="zhi-ling" tabindex="-1">指令</h2>
-<h3 id="shu-ju-chuan-song-zhi-ling" tabindex="-1">数据传送指令</h3>
-<p>源和目的的数据大小都一致情况：</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b74fb53189.png" style="transform: scale(1)" width=805 height=301></div></p>
-<p>有几个注意点：</p>
-<ul>
-<li>如果选用寄存器，寄存器的大小要和指令后缀相符合</li>
-<li>x86-64 要求传送指令的两个操作数不能够都是访问内存</li>
-<li>使用 <code>movl</code> 传送完双字之后，该寄存器所对应的 64 位寄存器的高 4 字部分置 0</li>
-<li>使用 <code>movq</code> 的话，立即数只能是 32 位的，传送时是将 32 位立即数进行符号扩展再传过去</li>
-<li><code>movabsq</code> 则可以直接使用 64 位的立即数，但也只能使用立即数，并且传送目标只能是寄存器</li>
-</ul>
-<p>小数据传到大数据的传送指令有两种：一种进行零扩展一种进行符号扩展</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b786aa7e94.png" style="transform: scale(1)" width=1071 height=346></div></p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7887550b2.png" style="transform: scale(1)" width=1152 height=473></div></p>
-<ul>
-<li>上面不存在 <code>movzlq</code>，是因为 <code>movl</code> 在传送后自动清空高 4 字节，达到了 <code>movzlq</code> 的目的</li>
-<li><code>cltq</code> 无需指定操作数，他和 <code>movslq %eax,%rax</code> 一致，但是编码更加紧凑</li>
-</ul>
-<p>C 语言中，如果进行强制数据类型转换的时候既涉及大小变化又涉及符号变化时，应先改变大小。比如一个 <code>unsigned char</code> 转 <code>int</code> 的话，应该是零扩展到 32 位，而并非是符号扩展到 32 位</p>
-<h3 id="suan-shu-zhi-ling" tabindex="-1">算数指令</h3>
-<h4 id="jia-zai-you-xiao-di-zhi" tabindex="-1">加载有效地址</h4>
-<p>格式为 <code>leaq S,D</code>，这个指令的 <code>S</code> 部分必须是一个内存引用格式，其作用类似传送指令，把 <code>S</code> 表示的地址传送到 <code>D</code> 中。实际中这个指令和内存地址关系不大，只是单纯的计算数字，如：<code>leaq 7(%rdx,%rdx,4),%rax</code> 就相当于将 <code>%rax</code> 变为 <code>7+5%rax</code></p>
-<h4 id="yi-yuan-cao-zuo-he-er-yuan-cao-zuo" tabindex="-1">一元操作和二元操作</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7b65856f0.png" style="transform: scale(1)" width=828 height=176></div></p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7b81a33ed.png" style="transform: scale(1)" width=810 height=248></div></p>
-<ul>
-<li>
-<p>上面的所有指令都需要添加后缀，比如 <code>addq</code></p>
-</li>
-<li>
-<p>同样地，操作数不能同时是内存</p>
-</li>
-<li>
-<p>对于不符合交换律的运算，如 <code>sub</code>，一定是后面的操作数在前</p>
-</li>
-</ul>
-<h4 id="yi-wei-cao-zuo" tabindex="-1">移位操作</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7cd55dffa.png" style="transform: scale(1)" width=810 height=187></div></p>
-<p>其中 <code>k</code> 为移位量，<code>D</code> 表示要作用的目标</p>
-<ul>
-<li><code>k</code> 必须是一个立即数，或是单字节寄存器 <code>%cl</code> 中，其他寄存器不可以</li>
-<li>上述的指令同样需要添加后缀。只要求 <code>D</code> 作为寄存器时大小和后缀相符即可</li>
-<li>如果 <code>k</code> 使用 <code>%cl</code> 的话，如果 <code>D</code> 的位长为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>，那么位移量由 <code>%cl</code> 的低 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> 位决定，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>m</mi></msup><mo>=</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">2^m=w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>，高位部分会被忽略。比如 <code>%cl</code> 为 <code>0xFF</code> 的话，<code>salb</code> 会移动 7 位，<code>salw</code> 会移动 15 位，<code>sall</code> 会移动 31 位，<code>salq</code> 会移动 63 位</li>
-</ul>
-<h4 id="128-wei-yun-suan" tabindex="-1">128 位运算</h4>
-<p>Intel 把 16 字节的数称为八字（oct word）。为了表示 128 位的数据，我们规定 <code>%rdx</code> 存高 64 位，<code>%rax</code> 存低 64 位，然后我们有如下指令：</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b8164d6a18.png" style="transform: scale(1)" width=1103 height=466></div></p>
-<ul>
-<li>
-<p>注意 <code>mulq</code> 只有一个操作数，区别于上面有两个操作数的 <code>mulq</code></p>
-</li>
-<li>
-<p><code>divq</code> 和 <code>idivq</code> 指令执行后会分别把除数和余数放到两个寄存器中</p>
-</li>
-<li>
-<p>实际上对于非 128 位的数据进行除法或者取模运算的话也需要使用 <code>idivq</code> 和 <code>divq</code> 指令。这些数据在进行 <code>div</code> 指令前需要先通过 <code>clto</code> 指令来把自身符号扩展到 128 位</p>
-</li>
-</ul>
-<h3 id="kong-zhi-zhi-ling" tabindex="-1">控制指令</h3>
-<h4 id="jin-she-zhi-tiao-jian-ma" tabindex="-1">仅设置条件码</h4>
-<p><code>cmp</code> 和 <code>test</code> 指令分别基于减法和按位与运算，但是只设置条件码</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b880699f9f.png" style="transform: scale(1)" width=638 height=623></div></p>
-<p>比较常见的是，<code>cmp</code> 指令用来判断两个数的大小，<code>test</code> 传递两个相同的操作数来判断这个数字的正负</p>
-<h4 id="fang-wen-tiao-jian-ma" tabindex="-1">访问条件码</h4>
-<p>通常条件码寄存器不会被直接访问，而是通过如下的指令来访问</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b89c34e98a.png" style="transform: scale(1)" width=1061 height=652></div></p>
-<ul>
-<li>
-<p>其中注意 <code>l</code> 和 <code>b</code> 的后缀不再表示数据的大小了，而是 less 和 below 的意思</p>
-</li>
-<li>
-<p>无需增加后缀，会自动根据目标寄存器的大小推断</p>
-</li>
-<li>
-<p>操作数 <code>D</code> 必须是一个单字节寄存器</p>
-</li>
-</ul>
-<h4 id="tiao-zhuan" tabindex="-1">跳转</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b8b540261c.png" style="transform: scale(1)" width=982 height=693></div></p>
-<p>label 是汇编中的标号，如：</p>
-<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTA5bW92cSUyMCUyNDAlMkMlMjVyYXglMEElMDlqbXAlMjAuTDElMEElMDltb3ZxJTIwKCUyNXJheCklMkMlMjVyZHglMEEuTDElMEElMDlwb3BxJTIwJTI1cmR4JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code">	movq $0,%rax
-	jmp .L1
-	movq (%rax),%rdx
-.L1
-	popq %rdx
-</div></code></pre>
-<p><code>jmp</code> 还可以有间接跳转，即跳转目标的地址是从寄存器或者内存中读取的，如：<code>jmp *%rax</code> 和 <code>jmp *(%rax)</code></p>
-<p>跳转指令要跳转到的地址在机器码层面一般有两种编码方式：一种是 PC 相对的，即目标编码为实际地址与当前 PC （当前 PC 是下一条指令的地址）的差值，或者说下一条指令的地址加上跳转指令的地址记为真实跳转到的目标地址；一种是绝对的，即直接写明要跳转到的地址</p>
-<p>跳转指令可以用来实现 C 语言的 if 语句，如：</p>
-<pre><div class="head"><div class="language">c</div><div class="copy" data="aWYlMjAodGVzdC1leHByKSUwQSUwOXRoZW4tc3RhdGVtZW50JTBBZWxzZSUwQSUyMCUyMCUyMCUyMGVsc2Utc3RhdGVtZW50JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">if</span> (test-expr)
-	then-statement
-<span class="hljs-keyword">else</span>
-    <span class="hljs-keyword">else</span>-statement
-</div></code></pre>
-<p>一般会被翻译成如下的汇编（用 C 的形式表示）</p>
-<pre><div class="head"><div class="language">c</div><div class="copy" data="JTA5dCUyMCUzRCUyMHRlc3QtZXhwciUwQSUyMCUyMCUyMCUyMGlmJTIwKCF0KSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGdvdG8lMjBmYWxzZSUzQiUwQSUwOXRoZW4tc3RhdGVtZW50JTBBJTIwJTIwJTIwJTIwZ290byUyMGRvbmUlM0IlMEFmYWxzZSUzQSUwQSUwOWVsc2Utc3RhdGVtZW50JTBBZG9uZSUzQSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">	t = test-expr
-    <span class="hljs-keyword">if</span> (!t)
-        <span class="hljs-keyword">goto</span> <span class="hljs-literal">false</span>;
-	then-statement
-    <span class="hljs-keyword">goto</span> done;
-<span class="hljs-literal">false</span>:
-	<span class="hljs-keyword">else</span>-statement
-done:
-</div></code></pre>
-<p>有意思的是汇编的测试条件和 C 的正好相反</p>
-<h4 id="tiao-jian-chuan-song" tabindex="-1">条件传送</h4>
-<p>上面的跳转可能会影响处理器性能，因为现代处理器是流水线化工作的，一条指令的执行被拆成了好几步，上一条指令还没执行完毕就同时执行下一条指令。如果程序是顺序结构的话，那么处理器在执行的时候会将指令填满流水线。而当遇到分支的时候，处理器无法得知后续要执行的指令，流水线则会空闲。处理器为了保持流水线充满，会对分支进行预测，预测后续执行的指令，但是如果预测失败，则需要很大的惩罚回退已经执行的操作。</p>
-<p>部分分支情况可以使用条件传送进行优化。这种优化会把两个分支都进行计算，然后在最后根据条件选择要选用的值：</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c37e41d29b.png" style="transform: scale(1)" width=990 height=693></div></p>
-<p>只有满足相应的条件，才会进行传送</p>
-<ul>
-<li><code>S</code> 只能是寄存器或者内存，<code>R</code> 只能为寄存器</li>
-<li>不支持单个字节的传送</li>
-<li>无需增加后缀，会自动根据目标寄存器的大小推断</li>
-</ul>
-<p>C 语言中使用三目表达式可能会更容易让编译器使用条件传送指令</p>
-<p>有些情况下，有可能把两个分支的值都计算完毕之后比分支预测失败带来的惩罚还高，那么编译器就不会选用条件传送</p>
-<p>如果分支并非单纯的计算值，而是可能有副作用，那么也不会选择条件传送</p>
-<p>如：</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3ef194cf0.png" style="transform: scale(1)" width=797 height=124></div></p>
-<p>看起来可以用条件传送，但是如果 <code>xp</code> 真的为空指针的话，提前计算 <code>*xp</code> 会导致空指针异常</p>
-<h3 id="fu-dian-xiang-guan" tabindex="-1">浮点相关</h3>
-<h4 id="fu-dian-chuan-song" tabindex="-1">浮点传送</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9ae817dbe.png" style="transform: scale(1)" width=1563 height=502></div></p>
-<p>其中 <code>X</code> 只能选择 XMM 寄存器，<code>M</code> 只能选择内存</p>
-<p>如果浮点运算涉及到了立即数，那么需要由编译器先把立即数写到 rodata 段，然后从内存引用</p>
-<h4 id="zhuan-huan-cao-zuo" tabindex="-1">转换操作</h4>
-<p><strong>浮点转整数</strong></p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9c0c23a8f.png" style="transform: scale(1)" width=1564 height=466></div></p>
-<p>截断会向 0 舍入</p>
-<p><strong>整数转浮点</strong></p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9c575c7d9.png" style="transform: scale(1)" width=1550 height=452></div></p>
-<p>一般源 2 和目的一致</p>
-<p><strong>单精度到双精度</strong></p>
-<p>如果想把单精度数据转成双精度数据的话，可以使用 <code>vcvtss2sd</code> 指令，如 <code>vcvtss2sd %xmm0,%xmm0,%xmm0</code> 即可把 <code>%xmm0</code> 的单精度变为双精度</p>
-<p>不过 GCC 生成如下的代码</p>
-<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="dnVucGNrbHBzJTIwJTI1eG1tMCUyQyUyNXhtbTAlMkMlMjV4bW0wJTBBdmN2dHBzMnBkJTIwJTI1eG1tMCUyQyUyNXhtbTAlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">vunpcklps %xmm0,%xmm0,%xmm0
-vcvtps2pd %xmm0,%xmm0
-</div></code></pre>
-<p><code>vunpcklps</code> 将两个 xmm 寄存器的值交叉放置，然后把结果放到第三个寄存器。比如第一个寄存器的内容为字 <code>[s3,s2,s1,s0]</code>，另一个寄存器的内容为字 <code>[d3,d2.d1,d0]</code> ，那么目标寄存器的值会变为 <code>[s1,d1,s0,d0]</code>。那么对于上面这个指令，如果 <code>%xmm0</code> 的值为字 <code>[x3,x2,x1,x0]</code> 的话那么 <code>%xmm0</code> 会变为 <code>[x1,x1,x0,x0]</code>。</p>
-<p><code>vcvtps2pd</code> 会将源寄存器的两个低位的单精度值扩展成 xmm 寄存器中的两个双精度值。对于上面这个例子，最终 <code>%xmm0</code> 变为 <code>[dx0,dx0]</code></p>
-<p>那么上述两个指令合起来的效果就是把 <code>%xmm0</code> 低 32 位表示的单精度浮点数转为两个一样的双精度</p>
-<p>这样做不会有什么好处，GCC 这么做的原因也不明</p>
-<p><strong>双精度到单精度</strong></p>
-<p>可以使用 <code>vcvtsd2ss %xmm0,%xmm0,%xmm0</code> 指令，但是 GCC 产生如下的代码：</p>
-<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="dm1vdmRkdXAlMjAlMjV4bW0wJTJDJTI1eG1tMCUwQXZjdnRwZDJwc3glMjAlMjV4bW0wJTJDJTI1eG1tMCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">vmovddup %xmm0,%xmm0
-vcvtpd2psx %xmm0,%xmm0
-</div></code></pre>
-<p><code>vmovddup</code> 会将 xmm 的低 64 位复制到高 64 位，于是如果 <code>%xmm0</code> 为 <code>[x1,x0]</code> 的话会变成 <code>[x0,x0]</code>，<code>vcvtpd2psx</code> 会将 xmm 的两个双精度数字变为两个单精度，并在高 64 位填充 0，即会变为 <code>[0.0,0.0,x0,x0]</code></p>
-<h4 id="fu-dian-yun-suan" tabindex="-1">浮点运算</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca0c0812c3.png" style="transform: scale(1)" width=1552 height=529></div></p>
-<ul>
-<li>第一个操作数 <code>S1</code> 必须是 xmm 寄存器或者是内存</li>
-<li>第二个操作数和目的都必须是 xmm 寄存器</li>
-</ul>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca1d00c8ec.png" style="transform: scale(1)" width=1557 height=242></div></p>
-<ul>
-<li>源和目的都必须是 xmm 寄存器</li>
-</ul>
-<h4 id="bi-jiao-cao-zuo" tabindex="-1">比较操作</h4>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca3cc6ca6c.png" style="transform: scale(1)" width=1548 height=144></div></p>
-<p>浮点运算主要会设置 <code>ZF</code>、<code>CF</code> 和 <code>PF</code>，设置条件如下：</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca3a7495c8.png" style="transform: scale(1)" width=770 height=234></div></p>
-<h2 id="han-shu-tiao-yong" tabindex="-1">函数调用</h2>
-<h3 id="ya-zhan-dan-zhan-zhi-ling" tabindex="-1">压栈弹栈指令</h3>
-<p><code>%rsp</code> 寄存器存放当前栈顶地址</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c40e130320.png" style="transform: scale(1)" width=875 height=291></div></p>
-<h3 id="tiao-yong-fan-hui-zhi-ling" tabindex="-1">调用返回指令</h3>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c412f3cc58.png" style="transform: scale(1)" width=693 height=214></div></p>
-<p>其中 <code>call</code> 指令会首先把当前 PC （即下一条指令的地址）压入栈中，用来后续返回，然后将 PC 置为要调用的函数的地址</p>
-<p><code>ret</code> 指令会从栈中弹出一个值（编译器需要确保执行 <code>ret</code> 时已经弹栈到返回地址处了），然后将 PC 置为这个值</p>
-<h3 id="can-shu-he-fan-hui-zhi" tabindex="-1">参数和返回值</h3>
-<p>返回值放在 <code>%rax</code> 寄存器中，如果返回值是浮点数，则会放在 <code>%xmm0</code></p>
-<p>传递参数时，前 6 个参数通过寄存器传递，使用寄存器的规则如下：</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c42ea0d6dc.png" style="transform: scale(1)" width=1263 height=369></div></p>
-<p>多余 6 个的参数会直接压入栈中</p>
-<p>对于浮点数参数，前 8 个浮点数参数会使用 <code>%xmm0</code> 到 <code>%xmm7</code> 传递，剩余的会压入栈中</p>
-<p>压入栈中的时候，无论是 8 位 16 位还是 32 位，都占用 64 位的栈空间</p>
-<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c44d1c6d0a.png" style="transform: scale(1)" width=810 height=1201></div></p>
-<p>注意第七个函数位置是 <code>%rsp+8</code>，因为 <code>%rsp</code> 的位置上是 <code>call</code> 指令压入的返回值地址</p>
-<h3 id="ji-cun-qi-1" tabindex="-1">寄存器</h3>
-<p>为了确保调用一个函数前后，被调用的函数不会覆盖调用函数稍后会使用的寄存器值，我们需要有一个约定。一些寄存器是需要调用者进行提前保存的，一些寄存器是需要被调用者保存的。</p>
-<p>我们假设现在是函数 A 调用了函数 B</p>
-<p><code>%rbx</code>、<code>%rbp</code>、<code>%r12</code> ~ <code>%r15</code> 被划分为被调用者保存寄存器。函数 B 需要确保自己执行前后这些寄存器的值不变。函数 B 要么根本不去动这些寄存器，要么先把这些寄存器的值压入栈中，返回时再恢复。这样，函数 A 可以在调用 B 前放心地把数据存到这些寄存器上</p>
-<p>上述以外的寄存器（<code>%rsp</code> 除外）被划分为调用者保存寄存器，包括 ymm 和 xmm 这些寄存器。任何函数都可以随意使用这些寄存器，如果函数 A 需要确保这些寄存器在调用函数 B 后不变的话，需要自行保存</p>
-<h2 id="shu-ju-jie-gou" tabindex="-1">数据结构</h2>
-<h3 id="tiao-biao" tabindex="-1">跳表</h3>
+<blockquote>
+<p>X86 寄存器，指令集等内容搬到了 <a href="https://www.caiwen.work/post/cs-x86">https://www.caiwen.work/post/cs-x86</a></p>
+</blockquote>
+<h2 id="1-shu-ju-jie-gou" tabindex="-1">1. 数据结构</h2>
+<h3 id="1-1-tiao-biao" tabindex="-1">1.1 跳表</h3>
 <p>对于 switch 语句，如果判断的情况比较少的时候可能会直接展开成 if 语句，如果判断的情况比较多，且判断的值范围跨度比较小的时候，就会使用跳表</p>
 <p>比如：</p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3c7d4548b.png" style="transform: scale(1)" width=515 height=1094></div></p>
@@ -241,10 +14,10 @@ vcvtpd2psx %xmm0,%xmm0
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3cf84d3f0.png" style="transform: scale(1)" width=650 height=1249></div></p>
 <p>其中 <code>&amp;&amp;</code> 表示获取某个代码位置的地址</p>
 <p>大概就是把 switch 判断的值映射到一个比较小的值上面，然后以映射后的值作为下标直接从数组中获取跳转地址。这种带来的好处就是无论需要判断的情况有多少，执行 switch 指令的时间都是一样的</p>
-<h3 id="duo-wei-shu-zu" tabindex="-1">多维数组</h3>
+<h3 id="1-2-duo-wei-shu-zu" tabindex="-1">1.2 多维数组</h3>
 <p>多维数组在内存中的排列规则是，最后一个下标的元素连续，比如：</p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c4b6086eeb.png" style="transform: scale(1)" width=383 height=603></div></p>
-<h3 id="bian-chang-shu-zu" tabindex="-1">变长数组</h3>
+<h3 id="1-3-bian-chang-shu-zu" tabindex="-1">1.3 变长数组</h3>
 <p>ISO C99 引入了变长数组这一特性，允许声明数组时数组长度为变量</p>
 <p>数组长度无法在编译期获知的话，可能会使得函数在返回时不好清理当前栈帧。为了管理变长栈帧，x86-64 使用 <code>%rbp</code> 这个寄存器存储当前的栈顶地址。由于 <code>%rbp</code> 是被调用者保存寄存器，需要先压入栈中。比如：</p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c91c86b404.png" style="transform: scale(1)" width=1172 height=369></div></p>
@@ -257,26 +30,479 @@ vcvtpd2psx %xmm0,%xmm0
 popq %rbp
 </div></code></pre>
 <p>即会直接把 <code>%rsp</code> 置为栈顶来清栈，然后恢复 <code>%rbp</code></p>
-<h2 id="dui-kang-huan-chong-qu-yi-chu" tabindex="-1">对抗缓冲区溢出</h2>
-<h3 id="zhan-sui-ji-hua" tabindex="-1">栈随机化</h3>
+<h2 id="2-dui-kang-huan-chong-qu-yi-chu" tabindex="-1">2. 对抗缓冲区溢出</h2>
+<h3 id="2-1-zhan-sui-ji-hua" tabindex="-1">2.1 栈随机化</h3>
 <p>如果要进行缓冲区攻击，那么就需要把恶意代码放到缓冲区中，同时我们还需要得知插入代码的地址。因此一个防范手段是，程序开始时就在栈上分配一段随机大小的空间，这样就相当于把栈的起始地址随机了，这样一来攻击者将很难得知插入的代码位于哪里</p>
 <p>一个解决手段是，将恶意代码前面加入若干 <code>nop</code> 指令，这种指令只会增加 PC 而不会有其他行为。这样，攻击者只需要猜对有 <code>nop</code> 指令的范围就可以了，跳到 <code>nop</code> 范围后程序将会沿着 <code>nop</code> 一直滑向恶意代码，对应的专业术语叫空操作雪橇（nop sled）</p>
-<h3 id="zhan-po-huai-jian-ce" tabindex="-1">栈破坏检测</h3>
+<h3 id="2-2-zhan-po-huai-jian-ce" tabindex="-1">2.2 栈破坏检测</h3>
 <p>GCC 会评估一个函数是否容易受到缓冲区攻击，并在缓冲区的上方防止一个特殊的数据，被称为金丝雀。在执行 <code>ret</code> 指令之前，GCC 会生成检查代码，检查这个金丝雀是否发生改变。如果改变的话说明缓冲区被攻击，会立刻终止程序</p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c62481a095.png" style="transform: scale(1)" width=975 height=122></div></p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c625b0a060.png" style="transform: scale(1)" width=979 height=520></div></p>
 <p>其中第 3 行获取金丝雀数据，第 13 行进行金丝雀检查</p>
 <p>编译时使用 <code>-fno-stack-protector</code> 参数可以禁止 GCC 进行栈破坏检测</p>
-<h3 id="xian-zhi-ke-zhi-hang-dai-ma-qu-yu" tabindex="-1">限制可执行代码区域</h3>
+<h3 id="2-3-xian-zhi-ke-zhi-hang-dai-ma-qu-yu" tabindex="-1">2.3 限制可执行代码区域</h3>
 <p>可以在分页的时候限制执行权限</p>
-<h2 id="ming-ling-hang-gong-ju" tabindex="-1">命令行工具</h2>
+<h2 id="3-ming-ling-hang-gong-ju" tabindex="-1">3. 命令行工具</h2>
 <p>产生汇编代码：<code>gcc -Og -S mstore.c</code>，其中 <code>-Og</code> 会使得编译器尽可能保持代码的整体结构，<code>-S</code> 说明生成汇编代码</p>
 <p>产生机器代码：<code>gcc -Og -c mstore.c</code>，<code>-c</code> 表示产生二进制的机器代码</p>
 <p>反汇编：<code>objdump -d mstore.o</code> 可以把上面产生的二进制机器码反汇编</p>
-<h2 id="bomb-lab" tabindex="-1">Bomb Lab</h2>
-<p>写了几天的实验过程突然丢失了，等大二下学期正式学 CS 的时候再补（）</p>
-<h2 id="attack-lab" tabindex="-1">Attack Lab</h2>
-<h3 id="phase-1" tabindex="-1">Phase 1</h3>
+<p><code>rust-objdump -S [elf]</code> 可以反汇编某个 elf 文件，但是只反汇编 .text 段</p>
+<p><code>rust-objdump -S -D [elf]</code> 反汇编所有的段</p>
+<blockquote>
+<p>关于 GDB 参考：<a href="https://www.caiwen.work/post/gdb-cheatsheet">https://www.caiwen.work/post/gdb-cheatsheet</a></p>
+</blockquote>
+<h2 id="4-bomb-lab" tabindex="-1">4. Bomb Lab</h2>
+<p><s>2024 年 12 月：写了几天的实验过程突然丢失了，等大二下学期正式学 CS 的时候再补（）</s></p>
+<blockquote>
+<p>下文的实验过程基于湖南大学计算机系统课程的 Bomb Lab，可能与官方的 Self-study handout 有差别。</p>
+</blockquote>
+<h3 id="4-1-phase-0" tabindex="-1">4.1 Phase 0</h3>
+<p>众所周知正版的 Bomb Lab 在提交答案错误之后，会向服务器发送请求，扣除一定的分数。为了保证我们的分数安全，我们需要先检查一下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405182008215.png" style="transform: scale(1)" width=1116 height=421></div></p>
+<p>没有网络相关操作，看起来没问题。随后我又到处看了一下，甚至把 Ctrl+C 信号处理的函数都看了一下，都没问题。</p>
+<h3 id="4-2-phase-1" tabindex="-1">4.2 Phase 1</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405184551823.png" style="transform: scale(1)" width=1075 height=133></div></p>
+<p>在 main 函数中，会把 <code>read_line</code> 读到的字符串的指针放入栈顶，然后调用 <code>phase_1</code></p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405182354351.png" style="transform: scale(1)" width=1282 height=548></div></p>
+<p><code>phase_1</code> 中将 <code>0x804921c</code> 放入 <code>0x4(%esp)</code> 上，同时又把 <code>0x20(%esp)</code> 放入栈顶，然后调用 <code>strings_not_equal</code>。不难发现 <code>0x804921c</code> 和 <code>0x20(%esp)</code> 就是 <code>strings_not_equal</code> 的两个参数，<code>0x804921c</code> 处的字符串大概率就是第一关的答案了。</p>
+<p>值得一提的是，在 <code>phase_1</code> 中先开了大小为 <code>0x1c</code> 的栈，所以 <code>0x1c(%esp)</code> 为返回地址，<code>0x20(%esp)</code> 为 <code>main</code> 函数传来的参数。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405185035265.png" style="transform: scale(1)" width=1386 height=85></div></p>
+<p>第一关答案为：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="SG91c2VzJTIwd2lsbCUyMGJlZ2F0JTIwam9icyUyQyUyMGpvYnMlMjB3aWxsJTIwYmVnYXQlMjBob3VzZXMuJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">Houses will begat jobs, jobs will begat houses.
+</div></code></pre>
+<h3 id="4-3-phase-2" tabindex="-1">4.3 Phase 2</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405185357563.png" style="transform: scale(1)" width=1413 height=1351></div></p>
+<p>首先进行了一些关于栈的操作。关键点在于 <code>0x40(%esp)</code> 这里实际上是 <code>main</code> 传递过来的输入的字符串（<s>怎么这里都是用栈来传参的，有点奇怪，怀疑是这个实验故意这么干的</s>，后来得知这是 32 位的调用约定，详见 <a href="https://www.caiwen.work/post/cs-x86">https://www.caiwen.work/post/cs-x86</a>）。然后又拿着这个输入进来的字符串调用了 <code>read_six_numbers</code>。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405190355553.png" style="transform: scale(1)" width=1352 height=1051></div></p>
+<p>从这里就更能看出邪门了，这个程序估计全都是用栈来传参的。那么按这个角度看，上面这个代码倒是比较显然了，他在最后调用 <code>sscanf</code>，回忆 <code>sscanf</code> 的定义：</p>
+<blockquote>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="aW50JTIwc3NjYW5mKGNvbnN0JTIwY2hhciUyMCpzdHIlMkMlMjBjb25zdCUyMGNoYXIlMjAqZm9ybWF0JTJDJTIwLi4uKSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-type">int</span> <span class="hljs-title function_">sscanf</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span> *str, <span class="hljs-type">const</span> <span class="hljs-type">char</span> *format, ...)</span>
+</div></code></pre>
+</blockquote>
+<p>第一个参数为 <code>(%esp)</code> 也就是 <code>0x30(%esp)</code> ，即 <code>read_six_numbers</code> 的第一个参数，也就是输入的字符串。</p>
+<p>第二个参数为 <code>0x4(%esp)</code>，即 <code>0x80493b1</code>：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405191034858.png" style="transform: scale(1)" width=772 height=91></div></p>
+<p>显然是想从输入的字符串中取出六个整数，然后我们根据后续第三到第八个参数可以得知：</p>
+<ul>
+<li>第一个数存到 <code>0x8(%esp)</code> -&gt; <code>%eax</code> -&gt; <code>0x34(%esp)</code>，即 <code>phase_2</code> 传给 <code>read_six_numbers</code> 的第二个参数。从 <code>phase_2</code> 的 <code>+5</code> 到 <code>+9</code> 可知第二个参数为 <code>phase_2</code> 的 <code>0x18(%esp)</code>，第一个数存在这里。</li>
+<li>第二个数存到 <code>0xc(%esp)</code> -&gt; <code>%edx</code> -&gt; <code> %eax + 4</code> -&gt; <code>0x34(%esp) + 0x4</code>，即 <code>phase_2</code> 的 <code>0x1c(%esp)</code>。</li>
+<li>以此类推，剩余四个数也都这样放在 <code>phase_2</code> 的栈上。第三个数对应 <code>0x20(%esp)</code>，第四个数对应 <code>0x24(%esp)</code>，第五个数对应 <code>0x28(%esp)</code>，第六个数对应 <code>0x2c(%esp)</code></li>
+</ul>
+<p>然后回来从 <code>phase_2</code> 的 <code>+30</code> 位置处开始看。首先从 <code>+30</code> 处可知第一个数要等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>。随后将第二个数放入 <code>%ebx</code> ，然后调到 <code>+39</code> 位置，这里猜测是做了个循环。</p>
+<p>观察后面代码可知，每次循环会把 <code>%ebx</code> 前面的数取出来，乘二，判断和 <code>%ebx</code> 对应的数字是否相等，相等的话就将 <code>%ebx</code> 移向下一个数字。</p>
+<p>所以第二关的答案应该是一个等比数列：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="MSUyMDIlMjA0JTIwOCUyMDE2JTIwMzIlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code">1 2 4 8 16 32
+</div></code></pre>
+<h3 id="4-4-phase-3" tabindex="-1">4.4 Phase 3</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405231815766.png" style="transform: scale(1)" width=1338 height=468></div></p>
+<p>开头那一堆操作到现在已经很熟悉了，相当于是输入字符串作为第一个参数，<code>0x80493bd</code> 作为第二个参数，<code>0x18(%esp)</code> 作为第三个参数，<code>0x1c(%esp)</code> 作为第四个参数，调用 <code>sscanf</code>。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405232001946.png" style="transform: scale(1)" width=655 height=95></div></p>
+<p>这一关我们需要输入两个数字。这两个数字会被存到 <code>0x18(%esp)</code> 和 <code>0x1c(%esp)</code> 上。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0ODk2OCUyMCUzQyUyQjU0JTNFJTNBJTIwJTIwJTIwJTIwamElMjAlMjAlMjAlMjAlMjAweDgwNDg5YTYlMjAlM0NwaGFzZV8zJTJCMTE2JTNFJTBBJTIwJTIwJTIwMHgwODA0ODk2YSUyMCUzQyUyQjU2JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwMHgxOCglMjVlc3ApJTJDJTI1ZWF4JTBBJTBBJTIwJTIwJTIwLi4uJTBBJTIwJTIwJTIwMHgwODA0ODlhNiUyMCUzQyUyQjExNiUzRSUzQSUyMCUyMCUyMGNhbGwlMjAlMjAlMjAweDgwNDhlMzUlMjAlM0NleHBsb2RlX2JvbWIlM0UlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code">   0x08048968 &lt;+54&gt;:    ja     0x80489a6 &lt;phase_3+116&gt;
+   0x0804896a &lt;+56&gt;:    mov    0x18(%esp),%eax
+
+   ...
+   0x080489a6 &lt;+116&gt;:   call   0x8048e35 &lt;explode_bomb&gt;
+</div></code></pre>
+<p>可知第一个数必须小于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>7</mn></mrow><annotation encoding="application/x-tex">7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">7</span></span></span></span>。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0ODk2YSUyMCUzQyUyQjU2JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwMHgxOCglMjVlc3ApJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0ODk2ZSUyMCUzQyUyQjYwJTNFJTNBJTIwJTIwJTIwJTIwam1wJTIwJTIwJTIwJTIwKjB4ODA0OTI3YyglMkMlMjVlYXglMkM0KSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">   0x0804896a &lt;+56&gt;:    mov    0x18(%esp),%eax
+   0x0804896e &lt;+60&gt;:    jmp    *0x804927c(,%eax,4)
+</div></code></pre>
+<p>这比较有意思了，可知后续 <code>jmp</code> 跳转到的位置应该是和我们输入的第一个数字有关。那么我们猜测 <code>0x804927c</code> 这里应该存放着一个大小为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8</mn></mrow><annotation encoding="application/x-tex">8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">8</span></span></span></span> 的指针数组：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405232654576.png" style="transform: scale(1)" width=1606 height=128></div></p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0ODk3NSUyMCUzQyUyQjY3JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI0MHhiOCUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDg5N2ElMjAlM0MlMkI3MiUzRSUzQSUyMCUyMCUyMCUyMGptcCUyMCUyMCUyMCUyMDB4ODA0ODliNyUyMCUzQ3BoYXNlXzMlMkIxMzMlM0UlMEElMjAlMjAlMjAweDA4MDQ4OTdjJTIwJTNDJTJCNzQlM0UlM0ElMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjQweDI5MSUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDg5ODElMjAlM0MlMkI3OSUzRSUzQSUyMCUyMCUyMCUyMGptcCUyMCUyMCUyMCUyMDB4ODA0ODliNyUyMCUzQ3BoYXNlXzMlMkIxMzMlM0UlMEElMjAlMjAlMjAweDA4MDQ4OTgzJTIwJTNDJTJCODElM0UlM0ElMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjQweDNhNyUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDg5ODglMjAlM0MlMkI4NiUzRSUzQSUyMCUyMCUyMCUyMGptcCUyMCUyMCUyMCUyMDB4ODA0ODliNyUyMCUzQ3BoYXNlXzMlMkIxMzMlM0UlMEElMjAlMjAlMjAweDA4MDQ4OThhJTIwJTNDJTJCODglM0UlM0ElMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjQweGVhJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0ODk4ZiUyMCUzQyUyQjkzJTNFJTNBJTIwJTIwJTIwJTIwam1wJTIwJTIwJTIwJTIwMHg4MDQ4OWI3JTIwJTNDcGhhc2VfMyUyQjEzMyUzRSUwQSUyMCUyMCUyMDB4MDgwNDg5OTElMjAlM0MlMkI5NSUzRSUzQSUyMCUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNDB4MzJiJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0ODk5NiUyMCUzQyUyQjEwMCUzRSUzQSUyMCUyMCUyMGptcCUyMCUyMCUyMCUyMDB4ODA0ODliNyUyMCUzQ3BoYXNlXzMlMkIxMzMlM0UlMEElMjAlMjAlMjAweDA4MDQ4OTk4JTIwJTNDJTJCMTAyJTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI0MHgzNzIlMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4OTlkJTIwJTNDJTJCMTA3JTNFJTNBJTIwJTIwJTIwam1wJTIwJTIwJTIwJTIwMHg4MDQ4OWI3JTIwJTNDcGhhc2VfMyUyQjEzMyUzRSUwQSUyMCUyMCUyMDB4MDgwNDg5OWYlMjAlM0MlMkIxMDklM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjQweDNhNyUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDg5YTQlMjAlM0MlMkIxMTQlM0UlM0ElMjAlMjAlMjBqbXAlMjAlMjAlMjAlMjAweDgwNDg5YjclMjAlM0NwaGFzZV8zJTJCMTMzJTNFJTBBJTIwJTIwJTIwMHgwODA0ODlhNiUyMCUzQyUyQjExNiUzRSUzQSUyMCUyMCUyMGNhbGwlMjAlMjAlMjAweDgwNDhlMzUlMjAlM0NleHBsb2RlX2JvbWIlM0UlMEElMjAlMjAlMjAweDA4MDQ4OWFiJTIwJTNDJTJCMTIxJTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI0MHgwJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0ODliMCUyMCUzQyUyQjEyNiUzRSUzQSUyMCUyMCUyMGptcCUyMCUyMCUyMCUyMDB4ODA0ODliNyUyMCUzQ3BoYXNlXzMlMkIxMzMlM0UlMEElMjAlMjAlMjAweDA4MDQ4OWIyJTIwJTNDJTJCMTI4JTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI0MHgyOGQlMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4OWI3JTIwJTNDJTJCMTMzJTNFJTNBJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwMHgxYyglMjVlc3ApJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0ODliYiUyMCUzQyUyQjEzNyUzRSUzQSUyMCUyMCUyMGplJTIwJTIwJTIwJTIwJTIwMHg4MDQ4OWMyJTIwJTNDcGhhc2VfMyUyQjE0NCUzRSUwQSUyMCUyMCUyMDB4MDgwNDg5YmQlMjAlM0MlMkIxMzklM0UlM0ElMjAlMjAlMjBjYWxsJTIwJTIwJTIwMHg4MDQ4ZTM1JTIwJTNDZXhwbG9kZV9ib21iJTNFJTBBJTIwJTIwJTIwMHgwODA0ODljMiUyMCUzQyUyQjE0NCUzRSUzQSUyMCUyMCUyMGFkZCUyMCUyMCUyMCUyMCUyNDB4MmMlMkMlMjVlc3AlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div></div><div class="code">   0x08048975 &lt;+67&gt;:    mov    $0xb8,%eax
+   0x0804897a &lt;+72&gt;:    jmp    0x80489b7 &lt;phase_3+133&gt;
+   0x0804897c &lt;+74&gt;:    mov    $0x291,%eax
+   0x08048981 &lt;+79&gt;:    jmp    0x80489b7 &lt;phase_3+133&gt;
+   0x08048983 &lt;+81&gt;:    mov    $0x3a7,%eax
+   0x08048988 &lt;+86&gt;:    jmp    0x80489b7 &lt;phase_3+133&gt;
+   0x0804898a &lt;+88&gt;:    mov    $0xea,%eax
+   0x0804898f &lt;+93&gt;:    jmp    0x80489b7 &lt;phase_3+133&gt;
+   0x08048991 &lt;+95&gt;:    mov    $0x32b,%eax
+   0x08048996 &lt;+100&gt;:   jmp    0x80489b7 &lt;phase_3+133&gt;
+   0x08048998 &lt;+102&gt;:   mov    $0x372,%eax
+   0x0804899d &lt;+107&gt;:   jmp    0x80489b7 &lt;phase_3+133&gt;
+   0x0804899f &lt;+109&gt;:   mov    $0x3a7,%eax
+   0x080489a4 &lt;+114&gt;:   jmp    0x80489b7 &lt;phase_3+133&gt;
+   0x080489a6 &lt;+116&gt;:   call   0x8048e35 &lt;explode_bomb&gt;
+   0x080489ab &lt;+121&gt;:   mov    $0x0,%eax
+   0x080489b0 &lt;+126&gt;:   jmp    0x80489b7 &lt;phase_3+133&gt;
+   0x080489b2 &lt;+128&gt;:   mov    $0x28d,%eax
+   0x080489b7 &lt;+133&gt;:   cmp    0x1c(%esp),%eax
+   0x080489bb &lt;+137&gt;:   je     0x80489c2 &lt;phase_3+144&gt;
+   0x080489bd &lt;+139&gt;:   call   0x8048e35 &lt;explode_bomb&gt;
+   0x080489c2 &lt;+144&gt;:   add    $0x2c,%esp
+</div></code></pre>
+<p>能够跳转到的位置在 <code>0x08048975</code> 到 <code>0x080489b2</code> 之间。而这中间的任何位置最后都会跳到 <code>+133</code> 位置，这个位置会检查你输入的第二个数字与 <code>%eax</code> 是否相等，相等的话就过关。</p>
+<p>所以这一关的答案是不唯一的。我们直接选择令第一个数字为 <code>0</code>，这样会跳到 <code>0x08048975</code>，这里会设置 <code>%eax</code> 为 <code>0xb8</code> ，所以我们令第二个数字为 <code>0xb8</code> 即 <code>184</code> 即可。</p>
+<h3 id="4-5-phase-4" tabindex="-1">4.5 Phase 4</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405233402347.png" style="transform: scale(1)" width=1341 height=468></div></p>
+<p>还是熟悉的操作，这里不多赘述：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/05/image-20260405233426847.png" style="transform: scale(1)" width=547 height=86></div></p>
+<p>我们还是要输入两个数字，这两个数字分别存到 <code>0x1c(%esp)</code> 和 <code>0x18(%esp)</code> 中。</p>
+<blockquote>
+<p>注意，这里比较不符合直觉，第一个数字存在了高地址处，第二个数字存在了低地址处。</p>
+</blockquote>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGEzYyUyMCUzQyUyQjQ0JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwMHgxOCglMjVlc3ApJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGE0MCUyMCUzQyUyQjQ4JTNFJTNBJTIwJTIwJTIwJTIwc3ViJTIwJTIwJTIwJTIwJTI0MHgyJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGE0MyUyMCUzQyUyQjUxJTNFJTNBJTIwJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwJTI0MHgyJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGE0OCUyMCUzQyUyQjU2JTNFJTNBJTIwJTIwJTIwJTIwY2FsbCUyMCUyMCUyMDB4ODA0OGUzNSUyMCUzQ2V4cGxvZGVfYm9tYiUzRSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code">   0x08048a3c &lt;+44&gt;:    mov    0x18(%esp),%eax
+   0x08048a40 &lt;+48&gt;:    sub    $0x2,%eax
+   0x08048a43 &lt;+51&gt;:    cmp    $0x2,%eax
+   0x08048a48 &lt;+56&gt;:    call   0x8048e35 &lt;explode_bomb&gt;
+</div></code></pre>
+<p>可知第二个数字减去 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> 要小于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>，也就是第二个数字要小于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>。</p>
+<blockquote>
+<p>注意，这里用的是 <code>jbe</code>，也就是第二个数字要看成是<strong>无符号</strong>的，前面减 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> 不能溢出，所以其实隐含着必须大于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> 这个条件。在做实验的时候看了十多分钟才看出来。。。</p>
+</blockquote>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGE0ZCUyMCUzQyUyQjYxJTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwMHgxOCglMjVlc3ApJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGE1MSUyMCUzQyUyQjY1JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI1ZWF4JTJDMHg0KCUyNWVzcCklMEElMjAlMjAlMjAweDA4MDQ4YTU1JTIwJTNDJTJCNjklM0UlM0ElMjAlMjAlMjAlMjBtb3ZsJTIwJTIwJTIwJTI0MHg1JTJDKCUyNWVzcCklMEElMjAlMjAlMjAweDA4MDQ4YTVjJTIwJTNDJTJCNzYlM0UlM0ElMjAlMjAlMjAlMjBjYWxsJTIwJTIwJTIwMHg4MDQ4OWM2JTIwJTNDZnVuYzQlM0UlMEElMjAlMjAlMjAweDA4MDQ4YTYxJTIwJTNDJTJCODElM0UlM0ElMjAlMjAlMjAlMjBjbXAlMjAlMjAlMjAlMjAweDFjKCUyNWVzcCklMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YTY1JTIwJTNDJTJCODUlM0UlM0ElMjAlMjAlMjAlMjBqZSUyMCUyMCUyMCUyMCUyMDB4ODA0OGE2YyUyMCUzQ3BoYXNlXzQlMkI5MiUzRSUwQSUyMCUyMCUyMDB4MDgwNDhhNjclMjAlM0MlMkI4NyUzRSUzQSUyMCUyMCUyMCUyMGNhbGwlMjAlMjAlMjAweDgwNDhlMzUlMjAlM0NleHBsb2RlX2JvbWIlM0UlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">   0x08048a4d &lt;+61&gt;:    mov    0x18(%esp),%eax
+   0x08048a51 &lt;+65&gt;:    mov    %eax,0x4(%esp)
+   0x08048a55 &lt;+69&gt;:    movl   $0x5,(%esp)
+   0x08048a5c &lt;+76&gt;:    call   0x80489c6 &lt;func4&gt;
+   0x08048a61 &lt;+81&gt;:    cmp    0x1c(%esp),%eax
+   0x08048a65 &lt;+85&gt;:    je     0x8048a6c &lt;phase_4+92&gt;
+   0x08048a67 &lt;+87&gt;:    call   0x8048e35 &lt;explode_bomb&gt;
+</div></code></pre>
+<p>然后将 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn></mrow><annotation encoding="application/x-tex">5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span> 作为参数一，第二个数字作为参数二，调用 <code>func4</code>，如果返回值等于第一个数字就通关。于是我们看一下 <code>func4</code> 是怎么个事。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0ODljNiUyMCUzQyUyQjAlM0UlM0ElMjAlMjAlMjAlMjAlMjBwdXNoJTIwJTIwJTIwJTI1ZWRpJTBBJTIwJTIwJTIwMHgwODA0ODljNyUyMCUzQyUyQjElM0UlM0ElMjAlMjAlMjAlMjAlMjBwdXNoJTIwJTIwJTIwJTI1ZXNpJTBBJTIwJTIwJTIwMHgwODA0ODljOCUyMCUzQyUyQjIlM0UlM0ElMjAlMjAlMjAlMjAlMjBwdXNoJTIwJTIwJTIwJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0ODljOSUyMCUzQyUyQjMlM0UlM0ElMjAlMjAlMjAlMjAlMjBzdWIlMjAlMjAlMjAlMjAlMjQweDEwJTJDJTI1ZXNwJTBBJTIwJTIwJTIwMHgwODA0ODljYyUyMCUzQyUyQjYlM0UlM0ElMjAlMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAweDIwKCUyNWVzcCklMkMlMjVlYnglMEElMjAlMjAlMjAweDA4MDQ4OWQwJTIwJTNDJTJCMTAlM0UlM0ElMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAweDI0KCUyNWVzcCklMkMlMjVlc2klMEElMjAlMjAlMjAweDA4MDQ4OWQ0JTIwJTNDJTJCMTQlM0UlM0ElMjAlMjAlMjAlMjB0ZXN0JTIwJTIwJTIwJTI1ZWJ4JTJDJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0ODlkNiUyMCUzQyUyQjE2JTNFJTNBJTIwJTIwJTIwJTIwamxlJTIwJTIwJTIwJTIwMHg4MDQ4YTA0JTIwJTNDZnVuYzQlMkI2MiUzRSUwQSUyMCUyMCUyMC4uLi4lMEElMjAlMjAlMjAweDA4MDQ4YTA0JTIwJTNDJTJCNjIlM0UlM0ElMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjQweDAlMkMlMjVlYXglMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code">   0x080489c6 &lt;+0&gt;:     push   %edi
+   0x080489c7 &lt;+1&gt;:     push   %esi
+   0x080489c8 &lt;+2&gt;:     push   %ebx
+   0x080489c9 &lt;+3&gt;:     sub    $0x10,%esp
+   0x080489cc &lt;+6&gt;:     mov    0x20(%esp),%ebx
+   0x080489d0 &lt;+10&gt;:    mov    0x24(%esp),%esi
+   0x080489d4 &lt;+14&gt;:    test   %ebx,%ebx
+   0x080489d6 &lt;+16&gt;:    jle    0x8048a04 &lt;func4+62&gt;
+   ....
+   0x08048a04 &lt;+62&gt;:    mov    $0x0,%eax
+</div></code></pre>
+<p>首先准备参数，将参数一放入 <code>%ebx</code>，参数二放入 <code>%esi</code>。</p>
+<p>如果参数一小于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 的话，则直接返回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>。我们传入的参数一为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn></mrow><annotation encoding="application/x-tex">5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>，不考虑这一点。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0ODlkOCUyMCUzQyUyQjE4JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI1ZXNpJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0ODlkYSUyMCUzQyUyQjIwJTNFJTNBJTIwJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwJTI0MHgxJTJDJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0ODlkZCUyMCUzQyUyQjIzJTNFJTNBJTIwJTIwJTIwJTIwamUlMjAlMjAlMjAlMjAlMjAweDgwNDhhMDklMjAlM0NmdW5jNCUyQjY3JTNFJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div></div><div class="code">   0x080489d8 &lt;+18&gt;:    mov    %esi,%eax
+   0x080489da &lt;+20&gt;:    cmp    $0x1,%ebx
+   0x080489dd &lt;+23&gt;:    je     0x8048a09 &lt;func4+67&gt;
+</div></code></pre>
+<p>如果参数一等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 的话，则直接返回参数二。我们传入的参数一为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn></mrow><annotation encoding="application/x-tex">5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>，还是不考虑这一点。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0ODlkZiUyMCUzQyUyQjI1JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI1ZXNpJTJDMHg0KCUyNWVzcCklMEElMjAlMjAlMjAweDA4MDQ4OWUzJTIwJTNDJTJCMjklM0UlM0ElMjAlMjAlMjAlMjBsZWElMjAlMjAlMjAlMjAtMHgxKCUyNWVieCklMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4OWU2JTIwJTNDJTJCMzIlM0UlM0ElMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjVlYXglMkMoJTI1ZXNwKSUwQSUyMCUyMCUyMDB4MDgwNDg5ZTklMjAlM0MlMkIzNSUzRSUzQSUyMCUyMCUyMCUyMGNhbGwlMjAlMjAlMjAweDgwNDg5YzYlMjAlM0NmdW5jNCUzRSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code">   0x080489df &lt;+25&gt;:    mov    %esi,0x4(%esp)
+   0x080489e3 &lt;+29&gt;:    lea    -0x1(%ebx),%eax
+   0x080489e6 &lt;+32&gt;:    mov    %eax,(%esp)
+   0x080489e9 &lt;+35&gt;:    call   0x80489c6 &lt;func4&gt;
+</div></code></pre>
+<p>这里有意思，相当于是把参数一减去 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，然后参数二不变，做了个递归。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0ODllZSUyMCUzQyUyQjQwJTNFJTNBJTIwJTIwJTIwJTIwbGVhJTIwJTIwJTIwJTIwKCUyNWVheCUyQyUyNWVzaSUyQzEpJTJDJTI1ZWRpJTBBJTIwJTIwJTIwMHgwODA0ODlmMSUyMCUzQyUyQjQzJTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI1ZXNpJTJDMHg0KCUyNWVzcCklMEElMjAlMjAlMjAweDA4MDQ4OWY1JTIwJTNDJTJCNDclM0UlM0ElMjAlMjAlMjAlMjBzdWIlMjAlMjAlMjAlMjAlMjQweDIlMkMlMjVlYnglMEElMjAlMjAlMjAweDA4MDQ4OWY4JTIwJTNDJTJCNTAlM0UlM0ElMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjVlYnglMkMoJTI1ZXNwKSUwQSUyMCUyMCUyMDB4MDgwNDg5ZmIlMjAlM0MlMkI1MyUzRSUzQSUyMCUyMCUyMCUyMGNhbGwlMjAlMjAlMjAweDgwNDg5YzYlMjAlM0NmdW5jNCUzRSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code">   0x080489ee &lt;+40&gt;:    lea    (%eax,%esi,1),%edi
+   0x080489f1 &lt;+43&gt;:    mov    %esi,0x4(%esp)
+   0x080489f5 &lt;+47&gt;:    sub    $0x2,%ebx
+   0x080489f8 &lt;+50&gt;:    mov    %ebx,(%esp)
+   0x080489fb &lt;+53&gt;:    call   0x80489c6 &lt;func4&gt;
+</div></code></pre>
+<p>上面递归完了之后，后面会将返回值加上参数二再加上 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，放入 <code>%edi</code>。</p>
+<p>然后又进行了一个递归，这次是把参数一减去 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>，参数二不变，递归调用 <code>func4</code>。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGEwMCUyMCUzQyUyQjU4JTNFJTNBJTIwJTIwJTIwJTIwYWRkJTIwJTIwJTIwJTIwJTI1ZWRpJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGEwMiUyMCUzQyUyQjYwJTNFJTNBJTIwJTIwJTIwJTIwam1wJTIwJTIwJTIwJTIwMHg4MDQ4YTA5JTIwJTNDZnVuYzQlMkI2NyUzRSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">   0x08048a00 &lt;+58&gt;:    add    %edi,%eax
+   0x08048a02 &lt;+60&gt;:    jmp    0x8048a09 &lt;func4+67&gt;
+</div></code></pre>
+<p>递归的返回值再加上 <code>%edi</code> 即为最终结果。</p>
+<p>这个 <code>func4</code> 的递归过程稍微有点复杂，我们干脆写一个程序跑一遍：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="Zm4lMjBmdW5jNChhJTNBJTIwaTMyJTJDJTIwYiUzQSUyMGkzMiklMjAtJTNFJTIwaTMyJTIwJTdCJTBBJTIwJTIwJTIwJTIwaWYlMjBhJTIwJTNDJTNEJTIwMCUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHJldHVybiUyMDAlM0IlMEElMjAlMjAlMjAlMjAlN0QlMEElMjAlMjAlMjAlMjBpZiUyMGElMjAlM0QlM0QlMjAxJTIwJTdCJTBBJTIwJTIwJTIwJTIwJTIwJTIwJTIwJTIwcmV0dXJuJTIwYiUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSUyMCUyMCUyMCUyMGxldCUyMHQxJTIwJTNEJTIwZnVuYzQoYSUyMC0lMjAxJTJDJTIwYiklMjAlMkIlMjBiJTNCJTBBJTIwJTIwJTIwJTIwbGV0JTIwdDIlMjAlM0QlMjBmdW5jNChhJTIwLSUyMDIlMkMlMjBiKSUzQiUwQSUyMCUyMCUyMCUyMHQxJTIwJTJCJTIwdDIlMEElN0QlMEElMEFmbiUyMG1haW4oKSUyMCU3QiUwQSUyMCUyMCUyMCUyMHByaW50bG4hKCUyMiU3QiU3RCUyMiUyQyUyMGZ1bmM0KDUlMkMlMjAyKSklM0IlMEElN0QlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div></div><div class="code"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">func4</span>(a: <span class="hljs-type">i32</span>, b: <span class="hljs-type">i32</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">i32</span> {
+    <span class="hljs-keyword">if</span> a &lt;= <span class="hljs-number">0</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">if</span> a == <span class="hljs-number">1</span> {
+        <span class="hljs-keyword">return</span> b;
+    }
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">t1</span> = <span class="hljs-title function_ invoke__">func4</span>(a - <span class="hljs-number">1</span>, b) + b;
+    <span class="hljs-keyword">let</span> <span class="hljs-variable">t2</span> = <span class="hljs-title function_ invoke__">func4</span>(a - <span class="hljs-number">2</span>, b);
+    t1 + t2
+}
+
+<span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{}&quot;</span>, <span class="hljs-title function_ invoke__">func4</span>(<span class="hljs-number">5</span>, <span class="hljs-number">2</span>));
+}
+</div></code></pre>
+<p>这一关答案也不唯一。这里直接钦定第二个数字为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>，跑出来的结果是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>24</mn></mrow><annotation encoding="application/x-tex">24</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">24</span></span></span></span>，于是 <code>24 2</code> 就是一个答案。</p>
+<h3 id="4-6-phase-5" tabindex="-1">4.6 Phase 5</h3>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGE3MSUyMCUzQyUyQjAlM0UlM0ElMjAlMjAlMjAlMjAlMjBwdXNoJTIwJTIwJTIwJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0OGE3MiUyMCUzQyUyQjElM0UlM0ElMjAlMjAlMjAlMjAlMjBzdWIlMjAlMjAlMjAlMjAlMjQweDI4JTJDJTI1ZXNwJTBBJTIwJTIwJTIwMHgwODA0OGE3NSUyMCUzQyUyQjQlM0UlM0ElMjAlMjAlMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAweDMwKCUyNWVzcCklMkMlMjVlYnglMEElMjAlMjAlMjAweDA4MDQ4YTc5JTIwJTNDJTJCOCUzRSUzQSUyMCUyMCUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNWdzJTNBMHgxNCUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDhhN2YlMjAlM0MlMkIxNCUzRSUzQSUyMCUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNWVheCUyQzB4MWMoJTI1ZXNwKSUwQSUyMCUyMCUyMDB4MDgwNDhhODMlMjAlM0MlMkIxOCUzRSUzQSUyMCUyMCUyMCUyMHhvciUyMCUyMCUyMCUyMCUyNWVheCUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDhhODUlMjAlM0MlMkIyMCUzRSUzQSUyMCUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNWVieCUyQyglMjVlc3ApJTBBJTIwJTIwJTIwMHgwODA0OGE4OCUyMCUzQyUyQjIzJTNFJTNBJTIwJTIwJTIwJTIwY2FsbCUyMCUyMCUyMDB4ODA0OGQwYiUyMCUzQ3N0cmluZ19sZW5ndGglM0UlMEElMjAlMjAlMjAweDA4MDQ4YThkJTIwJTNDJTJCMjglM0UlM0ElMjAlMjAlMjAlMjBjbXAlMjAlMjAlMjAlMjAlMjQweDYlMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YTkwJTIwJTNDJTJCMzElM0UlM0ElMjAlMjAlMjAlMjBqZSUyMCUyMCUyMCUyMCUyMDB4ODA0OGFkNyUyMCUzQ3BoYXNlXzUlMkIxMDIlM0UlMEElMjAlMjAlMjAweDA4MDQ4YTkyJTIwJTNDJTJCMzMlM0UlM0ElMjAlMjAlMjAlMjBjYWxsJTIwJTIwJTIwMHg4MDQ4ZTM1JTIwJTNDZXhwbG9kZV9ib21iJTNFJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code">   0x08048a71 &lt;+0&gt;:     push   %ebx
+   0x08048a72 &lt;+1&gt;:     sub    $0x28,%esp
+   0x08048a75 &lt;+4&gt;:     mov    0x30(%esp),%ebx
+   0x08048a79 &lt;+8&gt;:     mov    %gs:0x14,%eax
+   0x08048a7f &lt;+14&gt;:    mov    %eax,0x1c(%esp)
+   0x08048a83 &lt;+18&gt;:    xor    %eax,%eax
+   0x08048a85 &lt;+20&gt;:    mov    %ebx,(%esp)
+   0x08048a88 &lt;+23&gt;:    call   0x8048d0b &lt;string_length&gt;
+   0x08048a8d &lt;+28&gt;:    cmp    $0x6,%eax
+   0x08048a90 &lt;+31&gt;:    je     0x8048ad7 &lt;phase_5+102&gt;
+   0x08048a92 &lt;+33&gt;:    call   0x8048e35 &lt;explode_bomb&gt;
+</div></code></pre>
+<p>这里主要是把输入的字符串拿去调用 <code>string_length</code> 这个函数，前面 <code>%gs:0x14</code> 有关的操作应该是为了防止缓冲区攻击之类的。</p>
+<p>我们暂且假设 <code>string_length</code> 如它的名字一样是获取字符串长度的，后续会比较输入字符串长度是否为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn></mrow><annotation encoding="application/x-tex">6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span>，所以这一关的答案需要是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn></mrow><annotation encoding="application/x-tex">6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span> 个字符。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGE5NyUyMCUzQyUyQjM4JTNFJTNBJTIwJTIwJTIwJTIwam1wJTIwJTIwJTIwJTIwMHg4MDQ4YWQ3JTIwJTNDcGhhc2VfNSUyQjEwMiUzRSUwQSUyMCUyMCUyMDB4MDgwNDhhOTklMjAlM0MlMkI0MCUzRSUzQSUyMCUyMCUyMCUyMG1vdnpibCUyMCglMjVlYnglMkMlMjVlYXglMkMxKSUyQyUyNWVkeCUwQSUyMCUyMCUyMDB4MDgwNDhhOWQlMjAlM0MlMkI0NCUzRSUzQSUyMCUyMCUyMCUyMGFuZCUyMCUyMCUyMCUyMCUyNDB4ZiUyQyUyNWVkeCUwQSUyMCUyMCUyMDB4MDgwNDhhYTAlMjAlM0MlMkI0NyUzRSUzQSUyMCUyMCUyMCUyMG1vdnpibCUyMDB4ODA0OTI5YyglMjVlZHgpJTJDJTI1ZWR4JTBBJTIwJTIwJTIwMHgwODA0OGFhNyUyMCUzQyUyQjU0JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI1ZGwlMkMweDE1KCUyNWVzcCUyQyUyNWVheCUyQzEpJTBBJTIwJTIwJTIwMHgwODA0OGFhYiUyMCUzQyUyQjU4JTNFJTNBJTIwJTIwJTIwJTIwYWRkJTIwJTIwJTIwJTIwJTI0MHgxJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGFhZSUyMCUzQyUyQjYxJTNFJTNBJTIwJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwJTI0MHg2JTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGFiMSUyMCUzQyUyQjY0JTNFJTNBJTIwJTIwJTIwJTIwam5lJTIwJTIwJTIwJTIwMHg4MDQ4YTk5JTIwJTNDcGhhc2VfNSUyQjQwJTNFJTBBJTIwJTIwJTIwLi4uJTBBJTIwJTIwJTIwMHgwODA0OGFkNyUyMCUzQyUyQjEwMiUzRSUzQSUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNDB4MCUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDhhZGMlMjAlM0MlMkIxMDclM0UlM0ElMjAlMjAlMjBqbXAlMjAlMjAlMjAlMjAweDgwNDhhOTklMjAlM0NwaGFzZV81JTJCNDAlM0UlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code">   0x08048a97 &lt;+38&gt;:    jmp    0x8048ad7 &lt;phase_5+102&gt;
+   0x08048a99 &lt;+40&gt;:    movzbl (%ebx,%eax,1),%edx
+   0x08048a9d &lt;+44&gt;:    and    $0xf,%edx
+   0x08048aa0 &lt;+47&gt;:    movzbl 0x804929c(%edx),%edx
+   0x08048aa7 &lt;+54&gt;:    mov    %dl,0x15(%esp,%eax,1)
+   0x08048aab &lt;+58&gt;:    add    $0x1,%eax
+   0x08048aae &lt;+61&gt;:    cmp    $0x6,%eax
+   0x08048ab1 &lt;+64&gt;:    jne    0x8048a99 &lt;phase_5+40&gt;
+   ...
+   0x08048ad7 &lt;+102&gt;:   mov    $0x0,%eax
+   0x08048adc &lt;+107&gt;:   jmp    0x8048a99 &lt;phase_5+40&gt;
+</div></code></pre>
+<p>这里应该是开了个循环。逻辑不难，<code>%eax</code> 在这里相当于是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>，初始时 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">i=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>，每次循环 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mn>6</mn></mrow><annotation encoding="application/x-tex">i=6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span> 时跳出循环。<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 用来遍历输入的字符串，将字符串中每个字符都与上 <code>0xf</code>（相当于取了低 4 位）。<code>0x804929c</code> 这里应该是有一个长度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16</mn></mrow><annotation encoding="application/x-tex">16</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">16</span></span></span></span> 的字符串数组，我们把与得到的结果作为下标，在这个数组中取出对应的字符，组成了从 <code>0x15(%esp)</code> 开始的新字符串。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406003429094.png" style="transform: scale(1)" width=2019 height=133></div></p>
+<table>
+<thead>
+<tr>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>m</td>
+<td>a</td>
+<td>d</td>
+<td>u</td>
+<td>i</td>
+<td>e</td>
+<td>r</td>
+<td>s</td>
+</tr>
+<tr>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+</tr>
+<tr>
+<td>n</td>
+<td>f</td>
+<td>o</td>
+<td>t</td>
+<td>v</td>
+<td>b</td>
+<td>y</td>
+<td>l</td>
+</tr>
+</tbody>
+</table>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGFiMyUyMCUzQyUyQjY2JTNFJTNBJTIwJTIwJTIwJTIwbW92YiUyMCUyMCUyMCUyNDB4MCUyQzB4MWIoJTI1ZXNwKSUwQSUyMCUyMCUyMDB4MDgwNDhhYjglMjAlM0MlMkI3MSUzRSUzQSUyMCUyMCUyMCUyMG1vdmwlMjAlMjAlMjAlMjQweDgwNDkyNzIlMkMweDQoJTI1ZXNwKSUwQSUyMCUyMCUyMDB4MDgwNDhhYzAlMjAlM0MlMkI3OSUzRSUzQSUyMCUyMCUyMCUyMGxlYSUyMCUyMCUyMCUyMDB4MTUoJTI1ZXNwKSUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDhhYzQlMjAlM0MlMkI4MyUzRSUzQSUyMCUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNWVheCUyQyglMjVlc3ApJTBBJTIwJTIwJTIwMHgwODA0OGFjNyUyMCUzQyUyQjg2JTNFJTNBJTIwJTIwJTIwJTIwY2FsbCUyMCUyMCUyMDB4ODA0OGQyYSUyMCUzQ3N0cmluZ3Nfbm90X2VxdWFsJTNFJTBBJTIwJTIwJTIwMHgwODA0OGFjYyUyMCUzQyUyQjkxJTNFJTNBJTIwJTIwJTIwJTIwdGVzdCUyMCUyMCUyMCUyNWVheCUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDhhY2UlMjAlM0MlMkI5MyUzRSUzQSUyMCUyMCUyMCUyMGplJTIwJTIwJTIwJTIwJTIwMHg4MDQ4YWRlJTIwJTNDcGhhc2VfNSUyQjEwOSUzRSUwQSUyMCUyMCUyMDB4MDgwNDhhZDAlMjAlM0MlMkI5NSUzRSUzQSUyMCUyMCUyMCUyMGNhbGwlMjAlMjAlMjAweDgwNDhlMzUlMjAlM0NleHBsb2RlX2JvbWIlM0UlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">   0x08048ab3 &lt;+66&gt;:    movb   $0x0,0x1b(%esp)
+   0x08048ab8 &lt;+71&gt;:    movl   $0x8049272,0x4(%esp)
+   0x08048ac0 &lt;+79&gt;:    lea    0x15(%esp),%eax
+   0x08048ac4 &lt;+83&gt;:    mov    %eax,(%esp)
+   0x08048ac7 &lt;+86&gt;:    call   0x8048d2a &lt;strings_not_equal&gt;
+   0x08048acc &lt;+91&gt;:    test   %eax,%eax
+   0x08048ace &lt;+93&gt;:    je     0x8048ade &lt;phase_5+109&gt;
+   0x08048ad0 &lt;+95&gt;:    call   0x8048e35 &lt;explode_bomb&gt;
+</div></code></pre>
+<p>然后就是去比较这个字符串和 <code>0x8049272</code> 这里的字符串是否相等，相等的话则过关。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406003608261.png" style="transform: scale(1)" width=596 height=97></div></p>
+<p>那么需要构造字符的低 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 位分别为 9，15，1，0，5，7 的字符串。</p>
+<p>我们先写个程序跑一下：</p>
+<pre><div class="head"><div class="language">rust</div><div class="copy" data="Zm4lMjBtYWluKCklMjAlN0IlMEElMjAlMjAlMjAlMjBmb3IlMjBpJTIwaW4lMjAnYScuLiUzRCd6JyUyMCU3QiUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMHByaW50bG4hKCUyMiU3QiU3RCUzQSUyMCU3QiU3RCUyMiUyQyUyMGklMkMlMjAoaSUyMGFzJTIwdXNpemUpJTIwJTI2JTIwMHhmKSUzQiUwQSUyMCUyMCUyMCUyMCU3RCUwQSU3RCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div></div><div class="code"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">main</span>() {
+    <span class="hljs-keyword">for</span> <span class="hljs-variable">i</span> <span class="hljs-keyword">in</span> <span class="hljs-string">&#x27;a&#x27;</span>..=<span class="hljs-string">&#x27;z&#x27;</span> {
+        <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{}: {}&quot;</span>, i, (i <span class="hljs-keyword">as</span> <span class="hljs-type">usize</span>) &amp; <span class="hljs-number">0xf</span>);
+    }
+}
+</div></code></pre>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="YSUzQSUyMDElMEFiJTNBJTIwMiUwQWMlM0ElMjAzJTBBZCUzQSUyMDQlMEFlJTNBJTIwNSUwQWYlM0ElMjA2JTBBZyUzQSUyMDclMEFoJTNBJTIwOCUwQWklM0ElMjA5JTBBaiUzQSUyMDEwJTBBayUzQSUyMDExJTBBbCUzQSUyMDEyJTBBbSUzQSUyMDEzJTBBbiUzQSUyMDE0JTBBbyUzQSUyMDE1JTBBcCUzQSUyMDAlMEFxJTNBJTIwMSUwQXIlM0ElMjAyJTBBcyUzQSUyMDMlMEF0JTNBJTIwNCUwQXUlM0ElMjA1JTBBdiUzQSUyMDYlMEF3JTNBJTIwNyUwQXglM0ElMjA4JTBBeSUzQSUyMDklMEF6JTNBJTIwMTAlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div></div><div class="code">a: 1
+b: 2
+c: 3
+d: 4
+e: 5
+f: 6
+g: 7
+h: 8
+i: 9
+j: 10
+k: 11
+l: 12
+m: 13
+n: 14
+o: 15
+p: 0
+q: 1
+r: 2
+s: 3
+t: 4
+u: 5
+v: 6
+w: 7
+x: 8
+y: 9
+z: 10
+</div></code></pre>
+<p>一种构造方案是 <code>ioapeg</code>。</p>
+<h3 id="4-7-phase-6" tabindex="-1">4.7 Phase 6</h3>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGFmNSUyMCUzQyUyQjAlM0UlM0ElMjAlMjAlMjAlMjAlMjBwdXNoJTIwJTIwJTIwJTI1ZXNpJTBBJTIwJTIwJTIwMHgwODA0OGFmNiUyMCUzQyUyQjElM0UlM0ElMjAlMjAlMjAlMjAlMjBwdXNoJTIwJTIwJTIwJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0OGFmNyUyMCUzQyUyQjIlM0UlM0ElMjAlMjAlMjAlMjAlMjBzdWIlMjAlMjAlMjAlMjAlMjQweDQ0JTJDJTI1ZXNwJTBBJTIwJTIwJTIwMHgwODA0OGFmYSUyMCUzQyUyQjUlM0UlM0ElMjAlMjAlMjAlMjAlMjBsZWElMjAlMjAlMjAlMjAweDEwKCUyNWVzcCklMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YWZlJTIwJTNDJTJCOSUzRSUzQSUyMCUyMCUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNWVheCUyQzB4NCglMjVlc3ApJTBBJTIwJTIwJTIwMHgwODA0OGIwMiUyMCUzQyUyQjEzJTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwMHg1MCglMjVlc3ApJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGIwNiUyMCUzQyUyQjE3JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI1ZWF4JTJDKCUyNWVzcCklMEElMjAlMjAlMjAweDA4MDQ4YjA5JTIwJTNDJTJCMjAlM0UlM0ElMjAlMjAlMjAlMjBjYWxsJTIwJTIwJTIwMHg4MDQ4ZTVjJTIwJTNDcmVhZF9zaXhfbnVtYmVycyUzRSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">   0x08048af5 &lt;+0&gt;:     push   %esi
+   0x08048af6 &lt;+1&gt;:     push   %ebx
+   0x08048af7 &lt;+2&gt;:     sub    $0x44,%esp
+   0x08048afa &lt;+5&gt;:     lea    0x10(%esp),%eax
+   0x08048afe &lt;+9&gt;:     mov    %eax,0x4(%esp)
+   0x08048b02 &lt;+13&gt;:    mov    0x50(%esp),%eax
+   0x08048b06 &lt;+17&gt;:    mov    %eax,(%esp)
+   0x08048b09 &lt;+20&gt;:    call   0x8048e5c &lt;read_six_numbers&gt;
+</div></code></pre>
+<p>先是经典的读入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn></mrow><annotation encoding="application/x-tex">6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span> 个数字。根据我们先前的经验，这 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn></mrow><annotation encoding="application/x-tex">6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span> 个数字存放在 <code>0x10(%esp)</code> 这里。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGIyNCUyMCUzQyUyQjQ3JTNFJTNBJTIwJTIwJTIwJTIwYWRkJTIwJTIwJTIwJTIwJTI0MHgxJTJDJTI1ZXNpJTBBJTIwJTIwJTIwMHgwODA0OGIyNyUyMCUzQyUyQjUwJTNFJTNBJTIwJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwJTI0MHg2JTJDJTI1ZXNpJTBBJTIwJTIwJTIwMHgwODA0OGIyYSUyMCUzQyUyQjUzJTNFJTNBJTIwJTIwJTIwJTIwam5lJTIwJTIwJTIwJTIwMHg4MDQ4YjMzJTIwJTNDcGhhc2VfNiUyQjYyJTNFJTBBJTIwJTIwJTIwMHgwODA0OGIyYyUyMCUzQyUyQjU1JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI0MHgwJTJDJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0OGIzMSUyMCUzQyUyQjYwJTNFJTNBJTIwJTIwJTIwJTIwam1wJTIwJTIwJTIwJTIwMHg4MDQ4YjZiJTIwJTNDcGhhc2VfNiUyQjExOCUzRSUwQSUyMCUyMCUyMDB4MDgwNDhiMzMlMjAlM0MlMkI2MiUzRSUzQSUyMCUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNWVzaSUyQyUyNWVieCUwQSUyMCUyMCUyMDB4MDgwNDhiMzUlMjAlM0MlMkI2NCUzRSUzQSUyMCUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMDB4MTAoJTI1ZXNwJTJDJTI1ZWJ4JTJDNCklMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YjM5JTIwJTNDJTJCNjglM0UlM0ElMjAlMjAlMjAlMjBjbXAlMjAlMjAlMjAlMjAlMjVlYXglMkMweGMoJTI1ZXNwJTJDJTI1ZXNpJTJDNCklMEElMjAlMjAlMjAweDA4MDQ4YjNkJTIwJTNDJTJCNzIlM0UlM0ElMjAlMjAlMjAlMjBqbmUlMjAlMjAlMjAlMjAweDgwNDhiNDQlMjAlM0NwaGFzZV82JTJCNzklM0UlMEElMjAlMjAlMjAweDA4MDQ4YjNmJTIwJTNDJTJCNzQlM0UlM0ElMjAlMjAlMjAlMjBjYWxsJTIwJTIwJTIwMHg4MDQ4ZTM1JTIwJTNDZXhwbG9kZV9ib21iJTNFJTBBJTIwJTIwJTIwMHgwODA0OGI0NCUyMCUzQyUyQjc5JTNFJTNBJTIwJTIwJTIwJTIwYWRkJTIwJTIwJTIwJTIwJTI0MHgxJTJDJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0OGI0NyUyMCUzQyUyQjgyJTNFJTNBJTIwJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwJTI0MHg1JTJDJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0OGI0YSUyMCUzQyUyQjg1JTNFJTNBJTIwJTIwJTIwJTIwamxlJTIwJTIwJTIwJTIwMHg4MDQ4YjM1JTIwJTNDcGhhc2VfNiUyQjY0JTNFJTBBJTIwJTIwJTIwMHgwODA0OGI0YyUyMCUzQyUyQjg3JTNFJTNBJTIwJTIwJTIwJTIwam1wJTIwJTIwJTIwJTIwMHg4MDQ4YjEzJTIwJTNDcGhhc2VfNiUyQjMwJTNFJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div></div><div class="code">   0x08048b24 &lt;+47&gt;:    add    $0x1,%esi
+   0x08048b27 &lt;+50&gt;:    cmp    $0x6,%esi
+   0x08048b2a &lt;+53&gt;:    jne    0x8048b33 &lt;phase_6+62&gt;
+   0x08048b2c &lt;+55&gt;:    mov    $0x0,%ebx
+   0x08048b31 &lt;+60&gt;:    jmp    0x8048b6b &lt;phase_6+118&gt;
+   0x08048b33 &lt;+62&gt;:    mov    %esi,%ebx
+   0x08048b35 &lt;+64&gt;:    mov    0x10(%esp,%ebx,4),%eax
+   0x08048b39 &lt;+68&gt;:    cmp    %eax,0xc(%esp,%esi,4)
+   0x08048b3d &lt;+72&gt;:    jne    0x8048b44 &lt;phase_6+79&gt;
+   0x08048b3f &lt;+74&gt;:    call   0x8048e35 &lt;explode_bomb&gt;
+   0x08048b44 &lt;+79&gt;:    add    $0x1,%ebx
+   0x08048b47 &lt;+82&gt;:    cmp    $0x5,%ebx
+   0x08048b4a &lt;+85&gt;:    jle    0x8048b35 &lt;phase_6+64&gt;
+   0x08048b4c &lt;+87&gt;:    jmp    0x8048b13 &lt;phase_6+30&gt;
+</div></code></pre>
+<p>这里出现了一个循环结构。实际上是两重循环，外层循环会检查这六个数字是否大于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> （这里 <code>sub</code> + <code>jbe</code> 的坑我们上面也见识过了）且小于等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn></mrow><annotation encoding="application/x-tex">6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span>。检查完了这个之后还会再开内层循环，检查后面的数字是否与当前数字相同，这等价于需要保证这六个互不相同。</p>
+<p>检查完毕之后会跳到 <code>+118</code> 处：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGI0ZSUyMCUzQyUyQjg5JTNFJTNBJTIwJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwMHg4KCUyNWVkeCklMkMlMjVlZHglMEElMjAlMjAlMjAweDA4MDQ4YjUxJTIwJTNDJTJCOTIlM0UlM0ElMjAlMjAlMjAlMjBhZGQlMjAlMjAlMjAlMjAlMjQweDElMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YjU0JTIwJTNDJTJCOTUlM0UlM0ElMjAlMjAlMjAlMjBjbXAlMjAlMjAlMjAlMjAlMjVlY3glMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YjU2JTIwJTNDJTJCOTclM0UlM0ElMjAlMjAlMjAlMjBqbmUlMjAlMjAlMjAlMjAweDgwNDhiNGUlMjAlM0NwaGFzZV82JTJCODklM0UlMEElMjAlMjAlMjAweDA4MDQ4YjU4JTIwJTNDJTJCOTklM0UlM0ElMjAlMjAlMjAlMjBqbXAlMjAlMjAlMjAlMjAweDgwNDhiNWYlMjAlM0NwaGFzZV82JTJCMTA2JTNFJTBBJTIwJTIwJTIwMHgwODA0OGI1YSUyMCUzQyUyQjEwMSUzRSUzQSUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNDB4ODA0YjExYyUyQyUyNWVkeCUwQSUyMCUyMCUyMDB4MDgwNDhiNWYlMjAlM0MlMkIxMDYlM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjVlZHglMkMweDI4KCUyNWVzcCUyQyUyNWVzaSUyQzQpJTBBJTIwJTIwJTIwMHgwODA0OGI2MyUyMCUzQyUyQjExMCUzRSUzQSUyMCUyMCUyMGFkZCUyMCUyMCUyMCUyMCUyNDB4MSUyQyUyNWVieCUwQSUyMCUyMCUyMDB4MDgwNDhiNjYlMjAlM0MlMkIxMTMlM0UlM0ElMjAlMjAlMjBjbXAlMjAlMjAlMjAlMjAlMjQweDYlMkMlMjVlYnglMEElMjAlMjAlMjAweDA4MDQ4YjY5JTIwJTNDJTJCMTE2JTNFJTNBJTIwJTIwJTIwamUlMjAlMjAlMjAlMjAlMjAweDgwNDhiODIlMjAlM0NwaGFzZV82JTJCMTQxJTNFJTBBLSUzRSUyMDB4MDgwNDhiNmIlMjAlM0MlMkIxMTglM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjVlYnglMkMlMjVlc2klMEElMjAlMjAlMjAweDA4MDQ4YjZkJTIwJTNDJTJCMTIwJTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwMHgxMCglMjVlc3AlMkMlMjVlYnglMkM0KSUyQyUyNWVjeCUwQSUyMCUyMCUyMDB4MDgwNDhiNzElMjAlM0MlMkIxMjQlM0UlM0ElMjAlMjAlMjBjbXAlMjAlMjAlMjAlMjAlMjQweDElMkMlMjVlY3glMEElMjAlMjAlMjAweDA4MDQ4Yjc0JTIwJTNDJTJCMTI3JTNFJTNBJTIwJTIwJTIwamxlJTIwJTIwJTIwJTIwMHg4MDQ4YjVhJTIwJTNDcGhhc2VfNiUyQjEwMSUzRSUwQSUyMCUyMCUyMDB4MDgwNDhiNzYlMjAlM0MlMkIxMjklM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjQweDElMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YjdiJTIwJTNDJTJCMTM0JTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI0MHg4MDRiMTFjJTJDJTI1ZWR4JTBBJTIwJTIwJTIwMHgwODA0OGI4MCUyMCUzQyUyQjEzOSUzRSUzQSUyMCUyMCUyMGptcCUyMCUyMCUyMCUyMDB4ODA0OGI0ZSUyMCUzQ3BoYXNlXzYlMkI4OSUzRSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div></div><div class="code">   0x08048b4e &lt;+89&gt;:    mov    0x8(%edx),%edx
+   0x08048b51 &lt;+92&gt;:    add    $0x1,%eax
+   0x08048b54 &lt;+95&gt;:    cmp    %ecx,%eax
+   0x08048b56 &lt;+97&gt;:    jne    0x8048b4e &lt;phase_6+89&gt;
+   0x08048b58 &lt;+99&gt;:    jmp    0x8048b5f &lt;phase_6+106&gt;
+   0x08048b5a &lt;+101&gt;:   mov    $0x804b11c,%edx
+   0x08048b5f &lt;+106&gt;:   mov    %edx,0x28(%esp,%esi,4)
+   0x08048b63 &lt;+110&gt;:   add    $0x1,%ebx
+   0x08048b66 &lt;+113&gt;:   cmp    $0x6,%ebx
+   0x08048b69 &lt;+116&gt;:   je     0x8048b82 &lt;phase_6+141&gt;
+-&gt; 0x08048b6b &lt;+118&gt;:   mov    %ebx,%esi
+   0x08048b6d &lt;+120&gt;:   mov    0x10(%esp,%ebx,4),%ecx
+   0x08048b71 &lt;+124&gt;:   cmp    $0x1,%ecx
+   0x08048b74 &lt;+127&gt;:   jle    0x8048b5a &lt;phase_6+101&gt;
+   0x08048b76 &lt;+129&gt;:   mov    $0x1,%eax
+   0x08048b7b &lt;+134&gt;:   mov    $0x804b11c,%edx
+   0x08048b80 &lt;+139&gt;:   jmp    0x8048b4e &lt;phase_6+89&gt;
+</div></code></pre>
+<p>首先 <code>%ebx</code> 和 <code>%esi</code> 都为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>。</p>
+<p>由 <code>+120</code> 可知 <code>%ebx</code> 是用来索引输入数组的。假如当前元素为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>，如果<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x = 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，则将 <code>0x804b11c</code> 赋值给 <code>%edx</code>。</p>
+<p>反之，则初始化 <code>%edx</code> 为 <code>0x804b11c</code>，<code>%eax</code> 为 <code>1</code>，进入 <code>+89</code> 这里。</p>
+<p><code>+89</code> 到 <code>+97</code> 这里相当于一个小循环，结合 <code>%edx</code> 的初值很像 <code>.data</code> 段的地址，以及 <code>mov 0x8(%edx),%edx</code>，很容易猜想 <code>0x804b11c</code> 这里放着一个链表。这里这个小循环是在把链表中第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 个节点的地址放入 <code>%edx</code> 中。</p>
+<p>无论当前元素是否等于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，最后都会进入 <code>+106</code> 这里，到这里时，<code>%edx</code> 就是为链表中第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 个节点的地址。然后会把 <code>%edx</code> 放入 <code>0x28(%esp)</code> 开始的一个数组中，并开始处理下一个数字。</p>
+<p>我们这里输入的数字相当于是在索引一个链表，把链表中的节点的地址按照我们给定的排列方式存入新的数组中。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406012134871.png" style="transform: scale(1)" width=1413 height=517></div></p>
+<p>这些处理完之后会跳到 <code>+141</code> 处。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGI4MiUyMCUzQyUyQjE0MSUzRSUzQSUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMDB4MjgoJTI1ZXNwKSUyQyUyNWVieCUwQSUyMCUyMCUyMDB4MDgwNDhiODYlMjAlM0MlMkIxNDUlM0UlM0ElMjAlMjAlMjBsZWElMjAlMjAlMjAlMjAweDJjKCUyNWVzcCklMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YjhhJTIwJTNDJTJCMTQ5JTNFJTNBJTIwJTIwJTIwbGVhJTIwJTIwJTIwJTIwMHg0MCglMjVlc3ApJTJDJTI1ZXNpJTBBJTIwJTIwJTIwMHgwODA0OGI4ZSUyMCUzQyUyQjE1MyUzRSUzQSUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNWVieCUyQyUyNWVjeCUwQSUyMCUyMCUyMDB4MDgwNDhiOTAlMjAlM0MlMkIxNTUlM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAoJTI1ZWF4KSUyQyUyNWVkeCUwQSUyMCUyMCUyMDB4MDgwNDhiOTIlMjAlM0MlMkIxNTclM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjVlZHglMkMweDgoJTI1ZWN4KSUwQSUyMCUyMCUyMDB4MDgwNDhiOTUlMjAlM0MlMkIxNjAlM0UlM0ElMjAlMjAlMjBhZGQlMjAlMjAlMjAlMjAlMjQweDQlMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4Yjk4JTIwJTNDJTJCMTYzJTNFJTNBJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwJTI1ZXNpJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGI5YSUyMCUzQyUyQjE2NSUzRSUzQSUyMCUyMCUyMGplJTIwJTIwJTIwJTIwJTIwMHg4MDQ4YmEwJTIwJTNDcGhhc2VfNiUyQjE3MSUzRSUwQSUyMCUyMCUyMDB4MDgwNDhiOWMlMjAlM0MlMkIxNjclM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjVlZHglMkMlMjVlY3glMEElMjAlMjAlMjAweDA4MDQ4YjllJTIwJTNDJTJCMTY5JTNFJTNBJTIwJTIwJTIwam1wJTIwJTIwJTIwJTIwMHg4MDQ4YjkwJTIwJTNDcGhhc2VfNiUyQjE1NSUzRSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div></div><div class="code">   0x08048b82 &lt;+141&gt;:   mov    0x28(%esp),%ebx
+   0x08048b86 &lt;+145&gt;:   lea    0x2c(%esp),%eax
+   0x08048b8a &lt;+149&gt;:   lea    0x40(%esp),%esi
+   0x08048b8e &lt;+153&gt;:   mov    %ebx,%ecx
+   0x08048b90 &lt;+155&gt;:   mov    (%eax),%edx
+   0x08048b92 &lt;+157&gt;:   mov    %edx,0x8(%ecx)
+   0x08048b95 &lt;+160&gt;:   add    $0x4,%eax
+   0x08048b98 &lt;+163&gt;:   cmp    %esi,%eax
+   0x08048b9a &lt;+165&gt;:   je     0x8048ba0 &lt;phase_6+171&gt;
+   0x08048b9c &lt;+167&gt;:   mov    %edx,%ecx
+   0x08048b9e &lt;+169&gt;:   jmp    0x8048b90 &lt;phase_6+155&gt;
+</div></code></pre>
+<p>这里又是个循环，从 <code>+141</code> 开始到 <code>+153</code> 实际上是循环的初始化。</p>
+<ul>
+<li><code>%eax</code> 初始时为新的数组的第二个元素的地址，并且不断向后遍历。</li>
+<li><code>%esi</code> 是循环中 <code>%eax</code> 的一个上界，<code>%eax</code> 到达 <code>%esi</code> 时循环结束。</li>
+<li><code>%ecx</code> 为 <code>%eax</code> 指向的元素的前面那个元素对应的链表节点的地址。</li>
+</ul>
+<p>这个循环相当于按新的数组中的顺序，把数组中后一个链表节点作为前一个链表节点的后继。所以我们输入的六个数字实际上就是表示我们要把这些链表节点如何排序。</p>
+<p>这些处理完之后会跳到 <code>+171</code> 处。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGJhMCUyMCUzQyUyQjE3MSUzRSUzQSUyMCUyMCUyMG1vdmwlMjAlMjAlMjAlMjQweDAlMkMweDgoJTI1ZWR4KSUwQSUyMCUyMCUyMDB4MDgwNDhiYTclMjAlM0MlMkIxNzglM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjQweDUlMkMlMjVlc2klMEElMjAlMjAlMjAweDA4MDQ4YmFjJTIwJTNDJTJCMTgzJTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwMHg4KCUyNWVieCklMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YmFmJTIwJTNDJTJCMTg2JTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwKCUyNWVheCklMkMlMjVlYXglMEElMjAlMjAlMjAweDA4MDQ4YmIxJTIwJTNDJTJCMTg4JTNFJTNBJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwJTI1ZWF4JTJDKCUyNWVieCklMEElMjAlMjAlMjAweDA4MDQ4YmIzJTIwJTNDJTJCMTkwJTNFJTNBJTIwJTIwJTIwamxlJTIwJTIwJTIwJTIwMHg4MDQ4YmJhJTIwJTNDcGhhc2VfNiUyQjE5NyUzRSUwQSUyMCUyMCUyMDB4MDgwNDhiYjUlMjAlM0MlMkIxOTIlM0UlM0ElMjAlMjAlMjBjYWxsJTIwJTIwJTIwMHg4MDQ4ZTM1JTIwJTNDZXhwbG9kZV9ib21iJTNFJTBBJTIwJTIwJTIwMHgwODA0OGJiYSUyMCUzQyUyQjE5NyUzRSUzQSUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMDB4OCglMjVlYngpJTJDJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0OGJiZCUyMCUzQyUyQjIwMCUzRSUzQSUyMCUyMCUyMHN1YiUyMCUyMCUyMCUyMCUyNDB4MSUyQyUyNWVzaSUwQSUyMCUyMCUyMDB4MDgwNDhiYzAlMjAlM0MlMkIyMDMlM0UlM0ElMjAlMjAlMjBqbmUlMjAlMjAlMjAlMjAweDgwNDhiYWMlMjAlM0NwaGFzZV82JTJCMTgzJTNFJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div></div><div class="code">   0x08048ba0 &lt;+171&gt;:   movl   $0x0,0x8(%edx)
+   0x08048ba7 &lt;+178&gt;:   mov    $0x5,%esi
+   0x08048bac &lt;+183&gt;:   mov    0x8(%ebx),%eax
+   0x08048baf &lt;+186&gt;:   mov    (%eax),%eax
+   0x08048bb1 &lt;+188&gt;:   cmp    %eax,(%ebx)
+   0x08048bb3 &lt;+190&gt;:   jle    0x8048bba &lt;phase_6+197&gt;
+   0x08048bb5 &lt;+192&gt;:   call   0x8048e35 &lt;explode_bomb&gt;
+   0x08048bba &lt;+197&gt;:   mov    0x8(%ebx),%ebx
+   0x08048bbd &lt;+200&gt;:   sub    $0x1,%esi
+   0x08048bc0 &lt;+203&gt;:   jne    0x8048bac &lt;phase_6+183&gt;
+</div></code></pre>
+<p>这里又是个循环结构。这个循环就比较简单了，相当于在检查重新排好序的链表节点的值是否是单调不降的。</p>
+<p>根据上图可知，<code>node4</code> &lt; <code>node1</code> &lt; <code>node6</code> &lt; <code>node2</code> &lt; <code>node5</code> &lt; <code>node3</code> ，所以答案为 <code>4 1 6 2 5 3</code></p>
+<h3 id="4-8-secret-phase" tabindex="-1">4.8 Secret Phase</h3>
+<p>Bomb Lab 附带的 <code>bomb.c</code> 在最后有一个神秘注释：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406113436606.png" style="transform: scale(1)" width=1361 height=216></div></p>
+<p>这启示我们似乎有哪里遗漏了。<code>main</code> 函数中看起来有点奇怪的是 <code>phase_defused</code>，因为各个 Phase 对应的函数已经能实现判断输入的答案是否正确，这个函数有点多余。于是我们先反汇编看一下这个函数：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406114857989.png" style="transform: scale(1)" width=1380 height=1604></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406115337685.png" style="transform: scale(1)" width=1068 height=337></div></p>
+<p>这个函数首先会去判断 <code>0x804b3a8</code> 这个地方是不是为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn></mrow><annotation encoding="application/x-tex">6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span>。从这个地方的符号名称可以猜出这个应该是输入的字符串数量。<code>phase_defused</code> 会在输入完六个字符串之后起到作用。</p>
+<p>然后会对 <code>input_strings + 240</code> 进行 <code>sscanf</code>，判断其第三个部分是否等于 <code>DrEvil</code>，是的话则跳转到 <code>secret_phase</code>，我们就能来到这个隐藏关。</p>
+<p>不过 <code>input_strings + 240</code> 这个有点奇怪。开始时我猜测最后一关需要在答案的基础上再追加一些字符，使其填充到 <code>240</code> 字节，然后再填 <code>%d %d %s</code> ，尝试之后发现提示输入的字符串太长。</p>
+<p>于是我们再看一下 <code>read_line</code> 函数干了什么。这个函数代码比较长，大部分不是我们关心的，函数的最后返回的 <code>%eax</code> 应该是输入字符串的指针，所以我们倒着观察 <code>%eax</code> 是怎么来的。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGY4MSUyMCUzQyUyQjIxMyUzRSUzQSUyMCUyMCUyMGNhbGwlMjAlMjAlMjAweDgwNDhlMzUlMjAlM0NleHBsb2RlX2JvbWIlM0UlMEElMjAlMjAlMjAweDA4MDQ4Zjg2JTIwJTNDJTJCMjE4JTNFJTNBJTIwJTIwJTIwbGVhJTIwJTIwJTIwJTIwKCUyNWVkeCUyQyUyNWVkeCUyQzQpJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGY4OSUyMCUzQyUyQjIyMSUzRSUzQSUyMCUyMCUyMHNobCUyMCUyMCUyMCUyMCUyNDB4NCUyQyUyNWVheCUwQSUyMCUyMCUyMDB4MDgwNDhmOGMlMjAlM0MlMkIyMjQlM0UlM0ElMjAlMjAlMjBtb3ZiJTIwJTIwJTIwJTI0MHgwJTJDMHg4MDRiM2JmKCUyNWVjeCUyQyUyNWVheCUyQzEpJTBBJTIwJTIwJTIwMHgwODA0OGY5NCUyMCUzQyUyQjIzMiUzRSUzQSUyMCUyMCUyMGFkZCUyMCUyMCUyMCUyMCUyNDB4MSUyQyUyNWVkeCUwQSUyMCUyMCUyMDB4MDgwNDhmOTclMjAlM0MlMkIyMzUlM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjVlZHglMkMweDgwNGIzYTglMEElMjAlMjAlMjAweDA4MDQ4ZjlkJTIwJTNDJTJCMjQxJTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI1ZWJ4JTJDJTI1ZWF4JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">   0x08048f81 &lt;+213&gt;:   call   0x8048e35 &lt;explode_bomb&gt;
+   0x08048f86 &lt;+218&gt;:   lea    (%edx,%edx,4),%eax
+   0x08048f89 &lt;+221&gt;:   shl    $0x4,%eax
+   0x08048f8c &lt;+224&gt;:   movb   $0x0,0x804b3bf(%ecx,%eax,1)
+   0x08048f94 &lt;+232&gt;:   add    $0x1,%edx
+   0x08048f97 &lt;+235&gt;:   mov    %edx,0x804b3a8
+   0x08048f9d &lt;+241&gt;:   mov    %ebx,%eax
+</div></code></pre>
+<p><code>%eax</code> 是从 <code>%ebx</code> 来的，然后再继续往上找 <code>%ebx</code>，一直找到 <code>+213</code> 这个位置都没发现。同时由于 <code>+213</code> 这个位置直接引爆了炸弹，所以不可能从 <code>+213</code> 上面顺着执行到下面，肯定是存在有跳转 <code>+218</code> 到 <code>+241</code> 这个区域的指令。</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwMHgwODA0OGYyMiUyMCUzQyUyQjExOCUzRSUzQSUyMCUyMCUyMGNhbGwlMjAlMjAlMjAweDgwNDg1ZTAlMjAlM0NleGl0JTQwcGx0JTNFJTBBJTIwJTIwJTIwMHgwODA0OGYyNyUyMCUzQyUyQjEyMyUzRSUzQSUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMDB4ODA0YjNhOCUyQyUyNWVkeCUwQSUyMCUyMCUyMDB4MDgwNDhmMmQlMjAlM0MlMkIxMjklM0UlM0ElMjAlMjAlMjBsZWElMjAlMjAlMjAlMjAoJTI1ZWR4JTJDJTI1ZWR4JTJDNCklMkMlMjVlYnglMEElMjAlMjAlMjAweDA4MDQ4ZjMwJTIwJTNDJTJCMTMyJTNFJTNBJTIwJTIwJTIwc2hsJTIwJTIwJTIwJTIwJTI0MHg0JTJDJTI1ZWJ4JTBBJTIwJTIwJTIwMHgwODA0OGYzMyUyMCUzQyUyQjEzNSUzRSUzQSUyMCUyMCUyMGFkZCUyMCUyMCUyMCUyMCUyNDB4ODA0YjNjMCUyQyUyNWVieCUwQSUyMCUyMCUyMDB4MDgwNDhmMzklMjAlM0MlMkIxNDElM0UlM0ElMjAlMjAlMjBtb3YlMjAlMjAlMjAlMjAlMjVlYnglMkMlMjVlZGklMEElMjAlMjAlMjAweDA4MDQ4ZjNiJTIwJTNDJTJCMTQzJTNFJTNBJTIwJTIwJTIwbW92JTIwJTIwJTIwJTIwJTI0MHgwJTJDJTI1ZWF4JTBBJTIwJTIwJTIwMHgwODA0OGY0MCUyMCUzQyUyQjE0OCUzRSUzQSUyMCUyMCUyMG1vdiUyMCUyMCUyMCUyMCUyNDB4ZmZmZmZmZmYlMkMlMjVlY3glMEElMjAlMjAlMjAweDA4MDQ4ZjQ1JTIwJTNDJTJCMTUzJTNFJTNBJTIwJTIwJTIwcmVwbnolMjBzY2FzJTIwJTI1ZXMlM0EoJTI1ZWRpKSUyQyUyNWFsJTBBJTIwJTIwJTIwMHgwODA0OGY0NyUyMCUzQyUyQjE1NSUzRSUzQSUyMCUyMCUyMG5vdCUyMCUyMCUyMCUyMCUyNWVjeCUwQSUyMCUyMCUyMDB4MDgwNDhmNDklMjAlM0MlMkIxNTclM0UlM0ElMjAlMjAlMjBzdWIlMjAlMjAlMjAlMjAlMjQweDElMkMlMjVlY3glMEElMjAlMjAlMjAweDA4MDQ4ZjRjJTIwJTNDJTJCMTYwJTNFJTNBJTIwJTIwJTIwY21wJTIwJTIwJTIwJTIwJTI0MHg0ZSUyQyUyNWVjeCUwQSUyMCUyMCUyMDB4MDgwNDhmNGYlMjAlM0MlMkIxNjMlM0UlM0ElMjAlMjAlMjBqbGUlMjAlMjAlMjAlMjAweDgwNDhmODYlMjAlM0NyZWFkX2xpbmUlMkIyMTglM0UlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div></div><div class="code">   0x08048f22 &lt;+118&gt;:   call   0x80485e0 &lt;exit@plt&gt;
+   0x08048f27 &lt;+123&gt;:   mov    0x804b3a8,%edx
+   0x08048f2d &lt;+129&gt;:   lea    (%edx,%edx,4),%ebx
+   0x08048f30 &lt;+132&gt;:   shl    $0x4,%ebx
+   0x08048f33 &lt;+135&gt;:   add    $0x804b3c0,%ebx
+   0x08048f39 &lt;+141&gt;:   mov    %ebx,%edi
+   0x08048f3b &lt;+143&gt;:   mov    $0x0,%eax
+   0x08048f40 &lt;+148&gt;:   mov    $0xffffffff,%ecx
+   0x08048f45 &lt;+153&gt;:   repnz scas %es:(%edi),%al
+   0x08048f47 &lt;+155&gt;:   not    %ecx
+   0x08048f49 &lt;+157&gt;:   sub    $0x1,%ecx
+   0x08048f4c &lt;+160&gt;:   cmp    $0x4e,%ecx
+   0x08048f4f &lt;+163&gt;:   jle    0x8048f86 &lt;read_line+218&gt;
+</div></code></pre>
+<p>整个代码中只有这里一处是会跳转到 <code>+218</code> 的。由于 <code>+118</code> 直接退出了这个程序，所以我们只需要研究 <code>+123</code> 到 <code>+218</code> 这里的行为。</p>
+<p>前几行表明 <code>%ebx</code> 是由 <code>0x804b3a8</code> 的值（也就是 <code>num_input_strings</code>）先乘上 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn></mrow><annotation encoding="application/x-tex">5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>，再左移 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 位，再加上 <code>0x804b3c0</code> 得来。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406121056204.png" style="transform: scale(1)" width=839 height=101></div></p>
+<p><code>0x804b3c0</code> 刚好是 <code>input_strings</code> 的其实地址，那么前面那乘上 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn></mrow><annotation encoding="application/x-tex">5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>，再左移 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 的运算应该是在算偏移。乘上 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn></mrow><annotation encoding="application/x-tex">5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">5</span></span></span></span>，再左移 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 相当于乘 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>80</mn></mrow><annotation encoding="application/x-tex">80</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">80</span></span></span></span>，所以这里 <code>read_line</code> 的行为大概就能猜出来了，<code>input_strings</code> 是一块缓冲区，<code>read_line</code> 会把每一关输入的字符串按 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>80</mn></mrow><annotation encoding="application/x-tex">80</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">80</span></span></span></span> 字节的偏移放入 <code>input_strings</code> 不同的位置。</p>
+<p>上面我们看到的 <code>input_strings + 240</code> 对应的是第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 关输入的字符串， 第 4 关刚好是需要输入两个数字，那么我们现在再在第四关的答案后面追加 <code>DrEvil</code> 就能进入隐藏关了。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406121550107.png" style="transform: scale(1)" width=1269 height=1096></div></p>
+<blockquote>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="bG9uZyUyMGludCUyMHN0cnRvbChjb25zdCUyMGNoYXIlMjAqc3RyJTJDJTIwY2hhciUyMCoqZW5kcHRyJTJDJTIwaW50JTIwYmFzZSklMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div></div><div class="code"><span class="hljs-type">long</span> <span class="hljs-type">int</span> <span class="hljs-title function_">strtol</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span> *str, <span class="hljs-type">char</span> **endptr, <span class="hljs-type">int</span> base)</span>
+</div></code></pre>
+<ul>
+<li><strong>str</strong> -- 要转换为长整数的字符串。</li>
+<li><strong>endptr</strong> -- 对类型为 char* 的对象的引用，其值由函数设置为 <strong>str</strong> 中数值后的下一个字符。</li>
+<li><strong>base</strong> -- 基数，必须介于 2 和 36（包含）之间，或者是特殊值 0。如果 base 为 0，则会根据字符串的前缀来判断进制：如果字符串以 '0x' 或 '0X' 开头，则将其视为十六进制；如果字符串以 '0' 开头，则将其视为八进制；否则将其视为十进制。</li>
+</ul>
+</blockquote>
+<p>这一关开始时对输入的字符串做了一个 <code>strtol</code>，将其转为了一个 10 进制的数字。这个数字需要大于等于 1 且小于等于 <code>0x3e9</code> 即 1001。然后将这个数字作为参数二，<code>0x804b068</code> 作为参数一，调用 <code>fun7</code>，最后返回值为 4 就通关。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406122954815.png" style="transform: scale(1)" width=1166 height=1264></div></p>
+<p>这里又出现了类似 Phase4 的递归。从 <code>mov 0x24(%esp), %edx</code> 和 <code>mov (%edx), %ebx</code> 可知第一个参数应该是一个指针。</p>
+<p>这个函数大体上进行了一些判断。现在参数一为 <code>%edx</code>，参数二为 <code>%ecx</code></p>
+<ul>
+<li>
+<p>如果 <code>%edx</code> 为 0，直接返回 <code>0xffffffff</code></p>
+</li>
+<li>
+<p>如果 <code>(%edx)</code> 等于 <code>%ecx</code>，返回 0</p>
+</li>
+<li>
+<p>如果 <code>(%edx)</code> 小于 <code>%ecx</code>，<code>0x8(%edx)</code> 作为参数一，<code>%ecx</code> 作为参数二，递归调用 <code>fun7</code>，子函数返回值的二倍再加上 1 即为当前函数返回值</p>
+</li>
+<li>
+<p>如果 <code>(%edx)</code> 大于 <code>%ecx</code>，<code>0x4(%edx)</code> 作为参数一，<code>%ecx</code> 作为参数二，递归调用 <code>fun7</code>，子函数返回值的二倍即为当前函数返回值</p>
+</li>
+</ul>
+<p>这下看懂了，这个函数相当于是在一个类似于 BST 的数据结构上遍历，如果找不到对应的节点则返回一个正无穷。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406130316249.png" style="transform: scale(1)" width=1512 height=1260></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/04/06/image-20260406130323040.png" style="transform: scale(1)" width=1289 height=767></div></p>
+<p>上面的返回值的分析是自下而上的，我们现在要自上而下地反着推：</p>
+<ul>
+<li>在最顶层我们期望的返回值是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> ，这是个偶数，所以必然是递归左子树而来，我们希望左子树返回的是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>。</li>
+<li>在子节点，我们期望的返回值是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>，这是个偶数，所以必然是递归左子树而来，我们希望左子树返回的是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>。</li>
+<li>在子节点，我们期望的返回值是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>，这是个奇数，所以必然是递归右子树而来，我们希望右子树返回的是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>。</li>
+<li>此时到达了 <code>0x07</code> 这个点，如果我们给出的数字就是 <code>0x07</code>，那么这个点会返回 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>。</li>
+</ul>
+<p>于是 <code>0x07</code> 就是答案。</p>
+<h2 id="5-attack-lab" tabindex="-1">5. Attack Lab</h2>
+<h3 id="5-1-phase-1" tabindex="-1">5.1 Phase 1</h3>
 <p>我们需要进行一个缓冲区攻击，使得 getbuf 函数返回值直接跳到 touch1 函数</p>
 <p>大概的思路就是我们想办法把 getbuf 函数栈顶上方的返回值地址给篡改一下</p>
 <p>首先 <code>objdump -d ctarget &gt; disa.asm</code> 对 <code>ctarget</code> 来个反编译。touch1 函数在 <code>00000000004017c0</code> 地址处，getbuf 函数的反编译：</p>
@@ -296,7 +522,7 @@ c0 17 40 00 00 00 00 00
 0a
 </div></code></pre>
 <p>前面 40 字节无所谓，用来填充缓冲区，后面 8 字节构造了到 touch1 函数的地址，最后给个 0a 作为换行符结束输入</p>
-<h3 id="phase-2" tabindex="-1">Phase 2</h3>
+<h3 id="5-2-phase-2" tabindex="-1">5.2 Phase 2</h3>
 <p>这次我们需要让 getbuf 函数不仅跳转到 touch2 函数，还携带一个参数</p>
 <p>我们可能要考虑，先篡改 getbuf 栈顶上面的返回值地址，让其先指向我们自己的代码，然后我们去修改 <code>%rdi</code>，然后再跳到 touch2 函数</p>
 <p>一个困难之处在于可能栈地址是随机的，好在经过测试，<code>ctarget</code> 栈地址并没有随机。我们使用 gdb 在 getbuf 出打断点，并输出 <code>%rsp</code> 的值，为 <code>0x5561dca0</code>。一个注意地方是我们需要在 gdb 中先 <code>set args -q</code> 使得程序不连接评分服务器</p>
@@ -364,7 +590,7 @@ Disassembly of section .text:
 <p>终于通过</p>
 <p>不过后续在做 Phase 3 的时候实在好奇为什么不能再往上多修改一些栈数据，不能多修改的话可能会影响 Phase 3 的发挥。</p>
 <p>在 gdb 中，触发段错误后，使用 disas 看到了触发段错误的指令：<code>movaps %xmm0,-0x40(%rbp)</code> 查看 <code>%rbp</code> 的值是正常的，应该不是引用了非法内存，这就很奇怪了，于是询问 ai 得知，<code>movaps</code> 这个涉及到 <code>%xmm0</code>（涉及到的原因应该不是浮点运算，应该是使用 <code>%xmm0</code> 做向量运算），这个指令要求目的地址按 16 字节对齐，一般情况下编译器会自动保证这里是满足对齐要求的，但是我们之前修改了 <code>%rsp</code> ，可能破坏了对齐</p>
-<h3 id="phase-3" tabindex="-1">Phase 3</h3>
+<h3 id="5-3-phase-3" tabindex="-1">5.3 Phase 3</h3>
 <p>这次要求我们让程序跳转到 touch3，要求我们不仅注入代码还要注入特定字符串，并传递字符串指针作为 touch3 的参数</p>
 <p>cookie 对应的 ascii 码的十六进制表示为 <code>0x6166373939623935</code>，然后再加一个 <code>00</code> 结尾。首先一个问题是这个字符串数据放在哪里。一开始怕破坏太多栈空间导致段错误（后来才知道是对齐的原因），所以考虑把数据放在栈中比较靠近底部的位置，然后在自己注入的代码中去注入数据：</p>
 <pre><div class="head"><div class="language">Unknown</div><div class="copy" data="JTIwJTIwJTIwJTIwbW92cSUyMCUyNDB4NjE2NjM3MzkzOTYyMzkzNSUyQyUyMCUyNXI4JTBBJTIwJTIwJTIwJTIwbW92cSUyMCUyNXI4JTJDJTIwMHg1NTYyMDAwMCUwQSUyMCUyMCUyMCUyMG1vdnElMjAlMjQweDAwJTJDJTIwMHg1NTYyMDAwOCUwQSUyMCUyMCUyMCUyMG1vdnElMjAlMjQweDU1NjIwMDAwJTJDJTIwJTI1cmRpJTBBJTIwJTIwJTIwJTIwYWRkJTIwJTI0LTglMkMlMjAlMjVyc3AlMEElMjAlMjAlMjAlMjBtb3ZxJTIwJTI0MHgwMDQwMThmYSUyQyUyMCglMjVyc3ApJTBBJTIwJTIwJTIwJTIwcmV0JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div><div class="code">    movq $0x6166373939623935, %r8
@@ -392,7 +618,7 @@ Disassembly of section .text:
 0a
 </div></code></pre>
 <p>通过</p>
-<h3 id="phase-4" tabindex="-1">Phase 4</h3>
+<h3 id="5-4-phase-4" tabindex="-1">5.4 Phase 4</h3>
 <p>从这个 phase 开始，我们需要一个新的被称为 ROP 的攻击手段。任务指导书中介绍了这个手段。</p>
 <p>大概就是，如果程序的栈地址是随机化的，且栈所处的内存被记为不可执行，那么前面的代码注入的方法就行不通了，甚至使用 nop sled 都无法发挥作用。ROP 考虑利用现有的代码，汇编指令都是一个一个放置的，只有我们找对了第一个指令的起始地址，那么后续指令就会一个一个跟着执行，但是如果我们截取现有代码中的一部分指令，比如从一个完整的指令中间开始解码指令，有可能就能得到我们想执行的恶意代码。一般我们需要反编译程序然后找到这种指令的首地址。我们可能更倾向于找最后是 <code>0xc3</code> 结尾的部分，因为 <code>0x3c</code> 在 x86-64 中是 <code>ret</code> 指令，这样的话我们可以在执行一部分恶意代码之后跳到下一个地方执行恶意代码。</p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/21/687e2ad501bd7.png" style="transform: scale(1)" width=1100 height=549></div></p>
@@ -423,7 +649,7 @@ ec 17 40 00 00 00 00 00
 a0
 </div></code></pre>
 <p>显示填充缓冲区，然后是第一次跳转地址（到 <code>pop</code>），然后是注入数据，然后是第二次跳转地址（到 <code>mov</code>），然后是第三次跳转地址（到 touch2）</p>
-<h3 id="phase-5" tabindex="-1">Phase 5</h3>
+<h3 id="5-5-phase-5" tabindex="-1">5.5 Phase 5</h3>
 <p>指导书在这里开始有点劝退还挺有意思（）</p>
 <p>首先提到这里需要用到一些新的指令</p>
 <p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/21/687e2e971bbc0.png" style="transform: scale(1)" width=1583 height=970></div></p>

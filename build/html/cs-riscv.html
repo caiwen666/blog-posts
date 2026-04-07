@@ -1,0 +1,361 @@
+<h2 id="0-shu-ju-ge-shi" tabindex="-1">0. 数据格式</h2>
+<p>RiscV 中字长为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn></mrow><annotation encoding="application/x-tex">32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 位。</p>
+<h2 id="1-ji-cun-qi" tabindex="-1">1. 寄存器</h2>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>ABI 名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x0</td>
+<td>zero</td>
+<td>恒为零</td>
+</tr>
+<tr>
+<td>x1</td>
+<td>ra</td>
+<td>存放函数调用返回地址</td>
+</tr>
+<tr>
+<td>x2</td>
+<td>sp</td>
+<td>栈指针</td>
+</tr>
+<tr>
+<td>x3</td>
+<td>gp</td>
+<td>保存指向全局数据区附近的指针（比如 <code>.bss</code>），便于访问大量的全局/静态变量。（具体怎么用由编译器决定）</td>
+</tr>
+<tr>
+<td>x4</td>
+<td>tp</td>
+<td>保存指向 Thread Local 存储的指针。（具体怎么用由编译器决定）</td>
+</tr>
+<tr>
+<td>x5-x7</td>
+<td>t0-t2</td>
+<td>临时寄存器</td>
+</tr>
+<tr>
+<td>x8</td>
+<td>s0/fp</td>
+<td>即可以作为一个保存寄存器（saved register），也可以作为栈帧指针（即指向栈的起始位置）的寄存器。</td>
+</tr>
+<tr>
+<td>x9</td>
+<td>s1</td>
+<td>保存寄存器</td>
+</tr>
+<tr>
+<td>x10-x11</td>
+<td>a0-a1</td>
+<td>存放函数的参数/返回值</td>
+</tr>
+<tr>
+<td>x12-x17</td>
+<td>a2-a7</td>
+<td>存放函数的参数</td>
+</tr>
+<tr>
+<td>x18-x27</td>
+<td>s2-s11</td>
+<td>保存寄存器</td>
+</tr>
+<tr>
+<td>x28-x31</td>
+<td>t3-t6</td>
+<td>临时寄存器</td>
+</tr>
+</tbody>
+</table>
+<p>riscv 的寄存器都是 32 位的。</p>
+<h2 id="2-zhi-ling-ji" tabindex="-1">2. 指令集</h2>
+<h3 id="2-1-r-ge-shi" tabindex="-1">2.1 R 格式</h3>
+<p>一些在寄存器上进行算数操作的指令为 R 格式：<code>opname rd, rs1, rs2</code>。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/29/image-20260329202353699.png" style="transform: scale(1)" width=2020 height=419></div></p>
+<p>其中 <code>opcode</code> 恒为 <code>0110011</code>。指令进行的操作由 <code>funct3</code> 和 <code>funct7</code> 来决定：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/29/image-20260329202533138.png" style="transform: scale(1)" width=2092 height=947></div></p>
+<p>| 指令                | 描述                                                                         |
+| ------------------- | ---------------------------------------------------------------------------- | ---- |
+| <code>add rd, rs1, rs2</code>  | <code>rd = rs1 + rs2</code>                                                             |
+| <code>sub rd, rs1, rs2</code>  | <code>rd = rs1 - rs2</code>                                                             |
+| <code>sll rd, rs1, rs2</code>  | <code>rd = rs1 &lt;&lt; rs2</code>，逻辑左移                                                  |
+| <code>slt rd, rs1, rs2</code>  | 将 <code>rs1</code> 和 <code>rs2</code> 视为有符号数。如果 <code>rs1 &lt; rs2</code>，则 <code>rd = 1</code>，否则 <code>rd = 0</code> |
+| <code>sltu rd, rs1, rs2</code> | 将 <code>rs1</code> 和 <code>rs2</code> 视为无符号数。如果 <code>rs1 &lt; rs2</code>，则 <code>rd = 1</code>，否则 <code>rd = 0</code> |
+| <code>xor rd, rs1, rs2</code>  | <code>rd = rs1 ^ rs2</code>                                                             |
+| <code>srl rd, rs1, rs2</code>  | <code>rd = rs1 &gt;&gt; rs2</code>，逻辑右移                                                  |
+| <code>sra rd, rs1, rs2</code>  | <code>rd = rs1 &gt;&gt; rs2</code>，算数右移                                                  |
+| <code>or rd, rs1, rs2</code>   | <code>rd = rs1                                                                    | rs2</code> |
+| <code>and rd, rs1, rs2</code>  | <code>rd = rs1 &amp; rs2</code>                                                             |</p>
+<p>其中，<code>add</code> 和 <code>sub</code> 用的电路是差不多的，所以 <code>funct3</code> 一样，只有 <code>funct7</code> 不同以区分。<code>srl</code> 和 <code>sra</code> 也是同理。</p>
+<p>只提供 <code>slt</code>。如果需要 <code>&gt;</code>，可以把操作数调换一下。如果需要 <code>&lt;=</code>，可以先判 <code>&gt;</code>，然后再异或上 1 取反。RiscV 没有像 X86 的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">OF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">OF</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">CF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">CF</span></span></span></span> 这种标识位，而是整了这样的指令。</p>
+<h3 id="2-2-i-ge-shi" tabindex="-1">2.2 I 格式</h3>
+<p>涉及到立即数的指令为 I 格式。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/29/image-20260329211708678.png" style="transform: scale(1)" width=2031 height=506></div></p>
+<p><code>imm</code> 是补码表示，也就是这里立即数的范围只有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mo>−</mo><mn>2048</mn><mo separator="true">,</mo><mn>2047</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-2048, 2047]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">−</span><span class="mord">2048</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2047</span><span class="mclose">]</span></span></span></span>。后面会说如何表示更大的立即数。</p>
+<h4 id="2-2-1-suan-shu" tabindex="-1">2.2.1 算数</h4>
+<p><code>opcode</code> 为 <code>0010011</code> 。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/29/image-20260329212056020.png" style="transform: scale(1)" width=1813 height=731></div></p>
+<p>| 指令                | 描述                                                                                                                                                                                            |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| <code>addi rd, rs, imm</code>  | <code>rd = rs + imm</code>                                                                                                                                                                                 |
+| <code>slti rd, rs, imm</code>  | 将 <code>rd</code> 按有符号数解释。如果 <code>rs &lt; imm</code>，则设置 <code>rd = 1</code>，反之设置 <code>rd = 0</code>                                                                                                                     |
+| <code>sltiu rd, rs, imm</code> | 将 <code>rd</code> 按无符号数解释。由于 <code>imm</code> 是有符号数，所以在比较的时候需要先把 <code>imm</code> <strong>符号扩展</strong> 成 32 位，再把 <code>imm</code> 视为无符号数去跟 <code>rd</code> 比较。如果 <code>rs &lt; imm</code>，则设置 <code>rd = 1</code>，反之设置 <code>rd = 0</code> |
+| <code>xori rd, rs, imm</code>  | <code>rd = rs ^ imm</code>                                                                                                                                                                                 |
+| <code>ori rd, rs, imm</code>   | <code>rd = rs                                                                                                                                                                                        | imm</code> |
+| <code>andi rd, rs, imm</code>  | <code>rd = rs &amp; imm</code>                                                                                                                                                                                 |
+| <code>slli rd, rs, imm</code>  | <code>rd = rs &lt;&lt; imm</code>                                                                                                                                                                                |
+| <code>srli, rd, rs, imm</code> | <code>rd = rs &gt;&gt; imm</code>，逻辑右移                                                                                                                                                                      |
+| <code>srai, rd, rs, imm</code> | <code>rd = rs &gt;&gt; imm</code>，算数右移                                                                                                                                                                      |</p>
+<p>由于减去一个数，相当于加上一个数的相反数，所以没有 <code>subi</code>。</p>
+<p>对于移位指令，由于移位的位数会对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn></mrow><annotation encoding="application/x-tex">32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 取模，因此 <code>imm</code> 只有低 5 位有用。剩下的 7 位类似 <code>funct7</code>，来区分是算数右移还是逻辑右移。</p>
+<h4 id="2-2-2-load" tabindex="-1">2.2.2 load</h4>
+<p><code>opcode</code> 为 <code>0000011</code>。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/30/image-20260330140729615.png" style="transform: scale(1)" width=1764 height=423></div></p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lb rd, imm(rs1)</code></td>
+<td>加载 <code>rs1 + imm</code> 地址处的一个字节，并<strong>符号扩展</strong>到 32 位放入 <code>rd</code> 中</td>
+</tr>
+<tr>
+<td><code>lh rd, imm(rs1)</code></td>
+<td>加载 <code>rs1 + imm</code> 地址处的两个字节（半字），并<strong>符号扩展</strong>到 32 位放入 <code>rd</code> 中</td>
+</tr>
+<tr>
+<td><code>lw rd, imm(rs1)</code></td>
+<td>加载 <code>rs1 + imm</code> 地址处的四个字节（字）放入 <code>rd</code> 中</td>
+</tr>
+<tr>
+<td><code>lbu rd, imm(rs1)</code></td>
+<td>加载 <code>rs1 + imm</code> 地址处的一个字节，并<strong>零扩展</strong>到 32 位放入 <code>rd</code> 中</td>
+</tr>
+<tr>
+<td><code>lhu rd, imm(rs1)</code></td>
+<td>加载 <code>rs1 + imm</code> 地址处的两个字节（半字），并<strong>零扩展</strong>到 32 位放入 <code>rd</code> 中</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2-2-3-jalr" tabindex="-1">2.2.3 jalr</h4>
+<p><code>jalr rd, rs1, imm</code></p>
+<ul>
+<li><code>opcode</code> 为 <code>1100111</code>，<code>funct3</code> 为 <code>000</code></li>
+<li>先把下一条指令的地址（<code>PC + 4</code>）放到 <code>rd</code> 中，然后跳到 <code>rs1 + imm</code> 处</li>
+</ul>
+<h3 id="2-3-s-ge-shi" tabindex="-1">2.3 S 格式</h3>
+<p>用于 store 指令。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/30/image-20260330141417876.png" style="transform: scale(1)" width=1971 height=174></div></p>
+<p>这类指令由于不需要写寄存器，所以原来 <code>rd</code> 的地方改为 <code>imm</code> 的低位部分。</p>
+<p><code>opcode</code> 为 <code>0100011</code>。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/30/image-20260330141610383.png" style="transform: scale(1)" width=1631 height=295></div></p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sb rs2, imm(rs1)</code></td>
+<td>把 <code>rs2</code> 的低位 1 字节放入 <code>imm + rs1</code> 这个内存地址</td>
+</tr>
+<tr>
+<td><code>sh rs2, imm(rs1)</code></td>
+<td>把 <code>rs2</code> 的低位 2 字节放入 <code>imm + rs1</code> 这个内存地址</td>
+</tr>
+<tr>
+<td><code>sw rs2, imm(rs1)</code></td>
+<td>把 <code>rs2</code> 放入 <code>imm + rs1</code> 这个内存地址</td>
+</tr>
+</tbody>
+</table>
+<p>没有 <code>sbu</code> 和 <code>shu</code> 这种指令。</p>
+<h3 id="2-4-b-sb-ge-shi" tabindex="-1">2.4 B/SB 格式</h3>
+<p>用于条件跳转指令。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/30/image-20260330142052055.png" style="transform: scale(1)" width=2059 height=295></div></p>
+<p><code>opcode</code> 为 <code>1100011</code>。</p>
+<p>条件跳转指令使用 PC 相对寻址。</p>
+<p>由于 RiscV 中每条指令都是 32 位的，所以理论上 <code>imm</code> 只需要表示 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> 的倍数即可。但是 RiscV 还支持压缩指令，这种指令只有 16 位。并且 RiscV 约定扩展指令集的指令长度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16</mn></mrow><annotation encoding="application/x-tex">16</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">16</span></span></span></span> 的倍数。所以 <code>imm</code> 表示的是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn></mrow><annotation encoding="application/x-tex">2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span> 的倍数。</p>
+<p><code>imm</code> 的组成比较特殊：</p>
+<ul>
+<li><code>imm[12|10:5]</code> 为 <code>zxxxxxx</code></li>
+<li><code>imm[4:1|11]</code> 为 <code>wwwwy</code></li>
+<li>最后组成的 <code>imm</code> 为 <code>zyxxxxxxwwww0</code>（即 <code>imm[4:1|11]</code> 的最后一位表示第 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>11</mn></mrow><annotation encoding="application/x-tex">11</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">11</span></span></span></span> 位）</li>
+</ul>
+<p>这样的设计会减少硬件的开销。</p>
+<p><code>imm</code> 表示是汇编中的 Label。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/30/image-20260330142952928.png" style="transform: scale(1)" width=2090 height=549></div></p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>beq rs1, rs2, label</code></td>
+<td>如果 <code>rs1 == rs2</code>，则跳转到 <code>label</code></td>
+</tr>
+<tr>
+<td><code>bne rs1, rs2, label</code></td>
+<td>如果 <code>rs1 != rs2</code>，则跳转到 <code>label</code></td>
+</tr>
+<tr>
+<td><code>blt rs1, rs2, label</code></td>
+<td>将 <code>rs1</code> 和 <code>rs2</code> 视为<strong>有符号整数</strong>，如果 <code>rs1 &lt; rs2</code>，则跳转到 <code>label</code></td>
+</tr>
+<tr>
+<td><code>bge rs1, rs2, label</code></td>
+<td>将 <code>rs1</code> 和 <code>rs2</code> 视为<strong>有符号整数</strong>，如果 <code>rs1 &gt;= rs2</code>，则跳转到 <code>label</code></td>
+</tr>
+<tr>
+<td><code>bltu rs1, rs2, label</code></td>
+<td>将 <code>rs1</code> 和 <code>rs2</code> 视为<strong>无符号整数</strong>，如果 <code>rs1 &lt; rs2</code>，则跳转到 <code>label</code></td>
+</tr>
+<tr>
+<td><code>bgeu rs1, rs2, label</code></td>
+<td>将 <code>rs1</code> 和 <code>rs2</code> 视为<strong>无符号整数</strong>，如果 <code>rs1 &gt;= rs2</code>，则跳转到 <code>label</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>&gt;</code> 和 <code>&lt;=</code> 可以通过交换操作数来实现，因此不存在 <code>bgt</code> 和 <code>ble</code> 指令。</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>12</mn></mrow><annotation encoding="application/x-tex">12</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">12</span></span></span></span> 位的 <code>imm</code> ，再加上有一半的地址都是无效指令，所以上述指令只能到达 PC 前后 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>±</mo><msup><mn>2</mn><mn>10</mn></msup></mrow><annotation encoding="application/x-tex">\pm 2^{10}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8974em;vertical-align:-0.0833em;"></span><span class="mord">±</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">10</span></span></span></span></span></span></span></span></span></span></span></span> 条指令。</p>
+<p>如果需要到达更远的地方，需要进行如下转换：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="YmVxJTIweDEwJTJDJTIweDAlMkMlMjBmYXIlMEElMjMlMjBuZXh0JTIwaW5zdHIlMEElMEElMjMlMjAtLS0tLSUzRSUwQSUwQWJuZSUyMHgxMCUyQyUyMHgwJTJDJTIwbmV4dCUyMCUyMyUyMCVFNiU5RCVBMSVFNCVCQiVCNiVFNSU4RiU5NiVFNSU4RiU4RCUwQWolMjBmYXIlMEFuZXh0JTNBJTIwJTIzJTIwbmV4dCUyMGluc3RyJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">beq x10, x0, far
+# next instr
+
+# -----&gt;
+
+bne x10, x0, next # 条件取反
+j far
+next: # next instr
+</div></code></pre>
+<h3 id="2-5-j-uj-ge-shi" tabindex="-1">2.5 J/UJ 格式</h3>
+<p>仅用于 <code>jal</code> 指令：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/30/image-20260330144844327.png" style="transform: scale(1)" width=2020 height=410></div></p>
+<p><code>opcode</code> 为 <code>1101111</code>。</p>
+<p>注意这里的 <code>imm</code> 也跟上面的 B 格式一样，位不是按顺序的。</p>
+<p><code>imm</code> 表示是汇编中的 Label。</p>
+<p><code>jal rd, label</code></p>
+<ul>
+<li>
+<p>使用 PC 相对寻址</p>
+</li>
+<li>
+<p>将下一条指令的地址 （<code>PC + 4</code>）放入到 <code>rd</code> 中</p>
+</li>
+<li>
+<p>调到 <code>label</code></p>
+</li>
+</ul>
+<p><code>imm</code> 有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>20</mn></mrow><annotation encoding="application/x-tex">20</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">20</span></span></span></span> 位，有一半的地址是无效指令，所以上述指令能到达 PC 前后 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>±</mo><msup><mn>2</mn><mn>18</mn></msup></mrow><annotation encoding="application/x-tex">\pm 2^{18}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8974em;vertical-align:-0.0833em;"></span><span class="mord">±</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">18</span></span></span></span></span></span></span></span></span></span></span></span> 条指令。</p>
+<h3 id="2-6-u-ge-shi" tabindex="-1">2.6 U 格式</h3>
+<p>用于 <code>lui</code> 和 <code>auipc</code> 两个指令。</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/30/image-20260330145949282.png" style="transform: scale(1)" width=2039 height=726></div></p>
+<p>和 J 格式很像，但这里的 <code>imm</code> 的位是有序的，并且语义上也有差别，表示的是一个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn></mrow><annotation encoding="application/x-tex">32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 位数的高 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>20</mn></mrow><annotation encoding="application/x-tex">20</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">20</span></span></span></span> 位。</p>
+<ul>
+<li>
+<p><code>lui rd, imm</code></p>
+<ul>
+<li>
+<p><code>opcode</code> 为 <code>0110111</code></p>
+</li>
+<li>
+<p>会将 <code>rd</code> 的高 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>20</mn></mrow><annotation encoding="application/x-tex">20</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">20</span></span></span></span> 位置成 <code>imm</code>，然后低 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>12</mn></mrow><annotation encoding="application/x-tex">12</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">12</span></span></span></span> 位清空</p>
+</li>
+<li>
+<p><code>lui</code> 和 <code>addi</code> 相配合可以将一个 32 位立即数放到寄存器</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="bHVpJTIweDEwJTJDJTIwMHg4NzY1NCUwOSUwOSUyMyUyMHgxMCUyMCUzRCUyMDB4ODc2NTQwMDAlMEFhZGRpJTIweDEwJTJDJTIweDEwJTJDJTIwMHgzMjElMDklMjMlMjB4MTAlMjAlM0QlMjAweDg3NjU0MzIxJTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">lui x10, 0x87654		# x10 = 0x87654000
+addi x10, x10, 0x321	# x10 = 0x87654321
+</div></code></pre>
+<p>注意的是，<code>addi</code> 的 <code>imm</code> 是补码，加到寄存器之前会先进行符号扩展，所以有可能发生这种情况：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/30/image-20260330151035762.png" style="transform: scale(1)" width=1770 height=477></div></p>
+<p>所以当低 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>12</mn></mrow><annotation encoding="application/x-tex">12</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">12</span></span></span></span> 位的部分的最高位为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 时，需要让 <code>lui</code> 的立即数多 1。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>auipc rd, imm</code></p>
+<ul>
+<li><code>opcode</code> 为 <code>0010111</code></li>
+<li><code>rd = PC + (imm &lt;&lt; 12)</code></li>
+<li>可以将 <code>PC</code> 的值取出来放到通用寄存器中，比如 <code>auipc x5, 0</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="3-wei-zhi-ling" tabindex="-1">3. 伪指令</h2>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>描述</th>
+<th>等价于</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mv rd, rs1</code></td>
+<td>令 <code>rd = rs1</code></td>
+<td><code>addi rd, rs1, 0</code></td>
+</tr>
+<tr>
+<td><code>not rd, rs</code></td>
+<td>将 <code>rs1</code> 按位取反放入 <code>rd</code> 中</td>
+<td><code>xori rd, rs, -1</code></td>
+</tr>
+<tr>
+<td><code>li rd, imm</code></td>
+<td>将立即数 <code>imm</code> 放入 <code>rd</code> 寄存器中</td>
+<td>根据 <code>imm</code> 的位数来决定是直接 <code>addi rd, x0, imm</code> 还是需要上 <code>lui</code></td>
+</tr>
+<tr>
+<td><code>j label</code></td>
+<td>跳转到 <code>label</code></td>
+<td><code>jal x0, label</code></td>
+</tr>
+<tr>
+<td><code>jr rs1</code></td>
+<td>跳转到 <code>rs1</code> 存储的地址处</td>
+<td><code>jalr x0, rs1</code></td>
+</tr>
+<tr>
+<td><code>ret</code></td>
+<td>从当前函数返回</td>
+<td><code>jr ra</code>，又等价于 <code>jalr x0, ra</code></td>
+</tr>
+<tr>
+<td><code>nop</code></td>
+<td>无操作</td>
+<td><code>addi x0, x0, 0</code></td>
+</tr>
+<tr>
+<td><code>la rd, label</code></td>
+<td>将 <code>label</code> 的地址加载到寄存器 <code>rd</code> 中</td>
+<td>如果是绝对地址，那么使用 <code>lui</code> 和 <code>addi</code>。如果是 PC 相对地址，那么使用 <code>auipc</code> 和 <code>addi</code></td>
+</tr>
+<tr>
+<td><code>call label</code></td>
+<td>调用函数</td>
+<td>如果与当前 PC 相差不远，则 <code>jalr ra, label</code> 即可。如果相差很远，则需要 <code>auipc ra, addr[31: 12]</code> 然后 <code>jalr ra, addr[11:0]</code></td>
+</tr>
+</tbody>
+</table>
+<p>值得注意的是，基础指令集中没有乘法和除法的指令。像是 <code>mul rd, rs1, rs2</code> 指令是属于 M 扩展里的。不过即使是 M 扩展也没有 <code>muli</code>，因为 riscv 里面立即数的字段位数不太长，可能不实用，而且把立即数加载到寄存器也不是什么麻烦事。</p>
+<h2 id="4-han-shu-tiao-yong-yue-ding" tabindex="-1">4. 函数调用约定</h2>
+<p><strong>调用者保存寄存器</strong> ra、a0-a7、t0-t6</p>
+<p><strong>被调用者保存寄存器</strong> sp、s0-s11</p>
+<p>zero 由于恒为 0，不需要考虑是调用者保存还是被调用者保存。gp 在整个程序的运行过程中应该是不变的，tp 在同一个线程中应该也是不变的，所以也不需要考虑是调用者保存还是被调用者保存。</p>
+<p>a0-a7 用来存放参数。</p>
+<p>如果函数的返回值是 32 位的，那么只需要把返回值存在 a0 里即可。如果返回值是 64 位的话，a0 存底 32 位，a1 存高 32 位。</p>

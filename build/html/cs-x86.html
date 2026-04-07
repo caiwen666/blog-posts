@@ -1,0 +1,279 @@
+<h2 id="0-shu-ju-ge-shi" tabindex="-1">0. 数据格式</h2>
+<p>X86 中字长为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16</mn></mrow><annotation encoding="application/x-tex">16</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">16</span></span></span></span> 位：</p>
+<ul>
+<li>字节，8位，汇编后缀为 <code>b</code></li>
+<li>字（word）表示 16 位，2 字节，汇编后缀为 <code>w</code></li>
+<li>双字（double words）表示 32 位，4 字节，汇编后缀为 <code>l</code></li>
+<li>四字（quad words）表示 64 位，8 字节，汇编后缀为 <code>q</code></li>
+</ul>
+<p>上面的后缀是对于整数的指令的。浮点数使用单独的指令集，和上述有所不同：</p>
+<ul>
+<li>单精度（float），32 位，4 字节，汇编后缀为 <code>s</code></li>
+<li>双精度（double），64 位，8 字节，汇编后缀为 <code>l</code></li>
+</ul>
+<h2 id="1-ji-cun-qi" tabindex="-1">1. 寄存器</h2>
+<h3 id="1-1-tong-yong-ji-cun-qi" tabindex="-1">1.1 通用寄存器</h3>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b710866f7d.png" style="transform: scale(1)" width=1107 height=1256></div></p>
+<p>总的来说是 16 个寄存器，每个寄存器又分 4 个具体的寄存器，可以分别访问低 8、低 16、低 32、低 64 位的数据</p>
+<h3 id="1-2-fu-dian-shu-ji-cun-qi" tabindex="-1">1.2 浮点数寄存器</h3>
+<p>AVX 浮点体系架构还提供如下的寄存器：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c98eff3c66.png" style="transform: scale(1)" width=963 height=1296></div></p>
+<p>这些寄存器主要用来存储向量，如每个 ymm 寄存器可以存放 8 个32 位值，或是 4 个64 位值，浮点数和整数都可以。不过如果单纯用来进行单个浮点数运算的话，只需要用到 xmm 寄存器的低 32 或 64 位</p>
+<h3 id="1-3-tiao-jian-ma" tabindex="-1">1.3 条件码</h3>
+<blockquote>
+<p>更多参考 <a href="https://www.caiwen.work/post/408-cs-data">https://www.caiwen.work/post/408-cs-data</a></p>
+</blockquote>
+<p>条件码寄存器只存储一个位，对于一般的运算，有：</p>
+<ul>
+<li>
+<p><code>OF</code>：溢出标志</p>
+<p>表示将最近的操作数解释为有符号数，该操作是否导致结果发生了溢出。</p>
+</li>
+<li>
+<p><code>CF</code>：进位标志。</p>
+<p>表示将最近的操作数解释为无符号数，该操作是否导致结果发生了溢出。</p>
+<p>对于浮点运算，如果运算结果是负数，或是有一个操作数是 NaN 的话就设置为 1。</p>
+</li>
+<li>
+<p><code>ZF</code>：零标志。</p>
+<p>表示最近的操作结果是否为 0。</p>
+<p>对于浮点运算，如果运算结果为 0 或是有一个操作数是 NaN 的话就设置为 1</p>
+</li>
+<li>
+<p><code>SF</code>：符号标志。</p>
+<p>表示最近的操作结果是否为负数，SF 为 1 表示负数，为 0 表示正数。</p>
+</li>
+<li>
+<p><code>PF</code>：奇偶标志位。</p>
+<p>对于整数操作，如果最近的操作结果是偶校验的（即含有偶数个二进制 1），则设置为 1。</p>
+<p>对于浮点运算，如果有一个操作数是 NaN 的话就设置为 1</p>
+</li>
+</ul>
+<p>对于移位，有：</p>
+<ul>
+<li>
+<p><code>CF</code>：无论是何种移位，<code>CF</code> 都设置成最后一个被移出的位。</p>
+</li>
+<li>
+<p><code>OF</code></p>
+<p>X86 仅对移 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 位有明确规定。大于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 位时，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">OF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">OF</span></span></span></span> 的设置是未定义行为。</p>
+<p>可视为移位后最高位是否发生变化。</p>
+<p>对于左移，移位后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">OF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">OF</span></span></span></span> 设置成结果的最高位与 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">CF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">CF</span></span></span></span>（即被移出的位）的异或。在语义上等价于将操作数视为有符号整数之后，左移是否溢出。</p>
+<p>对于逻辑右移，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">OF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">OF</span></span></span></span> 设置<strong>移位前</strong>的最高位（因为逻辑右移补上来的一定是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>，所以这里只需要看移动前的最高位）</p>
+<p>对于算数右移，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">OF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">OF</span></span></span></span> 设置为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>（算数右移一定是保证最高位不变的）</p>
+</li>
+</ul>
+<p>乘法运算发生溢出后，CPU 会将 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">OF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">OF</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">CF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">CF</span></span></span></span> 同时置 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>。</p>
+<p>除法运算后的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">OF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">OF</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">CF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">CF</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">ZF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">ZF</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">SF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">SF</span></span></span></span> 的设置是未定义行为。</p>
+<p>同时如下指令还有特殊行为：</p>
+<ul>
+<li><code>leaq</code> 指令不设置条件码</li>
+<li><code>xor</code> 指令不设置 <code>CF</code> 和 <code>OF</code></li>
+<li><code>inc</code> 和 <code>dec</code> 只设置 <code>OF</code> 和 <code>ZF</code>，不设置 <code>CF</code></li>
+</ul>
+<h3 id="1-4-han-shu-tiao-yong-yue-ding" tabindex="-1">1.4 函数调用约定</h3>
+<p><strong>被调用者保存寄存器</strong> <code>%rbx</code>、<code>%rbp</code>、<code>%r12</code> ~ <code>%r15</code></p>
+<p><strong>调用者保存寄存器</strong> 上述以外的寄存器（<code>%rsp</code> 除外），包括 ymm 和 xmm 这些寄存器</p>
+<p><strong>返回值</strong> 返回值放在 <code>%rax</code> 寄存器中，如果返回值是浮点数，则会放在 <code>%xmm0</code></p>
+<p><strong>参数</strong></p>
+<p>传递参数时，前 6 个参数通过寄存器传递，使用寄存器的规则如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c42ea0d6dc.png" style="transform: scale(1)" width=1263 height=369></div></p>
+<p>多余 6 个的参数会直接压入栈中</p>
+<p>对于浮点数参数，前 8 个浮点数参数会使用 <code>%xmm0</code> 到 <code>%xmm7</code> 传递，剩余的会压入栈中</p>
+<p>压入栈中的时候，无论是 8 位 16 位还是 32 位，都占用 64 位的栈空间</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c44d1c6d0a.png" style="transform: scale(1)" width=810 height=1201></div></p>
+<p>注意第七个函数位置是 <code>%rsp+8</code>，因为 <code>%rsp</code> 的位置上是 <code>call</code> 指令压入的返回值地址</p>
+<blockquote>
+<p>上面这些内容是 SystemV AMB64 ABI 的函数调用约定，主要用在 Linux ，macOS 和其他大多数的类 Unix 系统上</p>
+<p>而 Windows 系统上并不遵循这种约定。</p>
+<p>同时上面这些还是针对于 64 位而言的。对于 32 位，还有 <code>cdecl</code>、<code>stdcall</code>、<code>fastcall</code> 等各种约定。</p>
+<p>并不存在同一的函数调用约定。</p>
+</blockquote>
+<h3 id="1-5-qi-ta" tabindex="-1">1.5 其他</h3>
+<p>还有一些特殊的寄存器：</p>
+<ul>
+<li><code>%rip</code> 又称为 PC ，程序计数器，存放将要执行的下一条指令在内存中的地址</li>
+</ul>
+<h2 id="2-cao-zuo-shu" tabindex="-1">2. 操作数</h2>
+<ul>
+<li>立即数，以 <code>$</code> 开头随后接一个 C 语言中可以表示的整数字面量，如 <code>$-577</code>、<code>$0x1F</code></li>
+<li>寄存器，以 <code>%</code> 开头随后接寄存器的名称</li>
+<li>内存引用，完整的格式是 <code>Imm(rb,ri,s)</code>，表示的地址为 <code>Imm+rb+s*ri</code>，我们其中 <code>Imm</code> 是一个数字，<code>rb</code> 和 <code>ri</code> 是寄存器，<code>s</code> 是一个只能为 1 2 4 8 的数字。我们把 <code>rb</code> 称为基址寄存器，<code>Imm</code> 称为偏移，<code>ri</code> 称为变址寄存器，<code>s</code> 称为比例因子</li>
+</ul>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b731de5f78.png" style="transform: scale(1)" width=1226 height=499></div></p>
+<h2 id="3-zhi-ling-ji" tabindex="-1">3. 指令集</h2>
+<h3 id="3-1-shu-ju-chuan-song" tabindex="-1">3.1 数据传送</h3>
+<p><strong>源和目的的数据大小一致</strong></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b74fb53189.png" style="transform: scale(1)" width=805 height=301></div></p>
+<p>有几个注意点：</p>
+<ul>
+<li>如果选用寄存器，寄存器的大小要和指令后缀相符合</li>
+<li>x86-64 要求传送指令的两个操作数不能够都是访问内存</li>
+<li>使用 <code>movl</code> 传送完双字之后，该寄存器所对应的 64 位寄存器的高 32 位部分置 0</li>
+<li>使用 <code>movq</code> 的话，立即数只能是 32 位的，传送时是将 32 位立即数进行符号扩展再传过去</li>
+<li><code>movabsq</code> 则可以直接使用 64 位的立即数，但也只能使用立即数，并且传送目标只能是寄存器</li>
+</ul>
+<p><strong>小数据传到大数据</strong></p>
+<p>有两种：一种进行零扩展一种进行符号扩展</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b786aa7e94.png" style="transform: scale(1)" width=1071 height=346></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7887550b2.png" style="transform: scale(1)" width=1152 height=473></div></p>
+<ul>
+<li>上面不存在 <code>movzlq</code>，是因为 <code>movl</code> 在传送后自动清空高 4 字节，达到了 <code>movzlq</code> 的目的</li>
+<li><code>cltq</code> 无需指定操作数，他和 <code>movslq %eax,%rax</code> 一致，但是编码更加紧凑</li>
+</ul>
+<h3 id="3-2-yun-suan" tabindex="-1">3.2 运算</h3>
+<h4 id="3-2-1-jia-zai-you-xiao-di-zhi" tabindex="-1">3.2.1 加载有效地址</h4>
+<p>格式为 <code>leaq S,D</code>，这个指令的 <code>S</code> 部分必须是一个内存引用格式，其作用类似传送指令，把 <code>S</code> 表示的地址传送到 <code>D</code> 中。实际中这个指令和内存地址关系不大，只是单纯的计算数字，如：<code>leaq 7(%rdx,%rdx,4),%rax</code> 就相当于将 <code>%rax</code> 变为 <code>7+5%rax</code></p>
+<h4 id="3-2-2-yun-suan-he-luo-ji" tabindex="-1">3.2.2 运算和逻辑</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7b65856f0.png" style="transform: scale(1)" width=828 height=176></div></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7b81a33ed.png" style="transform: scale(1)" width=810 height=248></div></p>
+<ul>
+<li>
+<p>上面的所有指令都需要添加后缀，比如 <code>addq</code></p>
+</li>
+<li>
+<p>同样地，操作数不能同时是内存</p>
+</li>
+<li>
+<p>对于不符合交换律的运算，如 <code>sub</code>，一定是后面的操作数在前</p>
+</li>
+</ul>
+<h4 id="3-2-3-yi-wei" tabindex="-1">3.2.3 移位</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b7cd55dffa.png" style="transform: scale(1)" width=810 height=187></div></p>
+<p>其中 <code>k</code> 为移位量，<code>D</code> 表示要作用的目标</p>
+<ul>
+<li>
+<p><code>k</code> 必须是一个立即数，或是单字节寄存器 <code>%cl</code> 中，其他寄存器不可以</p>
+</li>
+<li>
+<p>上述的指令同样需要添加后缀。只要求 <code>D</code> 作为寄存器时大小和后缀相符即可</p>
+</li>
+<li>
+<p>如果 <code>k</code> 使用 <code>%cl</code> 的话，如果 <code>D</code> 的位长为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>，那么位移量由 <code>%cl</code> 的低 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> 位决定，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>m</mi></msup><mo>=</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">2^m=w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span>，高位部分会被忽略。</p>
+<p>比如 <code>%cl</code> 为 <code>0xFF</code> 的话，<code>salb</code> 会移动 7 位，<code>salw</code> 会移动 15 位，<code>sall</code> 会移动 31 位，<code>salq</code> 会移动 63 位</p>
+</li>
+</ul>
+<h4 id="3-2-4-cheng-chu" tabindex="-1">3.2.4 乘除</h4>
+<p>Intel 把 16 字节的数称为八字（oct word）。为了表示 128 位的数据，我们规定 <code>%rdx</code> 存高 64 位，<code>%rax</code> 存低 64 位，然后我们有如下指令：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b8164d6a18.png" style="transform: scale(1)" width=1103 height=466></div></p>
+<ul>
+<li>
+<p>注意 <code>mulq</code> 只有一个操作数，区别于上面有两个操作数的 <code>mulq</code></p>
+</li>
+<li>
+<p><code>divq</code> 和 <code>idivq</code> 指令执行后会分别把除数和余数放到两个寄存器中</p>
+</li>
+<li>
+<p>实际上对于非 128 位的数据进行除法或者取模运算的话也需要使用 <code>idivq</code> 和 <code>divq</code> 指令。这些数据在进行 <code>div</code> 指令前需要先通过 <code>clto</code> 指令来把自身符号扩展到 128 位</p>
+</li>
+</ul>
+<h3 id="3-3-kong-zhi" tabindex="-1">3.3 控制</h3>
+<h4 id="3-3-1-jin-she-zhi-tiao-jian-ma" tabindex="-1">3.3.1 仅设置条件码</h4>
+<p><code>cmp</code> 和 <code>test</code> 指令分别基于减法和按位与运算，但是只设置条件码</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b880699f9f.png" style="transform: scale(1)" width=638 height=623></div></p>
+<p>比较常见的是，<code>cmp</code> 指令用来判断两个数的大小，<code>test</code> 传递两个相同的操作数来判断这个数字的正负。</p>
+<h4 id="3-3-2-fang-wen-tiao-jian-ma" tabindex="-1">3.3.2 访问条件码</h4>
+<p>通常条件码寄存器不会被直接访问，而是通过如下的指令来访问</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b89c34e98a.png" style="transform: scale(1)" width=1061 height=652></div></p>
+<ul>
+<li>
+<p>其中注意 <code>l</code> 和 <code>b</code> 的后缀不再表示数据的大小了，而是 less 和 below 的意思</p>
+</li>
+<li>
+<p>无需增加后缀，会自动根据目标寄存器的大小推断</p>
+</li>
+<li>
+<p>操作数 <code>D</code> 必须是一个单字节寄存器</p>
+</li>
+</ul>
+<h4 id="3-3-3-tiao-zhuan" tabindex="-1">3.3.3 跳转</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/19/687b8b540261c.png" style="transform: scale(1)" width=982 height=693></div></p>
+<p>间接跳转，即跳转目标的地址是从寄存器或者内存中读取的，如：<code>jmp *%rax</code> 和 <code>jmp *(%rax)</code></p>
+<p>跳转指令要跳转到的地址在机器码层面一般有两种编码方式：</p>
+<ul>
+<li>一种是 PC 相对的，即目标编码为实际地址与当前 PC （<strong>当前 PC 是下一条指令的地址</strong>）的差值，或者说<strong>下一条指令</strong>的地址加上跳转指令的地址记为真实跳转到的目标地址；</li>
+<li>一种是绝对的，即直接写明要跳转到的地址</li>
+</ul>
+<p>跳转指令可以用来实现 C 语言的 if 语句，如：</p>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="aWYlMjAodGVzdC1leHByKSUwQSUwOXRoZW4tc3RhdGVtZW50JTBBZWxzZSUwQSUyMCUyMCUyMCUyMGVsc2Utc3RhdGVtZW50JTBB"><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div></div><div class="code"><span class="hljs-keyword">if</span> (test-expr)
+	then-statement
+<span class="hljs-keyword">else</span>
+    <span class="hljs-keyword">else</span>-statement
+</div></code></pre>
+<p>一般会被翻译成如下的汇编（用 C 的形式表示）</p>
+<pre><div class="head"><div class="language">c</div><div class="copy" data="JTA5dCUyMCUzRCUyMHRlc3QtZXhwciUwQSUyMCUyMCUyMCUyMGlmJTIwKCF0KSUwQSUyMCUyMCUyMCUyMCUyMCUyMCUyMCUyMGdvdG8lMjBmYWxzZSUzQiUwQSUwOXRoZW4tc3RhdGVtZW50JTBBJTIwJTIwJTIwJTIwZ290byUyMGRvbmUlM0IlMEFmYWxzZSUzQSUwQSUwOWVsc2Utc3RhdGVtZW50JTBBZG9uZSUzQSUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div></div><div class="code">	t = test-expr
+    <span class="hljs-keyword">if</span> (!t)
+        <span class="hljs-keyword">goto</span> <span class="hljs-literal">false</span>;
+	then-statement
+    <span class="hljs-keyword">goto</span> done;
+<span class="hljs-literal">false</span>:
+	<span class="hljs-keyword">else</span>-statement
+done:
+</div></code></pre>
+<p>有意思的是汇编的测试条件和 C 的正好相反</p>
+<h4 id="3-3-4-tiao-jian-chuan-song" tabindex="-1">3.3.4 条件传送</h4>
+<p>上面的跳转可能会影响处理器性能，因为现代处理器是流水线化工作的，一条指令的执行被拆成了好几步，上一条指令还没执行完毕就同时执行下一条指令。如果程序是顺序结构的话，那么处理器在执行的时候会将指令填满流水线。而当遇到分支的时候，处理器无法得知后续要执行的指令，流水线则会空闲。处理器为了保持流水线充满，会对分支进行预测，预测后续执行的指令，但是如果预测失败，则需要很大的惩罚回退已经执行的操作。</p>
+<p>部分分支情况可以使用条件传送进行优化。这种优化会把两个分支都进行计算，然后在最后根据条件选择要选用的值：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c37e41d29b.png" style="transform: scale(1)" width=990 height=693></div></p>
+<p>只有满足相应的条件，才会进行传送</p>
+<ul>
+<li><code>S</code> 只能是寄存器或者内存，<code>R</code> 只能为寄存器</li>
+<li>不支持单个字节的传送</li>
+<li>无需增加后缀，会自动根据目标寄存器的大小推断</li>
+</ul>
+<p>C 语言中使用三目表达式可能会更容易让编译器使用条件传送指令</p>
+<p>有些情况下，有可能把两个分支的值都计算完毕之后比分支预测失败带来的惩罚还高，那么编译器就不会选用条件传送</p>
+<p>如果分支并非单纯的计算值，而是可能有副作用，那么也不会选择条件传送</p>
+<p>如：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c3ef194cf0.png" style="transform: scale(1)" width=797 height=124></div></p>
+<p>看起来可以用条件传送，但是如果 <code>xp</code> 真的为空指针的话，提前计算 <code>*xp</code> 会导致空指针异常</p>
+<h3 id="3-4-fu-dian-xiang-guan" tabindex="-1">3.4 浮点相关</h3>
+<h4 id="3-4-1-shu-ju-chuan-song" tabindex="-1">3.4.1 数据传送</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9ae817dbe.png" style="transform: scale(1)" width=1563 height=502></div></p>
+<p>其中 <code>X</code> 只能选择 XMM 寄存器，<code>M</code> 只能选择内存</p>
+<p>如果浮点运算涉及到了立即数，那么需要由编译器先把立即数写到 rodata 段，然后从内存引用</p>
+<h4 id="3-4-2-zhuan-huan-cao-zuo" tabindex="-1">3.4.2 转换操作</h4>
+<p><strong>浮点转整数</strong></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9c0c23a8f.png" style="transform: scale(1)" width=1564 height=466></div></p>
+<p>截断会向 0 舍入</p>
+<p><strong>整数转浮点</strong></p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c9c575c7d9.png" style="transform: scale(1)" width=1550 height=452></div></p>
+<p>一般源 2 和目的一致</p>
+<p><strong>单精度到双精度</strong></p>
+<p>如果想把单精度数据转成双精度数据的话，可以使用 <code>vcvtss2sd</code> 指令，如 <code>vcvtss2sd %xmm0,%xmm0,%xmm0</code> 即可把 <code>%xmm0</code> 的单精度变为双精度</p>
+<p>不过 GCC 生成如下的代码</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="dnVucGNrbHBzJTIwJTI1eG1tMCUyQyUyNXhtbTAlMkMlMjV4bW0wJTBBdmN2dHBzMnBkJTIwJTI1eG1tMCUyQyUyNXhtbTAlMEE="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">vunpcklps %xmm0,%xmm0,%xmm0
+vcvtps2pd %xmm0,%xmm0
+</div></code></pre>
+<p><code>vunpcklps</code> 将两个 xmm 寄存器的值交叉放置，然后把结果放到第三个寄存器。比如第一个寄存器的内容为字 <code>[s3,s2,s1,s0]</code>，另一个寄存器的内容为字 <code>[d3,d2.d1,d0]</code> ，那么目标寄存器的值会变为 <code>[s1,d1,s0,d0]</code>。那么对于上面这个指令，如果 <code>%xmm0</code> 的值为字 <code>[x3,x2,x1,x0]</code> 的话那么 <code>%xmm0</code> 会变为 <code>[x1,x1,x0,x0]</code>。</p>
+<p><code>vcvtps2pd</code> 会将源寄存器的两个低位的单精度值扩展成 xmm 寄存器中的两个双精度值。对于上面这个例子，最终 <code>%xmm0</code> 变为 <code>[dx0,dx0]</code></p>
+<p>那么上述两个指令合起来的效果就是把 <code>%xmm0</code> 低 32 位表示的单精度浮点数转为两个一样的双精度</p>
+<p>这样做不会有什么好处，GCC 这么做的原因也不明</p>
+<p><strong>双精度到单精度</strong></p>
+<p>可以使用 <code>vcvtsd2ss %xmm0,%xmm0,%xmm0</code> 指令，但是 GCC 产生如下的代码：</p>
+<pre><div class="head"><div class="language">Unknown</div><div class="copy" data="dm1vdmRkdXAlMjAlMjV4bW0wJTJDJTI1eG1tMCUwQXZjdnRwZDJwc3glMjAlMjV4bW0wJTJDJTI1eG1tMCUwQQ=="><svg focusable="false" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"></path></svg></div></div><code class="hljs"><div class="lines"><div>1</div><div>2</div></div><div class="code">vmovddup %xmm0,%xmm0
+vcvtpd2psx %xmm0,%xmm0
+</div></code></pre>
+<p><code>vmovddup</code> 会将 xmm 的低 64 位复制到高 64 位，于是如果 <code>%xmm0</code> 为 <code>[x1,x0]</code> 的话会变成 <code>[x0,x0]</code>，<code>vcvtpd2psx</code> 会将 xmm 的两个双精度数字变为两个单精度，并在高 64 位填充 0，即会变为 <code>[0.0,0.0,x0,x0]</code></p>
+<h4 id="3-4-3-yun-suan" tabindex="-1">3.4.3 运算</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca0c0812c3.png" style="transform: scale(1)" width=1552 height=529></div></p>
+<ul>
+<li>第一个操作数 <code>S1</code> 必须是 xmm 寄存器或者是内存</li>
+<li>第二个操作数和目的都必须是 xmm 寄存器</li>
+</ul>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca1d00c8ec.png" style="transform: scale(1)" width=1557 height=242></div></p>
+<ul>
+<li>源和目的都必须是 xmm 寄存器</li>
+</ul>
+<h4 id="3-4-4-bi-jiao" tabindex="-1">3.4.4 比较</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca3cc6ca6c.png" style="transform: scale(1)" width=1548 height=144></div></p>
+<p>浮点运算主要会设置 <code>ZF</code>、<code>CF</code> 和 <code>PF</code>，设置条件如下：</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687ca3a7495c8.png" style="transform: scale(1)" width=770 height=234></div></p>
+<h3 id="3-5-han-shu-tiao-yong-xiang-guan" tabindex="-1">3.5 函数调用相关</h3>
+<h4 id="3-5-1-ya-zhan-yu-dan-zhan" tabindex="-1">3.5.1 压栈与弹栈</h4>
+<p><code>%rsp</code> 寄存器存放当前栈顶地址</p>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c40e130320.png" style="transform: scale(1)" width=875 height=291></div></p>
+<h4 id="3-5-2-tiao-yong-yu-fan-hui" tabindex="-1">3.5.2 调用与返回</h4>
+<p><div class="img-box"><img class="lazy" date-src="https://pic.caiwen.work/i/2025/07/20/687c412f3cc58.png" style="transform: scale(1)" width=693 height=214></div></p>
+<p>其中 <code>call</code> 指令会首先把当前 PC （即下一条指令的地址）压入栈中，用来后续返回，然后将 PC 置为要调用的函数的地址</p>
+<p><code>ret</code> 指令会从栈中弹出一个值（编译器需要确保执行 <code>ret</code> 时已经弹栈到返回地址处了），然后将 PC 置为这个值</p>

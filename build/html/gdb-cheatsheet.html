@@ -1,0 +1,92 @@
+<p><code>break [symbol]/[*address]</code> 在某个符号或者地址处打断点</p>
+<p><code>clear [symbol]/[*address]</code> 清除某个符号或者地址处的断点</p>
+<p><code>info breakpoints</code> 可以查看当前所有断点</p>
+<p><code>delete 3</code> 删除某个编号的断点</p>
+<p><code>display/i $pc</code> 可以在每条指令执行结束后显示一下指定的寄存器/地址的内容，可以用来持续监控</p>
+<p><code>p/x $寄存器名</code> 可以以十六进制显示某个寄存器的值</p>
+<p><code>disas</code> 反编译当前函数</p>
+<p><code>disas [symbol]</code> 反编译指定函数</p>
+<p><code>disas /m 开始地址,结束地址</code> 反编译指定地址范围的指令</p>
+<p>其中的参数可选</p>
+<ul>
+<li><code>/m</code> 显示源代码和汇编代码混合视图</li>
+<li><code>/r</code> 显示原始指令码</li>
+<li><code>/s</code> 显示汇编代码大小</li>
+</ul>
+<p><strong>检查内存</strong></p>
+<p>语法：<code>x/[重复次数][格式][单位] 地址表达式</code></p>
+<p>三个部分都可以省略。</p>
+<p>格式：</p>
+<table>
+<thead>
+<tr>
+<th>字母</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>十六进制</td>
+</tr>
+<tr>
+<td>d</td>
+<td>有符号十进制</td>
+</tr>
+<tr>
+<td>u</td>
+<td>无符号十进制</td>
+</tr>
+<tr>
+<td>o</td>
+<td>八进制</td>
+</tr>
+<tr>
+<td>t</td>
+<td>二进制</td>
+</tr>
+<tr>
+<td>f</td>
+<td>浮点数</td>
+</tr>
+<tr>
+<td>c</td>
+<td>字符</td>
+</tr>
+<tr>
+<td>s</td>
+<td>C 字符串形式，以 <code>\0</code> 结尾</td>
+</tr>
+<tr>
+<td>i</td>
+<td>反汇编成指令</td>
+</tr>
+</tbody>
+</table>
+<p>单位：</p>
+<table>
+<thead>
+<tr>
+<th>字母</th>
+<th>大小</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>b</td>
+<td>1 字节</td>
+</tr>
+<tr>
+<td>h</td>
+<td>2 字节，半字</td>
+</tr>
+<tr>
+<td>w</td>
+<td>4 字节，字</td>
+</tr>
+<tr>
+<td>g</td>
+<td>8 字节，双字</td>
+</tr>
+</tbody>
+</table>
