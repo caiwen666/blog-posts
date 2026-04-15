@@ -79,18 +79,56 @@
 <p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/29/image-20260329202353699.png" style="transform: scale(1)" width=2020 height=419></div></p>
 <p>其中 <code>opcode</code> 恒为 <code>0110011</code>。指令进行的操作由 <code>funct3</code> 和 <code>funct7</code> 来决定：</p>
 <p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/29/image-20260329202533138.png" style="transform: scale(1)" width=2092 height=947></div></p>
-<p>| 指令                | 描述                                                                         |
-| ------------------- | ---------------------------------------------------------------------------- | ---- |
-| <code>add rd, rs1, rs2</code>  | <code>rd = rs1 + rs2</code>                                                             |
-| <code>sub rd, rs1, rs2</code>  | <code>rd = rs1 - rs2</code>                                                             |
-| <code>sll rd, rs1, rs2</code>  | <code>rd = rs1 &lt;&lt; rs2</code>，逻辑左移                                                  |
-| <code>slt rd, rs1, rs2</code>  | 将 <code>rs1</code> 和 <code>rs2</code> 视为有符号数。如果 <code>rs1 &lt; rs2</code>，则 <code>rd = 1</code>，否则 <code>rd = 0</code> |
-| <code>sltu rd, rs1, rs2</code> | 将 <code>rs1</code> 和 <code>rs2</code> 视为无符号数。如果 <code>rs1 &lt; rs2</code>，则 <code>rd = 1</code>，否则 <code>rd = 0</code> |
-| <code>xor rd, rs1, rs2</code>  | <code>rd = rs1 ^ rs2</code>                                                             |
-| <code>srl rd, rs1, rs2</code>  | <code>rd = rs1 &gt;&gt; rs2</code>，逻辑右移                                                  |
-| <code>sra rd, rs1, rs2</code>  | <code>rd = rs1 &gt;&gt; rs2</code>，算数右移                                                  |
-| <code>or rd, rs1, rs2</code>   | <code>rd = rs1                                                                    | rs2</code> |
-| <code>and rd, rs1, rs2</code>  | <code>rd = rs1 &amp; rs2</code>                                                             |</p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>add rd, rs1, rs2</code></td>
+<td><code>rd = rs1 + rs2</code></td>
+</tr>
+<tr>
+<td><code>sub rd, rs1, rs2</code></td>
+<td><code>rd = rs1 - rs2</code></td>
+</tr>
+<tr>
+<td><code>sll rd, rs1, rs2</code></td>
+<td><code>rd = rs1 &lt;&lt; rs2</code>，逻辑左移</td>
+</tr>
+<tr>
+<td><code>slt rd, rs1, rs2</code></td>
+<td>将 <code>rs1</code> 和 <code>rs2</code> 视为有符号数。如果 <code>rs1 &lt; rs2</code>，则 <code>rd = 1</code>，否则 <code>rd = 0</code></td>
+</tr>
+<tr>
+<td><code>sltu rd, rs1, rs2</code></td>
+<td>将 <code>rs1</code> 和 <code>rs2</code> 视为无符号数。如果 <code>rs1 &lt; rs2</code>，则 <code>rd = 1</code>，否则 <code>rd = 0</code></td>
+</tr>
+<tr>
+<td><code>xor rd, rs1, rs2</code></td>
+<td><code>rd = rs1 ^ rs2</code></td>
+</tr>
+<tr>
+<td><code>srl rd, rs1, rs2</code></td>
+<td><code>rd = rs1 &gt;&gt; rs2</code>，逻辑右移</td>
+</tr>
+<tr>
+<td><code>sra rd, rs1, rs2</code></td>
+<td><code>rd = rs1 &gt;&gt; rs2</code>，算数右移</td>
+</tr>
+<tr>
+<td><code>or rd, rs1, rs2</code></td>
+<td>`rd = rs1</td>
+</tr>
+<tr>
+<td><code>and rd, rs1, rs2</code></td>
+<td><code>rd = rs1 &amp; rs2</code></td>
+</tr>
+</tbody>
+</table>
 <p>其中，<code>add</code> 和 <code>sub</code> 用的电路是差不多的，所以 <code>funct3</code> 一样，只有 <code>funct7</code> 不同以区分。<code>srl</code> 和 <code>sra</code> 也是同理。</p>
 <p>只提供 <code>slt</code>。如果需要 <code>&gt;</code>，可以把操作数调换一下。如果需要 <code>&lt;=</code>，可以先判 <code>&gt;</code>，然后再异或上 1 取反。RiscV 没有像 X86 的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">OF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">OF</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">CF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">CF</span></span></span></span> 这种标识位，而是整了这样的指令。</p>
 <h3 id="2-2-i-ge-shi" tabindex="-1">2.2 I 格式</h3>
@@ -100,17 +138,52 @@
 <h4 id="2-2-1-suan-shu" tabindex="-1">2.2.1 算数</h4>
 <p><code>opcode</code> 为 <code>0010011</code> 。</p>
 <p><div class="img-box"><img class="lazy" date-src="https://api.file.caiwen.work/picture/2026/03/29/image-20260329212056020.png" style="transform: scale(1)" width=1813 height=731></div></p>
-<p>| 指令                | 描述                                                                                                                                                                                            |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| <code>addi rd, rs, imm</code>  | <code>rd = rs + imm</code>                                                                                                                                                                                 |
-| <code>slti rd, rs, imm</code>  | 将 <code>rd</code> 按有符号数解释。如果 <code>rs &lt; imm</code>，则设置 <code>rd = 1</code>，反之设置 <code>rd = 0</code>                                                                                                                     |
-| <code>sltiu rd, rs, imm</code> | 将 <code>rd</code> 按无符号数解释。由于 <code>imm</code> 是有符号数，所以在比较的时候需要先把 <code>imm</code> <strong>符号扩展</strong> 成 32 位，再把 <code>imm</code> 视为无符号数去跟 <code>rd</code> 比较。如果 <code>rs &lt; imm</code>，则设置 <code>rd = 1</code>，反之设置 <code>rd = 0</code> |
-| <code>xori rd, rs, imm</code>  | <code>rd = rs ^ imm</code>                                                                                                                                                                                 |
-| <code>ori rd, rs, imm</code>   | <code>rd = rs                                                                                                                                                                                        | imm</code> |
-| <code>andi rd, rs, imm</code>  | <code>rd = rs &amp; imm</code>                                                                                                                                                                                 |
-| <code>slli rd, rs, imm</code>  | <code>rd = rs &lt;&lt; imm</code>                                                                                                                                                                                |
-| <code>srli, rd, rs, imm</code> | <code>rd = rs &gt;&gt; imm</code>，逻辑右移                                                                                                                                                                      |
-| <code>srai, rd, rs, imm</code> | <code>rd = rs &gt;&gt; imm</code>，算数右移                                                                                                                                                                      |</p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addi rd, rs, imm</code></td>
+<td><code>rd = rs + imm</code></td>
+</tr>
+<tr>
+<td><code>slti rd, rs, imm</code></td>
+<td>将 <code>rd</code> 按有符号数解释。如果 <code>rs &lt; imm</code>，则设置 <code>rd = 1</code>，反之设置 <code>rd = 0</code></td>
+</tr>
+<tr>
+<td><code>sltiu rd, rs, imm</code></td>
+<td>将 <code>rd</code> 按无符号数解释。由于 <code>imm</code> 是有符号数，所以在比较的时候需要先把 <code>imm</code> <strong>符号扩展</strong> 成 32 位，再把 <code>imm</code> 视为无符号数去跟 <code>rd</code> 比较。如果 <code>rs &lt; imm</code>，则设置 <code>rd = 1</code>，反之设置 <code>rd = 0</code></td>
+</tr>
+<tr>
+<td><code>xori rd, rs, imm</code></td>
+<td><code>rd = rs ^ imm</code></td>
+</tr>
+<tr>
+<td><code>ori rd, rs, imm</code></td>
+<td>`rd = rs</td>
+</tr>
+<tr>
+<td><code>andi rd, rs, imm</code></td>
+<td><code>rd = rs &amp; imm</code></td>
+</tr>
+<tr>
+<td><code>slli rd, rs, imm</code></td>
+<td><code>rd = rs &lt;&lt; imm</code></td>
+</tr>
+<tr>
+<td><code>srli, rd, rs, imm</code></td>
+<td><code>rd = rs &gt;&gt; imm</code>，逻辑右移</td>
+</tr>
+<tr>
+<td><code>srai, rd, rs, imm</code></td>
+<td><code>rd = rs &gt;&gt; imm</code>，算数右移</td>
+</tr>
+</tbody>
+</table>
 <p>由于减去一个数，相当于加上一个数的相反数，所以没有 <code>subi</code>。</p>
 <p>对于移位指令，由于移位的位数会对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn></mrow><annotation encoding="application/x-tex">32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 取模，因此 <code>imm</code> 只有低 5 位有用。剩下的 7 位类似 <code>funct7</code>，来区分是算数右移还是逻辑右移。</p>
 <h4 id="2-2-2-load" tabindex="-1">2.2.2 load</h4>
